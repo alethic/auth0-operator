@@ -10,6 +10,7 @@ using Alethic.Auth0.Operator.Models;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
 
+using k8s;
 using k8s.Models;
 
 using KubeOps.Abstractions.Controller;
@@ -56,11 +57,29 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string?> Find(IManagementApiClient api, ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string?> Find(IManagementApiClient api, V1Client.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
-            var self = list.FirstOrDefault(i => i.Name == conf.Name);
-            return self?.ClientId;
+            if (spec.Find is not null)
+            {
+                if (spec.Find.ClientId is string clientId)
+                {
+                    var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id" }, cancellationToken: cancellationToken);
+                    var self = list.FirstOrDefault(i => i.ClientId == clientId);
+                    return self?.ClientId;
+                }
+
+                return null;
+            }
+            else
+            {
+                var conf = spec.Init ?? spec.Conf;
+                if (conf is null)
+                    return null;
+
+                var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
+                var self = list.FirstOrDefault(i => i.Name == conf.Name);
+                return self?.ClientId;
+            }
         }
 
         /// <inheritdoc />

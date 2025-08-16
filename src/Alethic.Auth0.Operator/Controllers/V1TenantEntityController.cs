@@ -54,11 +54,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Attempts to locate a matching API element by the given configuration.
         /// </summary>
         /// <param name="api"></param>
-        /// <param name="conf"></param>
+        /// <param name="spec"></param>
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract Task<string?> Find(IManagementApiClient api, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
+        protected abstract Task<string?> Find(IManagementApiClient api, TSpec spec, string defaultNamespace, CancellationToken cancellationToken);
 
         /// <summary>
         /// Performs a validation on the <paramref name="conf"/> parameter for usage in create operations.
@@ -114,7 +114,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
             {
                 // find existing remote entity
-                var entityId = await Find(api, entity.Spec.Conf, entity.Namespace(), cancellationToken);
+                var entityId = await Find(api, entity.Spec, entity.Namespace(), cancellationToken);
                 if (entityId is null)
                 {
                     Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} could not be located, creating.", EntityTypeName, entity.Namespace(), entity.Name());

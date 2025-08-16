@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Dynamic;
 using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Extensions;

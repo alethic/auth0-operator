@@ -61,16 +61,22 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string?> Find(IManagementApiClient api, ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string?> Find(IManagementApiClient api, V1ClientGrant.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
         {
+            var conf = spec.Init ?? spec.Conf;
+            if (conf is null)
+                return null;
+
             if (conf.ClientRef is null)
                 throw new InvalidOperationException("ClientRef is required.");
+
             var clientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken);
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new InvalidOperationException();
 
             if (conf.Audience is null)
                 throw new InvalidOperationException("Audience is required.");
+
             var audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken);
             if (string.IsNullOrWhiteSpace(audience))
                 throw new InvalidOperationException();
