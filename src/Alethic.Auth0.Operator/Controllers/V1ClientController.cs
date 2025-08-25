@@ -103,7 +103,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     }
                     catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
                     {
-                        Logger.LogInformation(
+                        Logger.LogWarning(
                             "{EntityTypeName} {EntityNamespace}/{EntityName} client_id lookup FAILED - could not find client with id {ClientId}",
                             EntityTypeName, entity.Namespace(), entity.Name(), clientId);
                         return null;
@@ -305,13 +305,15 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task<string> Create(IManagementApiClient api, ClientConf conf, string defaultNamespace,
             CancellationToken cancellationToken)
         {
+            var startTime = DateTimeOffset.UtcNow;
             Logger.LogInformation("{EntityTypeName} creating client in Auth0 with name: {ClientName}", EntityTypeName,
                 conf.Name);
             var self = await api.Clients.CreateAsync(TransformToNewtonsoftJson<ClientConf, ClientCreateRequest>(conf),
                 cancellationToken);
+            var duration = DateTimeOffset.UtcNow - startTime;
             Logger.LogInformation(
-                "{EntityTypeName} successfully created client in Auth0 with ID: {ClientId} and name: {ClientName}",
-                EntityTypeName, self.ClientId, conf.Name);
+                "{EntityTypeName} successfully created client in Auth0 with ID: {ClientId} and name: {ClientName} in {Duration}ms",
+                EntityTypeName, self.ClientId, conf.Name, duration.TotalMilliseconds);
             return self.ClientId;
         }
 
@@ -319,6 +321,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ClientConf conf,
             string defaultNamespace, CancellationToken cancellationToken)
         {
+            var startTime = DateTimeOffset.UtcNow;
             Logger.LogInformation(
                 "{EntityTypeName} updating client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName,
                 id, conf.Name);
@@ -333,9 +336,10 @@ namespace Alethic.Auth0.Operator.Controllers
                         req.ClientMetaData[key] = null;
 
             await api.Clients.UpdateAsync(id, req, cancellationToken);
+            var duration = DateTimeOffset.UtcNow - startTime;
             Logger.LogInformation(
-                "{EntityTypeName} successfully updated client in Auth0 with id: {ClientId} and name: {ClientName}",
-                EntityTypeName, id, conf.Name);
+                "{EntityTypeName} successfully updated client in Auth0 with id: {ClientId} and name: {ClientName} in {Duration}ms",
+                EntityTypeName, id, conf.Name, duration.TotalMilliseconds);
         }
 
         /// <inheritdoc />

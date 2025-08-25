@@ -56,7 +56,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return TransformToSystemTextJson<Hashtable>(await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken));
+                Logger.LogInformation("{EntityTypeName} fetching resource server from Auth0 with ID {Id}", EntityTypeName, id);
+                var result = await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken);
+                Logger.LogInformation("{EntityTypeName} successfully retrieved resource server from Auth0 with ID {Id}", EntityTypeName, id);
+                return TransformToSystemTextJson<Hashtable>(result);
             }
             catch (Exception e)
             {
@@ -70,10 +73,24 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             var conf = spec.Init ?? spec.Conf;
             if (conf is null)
+            {
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} no configuration available for find operation", EntityTypeName, entity.Namespace(), entity.Name());
                 return null;
+            }
 
+            Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} searching Auth0 for resource server with identifier {Identifier}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Identifier);
             var list = await api.ResourceServers.GetAllAsync(new ResourceServerGetRequest() { }, cancellationToken: cancellationToken);
             var self = list.FirstOrDefault(i => i.Identifier == conf.Identifier);
+            
+            if (self != null)
+            {
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} found existing resource server with identifier {Identifier} and ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Identifier, self.Id);
+            }
+            else
+            {
+                Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} no existing resource server found with identifier {Identifier}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Identifier);
+            }
+            
             return self?.Id;
         }
 
@@ -86,14 +103,18 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
+            Logger.LogInformation("{EntityTypeName} creating resource server in Auth0 with identifier {Identifier} and name {Name}", EntityTypeName, conf.Identifier, conf.Name);
             var self = await api.ResourceServers.CreateAsync(TransformToNewtonsoftJson<ResourceServerConf, ResourceServerCreateRequest>(conf), cancellationToken);
+            Logger.LogInformation("{EntityTypeName} successfully created resource server in Auth0 with ID {Id} and identifier {Identifier}", EntityTypeName, self.Id, self.Identifier);
             return self.Id;
         }
 
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
+            Logger.LogInformation("{EntityTypeName} updating resource server in Auth0 with ID {Id} and identifier {Identifier}", EntityTypeName, id, conf.Identifier);
             await api.ResourceServers.UpdateAsync(id, TransformToNewtonsoftJson<ResourceServerConf, ResourceServerUpdateRequest>(conf), cancellationToken);
+            Logger.LogInformation("{EntityTypeName} successfully updated resource server in Auth0 with ID {Id}", EntityTypeName, id);
         }
 
         /// <inheritdoc />
@@ -108,9 +129,11 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
+        protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
-            return api.ResourceServers.DeleteAsync(id, cancellationToken);
+            Logger.LogInformation("{EntityTypeName} deleting resource server from Auth0 with ID {Id}", EntityTypeName, id);
+            await api.ResourceServers.DeleteAsync(id, cancellationToken);
+            Logger.LogInformation("{EntityTypeName} successfully deleted resource server from Auth0 with ID {Id}", EntityTypeName, id);
         }
 
     }

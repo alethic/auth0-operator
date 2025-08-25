@@ -245,7 +245,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 return self.Identifier;
             }
 
-            Logger.LogDebug("Attempting to resolve ResourceServer reference {Namespace}/{Name}.", reference.Namespace, reference.Name);
+            Logger.LogInformation("Attempting to resolve ResourceServer reference {Namespace}/{Name}.", reference.Namespace, reference.Name);
 
             var resourceServer = await ResolveResourceServerRef(api, reference, defaultNamespace, cancellationToken);
             if (resourceServer is null)
@@ -254,7 +254,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (resourceServer.Status.Identifier is null)
                 throw new RetryException($"Referenced ResourceServer {resourceServer.Namespace()}/{resourceServer.Name()} has not been reconcilled.");
 
-            Logger.LogDebug("Resolved ResourceServer reference {Namespace}/{Name} to {Identifier}.", reference.Namespace, reference.Name, resourceServer.Status.Identifier);
+            Logger.LogInformation("Resolved ResourceServer reference {Namespace}/{Name} to {Identifier}.", reference.Namespace, reference.Name, resourceServer.Status.Identifier);
             return resourceServer.Status.Identifier;
         }
 
@@ -266,8 +266,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         public async Task<IManagementApiClient> GetTenantApiClientAsync(V1Tenant tenant, CancellationToken cancellationToken)
         {
+            Logger.LogInformation("Retrieving Auth0 API client for tenant {TenantNamespace}/{TenantName}", tenant.Namespace(), tenant.Name());
+            
             var api = await _cache.GetOrCreateAsync((tenant.Namespace(), tenant.Name()), async entry =>
             {
+                Logger.LogInformation("Creating new Auth0 API client for tenant {TenantNamespace}/{TenantName}", tenant.Namespace(), tenant.Name());
                 var domain = tenant.Spec.Auth?.Domain;
                 if (string.IsNullOrWhiteSpace(domain))
                     throw new InvalidOperationException($"Tenant {tenant.Namespace()}/{tenant.Name()} has no authentication domain.");
@@ -293,23 +296,32 @@ namespace Alethic.Auth0.Operator.Controllers
                 var clientId = Encoding.UTF8.GetString(clientIdBuf);
                 var clientSecret = Encoding.UTF8.GetString(clientSecretBuf);
 
+                Logger.LogInformation("Authenticating with Auth0 domain {Domain} for tenant {TenantNamespace}/{TenantName}", domain, tenant.Namespace(), tenant.Name());
                 // retrieve authentication token
                 var auth = new AuthenticationApiClient(new Uri($"https://{domain}"));
                 var authToken = await auth.GetTokenAsync(new ClientCredentialsTokenRequest() { Audience = $"https://{domain}/api/v2/", ClientId = clientId, ClientSecret = clientSecret }, cancellationToken);
                 if (authToken.AccessToken == null || authToken.AccessToken.Length == 0)
+                {
+                    Logger.LogError("Failed to retrieve management API token for tenant {TenantNamespace}/{TenantName} from domain {Domain}", tenant.Namespace(), tenant.Name(), domain);
                     throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} failed to retrieve management API token.");
+                }
 
                 // contact API using token and domain
                 var api = new ManagementApiClient(authToken.AccessToken, new Uri($"https://{domain}/api/v2/"));
 
                 // cache API client for 1 minute
                 entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                Logger.LogInformation("Successfully created and cached Auth0 API client for tenant {TenantNamespace}/{TenantName}", tenant.Namespace(), tenant.Name());
                 return (IManagementApiClient)api;
             });
 
             if (api is null)
+            {
+                Logger.LogError("API client is null after cache operation for tenant {TenantNamespace}/{TenantName}", tenant.Namespace(), tenant.Name());
                 throw new InvalidOperationException("Cannot retrieve tenant API client.");
+            }
 
+            Logger.LogInformation("Successfully retrieved Auth0 API client for tenant {TenantNamespace}/{TenantName}", tenant.Namespace(), tenant.Name());
             return api;
         }
 
@@ -435,73 +447,89 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         public async Task ReconcileAsync(TEntity entity, CancellationToken cancellationToken)
         {
+            var startTime = DateTimeOffset.UtcNow;
+            Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} starting reconciliation at {StartTime}", EntityTypeName, entity.Namespace(), entity.Name(), startTime);
+            
             try
             {
                 if (entity.Spec.Conf == null)
+                {
+                    Logger.LogError("{EntityTypeName} {Namespace}/{Name} is missing configuration", EntityTypeName, entity.Namespace(), entity.Name());
                     throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing configuration.");
+                }
 
                 // does the actual work of reconciling
                 await Reconcile(entity, cancellationToken);
 
+                var duration = DateTimeOffset.UtcNow - startTime;
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} reconciliation completed successfully in {Duration}ms", EntityTypeName, entity.Namespace(), entity.Name(), duration.TotalMilliseconds);
                 await ReconcileSuccessAsync(entity, cancellationToken);
             }
             catch (ErrorApiException e)
             {
                 try
                 {
-                    Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError.Message);
-                    await ReconcileWarningAsync(entity, "ApiError", e.ApiError.Message, cancellationToken);
+                    var duration = DateTimeOffset.UtcNow - startTime;
+                    Logger.LogError(e, "Auth0 API error during reconciliation for {EntityTypeName} {EntityNamespace}/{EntityName}: Status={StatusCode}, ErrorCode={ErrorCode}, Message={Message}, Duration={Duration}ms", 
+                        EntityTypeName, entity.Namespace(), entity.Name(), e.StatusCode, e.ApiError?.ErrorCode, e.ApiError?.Message, duration.TotalMilliseconds);
+                    await ReconcileWarningAsync(entity, "ApiError", e.ApiError?.Message ?? e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                    Logger.LogCritical(e2, "Unexpected exception creating event for {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                 }
             }
             catch (RateLimitApiException e)
             {
                 try
                 {
-                    Logger.LogError(e, "Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? e.Message);
-                    await ReconcileWarningAsync(entity, "RateLimit", e.ApiError.Message, cancellationToken);
+                    var duration = DateTimeOffset.UtcNow - startTime;
+                    Logger.LogWarning(e, "Auth0 rate limit exceeded for {EntityTypeName} {EntityNamespace}/{EntityName}: Limit={Limit}, Remaining={Remaining}, Reset={Reset}, Duration={Duration}ms", 
+                        EntityTypeName, entity.Namespace(), entity.Name(), 
+                        e.RateLimit?.Limit, e.RateLimit?.Remaining, e.RateLimit?.Reset, duration.TotalMilliseconds);
+                    await ReconcileWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                    Logger.LogCritical(e2, "Unexpected exception creating event for {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                 }
 
                 // calculate next attempt time, floored to one minute
-                var n = e.RateLimit.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
+                var n = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
                 if (n < TimeSpan.FromMinutes(1))
                     n = TimeSpan.FromMinutes(1);
 
-                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", n);
+                Logger.LogWarning("Rate limit exceeded, rescheduling reconciliation after {TimeSpan}", n);
                 Requeue(entity, n);
             }
             catch (RetryException e)
             {
                 try
                 {
-                    Logger.LogError(e, "Retry hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
-                    await DeletingWarningAsync(entity, "Retry", e.Message, cancellationToken);
+                    var duration = DateTimeOffset.UtcNow - startTime;
+                    Logger.LogWarning(e, "Retry required for {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}, Duration={Duration}ms", EntityTypeName, entity.Namespace(), entity.Name(), e.Message, duration.TotalMilliseconds);
+                    await ReconcileWarningAsync(entity, "Retry", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                    Logger.LogCritical(e2, "Unexpected exception creating event for {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                 }
 
-                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", TimeSpan.FromMinutes(1));
+                Logger.LogWarning("Retry exception occurred, rescheduling reconciliation after {TimeSpan}", TimeSpan.FromMinutes(1));
                 Requeue(entity, TimeSpan.FromMinutes(1));
             }
             catch (Exception e)
             {
                 try
                 {
-                    Logger.LogError(e, "Unexpected error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+                    var duration = DateTimeOffset.UtcNow - startTime;
+                    Logger.LogError(e, "Unexpected error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {ExceptionType} - {Message}, Duration={Duration}ms", 
+                        EntityTypeName, entity.Namespace(), entity.Name(), e.GetType().Name, e.Message, duration.TotalMilliseconds);
                     await ReconcileWarningAsync(entity, "Unknown", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                    Logger.LogCritical(e2, "Unexpected exception creating event for {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                 }
 
                 throw;

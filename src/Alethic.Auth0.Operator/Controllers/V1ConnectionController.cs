@@ -61,10 +61,15 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
+                Logger.LogInformation("{EntityTypeName} fetching connection from Auth0 with ID {Id}", EntityTypeName, id);
                 var self = await api.Connections.GetAsync(id, cancellationToken: cancellationToken);
                 if (self == null)
+                {
+                    Logger.LogWarning("{EntityTypeName} connection with ID {Id} not found in Auth0", EntityTypeName, id);
                     return null;
+                }
 
+                Logger.LogInformation("{EntityTypeName} successfully retrieved connection from Auth0 with ID {Id} and name {Name}", EntityTypeName, id, self.Name);
                 var dict = new Hashtable();
                 dict["id"] = self.Id;
                 dict["name"] = self.Name;
@@ -81,6 +86,7 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
+                Logger.LogWarning("{EntityTypeName} connection with ID {Id} not found in Auth0 (404)", EntityTypeName, id);
                 return null;
             }
             catch (Exception e)
@@ -95,34 +101,46 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (spec.Find is not null)
             {
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} using find criteria for connection lookup", EntityTypeName, entity.Namespace(), entity.Name());
+                
                 if (spec.Find.ConnectionId is string connectionId)
                 {
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} searching Auth0 for connection with ID {ConnectionId}", EntityTypeName, entity.Namespace(), entity.Name(), connectionId);
                     try
                     {
                         var connection = await api.Connections.GetAsync(connectionId, cancellationToken: cancellationToken);
-                        Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), connection.Name);
+                        Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} found existing connection with ID {ConnectionId} and name {Name}", EntityTypeName, entity.Namespace(), entity.Name(), connectionId, connection.Name);
                         return connection.Id;
                     }
                     catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
-                        Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find connection with id {ConnectionId}.", EntityTypeName, entity.Namespace(), entity.Name(), connectionId);
+                        Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} could not find connection with ID {ConnectionId}", EntityTypeName, entity.Namespace(), entity.Name(), connectionId);
                         return null;
                     }
                 }
 
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} no valid connection ID provided in find criteria", EntityTypeName, entity.Namespace(), entity.Name());
                 return null;
             }
             else
             {
                 var conf = spec.Init ?? spec.Conf;
                 if (conf is null || string.IsNullOrEmpty(conf.Name))
+                {
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} no configuration or connection name available for find operation", EntityTypeName, entity.Namespace(), entity.Name());
                     return null;
+                }
 
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} searching Auth0 for connection with name {ConnectionName}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
                 var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), (PaginationInfo?)null, cancellationToken);
                 var self = list.FirstOrDefault(i => i.Name == conf.Name);
                 if (self is not null)
                 {
-                    Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection by name: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} found existing connection with name {ConnectionName} and ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name, self.Id);
+                }
+                else
+                {
+                    Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} no existing connection found with name {ConnectionName}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
                 }
                 return self?.Id;
             }
