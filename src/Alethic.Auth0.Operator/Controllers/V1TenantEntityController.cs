@@ -99,18 +99,30 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Reconcile(TEntity entity, CancellationToken cancellationToken)
         {
             if (entity.Spec.TenantRef is null)
+            {
+                Logger.LogError("{EntityTypeName} {Namespace}/{Name} missing a tenant reference.", EntityTypeName, entity.Namespace(), entity.Name());
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
+            }
 
             if (entity.Spec.Conf is null)
+            {
+                Logger.LogError("{EntityTypeName} {Namespace}/{Name} missing configuration.", EntityTypeName, entity.Namespace(), entity.Name());
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
+            }
 
             var tenant = await ResolveTenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
             if (tenant is null)
+            {
+                Logger.LogError("{EntityTypeName} {Namespace}/{Name} missing a tenant.", EntityTypeName, entity.Namespace(), entity.Name());
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant.");
+            }
 
             var api = await GetTenantApiClientAsync(tenant, cancellationToken);
             if (api is null)
+            {
+                Logger.LogError("{EntityTypeName} {Namespace}/{Name} failed to retrieve API client.", EntityTypeName, entity.Namespace(), entity.Name());
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+            }
 
             // ensure we hold a reference to the tenant
             var md = entity.EnsureMetadata();
@@ -120,7 +132,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // we have not resolved a remote entity
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
             {
-                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} has not yet been reconciled, checking if entity exists in Auth0.", EntityTypeName, entity.Namespace(), entity.Name());
+                Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} has not yet been reconciled, checking if entity exists in Auth0.", EntityTypeName, entity.Namespace(), entity.Name());
 
                 // find existing remote entity
                 var entityId = await Find(api, entity, entity.Spec, entity.Namespace(), cancellationToken);
@@ -131,14 +143,17 @@ namespace Alethic.Auth0.Operator.Controllers
                     // reject creation if disallowed
                     if (entity.HasPolicy(V1EntityPolicyType.Create) == false)
                     {
-                        Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} does not support creation.", EntityTypeName, entity.Namespace(), entity.Name());
+                        Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} does not support creation.", EntityTypeName, entity.Namespace(), entity.Name());
                         return;
                     }
 
                     // validate configuration version used for initialization
                     var init = entity.Spec.Init ?? entity.Spec.Conf;
                     if (ValidateCreate(init) is string msg)
+                    {
+                        Logger.LogError("{EntityTypeName} {Namespace}/{Name} is invalid: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), msg);
                         throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is invalid: {msg}");
+                    }
 
                     // create new entity and associate
                     entity.Status.Id = await Create(api, init, entity.Namespace(), cancellationToken);
@@ -155,7 +170,10 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // at this point we must have a reference to an entity
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
+            {
+                Logger.LogError("{EntityTypeName} {Namespace}/{Name} reconciliation failed - ID is still not set after attempting to find or create entity.", EntityTypeName, entity.Namespace(), entity.Name());
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing an existing ID.");
+            }
 
             // attempt to retrieve existing entity
             Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} checking if entity exists in Auth0 with ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
@@ -163,7 +181,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (lastConf is null)
             {
                 // no matching remote entity that correlates directly with ID, reset and retry to go back to Find/Create
-                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} not found in Auth0, clearing status and scheduling recreation", EntityTypeName, entity.Namespace(), entity.Name());
+                Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} not found in Auth0, clearing status and scheduling recreation", EntityTypeName, entity.Namespace(), entity.Name());
                 entity.Status.LastConf = null;
                 entity.Status.Id = null;
                 entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
