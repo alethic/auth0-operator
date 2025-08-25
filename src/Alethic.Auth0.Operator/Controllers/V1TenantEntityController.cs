@@ -176,7 +176,7 @@ namespace Alethic.Auth0.Operator.Controllers
             }
 
             // attempt to retrieve existing entity
-            Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} checking if entity exists in Auth0 with ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+            Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} checking if entity exists in Auth0 with ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
             var lastConf = await Get(api, entity.Status.Id, entity.Namespace(), cancellationToken);
             if (lastConf is null)
             {
@@ -205,7 +205,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // schedule periodic reconciliation to detect external changes (e.g., manual deletion from Auth0)
             var interval = _options.Value.Reconciliation.Interval;
-            Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+            Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
             Requeue(entity, interval);
         }
 
