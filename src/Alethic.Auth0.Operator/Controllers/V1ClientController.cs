@@ -468,5 +468,18 @@ namespace Alethic.Auth0.Operator.Controllers
             Logger.LogInformation("{EntityTypeName} successfully deleted client from Auth0 with ID: {ClientId}",
                 EntityTypeName, id);
         }
+
+        /// <inheritdoc />
+
+        protected override DriftDetectionMode GetDriftDetectionMode() => DriftDetectionMode.IncludeSpecificFields;
+        
+        protected override string[] GetIncludedFields()
+        {
+            // Only compare these specific fields for drift detection
+            return new[]
+            {
+                
+            };
+        }
     }
 }

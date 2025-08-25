@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +23,26 @@ using Microsoft.Extensions.Options;
 
 namespace Alethic.Auth0.Operator.Controllers
 {
+    /// <summary>
+    /// Defines how field filtering should be applied during drift detection.
+    /// </summary>
+    public enum DriftDetectionMode
+    {
+        /// <summary>
+        /// Compare entire configuration without any field filtering.
+        /// </summary>
+        CompareAll,
+        
+        /// <summary>
+        /// Only compare specific fields defined by the entity controller.
+        /// </summary>
+        IncludeSpecificFields,
+        
+        /// <summary>
+        /// Compare all fields except those explicitly excluded by the entity controller.
+        /// </summary>
+        ExcludeSpecificFields
+    }
 
     public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf> : V1Controller<TEntity, TSpec, TStatus, TConf>
         where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntity<TSpec, TStatus, TConf>
@@ -94,6 +116,25 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         protected abstract Task Update(IManagementApiClient api, string id, Hashtable? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the drift detection mode for this entity type.
+        /// </summary>
+        /// <returns>The drift detection mode to use</returns>
+        protected virtual DriftDetectionMode GetDriftDetectionMode() => DriftDetectionMode.ExcludeSpecificFields;
+
+        /// <summary>
+        /// Gets the list of fields to include in drift detection when using IncludeSpecificFields mode.
+        /// </summary>
+        /// <returns>Array of field names to include in comparison</returns>
+        protected virtual string[] GetIncludedFields() => Array.Empty<string>();
+
+        /// <summary>
+        /// Gets the list of fields to exclude from drift detection when using ExcludeSpecificFields mode.
+        /// This is combined with the default volatile fields list.
+        /// </summary>
+        /// <returns>Array of field names to exclude from comparison</returns>
+        protected virtual string[] GetExcludedFields() => Array.Empty<string>();
 
         /// <inheritdoc />
         protected override async Task Reconcile(TEntity entity, CancellationToken cancellationToken)
@@ -192,7 +233,19 @@ namespace Alethic.Auth0.Operator.Controllers
             if (entity.HasPolicy(V1EntityPolicyType.Update))
             {
                 if (entity.Spec.Conf is { } conf)
-                    await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                {
+                    // Check if configuration has changed by comparing with last known state
+                    var hasChanges = HasConfigurationChanged(entity.Status.LastConf, conf);
+                    if (hasChanges)
+                    {
+                        Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} configuration changes detected - applying updates to Auth0", EntityTypeName, entity.Namespace(), entity.Name());
+                        await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                    }
+                    else
+                    {
+                        Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} no configuration changes detected - skipping update", EntityTypeName, entity.Namespace(), entity.Name());
+                    }
+                }
             }
             else
             {
@@ -334,6 +387,293 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines if the configuration has changed by comparing the last known state with the desired configuration.
+        /// </summary>
+        /// <param name="lastConf">The last known configuration from Auth0</param>
+        /// <param name="desiredConf">The desired configuration from the Kubernetes spec</param>
+        /// <returns>True if changes are detected, false if configurations match</returns>
+        private bool HasConfigurationChanged(Hashtable? lastConf, TConf desiredConf)
+        {
+            try
+            {
+                if (lastConf is null)
+                {
+                    Logger.LogDebug("{EntityTypeName} no previous configuration available - assuming changes exist", EntityTypeName);
+                    return true;
+                }
+
+                // Convert desired configuration to Auth0 API format for comparison
+                var desiredJson = TransformToNewtonsoftJson<TConf, object>(desiredConf);
+                var desiredHashtable = TransformToSystemTextJson<Hashtable>(desiredJson);
+                
+                // Filter fields based on the entity's drift detection configuration
+                var filteredLast = FilterFieldsForComparison(lastConf);
+                var filteredDesired = FilterFieldsForComparison(desiredHashtable);
+
+                // Compare the filtered configurations
+                var result = !AreHashtablesEqual(filteredLast, filteredDesired);
+                
+                if (result)
+                {
+                    LogConfigurationDifferences(filteredLast, filteredDesired);
+                }
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "{EntityTypeName} error comparing configurations, assuming changes exist: {Message}", EntityTypeName, ex.Message);
+                return true; // Safe fallback: assume changes exist
+            }
+        }
+
+        /// <summary>
+        /// Filters fields for comparison based on the entity's drift detection configuration.
+        /// </summary>
+        /// <param name="config">The configuration hashtable to filter</param>
+        /// <returns>A new hashtable with fields filtered according to the entity's drift detection mode</returns>
+        private Hashtable FilterFieldsForComparison(Hashtable config)
+        {
+            var mode = GetDriftDetectionMode();
+            var filtered = new Hashtable();
+
+            switch (mode)
+            {
+                case DriftDetectionMode.CompareAll:
+                    // Return all fields without filtering
+                    foreach (DictionaryEntry entry in config)
+                    {
+                        filtered[entry.Key] = entry.Value;
+                    }
+                    break;
+
+                case DriftDetectionMode.IncludeSpecificFields:
+                    // Only include specified fields
+                    var includedFields = new HashSet<string>(GetIncludedFields(), StringComparer.OrdinalIgnoreCase);
+                    foreach (DictionaryEntry entry in config)
+                    {
+                        if (entry.Key is string key && includedFields.Contains(key))
+                        {
+                            filtered[key] = entry.Value;
+                        }
+                    }
+                    break;
+
+                case DriftDetectionMode.ExcludeSpecificFields:
+                default:
+                    // Exclude specified fields plus default volatile fields
+                    var excludedFields = GetDefaultVolatileFields()
+                        .Concat(GetExcludedFields())
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    
+                    foreach (DictionaryEntry entry in config)
+                    {
+                        if (entry.Key is string key && !excludedFields.Contains(key))
+                        {
+                            filtered[key] = entry.Value;
+                        }
+                    }
+                    break;
+            }
+
+            return filtered;
+        }
+
+        /// <summary>
+        /// Gets the default list of volatile fields that Auth0 manages internally.
+        /// </summary>
+        /// <returns>Array of default volatile field names</returns>
+        private static string[] GetDefaultVolatileFields()
+        {
+            return new[]
+            {
+                // Auth0 system fields
+                "client_id", "tenant", "created_at", "updated_at", "revision",
+                // Client-specific volatile fields
+                "client_secret", "global", "is_first_party", "cross_origin_auth",
+                // Tenant-specific volatile fields
+                "id", "domain", "management_api_identifier",
+                // Connection-specific volatile fields
+                "provisioning_ticket_url", "realms",
+                // Resource server volatile fields
+                "identifier", "is_system",
+                // Client grant volatile fields
+                "id", "client_id", "audience"
+            };
+        }
+
+        /// <summary>
+        /// Performs deep comparison of two hashtables to detect configuration differences.
+        /// </summary>
+        /// <param name="left">First hashtable to compare</param>
+        /// <param name="right">Second hashtable to compare</param>
+        /// <returns>True if hashtables are equal, false otherwise</returns>
+        private static bool AreHashtablesEqual(Hashtable left, Hashtable right)
+        {
+            if (left.Count != right.Count)
+                return false;
+
+            foreach (DictionaryEntry entry in left)
+            {
+                if (!right.ContainsKey(entry.Key))
+                    return false;
+
+                if (!AreValuesEqual(entry.Value, right[entry.Key]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compares two values for equality, handling nested hashtables and arrays.
+        /// </summary>
+        /// <param name="left">First value to compare</param>
+        /// <param name="right">Second value to compare</param>
+        /// <returns>True if values are equal, false otherwise</returns>
+        private static bool AreValuesEqual(object? left, object? right)
+        {
+            if (ReferenceEquals(left, right))
+                return true;
+
+            if (left is null || right is null)
+                return false;
+
+            // Handle nested hashtables
+            if (left is Hashtable leftHash && right is Hashtable rightHash)
+                return AreHashtablesEqual(leftHash, rightHash);
+
+            // Handle arrays
+            if (left is IEnumerable leftEnum && right is IEnumerable rightEnum && 
+                !(left is string) && !(right is string))
+            {
+                var leftArray = leftEnum.Cast<object>().ToArray();
+                var rightArray = rightEnum.Cast<object>().ToArray();
+
+                if (leftArray.Length != rightArray.Length)
+                    return false;
+
+                for (int i = 0; i < leftArray.Length; i++)
+                {
+                    if (!AreValuesEqual(leftArray[i], rightArray[i]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            // Use standard equality comparison
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Logs detected configuration differences with detailed field-by-field changes.
+        /// </summary>
+        /// <param name="last">Last known configuration</param>
+        /// <param name="desired">Desired configuration</param>
+        private void LogConfigurationDifferences(Hashtable last, Hashtable desired)
+        {
+            var addedFields = new List<string>();
+            var modifiedFields = new List<string>();
+            var removedFields = new List<string>();
+
+            // Check for added or modified fields
+            foreach (DictionaryEntry entry in desired)
+            {
+                var key = entry.Key.ToString()!;
+                if (!last.ContainsKey(entry.Key))
+                {
+                    addedFields.Add($"{key} = {FormatValueForLogging(entry.Value)}");
+                }
+                else if (!AreValuesEqual(entry.Value, last[entry.Key]))
+                {
+                    var oldValue = FormatValueForLogging(last[entry.Key]);
+                    var newValue = FormatValueForLogging(entry.Value);
+                    modifiedFields.Add($"{key}: {oldValue} → {newValue}");
+                }
+            }
+
+            // Check for removed fields
+            foreach (DictionaryEntry entry in last)
+            {
+                if (!desired.ContainsKey(entry.Key))
+                {
+                    var key = entry.Key.ToString()!;
+                    removedFields.Add($"{key} = {FormatValueForLogging(entry.Value)}");
+                }
+            }
+
+            // Log changes by category with detailed before/after values
+            if (addedFields.Count > 0)
+            {
+                Logger.LogInformation("{EntityTypeName} configuration changes - ADDED fields: {AddedFields}", 
+                    EntityTypeName, string.Join(", ", addedFields));
+            }
+
+            if (modifiedFields.Count > 0)
+            {
+                Logger.LogInformation("{EntityTypeName} configuration changes - MODIFIED fields: {ModifiedFields}", 
+                    EntityTypeName, string.Join(", ", modifiedFields));
+            }
+
+            if (removedFields.Count > 0)
+            {
+                Logger.LogInformation("{EntityTypeName} configuration changes - REMOVED fields: {RemovedFields}", 
+                    EntityTypeName, string.Join(", ", removedFields));
+            }
+
+            // Also log a summary count
+            var totalChanges = addedFields.Count + modifiedFields.Count + removedFields.Count;
+            if (totalChanges > 0)
+            {
+                Logger.LogInformation("{EntityTypeName} configuration drift detected: {TotalChanges} field changes ({AddedCount} added, {ModifiedCount} modified, {RemovedCount} removed)", 
+                    EntityTypeName, totalChanges, addedFields.Count, modifiedFields.Count, removedFields.Count);
+            }
+        }
+
+        /// <summary>
+        /// Formats a value for logging, providing detailed representation with truncation for long values.
+        /// </summary>
+        /// <param name="value">Value to format</param>
+        /// <returns>Formatted string representation with type information</returns>
+        private static string FormatValueForLogging(object? value)
+        {
+            if (value is null)
+                return "(null)";
+
+            // Handle different value types with more detail
+            switch (value)
+            {
+                case string stringValue:
+                    var quotedStr = $"\"{stringValue}\"";
+                    return quotedStr.Length > 100 ? $"\"{stringValue[..95]}...\"" : quotedStr;
+                
+                case bool boolean:
+                    return boolean.ToString().ToLowerInvariant();
+                
+                case int or long or float or double or decimal:
+                    return value.ToString() ?? "(null)";
+                
+                case IEnumerable enumerable when value is not string:
+                    var items = enumerable.Cast<object>().Take(5).Select(FormatValueForLogging);
+                    var arrayPreview = string.Join(", ", items);
+                    var count = enumerable.Cast<object>().Count();
+                    return count > 5 ? $"[{arrayPreview}, ...] (total: {count} items)" : $"[{arrayPreview}]";
+                
+                case Hashtable hashtable:
+                    var entries = hashtable.Cast<DictionaryEntry>().Take(3)
+                        .Select(entry => $"{entry.Key}: {FormatValueForLogging(entry.Value)}");
+                    var hashPreview = string.Join(", ", entries);
+                    return hashtable.Count > 3 ? $"{{{hashPreview}, ...}} (total: {hashtable.Count} fields)" : $"{{{hashPreview}}}";
+                
+                default:
+                    var objectStr = value.ToString() ?? "(null)";
+                    var typeName = value.GetType().Name;
+                    return objectStr.Length > 80 ? $"({typeName}) {objectStr[..75]}..." : $"({typeName}) {objectStr}";
             }
         }
 
