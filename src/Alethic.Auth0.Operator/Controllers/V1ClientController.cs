@@ -478,7 +478,12 @@ namespace Alethic.Auth0.Operator.Controllers
             // Only compare these specific fields for drift detection
             return new[]
             {
-                
+                "name",
+                "app_type", 
+                "grant_types",
+                "callbacks",
+                "allowed_logout_urls",
+                "client_metadata"
             };
         }
     }
