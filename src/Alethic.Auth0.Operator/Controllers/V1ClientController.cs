@@ -129,7 +129,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // explicitely null out missing metadata if previously present
             if (last is not null && last.ContainsKey("client_metadata") && conf.ClientMetaData != null)
-                foreach (string key in (Hashtable)last["client_metadata"]!)
+                foreach (string key in ((Hashtable)last["client_metadata"]!).Keys)
                     if (conf.ClientMetaData.ContainsKey(key) == false)
                         req.ClientMetaData[key] = null;
 
