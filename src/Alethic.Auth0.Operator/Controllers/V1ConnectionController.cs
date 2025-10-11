@@ -117,9 +117,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), (PaginationInfo?)null, cancellationToken);
                 var self = list.FirstOrDefault(i => i.Name == conf.Name);
                 if (self is not null)
-                {
                     Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection by name: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
-                }
+
                 return self?.Id;
             }
         }
@@ -146,13 +145,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var l = new List<string>(refs.Length);
 
             foreach (var i in refs)
-            {
-                var r = await ResolveClientRefToId(api, i, defaultNamespace, cancellationToken);
-                if (r is null)
-                    throw new InvalidOperationException();
-
-                l.Add(r);
-            }
+                l.Add(await ResolveClientRefToId(api, i, defaultNamespace, cancellationToken) ?? throw new InvalidOperationException());
 
             return l.ToArray();
         }
@@ -163,8 +156,18 @@ namespace Alethic.Auth0.Operator.Controllers
             Logger.LogInformation("{EntityTypeName} creating connection in Auth0 with name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, conf.Name, conf.Strategy);
             var req = new ConnectionCreateRequest();
             await ApplyConfToRequest(api, req, conf, defaultNamespace, cancellationToken);
+
+            if (conf.Strategy is null)
+                throw new InvalidOperationException("Missing connection strategy.");
+
+            // calculate options, depends on strategy
+            var options = conf.Strategy == "auth0" ? (dynamic?)TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+            if (options is null)
+                throw new InvalidOperationException("Missing connection options.");
+
+            // configure strategy and options
             req.Strategy = conf.Strategy;
-            req.Options = conf.Strategy == "auth0" ? TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+            req.Options = options;
 
             var self = await api.Connections.CreateAsync(req, cancellationToken);
             if (self is null)
@@ -197,10 +200,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         async Task ApplyConfToRequest(IManagementApiClient api, ConnectionBase req, ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
+            if (conf.Name is null)
+                throw new InvalidOperationException("Missing name.");
+            if (conf.DisplayName is null)
+                throw new InvalidOperationException("Missing displayname.");
+
             req.Name = conf.Name;
             req.DisplayName = conf.DisplayName;
-            req.Metadata = conf.Metadata;
-            req.Realms = conf.Realms;
+            req.Metadata = conf.Metadata ?? null!;
+            req.Realms = conf.Realms ?? [];
             req.IsDomainConnection = conf.IsDomainConnection ?? false;
             req.ShowAsButton = conf.ShowAsButton;
             req.EnabledClients = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
