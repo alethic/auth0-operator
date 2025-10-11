@@ -183,8 +183,16 @@ namespace Alethic.Auth0.Operator.Controllers
             Logger.LogInformation("{EntityTypeName} updating connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, id, conf.Name, conf.Strategy);
             var req = new ConnectionUpdateRequest();
             await ApplyConfToRequest(api, req, conf, defaultNamespace, cancellationToken);
-            req.Name = null;
-            req.Options = conf.Strategy == "auth0" ? TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+
+            // name has to be cleared for an update
+            req.Name = null!;
+
+            // calculate options: depends on current strategy, possibly null, which means no apply
+            var strategy = last?["strategy"] as string;
+            var options = strategy == "auth0" && conf.Options is not null ? (dynamic?)TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+            if (options is not null)
+                req.Options = options;
+
             await api.Connections.UpdateAsync(id, req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, id, conf.Name, conf.Strategy);
         }
