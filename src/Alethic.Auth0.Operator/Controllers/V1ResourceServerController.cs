@@ -8,6 +8,7 @@ using Alethic.Auth0.Operator.Core.Models.ResourceServer;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
+using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
 
@@ -54,7 +55,14 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
-            return TransformToSystemTextJson<Hashtable>(await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken));
+            try
+            {
+                return TransformToSystemTextJson<Hashtable>(await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken));
+            }
+            catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         /// <inheritdoc />
