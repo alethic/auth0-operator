@@ -188,7 +188,7 @@ namespace Alethic.Auth0.Operator.Controllers
             req.Name = null!;
 
             // calculate options: depends on current strategy, possibly null, which means no apply
-            var strategy = last?["strategy"] as string;
+            var strategy = last?["strategy"] as string ?? conf.Strategy;
             var options = strategy == "auth0" && conf.Options is not null ? (dynamic?)TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
             if (options is not null)
                 req.Options = options;
