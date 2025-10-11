@@ -461,7 +461,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 try
                 {
-                    Logger.LogError(e, "Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
+                    Logger.LogError("Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                     await ReconcileWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? "", cancellationToken);
                 }
                 catch (Exception e2)

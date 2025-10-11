@@ -54,6 +54,7 @@ spec:
               value: "yyyy-MM-dd HH:mm:ss "
             - name: Logging__Console__FormatterOptions__SingleLine
               value: 'true'
+
 {{ if .Values.options.namespace }}
             - name: Auth0__Operator__Namespace
               value: {{ .Values.options.namespace | quote }}
