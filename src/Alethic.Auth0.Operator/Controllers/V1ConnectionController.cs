@@ -210,11 +210,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (conf.Name is null)
                 throw new InvalidOperationException("Missing name.");
-            if (conf.DisplayName is null)
-                throw new InvalidOperationException("Missing displayname.");
 
             req.Name = conf.Name;
-            req.DisplayName = conf.DisplayName;
+            if (conf.DisplayName is not null)
+                req.DisplayName = conf.DisplayName;
             req.Metadata = conf.Metadata ?? null!;
             req.Realms = conf.Realms ?? [];
             req.IsDomainConnection = conf.IsDomainConnection ?? false;
