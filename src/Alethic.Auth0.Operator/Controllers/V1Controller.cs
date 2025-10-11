@@ -449,8 +449,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 try
                 {
-                    Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError.Message);
-                    await ReconcileWarningAsync(entity, "ApiError", e.ApiError.Message, cancellationToken);
+                    Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? "");
+                    await ReconcileWarningAsync(entity, "ApiError", e.ApiError?.Message ?? "", cancellationToken);
                 }
                 catch (Exception e2)
                 {
@@ -462,7 +462,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 try
                 {
                     Logger.LogError(e, "Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
-                    await ReconcileWarningAsync(entity, "RateLimit", e.ApiError.Message, cancellationToken);
+                    await ReconcileWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? "", cancellationToken);
                 }
                 catch (Exception e2)
                 {

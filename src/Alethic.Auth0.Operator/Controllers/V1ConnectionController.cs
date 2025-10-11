@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,7 +80,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 dict["metadata"] = TransformToSystemTextJson<Hashtable?>(self.Metadata);
                 return dict;
             }
-            catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -98,7 +99,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), connection.Name);
                         return connection.Id;
                     }
-                    catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find connection with id {ConnectionId}.", EntityTypeName, entity.Namespace(), entity.Name(), connectionId);
                         return null;

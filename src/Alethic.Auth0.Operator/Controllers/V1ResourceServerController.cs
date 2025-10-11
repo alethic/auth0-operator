@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,7 +60,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 return TransformToSystemTextJson<Hashtable>(await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken));
             }
-            catch (ErrorApiException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
