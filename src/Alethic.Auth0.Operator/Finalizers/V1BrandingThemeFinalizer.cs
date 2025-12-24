@@ -10,7 +10,7 @@ using KubeOps.Abstractions.Finalizer;
 namespace Alethic.Auth0.Operator.Finalizers
 {
 
-    public class V1ThemeFinalizer : IEntityFinalizer<V1BrandingTheme>
+    public class V1BrandingThemeFinalizer : IEntityFinalizer<V1BrandingTheme>
     {
 
         readonly V1BrandingThemeController _controller;
@@ -19,7 +19,7 @@ namespace Alethic.Auth0.Operator.Finalizers
         /// Initializes a new instance.
         /// </summary>
         /// <param name="controller"></param>
-        public V1ThemeFinalizer(V1BrandingThemeController controller)
+        public V1BrandingThemeFinalizer(V1BrandingThemeController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }

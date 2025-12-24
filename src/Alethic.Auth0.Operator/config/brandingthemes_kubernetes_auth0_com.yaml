@@ -52,6 +52,13 @@ spec:
                 required:
                 - name
                 type: object
+              find:
+                nullable: true
+                properties:
+                  id:
+                    nullable: true
+                    type: string
+                type: object
               init:
                 nullable: true
                 properties:

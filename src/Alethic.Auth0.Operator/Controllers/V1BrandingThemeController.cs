@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Alethic.Auth0.Operator.Core.Models.BrandingTheme;
-using Alethic.Auth0.Operator.Core.Models.Client;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -50,7 +49,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string EntityTypeName => "Theme";
+        protected override string EntityTypeName => "BrandingTheme";
 
         /// <inheritdoc />
         protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
@@ -68,7 +67,29 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<string?> Find(IManagementApiClient api, V1BrandingTheme entity, V1BrandingTheme.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
         {
-            return null;
+            if (spec.Find is not null)
+            {
+                if (spec.Find.Id is string id)
+                {
+                    try
+                    {
+                        var theme = await api.Branding.GetBrandingThemeAsync(id, cancellationToken);
+                        Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing theme: {DisplayName}", EntityTypeName, entity.Namespace(), entity.Name(), theme.DisplayName);
+                        return theme.ThemeId;
+                    }
+                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find theme with id {ThemeId}.", EntityTypeName, entity.Namespace(), entity.Name(), id);
+                        return null;
+                    }
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <inheritdoc />
