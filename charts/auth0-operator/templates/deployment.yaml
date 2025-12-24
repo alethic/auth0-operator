@@ -52,6 +52,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
 
+            # Configure Kestrel to use the TLS certificate mounted from the secret.
+            - name: Kestrel__Certificates__Default__Path
+              value: /certs/tls.crt
+            - name: Kestrel__Certificates__Default__KeyPath
+              value: /certs/tls.key
+
             # By default we want to use a formatter more suited to Kubernetes.
             - name: Logging__Console__FormatterName
               value: "simple"
@@ -80,7 +86,7 @@ spec:
               value: {{ .value | quote }}
 {{- end }}
           ports:
-            - containerPort: 8080
+            - containerPort: 4443
               name: https
           resources: {{- toYaml .Values.operator.resources | nindent 12 }}
           {{- with .Values.operator.containerSecurityContext }}
@@ -91,16 +97,13 @@ spec:
           {{- toYaml . | nindent 12 }}
           {{- end }}
             - mountPath: /certs
-              name: certificates
-              readOnly: true
-            - mountPath: /ca
-              name: ca-certificates
+              name: certs
               readOnly: true
       volumes:
       {{- with .Values.operator.volumes }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
-        - name: certificates
+        - name: certs
           secret:
             defaultMode: 420
             secretName: {{ include "auth0-operator.fullname" . }}-tls
