@@ -91,7 +91,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // retrieve and copy new properties to status
             entity.Status.LastConf ??= new Hashtable();
             entity.Status.LastConf["settings"] = TransformToSystemTextJson<Hashtable>(settings);
-            entity.Status.LastConf["branding"] = TransformToSystemTextJson<Hashtable>(settings);
+            entity.Status.LastConf["branding"] = TransformToSystemTextJson<Hashtable>(branding);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             await ReconcileSuccessAsync(entity, cancellationToken);
