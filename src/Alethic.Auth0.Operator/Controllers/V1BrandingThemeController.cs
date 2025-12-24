@@ -149,8 +149,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="target"></param>
-        void Apply(BrandingThemeConf conf, BrandingThemeBase target)
+        void Apply(BrandingThemeConf? conf, BrandingThemeBase target)
         {
+            if (conf is null)
+                return;
+
             if (conf.DisplayName is not null)
                 target.DisplayName = conf.DisplayName;
 
@@ -388,11 +391,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
             var req = new BrandingThemeUpdateRequest();
-
-            // these settings need to be filled in
-            if (last is not null)
-                Apply(last, req);
-
+            Apply(last, req);
             Apply(conf, req);
             await api.Branding.UpdateBrandingThemeAsync(id, req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
