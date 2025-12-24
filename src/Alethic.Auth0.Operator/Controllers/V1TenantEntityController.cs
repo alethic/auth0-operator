@@ -22,11 +22,12 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf> : ControllerBase<TEntity, TSpec, TStatus, TConf>
-        where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntity<TSpec, TStatus, TConf>
+    public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf, TLastConf> : ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf>
+        where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntity<TSpec, TStatus, TConf, TLastConf>
         where TSpec : V1TenantEntitySpec<TConf>
-        where TStatus : V1TenantEntityStatus
+        where TStatus : V1TenantEntityStatus<TLastConf>
         where TConf : class
+        where TLastConf : class
     {
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken);
+        protected abstract Task<TLastConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken);
 
         /// <summary>
         /// Attempts to locate a matching API element by the given configuration.
@@ -91,7 +92,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract Task Update(IManagementApiClient api, string id, Hashtable? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
+        protected abstract Task Update(IManagementApiClient api, string id, TLastConf? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
 
         /// <inheritdoc />
         protected override async Task Reconcile(TEntity entity, CancellationToken cancellationToken)
@@ -193,7 +194,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual Task ApplyStatus(IManagementApiClient api, TEntity entity, Hashtable lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        protected virtual Task ApplyStatus(IManagementApiClient api, TEntity entity, TLastConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             entity.Status.LastConf = lastConf;
             return Task.CompletedTask;

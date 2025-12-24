@@ -18,7 +18,7 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0theme")]
     public partial class V1BrandingTheme :
         CustomKubernetesEntity<V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef>,
-        V1TenantEntity<V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef, BrandingThemeConf>
+        V1TenantEntity<V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef, BrandingThemeConf, BrandingThemeConf>
     {
 
         public class SpecDef : V1TenantEntitySpec<BrandingThemeConf>
@@ -43,7 +43,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityStatus
+        public class StatusDef : V1TenantEntityStatus<BrandingThemeConf>
         {
 
             [JsonPropertyName("id")]
@@ -51,7 +51,7 @@ namespace Alethic.Auth0.Operator.Models
 
             [JsonPropertyName("lastConf")]
             [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-            public Hashtable? LastConf { get; set; }
+            public BrandingThemeConf? LastConf { get; set; }
 
         }
 

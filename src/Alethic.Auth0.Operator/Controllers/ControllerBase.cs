@@ -35,11 +35,12 @@ using Newtonsoft.Json;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    public abstract class ControllerBase<TEntity, TSpec, TStatus, TConf> : IEntityController<TEntity>
-        where TEntity : IKubernetesObject<V1ObjectMeta>, V1Entity<TSpec, TStatus, TConf>
+    public abstract class ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf> : IEntityController<TEntity>
+        where TEntity : IKubernetesObject<V1ObjectMeta>, V1Entity<TSpec, TStatus, TConf, TLastConf>
         where TSpec : V1EntitySpec<TConf>
-        where TStatus : V1EntityStatus
+        where TStatus : V1EntityStatus<TLastConf>
         where TConf : class
+        where TLastConf : class
     {
 
         static readonly Newtonsoft.Json.JsonSerializer _newtonsoftJsonSerializer = Newtonsoft.Json.JsonSerializer.CreateDefault();

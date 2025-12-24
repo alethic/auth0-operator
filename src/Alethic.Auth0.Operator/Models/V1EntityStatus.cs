@@ -3,10 +3,11 @@
 namespace Alethic.Auth0.Operator.Models
 {
 
-    public interface V1EntityStatus
+    public interface V1EntityStatus<TLastConf>
+        where TLastConf: class
     {
 
-        Hashtable? LastConf { get; set; }
+        TLastConf? LastConf { get; set; }
 
     }
 

@@ -30,7 +30,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1BrandingThemeController :
-        V1TenantEntityController<V1BrandingTheme, V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef, BrandingThemeConf>,
+        V1TenantEntityController<V1BrandingTheme, V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef, BrandingThemeConf, BrandingThemeConf>,
         IEntityController<V1BrandingTheme>
     {
 
@@ -52,11 +52,11 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override string EntityTypeName => "BrandingTheme";
 
         /// <inheritdoc />
-        protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<BrandingThemeConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
             try
             {
-                return TransformToSystemTextJson<Hashtable>(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
+                return TransformToSystemTextJson<BrandingThemeConf>(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -108,7 +108,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, BrandingThemeConf? last, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
 
@@ -119,7 +119,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task ApplyStatus(IManagementApiClient api, V1BrandingTheme entity, Hashtable lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task ApplyStatus(IManagementApiClient api, V1BrandingTheme entity, BrandingThemeConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }

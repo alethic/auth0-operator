@@ -31,7 +31,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1ClientGrant), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.Create)]
     public class V1ClientGrantController :
-        V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, ClientGrantConf>,
+        V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, ClientGrantConf, Hashtable>,
         IEntityController<V1ClientGrant>
     {
 

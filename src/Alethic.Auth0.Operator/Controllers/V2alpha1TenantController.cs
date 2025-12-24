@@ -27,7 +27,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V2alpha1TenantController :
-        ControllerBase<V2alpha1Tenant, V2alpha1Tenant.SpecDef, V2alpha1Tenant.StatusDef, V2alpha1TenantConf>,
+        ControllerBase<V2alpha1Tenant, V2alpha1Tenant.SpecDef, V2alpha1Tenant.StatusDef, V2alpha1TenantConf, V2alpha1TenantConf>,
         IEntityController<V2alpha1Tenant>
     {
 
@@ -89,9 +89,9 @@ namespace Alethic.Auth0.Operator.Controllers
             }
 
             // retrieve and copy new properties to status
-            entity.Status.LastConf ??= new Hashtable();
-            entity.Status.LastConf["settings"] = TransformToSystemTextJson<Hashtable>(settings);
-            entity.Status.LastConf["branding"] = TransformToSystemTextJson<Hashtable>(branding);
+            entity.Status.LastConf ??= new V2alpha1TenantConf();
+            entity.Status.LastConf.Settings = TransformToSystemTextJson<TenantConfSettings>(settings);
+            entity.Status.LastConf.Branding = TransformToSystemTextJson<TenantConfBranding>(branding);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             await ReconcileSuccessAsync(entity, cancellationToken);

@@ -33,7 +33,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ClientController :
-        V1TenantEntityController<V1Client, V1Client.SpecDef, V1Client.StatusDef, ClientConf>,
+        V1TenantEntityController<V1Client, V1Client.SpecDef, V1Client.StatusDef, ClientConf, Hashtable>,
         IEntityController<V1Client>
     {
 

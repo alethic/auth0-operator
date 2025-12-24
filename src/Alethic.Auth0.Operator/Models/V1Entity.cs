@@ -3,10 +3,11 @@
 namespace Alethic.Auth0.Operator.Models
 {
 
-    public interface V1Entity<TSpec, TStatus, TConf>
+    public interface V1Entity<TSpec, TStatus, TConf, TLastConf>
         where TSpec : V1EntitySpec<TConf>
-        where TStatus : V1EntityStatus
+        where TStatus : V1EntityStatus<TLastConf>
         where TConf : class
+        where TLastConf : class
     {
 
         /// <summary>
