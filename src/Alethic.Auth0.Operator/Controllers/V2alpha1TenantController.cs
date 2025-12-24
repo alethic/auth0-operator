@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -74,7 +73,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
 
                     // push update to Auth0
-                    var req = TransformToNewtonsoftJson<TenantConfSettings, TenantSettingsUpdateRequest>(newSettings!);
+                    var req = TransformToNewtonsoftJson<Core.Models.Tenant.TenantSettings, TenantSettingsUpdateRequest>(newSettings!);
                     req.Flags.EnableSSO = null; // this can never be passed
                     settings = await api.TenantSettings.UpdateAsync(req, cancellationToken);
                 }
@@ -83,15 +82,15 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf.Branding is { } newBranding)
                 {
                     // push update to Auth0
-                    var req = TransformToNewtonsoftJson<TenantConfBranding, BrandingUpdateRequest>(newBranding!);
+                    var req = TransformToNewtonsoftJson<TenantBranding, BrandingUpdateRequest>(newBranding!);
                     branding = await api.Branding.UpdateAsync(req, cancellationToken);
                 }
             }
 
             // retrieve and copy new properties to status
             entity.Status.LastConf ??= new V2alpha1TenantConf();
-            entity.Status.LastConf.Settings = TransformToSystemTextJson<TenantConfSettings>(settings);
-            entity.Status.LastConf.Branding = TransformToSystemTextJson<TenantConfBranding>(branding);
+            entity.Status.LastConf.Settings = TransformToSystemTextJson<Core.Models.Tenant.TenantSettings>(settings);
+            entity.Status.LastConf.Branding = TransformToSystemTextJson<TenantBranding>(branding);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             await ReconcileSuccessAsync(entity, cancellationToken);

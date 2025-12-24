@@ -6,7 +6,7 @@ using Alethic.Auth0.Operator.Core.Extensions;
 namespace Alethic.Auth0.Operator.Core.Models.Connection
 {
 
-    public class ConnectionConf
+    public class V1ConnectionConf
     {
 
         [JsonPropertyName("name")]

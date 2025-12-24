@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Client
 {
 
-    public partial class ClientFind
+    public partial class V1ClientFind
     {
 
         [JsonPropertyName("client_id")]

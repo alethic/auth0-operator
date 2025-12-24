@@ -33,7 +33,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ClientController :
-        V1TenantEntityController<V1Client, V1Client.SpecDef, V1Client.StatusDef, ClientConf, Hashtable>,
+        V1TenantEntityController<V1Client, V1Client.SpecDef, V1Client.StatusDef, V1ClientConf, Hashtable>,
         IEntityController<V1Client>
     {
 
@@ -102,7 +102,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string? ValidateCreate(ClientConf conf)
+        protected override string? ValidateCreate(V1ClientConf conf)
         {
             if (conf.ApplicationType == null)
                 return "missing a value for application type";
@@ -111,21 +111,21 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string> Create(IManagementApiClient api, ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string> Create(IManagementApiClient api, V1ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating client in Auth0 with name: {ClientName}", EntityTypeName, conf.Name);
-            var self = await api.Clients.CreateAsync(TransformToNewtonsoftJson<ClientConf, ClientCreateRequest>(conf), cancellationToken);
+            var self = await api.Clients.CreateAsync(TransformToNewtonsoftJson<V1ClientConf, ClientCreateRequest>(conf), cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created client in Auth0 with ID: {ClientId} and name: {ClientName}", EntityTypeName, self.ClientId, conf.Name);
             return self.ClientId;
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);
 
             // transform initial request
-            var req = TransformToNewtonsoftJson<ClientConf, ClientUpdateRequest>(conf);
+            var req = TransformToNewtonsoftJson<V1ClientConf, ClientUpdateRequest>(conf);
 
             // explicitely null out missing metadata if previously present
             if (last is not null && last.ContainsKey("client_metadata") && conf.ClientMetaData != null)

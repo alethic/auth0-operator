@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection
 {
 
-    public partial class ConnectionFind
+    public partial class V1ConnectionFind
     {
 
         [JsonPropertyName("id")]

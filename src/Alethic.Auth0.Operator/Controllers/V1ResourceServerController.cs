@@ -32,7 +32,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ResourceServerController :
-        V1TenantEntityController<V1ResourceServer, V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, ResourceServerConf, Hashtable>,
+        V1TenantEntityController<V1ResourceServer, V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, Hashtable>,
         IEntityController<V1ResourceServer>
     {
 
@@ -79,22 +79,22 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string? ValidateCreate(ResourceServerConf conf)
+        protected override string? ValidateCreate(V1ResourceServerConf conf)
         {
             return null;
         }
 
         /// <inheritdoc />
-        protected override async Task<string> Create(IManagementApiClient api, ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string> Create(IManagementApiClient api, V1ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var self = await api.ResourceServers.CreateAsync(TransformToNewtonsoftJson<ResourceServerConf, ResourceServerCreateRequest>(conf), cancellationToken);
+            var self = await api.ResourceServers.CreateAsync(TransformToNewtonsoftJson<V1ResourceServerConf, ResourceServerCreateRequest>(conf), cancellationToken);
             return self.Id;
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            await api.ResourceServers.UpdateAsync(id, TransformToNewtonsoftJson<ResourceServerConf, ResourceServerUpdateRequest>(conf), cancellationToken);
+            await api.ResourceServers.UpdateAsync(id, TransformToNewtonsoftJson<V1ResourceServerConf, ResourceServerUpdateRequest>(conf), cancellationToken);
         }
 
         /// <inheritdoc />

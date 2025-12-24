@@ -31,7 +31,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1ClientGrant), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.Create)]
     public class V1ClientGrantController :
-        V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, ClientGrantConf, Hashtable>,
+        V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, Hashtable>,
         IEntityController<V1ClientGrant>
     {
 
@@ -89,7 +89,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string? ValidateCreate(ClientGrantConf conf)
+        protected override string? ValidateCreate(V1ClientGrantConf conf)
         {
             if (conf.ClientRef is null)
                 return "missing a value for ClientRef";
@@ -102,7 +102,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string> Create(IManagementApiClient api, ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string> Create(IManagementApiClient api, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             var req = new ClientGrantCreateRequest();
             req.ClientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken);
@@ -119,7 +119,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             var req = new ClientGrantUpdateRequest();
             req.Scope = conf.Scope?.ToList();

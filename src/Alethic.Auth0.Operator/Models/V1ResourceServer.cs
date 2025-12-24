@@ -18,10 +18,10 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0api")]
     public partial class V1ResourceServer :
         CustomKubernetesEntity<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef>,
-        V1TenantEntity<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, ResourceServerConf, Hashtable>
+        V1TenantEntity<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, Hashtable>
     {
 
-        public class SpecDef : V1TenantEntitySpec<ResourceServerConf>
+        public class SpecDef : V1TenantEntitySpec<V1ResourceServerConf>
         {
 
             [JsonPropertyName("policy")]
@@ -32,11 +32,11 @@ namespace Alethic.Auth0.Operator.Models
             public V1TenantReference? TenantRef { get; set; }
 
             [JsonPropertyName("init")]
-            public ResourceServerConf? Init { get; set; }
+            public V1ResourceServerConf? Init { get; set; }
 
             [JsonPropertyName("conf")]
             [Required]
-            public ResourceServerConf? Conf { get; set; }
+            public V1ResourceServerConf? Conf { get; set; }
 
         }
 

@@ -36,7 +36,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ConnectionController :
-        V1TenantEntityController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, ConnectionConf, Hashtable>,
+        V1TenantEntityController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>,
         IEntityController<V1Connection>
     {
 
@@ -124,7 +124,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string? ValidateCreate(ConnectionConf conf)
+        protected override string? ValidateCreate(V1ConnectionConf conf)
         {
             return null;
         }
@@ -151,7 +151,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string> Create(IManagementApiClient api, ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string> Create(IManagementApiClient api, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating connection in Auth0 with name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, conf.Name, conf.Strategy);
             var req = new ConnectionCreateRequest();
@@ -178,7 +178,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, id, conf.Name, conf.Strategy);
             var req = new ConnectionUpdateRequest();
@@ -206,7 +206,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        async Task ApplyConfToRequest(IManagementApiClient api, ConnectionBase req, ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        async Task ApplyConfToRequest(IManagementApiClient api, ConnectionBase req, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (conf.Name is null)
                 throw new InvalidOperationException("Missing name.");

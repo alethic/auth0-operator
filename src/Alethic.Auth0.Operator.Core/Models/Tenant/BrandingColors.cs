@@ -3,16 +3,16 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant
 {
 
-    public partial class V2alpha1TenantConf
+    public class BrandingColors
     {
-
-        [JsonPropertyName("settings")]
+        
+        [JsonPropertyName("primary")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantSettings? Settings { get; set; }
+        public string? Primary { get; set; }
 
-        [JsonPropertyName("branding")]
+        [JsonPropertyName("page_background")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantBranding? Branding { get; set; }
+        public string? PageBackground { get; set; }
 
     }
 

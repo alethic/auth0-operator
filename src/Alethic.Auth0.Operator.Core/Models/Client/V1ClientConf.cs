@@ -7,7 +7,7 @@ using Alethic.Auth0.Operator.Core.Models.Organization;
 namespace Alethic.Auth0.Operator.Core.Models.Client
 {
 
-    public partial class ClientConf
+    public partial class V1ClientConf
     {
 
         [JsonPropertyName("signing_keys")]
