@@ -99,7 +99,5 @@ spec:
       {{- end }}
         - name: certificates
           secret:
-            secretName: {{ include "auth0-operator.name" . }}-webhook-cert
-        - name: ca-certificates
-          secret:
-            secretName: {{ include "auth0-operator.name" . }}-webhook-ca
+            defaultMode: 420
+            secretName: {{ include "auth0-operator.fullname" . }}-tls
