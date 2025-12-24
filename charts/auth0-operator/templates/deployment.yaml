@@ -63,9 +63,9 @@ spec:
             - name: Auth0__Operator__Reconciliation__Interval
               value: {{ .Values.options.reconciliation.interval | quote }}
 {{ end }}
-{{ if .Values.options.reconciliation.errorInterval }}
-            - name: Auth0__Operator__Reconciliation__ErrorInterval
-              value: {{ .Values.options.reconciliation.errorInterval | quote }}
+{{ if .Values.options.reconciliation.retryInterval }}
+            - name: Auth0__Operator__Reconciliation__RetryInterval
+              value: {{ .Values.options.reconciliation.retryInterval | quote }}
 {{ end }}
 {{ range .Values.operator.env }}
             - name: {{ .name | quote }}

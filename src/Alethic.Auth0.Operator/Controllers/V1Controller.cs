@@ -464,8 +464,8 @@ namespace Alethic.Auth0.Operator.Controllers
                     Logger.LogCritical(e2, "Unexpected exception creating event.");
                 }
 
-                // retry after the error interval
-                var interval = Options.Reconciliation.ErrorInterval;
+                // retry after the retry interval
+                var interval = Options.Reconciliation.RetryInterval;
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 Requeue(entity, interval);
             }

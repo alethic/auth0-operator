@@ -84,4 +84,4 @@ options:
     #namespace:
   reconciliation:
     interval:
-    errorInterval:
+    retryInterval:
