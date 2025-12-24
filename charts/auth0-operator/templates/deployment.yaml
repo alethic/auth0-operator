@@ -60,23 +60,26 @@ spec:
             - name: Logging__Console__FormatterOptions__SingleLine
               value: 'true'
 
-{{ if .Values.options.namespace }}
+{{- if .Values.options.namespace }}
             - name: Auth0__Operator__Namespace
               value: {{ .Values.options.namespace | quote }}
-{{ end }}
-{{ if .Values.options.reconciliation.interval }}
+{{- end }}
+
+{{- if .Values.options.reconciliation.interval }}
             - name: Auth0__Operator__Reconciliation__Interval
               value: {{ .Values.options.reconciliation.interval | quote }}
-{{ end }}
-{{ if .Values.options.reconciliation.retryInterval }}
+{{- end }}
+
+{{- if .Values.options.reconciliation.retryInterval }}
             - name: Auth0__Operator__Reconciliation__RetryInterval
               value: {{ .Values.options.reconciliation.retryInterval | quote }}
-{{ end }}
-{{ range .Values.operator.env }}
+{{- end }}
+
+{{- range .Values.operator.env }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
-{{ end }}
-            ports:
+{{- end }}
+          ports:
             - containerPort: 8080
               name: https
           resources: {{- toYaml .Values.operator.resources | nindent 12 }}
