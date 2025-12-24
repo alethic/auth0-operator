@@ -1,0 +1,561 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: brandingthemes.kubernetes.auth0.com
+spec:
+  group: kubernetes.auth0.com
+  names:
+    kind: BrandingTheme
+    listKind: BrandingThemeList
+    plural: brandingthemes
+    shortNames:
+    - a0theme
+    singular: brandingtheme
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          status:
+            nullable: false
+            properties:
+              id:
+                nullable: true
+                type: string
+              lastConf:
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          spec:
+            nullable: false
+            properties:
+              policy:
+                items:
+                  enum:
+                  - Create
+                  - Update
+                  - Delete
+                  type: string
+                nullable: true
+                type: array
+              tenantRef:
+                nullable: true
+                properties:
+                  namespace:
+                    nullable: true
+                    type: string
+                  name:
+                    nullable: true
+                    type: string
+                required:
+                - name
+                type: object
+              init:
+                nullable: true
+                properties:
+                  displayName:
+                    nullable: true
+                    type: string
+                  borders:
+                    nullable: true
+                    properties:
+                      button_border_radius:
+                        format: float
+                        nullable: false
+                        type: number
+                      button_border_weight:
+                        format: float
+                        nullable: false
+                        type: number
+                      buttons_style:
+                        enum:
+                        - pill
+                        - rounded
+                        - sharp
+                        nullable: true
+                        type: string
+                      input_border_radius:
+                        format: float
+                        nullable: true
+                        type: number
+                      input_border_weight:
+                        format: float
+                        nullable: true
+                        type: number
+                      inputs_style:
+                        enum:
+                        - pill
+                        - rounded
+                        - sharp
+                        nullable: true
+                        type: string
+                      show_widget_shadow:
+                        nullable: true
+                        type: boolean
+                      widget_border_weight:
+                        format: float
+                        nullable: true
+                        type: number
+                      widget_corner_radius:
+                        format: float
+                        nullable: true
+                        type: number
+                    type: object
+                  colors:
+                    nullable: true
+                    properties:
+                      base_focus_color:
+                        nullable: true
+                        type: string
+                      base_hover_color:
+                        nullable: true
+                        type: string
+                      body_text:
+                        nullable: true
+                        type: string
+                      captcha_widget_theme:
+                        enum:
+                        - auto
+                        - dark
+                        - light
+                        nullable: true
+                        type: string
+                      error:
+                        nullable: true
+                        type: string
+                      header:
+                        nullable: true
+                        type: string
+                      icons:
+                        nullable: true
+                        type: string
+                      input_background:
+                        nullable: true
+                        type: string
+                      input_border:
+                        nullable: true
+                        type: string
+                      input_filled_text:
+                        nullable: true
+                        type: string
+                      input_labels_placeholders:
+                        nullable: true
+                        type: string
+                      links_focused_components:
+                        nullable: true
+                        type: string
+                      primary_button:
+                        nullable: true
+                        type: string
+                      primary_button_label:
+                        nullable: true
+                        type: string
+                      secondary_button_border:
+                        nullable: true
+                        type: string
+                      secondary_button_label:
+                        nullable: true
+                        type: string
+                      success:
+                        nullable: true
+                        type: string
+                      widget_background:
+                        nullable: true
+                        type: string
+                      widget_border:
+                        nullable: true
+                        type: string
+                    type: object
+                  fonts:
+                    nullable: true
+                    properties:
+                      body_text:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      buttons_text:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      font_url:
+                        nullable: true
+                        type: string
+                      input_labels:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      links:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      links_style:
+                        enum:
+                        - normal
+                        - underlined
+                        nullable: true
+                        type: string
+                      reference_text_size:
+                        format: float
+                        nullable: true
+                        type: number
+                      subtitle:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      title:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                    type: object
+                  page_background:
+                    nullable: true
+                    properties:
+                      background_color:
+                        nullable: true
+                        type: string
+                      background_image_url:
+                        nullable: true
+                        type: string
+                      page_layout:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        nullable: true
+                        type: string
+                    type: object
+                  widgets:
+                    nullable: true
+                    properties:
+                      header_text_alignment:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        nullable: true
+                        type: string
+                      logo_height:
+                        format: float
+                        nullable: true
+                        type: number
+                      logo_position:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        - none
+                        nullable: true
+                        type: string
+                      logo_url:
+                        nullable: true
+                        type: string
+                      social_buttons_layout:
+                        enum:
+                        - bottom
+                        - top
+                        nullable: true
+                        type: string
+                    type: object
+                type: object
+              conf:
+                nullable: true
+                properties:
+                  displayName:
+                    nullable: true
+                    type: string
+                  borders:
+                    nullable: true
+                    properties:
+                      button_border_radius:
+                        format: float
+                        nullable: false
+                        type: number
+                      button_border_weight:
+                        format: float
+                        nullable: false
+                        type: number
+                      buttons_style:
+                        enum:
+                        - pill
+                        - rounded
+                        - sharp
+                        nullable: true
+                        type: string
+                      input_border_radius:
+                        format: float
+                        nullable: true
+                        type: number
+                      input_border_weight:
+                        format: float
+                        nullable: true
+                        type: number
+                      inputs_style:
+                        enum:
+                        - pill
+                        - rounded
+                        - sharp
+                        nullable: true
+                        type: string
+                      show_widget_shadow:
+                        nullable: true
+                        type: boolean
+                      widget_border_weight:
+                        format: float
+                        nullable: true
+                        type: number
+                      widget_corner_radius:
+                        format: float
+                        nullable: true
+                        type: number
+                    type: object
+                  colors:
+                    nullable: true
+                    properties:
+                      base_focus_color:
+                        nullable: true
+                        type: string
+                      base_hover_color:
+                        nullable: true
+                        type: string
+                      body_text:
+                        nullable: true
+                        type: string
+                      captcha_widget_theme:
+                        enum:
+                        - auto
+                        - dark
+                        - light
+                        nullable: true
+                        type: string
+                      error:
+                        nullable: true
+                        type: string
+                      header:
+                        nullable: true
+                        type: string
+                      icons:
+                        nullable: true
+                        type: string
+                      input_background:
+                        nullable: true
+                        type: string
+                      input_border:
+                        nullable: true
+                        type: string
+                      input_filled_text:
+                        nullable: true
+                        type: string
+                      input_labels_placeholders:
+                        nullable: true
+                        type: string
+                      links_focused_components:
+                        nullable: true
+                        type: string
+                      primary_button:
+                        nullable: true
+                        type: string
+                      primary_button_label:
+                        nullable: true
+                        type: string
+                      secondary_button_border:
+                        nullable: true
+                        type: string
+                      secondary_button_label:
+                        nullable: true
+                        type: string
+                      success:
+                        nullable: true
+                        type: string
+                      widget_background:
+                        nullable: true
+                        type: string
+                      widget_border:
+                        nullable: true
+                        type: string
+                    type: object
+                  fonts:
+                    nullable: true
+                    properties:
+                      body_text:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      buttons_text:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      font_url:
+                        nullable: true
+                        type: string
+                      input_labels:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      links:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      links_style:
+                        enum:
+                        - normal
+                        - underlined
+                        nullable: true
+                        type: string
+                      reference_text_size:
+                        format: float
+                        nullable: true
+                        type: number
+                      subtitle:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                      title:
+                        nullable: true
+                        properties:
+                          bold:
+                            nullable: true
+                            type: boolean
+                          size:
+                            format: float
+                            nullable: false
+                            type: number
+                        type: object
+                    type: object
+                  page_background:
+                    nullable: true
+                    properties:
+                      background_color:
+                        nullable: true
+                        type: string
+                      background_image_url:
+                        nullable: true
+                        type: string
+                      page_layout:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        nullable: true
+                        type: string
+                    type: object
+                  widgets:
+                    nullable: true
+                    properties:
+                      header_text_alignment:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        nullable: true
+                        type: string
+                      logo_height:
+                        format: float
+                        nullable: true
+                        type: number
+                      logo_position:
+                        enum:
+                        - center
+                        - left
+                        - right
+                        - none
+                        nullable: true
+                        type: string
+                      logo_url:
+                        nullable: true
+                        type: string
+                      social_buttons_layout:
+                        enum:
+                        - bottom
+                        - top
+                        nullable: true
+                        type: string
+                    type: object
+                type: object
+            required:
+            - tenantRef
+            - conf
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

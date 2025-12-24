@@ -13,6 +13,14 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - brandingthemes
+  - clientgrants
+  - connections
+  verbs:
+  - '*'
+- apiGroups:
   - ""
   resources:
   - secrets
@@ -22,13 +30,6 @@ rules:
   - events.k8s.io
   resources:
   - events
-  verbs:
-  - '*'
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - clientgrants
-  - connections
   verbs:
   - '*'
 - apiGroups:
@@ -50,6 +51,14 @@ rules:
   - kubernetes.auth0.com
   resources:
   - tenants/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - brandingthemes/status
   verbs:
   - get
   - update

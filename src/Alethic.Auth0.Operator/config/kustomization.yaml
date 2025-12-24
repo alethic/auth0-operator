@@ -6,6 +6,7 @@ resources:
 - operator-role.yaml
 - operator-role-binding.yaml
 - deployment.yaml
+- brandingthemes_kubernetes_auth0_com.yaml
 - clients_kubernetes_auth0_com.yaml
 - clientgrants_kubernetes_auth0_com.yaml
 - connections_kubernetes_auth0_com.yaml
