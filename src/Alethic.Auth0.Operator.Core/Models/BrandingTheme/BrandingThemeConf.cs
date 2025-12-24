@@ -26,9 +26,9 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public BrandingThemePageBackground? PageBackground { get; set; }
 
-        [JsonPropertyName("widgets")]
+        [JsonPropertyName("widget")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public BrandingThemeWidgets? Widgets { get; set; }
+        public BrandingThemeWidgets? Widget { get; set; }
 
     }
 
