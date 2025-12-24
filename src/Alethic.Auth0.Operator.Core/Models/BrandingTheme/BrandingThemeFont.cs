@@ -12,7 +12,7 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
 
         [JsonPropertyName("size")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public float Size { get; set; }
+        public float? Size { get; set; }
 
     }
 
