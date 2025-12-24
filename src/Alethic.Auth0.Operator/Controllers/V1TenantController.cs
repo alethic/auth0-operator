@@ -57,24 +57,41 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var settings = await api.TenantSettings.GetAsync(cancellationToken: cancellationToken);
             if (settings is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} cannot be loaded from API.");
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} settings cannot be loaded from API.");
+
+            var branding = await api.Branding.GetAsync(cancellationToken: cancellationToken);
+            if (branding is null)
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} branding cannot be loaded from API.");
 
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
             {
-                // verify that no changes to enable_sso are being made
-                if (conf.Flags != null && conf.Flags.EnableSSO != null && settings.Flags.EnableSSO != null && conf.Flags.EnableSSO != settings.Flags.EnableSSO)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
+                // settings may not be specified
+                if (conf.Settings is { } newSettings)
+                {
+                    // verify that no changes to enable_sso are being made
+                    if (newSettings != null && newSettings.Flags != null && newSettings.Flags.EnableSSO != null && settings.Flags.EnableSSO != null && newSettings.Flags.EnableSSO != settings.Flags.EnableSSO)
+                        throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
 
-                // push update to Auth0
-                var req = TransformToNewtonsoftJson<TenantConf, TenantSettingsUpdateRequest>(conf);
-                req.Flags.EnableSSO = null;
-                settings = await api.TenantSettings.UpdateAsync(req, cancellationToken);
+                    // push update to Auth0
+                    var req = TransformToNewtonsoftJson<TenantConfSettings, TenantSettingsUpdateRequest>(newSettings!);
+                    req.Flags.EnableSSO = null; // this can never be passed
+                    settings = await api.TenantSettings.UpdateAsync(req, cancellationToken);
+                }
+
+                // branding may not be specified
+                if (conf.Branding is { } newBranding)
+                {
+                    // push update to Auth0
+                    var req = TransformToNewtonsoftJson<TenantBranding, BrandingUpdateRequest>(newBranding!);
+                    branding = await api.Branding.UpdateAsync(req, cancellationToken);
+                }
             }
 
-            // retrieve and copy applied settings to status
-            settings = await api.TenantSettings.GetAsync(cancellationToken: cancellationToken);
-            entity.Status.LastConf = TransformToSystemTextJson<Hashtable>(settings);
+            // retrieve and copy new properties to status
+            entity.Status.LastConf ??= new Hashtable();
+            entity.Status.LastConf["settings"] = TransformToSystemTextJson<Hashtable>(settings);
+            entity.Status.LastConf["branding"] = TransformToSystemTextJson<Hashtable>(settings);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             await ReconcileSuccessAsync(entity, cancellationToken);
