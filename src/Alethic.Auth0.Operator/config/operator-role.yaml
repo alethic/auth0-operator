@@ -17,6 +17,7 @@ rules:
   - brandingthemes
   - clientgrants
   - connections
+  - tenants
   verbs:
   - '*'
 - apiGroups:
@@ -90,6 +91,14 @@ rules:
   - kubernetes.auth0.com
   resources:
   - connections/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - tenants/status
   verbs:
   - get
   - update

@@ -13,14 +13,14 @@ namespace Alethic.Auth0.Operator.Models
 {
 
     [EntityScope(EntityScope.Namespaced)]
-    [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "Tenant")]
+    [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v2alpha1", Kind = "Tenant")]
     [KubernetesEntityShortNames("a0tenant")]
-    public partial class V1Tenant :
-        CustomKubernetesEntity<V1Tenant.SpecDef, V1Tenant.StatusDef>,
-        V1Entity<V1Tenant.SpecDef, V1Tenant.StatusDef, V1TenantConf>
+    public partial class V2alpha1Tenant :
+        CustomKubernetesEntity<V2alpha1Tenant.SpecDef, V2alpha1Tenant.StatusDef>,
+        V1Entity<V2alpha1Tenant.SpecDef, V2alpha1Tenant.StatusDef, V2alpha1TenantConf>
     {
 
-        public class SpecDef : V1EntitySpec<V1TenantConf>
+        public class SpecDef : V1EntitySpec<V2alpha1TenantConf>
         {
 
             public class AuthDef
@@ -48,11 +48,11 @@ namespace Alethic.Auth0.Operator.Models
             public AuthDef? Auth { get; set; }
 
             [JsonPropertyName("init")]
-            public V1TenantConf? Init { get; set; }
+            public V2alpha1TenantConf? Init { get; set; }
 
             [JsonPropertyName("conf")]
             [Required]
-            public V1TenantConf? Conf { get; set; }
+            public V2alpha1TenantConf? Conf { get; set; }
 
         }
 

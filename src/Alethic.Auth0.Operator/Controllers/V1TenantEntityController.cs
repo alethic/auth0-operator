@@ -22,7 +22,7 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf> : V1Controller<TEntity, TSpec, TStatus, TConf>
+    public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf> : ControllerBase<TEntity, TSpec, TStatus, TConf>
         where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntity<TSpec, TStatus, TConf>
         where TSpec : V1TenantEntitySpec<TConf>
         where TStatus : V1TenantEntityStatus
@@ -102,18 +102,13 @@ namespace Alethic.Auth0.Operator.Controllers
             if (entity.Spec.Conf is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
 
-            var tenant = await ResolveTenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
-            if (tenant is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant.");
-
-            var api = await GetTenantApiClientAsync(tenant, cancellationToken);
+            var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 
             // ensure we hold a reference to the tenant
             var md = entity.EnsureMetadata();
             var an = md.EnsureAnnotations();
-            an["kubernetes.auth0.com/tenant-uid"] = tenant.Uid();
 
             // we have not resolved a remote entity
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
@@ -221,11 +216,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (entity.Spec.TenantRef is null)
                     throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant reference.");
 
-                var tenant = await ResolveTenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
-                if (tenant is null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
-
-                var api = await GetTenantApiClientAsync(tenant, cancellationToken);
+                var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
                 if (api is null)
                     throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 

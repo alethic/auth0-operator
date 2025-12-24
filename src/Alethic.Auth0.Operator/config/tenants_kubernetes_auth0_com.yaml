@@ -13,6 +13,507 @@ spec:
     singular: tenant
   scope: Namespaced
   versions:
+  - name: v2alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          status:
+            nullable: false
+            properties:
+              lastConf:
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          spec:
+            nullable: false
+            properties:
+              policy:
+                items:
+                  enum:
+                  - Create
+                  - Update
+                  - Delete
+                  type: string
+                nullable: true
+                type: array
+              name:
+                nullable: false
+                type: string
+              auth:
+                nullable: true
+                properties:
+                  domain:
+                    nullable: true
+                    type: string
+                  secretRef:
+                    nullable: true
+                    properties:
+                      name:
+                        nullable: false
+                        type: string
+                      namespace:
+                        nullable: false
+                        type: string
+                    type: object
+                required:
+                - domain
+                - secretRef
+                type: object
+              init:
+                nullable: true
+                properties:
+                  settings:
+                    nullable: true
+                    properties:
+                      friendly_name:
+                        nullable: true
+                        type: string
+                      support_email:
+                        nullable: true
+                        type: string
+                      support_url:
+                        nullable: true
+                        type: string
+                      enabled_locales:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      change_password:
+                        nullable: true
+                        properties:
+                          enabled:
+                            nullable: true
+                            type: boolean
+                          html:
+                            nullable: true
+                            type: string
+                        type: object
+                      device_flow:
+                        nullable: true
+                        properties:
+                          charset:
+                            enum:
+                            - base20
+                            - digits
+                            nullable: true
+                            type: string
+                          mask:
+                            nullable: true
+                            type: string
+                        type: object
+                      flags:
+                        nullable: true
+                        properties:
+                          allow_legacy_ro_grant_types:
+                            nullable: true
+                            type: boolean
+                          allow_legacy_delegation_grant_types:
+                            nullable: true
+                            type: boolean
+                          allow_legacy_tokeninfo_endpoint:
+                            nullable: true
+                            type: boolean
+                          change_pwd_flow_v1:
+                            nullable: true
+                            type: boolean
+                          disable_clickjack_protection_headers:
+                            nullable: true
+                            type: boolean
+                          disable_management_api_sms_obfuscation:
+                            nullable: true
+                            type: boolean
+                          enable_adfs_waad_email_verification:
+                            nullable: true
+                            type: boolean
+                          enable_apis_section:
+                            nullable: true
+                            type: boolean
+                          enable_client_connections:
+                            nullable: true
+                            type: boolean
+                          enable_custom_domain_in_emails:
+                            nullable: true
+                            type: boolean
+                          enable_dynamic_client_registration:
+                            nullable: true
+                            type: boolean
+                          enable_idtoken_api2:
+                            nullable: true
+                            type: boolean
+                          enable_legacy_profile:
+                            nullable: true
+                            type: boolean
+                          enable_pipeline2:
+                            nullable: true
+                            type: boolean
+                          enable_public_signup_user_exists_error:
+                            nullable: true
+                            type: boolean
+                          enable_sso:
+                            nullable: true
+                            type: boolean
+                          enforce_client_authentication_on_passwordless_start:
+                            nullable: true
+                            type: boolean
+                          no_disclose_enterprise_connections:
+                            nullable: true
+                            type: boolean
+                          remove_alg_from_jwks:
+                            nullable: true
+                            type: boolean
+                          require_pushed_authorization_requests:
+                            nullable: true
+                            type: boolean
+                          revoke_refresh_token_grant:
+                            nullable: true
+                            type: boolean
+                          trust_azure_adfs_email_verified_connection_property:
+                            nullable: true
+                            type: boolean
+                          dashboard_log_streams_next:
+                            nullable: true
+                            type: boolean
+                          dashboard_insights_view:
+                            nullable: true
+                            type: boolean
+                          disable_fields_map_fix:
+                            nullable: true
+                            type: boolean
+                          mfa_show_factor_list_on_enrollment:
+                            nullable: true
+                            type: boolean
+                          improved_signup_bot_detection_in_classic:
+                            nullable: true
+                            type: boolean
+                          genai_trial:
+                            nullable: true
+                            type: boolean
+                          custom_domains_provisioning:
+                            nullable: true
+                            type: boolean
+                        type: object
+                      guardian_mfa_page:
+                        nullable: true
+                        properties:
+                          enabled:
+                            nullable: true
+                            type: boolean
+                          html:
+                            nullable: true
+                            type: string
+                        type: object
+                      default_audience:
+                        nullable: true
+                        type: string
+                      default_directory:
+                        nullable: true
+                        type: string
+                      error_page:
+                        nullable: true
+                        properties:
+                          html:
+                            nullable: true
+                            type: string
+                          show_log_link:
+                            nullable: true
+                            type: boolean
+                          url:
+                            nullable: true
+                            type: string
+                        type: object
+                      picture_url:
+                        nullable: true
+                        type: string
+                      allowed_logout_urls:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      session_lifetime:
+                        format: float
+                        nullable: true
+                        type: number
+                      idle_session_lifetime:
+                        format: float
+                        nullable: true
+                        type: number
+                      sandbox_version:
+                        nullable: true
+                        type: string
+                      sandbox_versions_available:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      session_cookie:
+                        nullable: true
+                        properties:
+                          mode:
+                            nullable: true
+                            type: string
+                        type: object
+                      customize_mfa_in_postlogin_action:
+                        nullable: true
+                        type: boolean
+                      acr_values_supported:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      pushed_authorization_requests_supported:
+                        nullable: true
+                        type: boolean
+                      mtls:
+                        nullable: true
+                        properties:
+                          enable_endpoint_aliases:
+                            nullable: true
+                            type: boolean
+                        type: object
+                    type: object
+                  branding:
+                    nullable: true
+                    properties: {}
+                    type: object
+                type: object
+              conf:
+                nullable: true
+                properties:
+                  settings:
+                    nullable: true
+                    properties:
+                      friendly_name:
+                        nullable: true
+                        type: string
+                      support_email:
+                        nullable: true
+                        type: string
+                      support_url:
+                        nullable: true
+                        type: string
+                      enabled_locales:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      change_password:
+                        nullable: true
+                        properties:
+                          enabled:
+                            nullable: true
+                            type: boolean
+                          html:
+                            nullable: true
+                            type: string
+                        type: object
+                      device_flow:
+                        nullable: true
+                        properties:
+                          charset:
+                            enum:
+                            - base20
+                            - digits
+                            nullable: true
+                            type: string
+                          mask:
+                            nullable: true
+                            type: string
+                        type: object
+                      flags:
+                        nullable: true
+                        properties:
+                          allow_legacy_ro_grant_types:
+                            nullable: true
+                            type: boolean
+                          allow_legacy_delegation_grant_types:
+                            nullable: true
+                            type: boolean
+                          allow_legacy_tokeninfo_endpoint:
+                            nullable: true
+                            type: boolean
+                          change_pwd_flow_v1:
+                            nullable: true
+                            type: boolean
+                          disable_clickjack_protection_headers:
+                            nullable: true
+                            type: boolean
+                          disable_management_api_sms_obfuscation:
+                            nullable: true
+                            type: boolean
+                          enable_adfs_waad_email_verification:
+                            nullable: true
+                            type: boolean
+                          enable_apis_section:
+                            nullable: true
+                            type: boolean
+                          enable_client_connections:
+                            nullable: true
+                            type: boolean
+                          enable_custom_domain_in_emails:
+                            nullable: true
+                            type: boolean
+                          enable_dynamic_client_registration:
+                            nullable: true
+                            type: boolean
+                          enable_idtoken_api2:
+                            nullable: true
+                            type: boolean
+                          enable_legacy_profile:
+                            nullable: true
+                            type: boolean
+                          enable_pipeline2:
+                            nullable: true
+                            type: boolean
+                          enable_public_signup_user_exists_error:
+                            nullable: true
+                            type: boolean
+                          enable_sso:
+                            nullable: true
+                            type: boolean
+                          enforce_client_authentication_on_passwordless_start:
+                            nullable: true
+                            type: boolean
+                          no_disclose_enterprise_connections:
+                            nullable: true
+                            type: boolean
+                          remove_alg_from_jwks:
+                            nullable: true
+                            type: boolean
+                          require_pushed_authorization_requests:
+                            nullable: true
+                            type: boolean
+                          revoke_refresh_token_grant:
+                            nullable: true
+                            type: boolean
+                          trust_azure_adfs_email_verified_connection_property:
+                            nullable: true
+                            type: boolean
+                          dashboard_log_streams_next:
+                            nullable: true
+                            type: boolean
+                          dashboard_insights_view:
+                            nullable: true
+                            type: boolean
+                          disable_fields_map_fix:
+                            nullable: true
+                            type: boolean
+                          mfa_show_factor_list_on_enrollment:
+                            nullable: true
+                            type: boolean
+                          improved_signup_bot_detection_in_classic:
+                            nullable: true
+                            type: boolean
+                          genai_trial:
+                            nullable: true
+                            type: boolean
+                          custom_domains_provisioning:
+                            nullable: true
+                            type: boolean
+                        type: object
+                      guardian_mfa_page:
+                        nullable: true
+                        properties:
+                          enabled:
+                            nullable: true
+                            type: boolean
+                          html:
+                            nullable: true
+                            type: string
+                        type: object
+                      default_audience:
+                        nullable: true
+                        type: string
+                      default_directory:
+                        nullable: true
+                        type: string
+                      error_page:
+                        nullable: true
+                        properties:
+                          html:
+                            nullable: true
+                            type: string
+                          show_log_link:
+                            nullable: true
+                            type: boolean
+                          url:
+                            nullable: true
+                            type: string
+                        type: object
+                      picture_url:
+                        nullable: true
+                        type: string
+                      allowed_logout_urls:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      session_lifetime:
+                        format: float
+                        nullable: true
+                        type: number
+                      idle_session_lifetime:
+                        format: float
+                        nullable: true
+                        type: number
+                      sandbox_version:
+                        nullable: true
+                        type: string
+                      sandbox_versions_available:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      session_cookie:
+                        nullable: true
+                        properties:
+                          mode:
+                            nullable: true
+                            type: string
+                        type: object
+                      customize_mfa_in_postlogin_action:
+                        nullable: true
+                        type: boolean
+                      acr_values_supported:
+                        items:
+                          nullable: false
+                          type: string
+                        nullable: true
+                        type: array
+                      pushed_authorization_requests_supported:
+                        nullable: true
+                        type: boolean
+                      mtls:
+                        nullable: true
+                        properties:
+                          enable_endpoint_aliases:
+                            nullable: true
+                            type: boolean
+                        type: object
+                    type: object
+                  branding:
+                    nullable: true
+                    properties: {}
+                    type: object
+                type: object
+            required:
+            - name
+            - auth
+            - conf
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
   - name: v1
     schema:
       openAPIV3Schema:
@@ -495,6 +996,6 @@ spec:
             type: object
         type: object
     served: true
-    storage: true
+    storage: false
     subresources:
       status: {}

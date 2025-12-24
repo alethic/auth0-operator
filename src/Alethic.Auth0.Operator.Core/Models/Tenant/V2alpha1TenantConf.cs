@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Tenant
 {
 
-    public partial class TenantConf
+    public partial class V2alpha1TenantConf
     {
 
         [JsonPropertyName("settings")]
@@ -13,7 +12,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("branding")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantBranding? Branding { get; set; }
+        public TenantConfBranding? Branding { get; set; }
 
     }
 

@@ -70,11 +70,11 @@ spec:
                     properties:
                       button_border_radius:
                         format: float
-                        nullable: false
+                        nullable: true
                         type: number
                       button_border_weight:
                         format: float
-                        nullable: false
+                        nullable: true
                         type: number
                       buttons_style:
                         enum:
@@ -186,7 +186,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       buttons_text:
@@ -197,7 +197,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       font_url:
@@ -211,7 +211,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       links:
@@ -222,7 +222,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       links_style:
@@ -243,7 +243,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       title:
@@ -254,7 +254,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                     type: object
@@ -319,11 +319,11 @@ spec:
                     properties:
                       button_border_radius:
                         format: float
-                        nullable: false
+                        nullable: true
                         type: number
                       button_border_weight:
                         format: float
-                        nullable: false
+                        nullable: true
                         type: number
                       buttons_style:
                         enum:
@@ -435,7 +435,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       buttons_text:
@@ -446,7 +446,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       font_url:
@@ -460,7 +460,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       links:
@@ -471,7 +471,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       links_style:
@@ -492,7 +492,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                       title:
@@ -503,7 +503,7 @@ spec:
                             type: boolean
                           size:
                             format: float
-                            nullable: false
+                            nullable: true
                             type: number
                         type: object
                     type: object

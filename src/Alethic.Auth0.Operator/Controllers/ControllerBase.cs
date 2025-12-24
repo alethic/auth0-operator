@@ -16,6 +16,7 @@ using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
+using Auth0.ManagementApi.Models;
 
 using k8s;
 using k8s.Models;
@@ -34,7 +35,7 @@ using Newtonsoft.Json;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    public abstract class V1Controller<TEntity, TSpec, TStatus, TConf> : IEntityController<TEntity>
+    public abstract class ControllerBase<TEntity, TSpec, TStatus, TConf> : IEntityController<TEntity>
         where TEntity : IKubernetesObject<V1ObjectMeta>, V1Entity<TSpec, TStatus, TConf>
         where TSpec : V1EntitySpec<TConf>
         where TStatus : V1EntityStatus
@@ -58,7 +59,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V1Controller(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
+        public ControllerBase(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _kube = kube ?? throw new ArgumentNullException(nameof(kube));
@@ -125,7 +126,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<V1Tenant?> ResolveTenantRef(V1TenantReference? tenantRef, string defaultNamespace, CancellationToken cancellationToken)
+        public async Task<V1Tenant?> ResolveV1TenantRef(V1TenantReference? tenantRef, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (tenantRef is null)
                 return null;
@@ -138,6 +139,32 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException($"Tenant reference {tenantRef} has no discovered namesace.");
 
             var tenant = await _kube.GetAsync<V1Tenant>(tenantRef.Name, ns, cancellationToken);
+            if (tenant is null)
+                throw new RetryException($"Tenant reference {tenantRef} cannot be resolved.");
+
+            return tenant;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the V2 tenant document referenced by the tenant reference.
+        /// </summary>
+        /// <param name="tenantRef"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<V2alpha1Tenant?> ResolveV2alpha1TenantRef(V1TenantReference? tenantRef, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            if (tenantRef is null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(tenantRef.Name))
+                throw new InvalidOperationException($"Tenant reference {tenantRef} has no name.");
+
+            var ns = tenantRef.Namespace ?? defaultNamespace;
+            if (string.IsNullOrWhiteSpace(ns))
+                throw new InvalidOperationException($"Tenant reference {tenantRef} has no discovered namesace.");
+
+            var tenant = await _kube.GetAsync<V2alpha1Tenant>(tenantRef.Name, ns, cancellationToken);
             if (tenant is null)
                 throw new RetryException($"Tenant reference {tenantRef} cannot be resolved.");
 
@@ -272,7 +299,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="tenant"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<IManagementApiClient> GetTenantApiClientAsync(V1Tenant tenant, CancellationToken cancellationToken)
+        protected async Task<IManagementApiClient> GetTenantApiClientAsync(V1Tenant tenant, CancellationToken cancellationToken)
         {
             var api = await _cache.GetOrCreateAsync((tenant.Namespace(), tenant.Name()), async entry =>
             {
@@ -319,6 +346,94 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException("Cannot retrieve tenant API client.");
 
             return api;
+        }
+
+        /// <summary>
+        /// Gets an active <see cref="ManagementApiClient"/> for the specified tenant.
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected async Task<IManagementApiClient> GetTenantApiClientAsync(V2alpha1Tenant tenant, CancellationToken cancellationToken)
+        {
+            var api = await _cache.GetOrCreateAsync((tenant.Namespace(), tenant.Name()), async entry =>
+            {
+                var domain = tenant.Spec.Auth?.Domain;
+                if (string.IsNullOrWhiteSpace(domain))
+                    throw new InvalidOperationException($"Tenant {tenant.Namespace()}/{tenant.Name()} has no authentication domain.");
+
+                var secretRef = tenant.Spec.Auth?.SecretRef;
+                if (secretRef == null)
+                    throw new InvalidOperationException($"Tenant {tenant.Namespace()}/{tenant.Name()} has no authentication secret.");
+
+                if (string.IsNullOrWhiteSpace(secretRef.Name))
+                    throw new InvalidOperationException($"Tenant {tenant.Namespace()}/{tenant.Name()} has no secret name.");
+
+                var secret = _kube.Get<V1Secret>(secretRef.Name, secretRef.NamespaceProperty ?? tenant.Namespace());
+                if (secret == null)
+                    throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} has missing secret.");
+
+                if (secret.Data.TryGetValue("clientId", out var clientIdBuf) == false)
+                    throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} has missing clientId value on secret.");
+
+                if (secret.Data.TryGetValue("clientSecret", out var clientSecretBuf) == false)
+                    throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} has missing clientSecret value on secret.");
+
+                // decode secret values
+                var clientId = Encoding.UTF8.GetString(clientIdBuf);
+                var clientSecret = Encoding.UTF8.GetString(clientSecretBuf);
+
+                // retrieve authentication token
+                var auth = new AuthenticationApiClient(new Uri($"https://{domain}"));
+                var authToken = await auth.GetTokenAsync(new ClientCredentialsTokenRequest() { Audience = $"https://{domain}/api/v2/", ClientId = clientId, ClientSecret = clientSecret }, cancellationToken);
+                if (authToken.AccessToken == null || authToken.AccessToken.Length == 0)
+                    throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} failed to retrieve management API token.");
+
+                // contact API using token and domain
+                var api = new ManagementApiClient(authToken.AccessToken, new Uri($"https://{domain}/api/v2/"));
+
+                // cache API client for 1 minute
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                return (IManagementApiClient)api;
+            });
+
+            if (api is null)
+                throw new InvalidOperationException("Cannot retrieve tenant API client.");
+
+            return api;
+        }
+
+        /// <summary>
+        /// Gets an active <see cref="ManagementApiClient"/> for the specified tenant reference.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="tenantRef"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        protected async Task<IManagementApiClient> GetTenantApiClientAsync(TEntity entity, V1TenantReference tenantRef, CancellationToken cancellationToken)
+        {
+            var v1Tenant = await ResolveV1TenantRef(tenantRef, entity.Namespace(), cancellationToken);
+            if (v1Tenant is not null)
+            {
+                var api = await GetTenantApiClientAsync(v1Tenant, cancellationToken);
+                if (api is null)
+                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+
+                return api;
+            }
+
+            var v2alpha1Tenant = await ResolveV2alpha1TenantRef(tenantRef, entity.Namespace(), cancellationToken);
+            if (v2alpha1Tenant is not null)
+            {
+                var api = await GetTenantApiClientAsync(v2alpha1Tenant, cancellationToken);
+                if (api is null)
+                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+
+                return api;
+            }
+
+            throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
         }
 
         /// <summary>
