@@ -239,7 +239,30 @@ spec:
                     type: object
                   branding:
                     nullable: true
-                    properties: {}
+                    properties:
+                      colors:
+                        nullable: true
+                        properties:
+                          primary:
+                            nullable: true
+                            type: string
+                          page_background:
+                            nullable: true
+                            type: string
+                        type: object
+                      favicon_url:
+                        nullable: true
+                        type: string
+                      logo_url:
+                        nullable: true
+                        type: string
+                      font:
+                        nullable: true
+                        properties:
+                          url:
+                            nullable: true
+                            type: string
+                        type: object
                     type: object
                 type: object
             type: object
@@ -497,7 +520,30 @@ spec:
                     type: object
                   branding:
                     nullable: true
-                    properties: {}
+                    properties:
+                      colors:
+                        nullable: true
+                        properties:
+                          primary:
+                            nullable: true
+                            type: string
+                          page_background:
+                            nullable: true
+                            type: string
+                        type: object
+                      favicon_url:
+                        nullable: true
+                        type: string
+                      logo_url:
+                        nullable: true
+                        type: string
+                      font:
+                        nullable: true
+                        properties:
+                          url:
+                            nullable: true
+                            type: string
+                        type: object
                     type: object
                 type: object
               conf:
@@ -719,7 +765,30 @@ spec:
                     type: object
                   branding:
                     nullable: true
-                    properties: {}
+                    properties:
+                      colors:
+                        nullable: true
+                        properties:
+                          primary:
+                            nullable: true
+                            type: string
+                          page_background:
+                            nullable: true
+                            type: string
+                        type: object
+                      favicon_url:
+                        nullable: true
+                        type: string
+                      logo_url:
+                        nullable: true
+                        type: string
+                      font:
+                        nullable: true
+                        properties:
+                          url:
+                            nullable: true
+                            type: string
+                        type: object
                     type: object
                 type: object
             required:
