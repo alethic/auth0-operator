@@ -12,7 +12,12 @@ namespace Alethic.Auth0.Operator.Options
         /// <summary>
         /// The interval between periodic reconciliation cycles.
         /// </summary>
-        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan Interval { get; set; } = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// The interval between periodic reconciliation cycles when an error occurs.
+        /// </summary>
+        public TimeSpan ErrorInterval { get; set; } = TimeSpan.FromMinutes(5);
 
     }
 

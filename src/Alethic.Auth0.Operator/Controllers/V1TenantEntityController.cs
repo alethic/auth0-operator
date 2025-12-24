@@ -29,8 +29,6 @@ namespace Alethic.Auth0.Operator.Controllers
         where TConf : class
     {
 
-        readonly IOptions<OperatorOptions> _options;
-
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
@@ -39,10 +37,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
-        public V1TenantEntityController(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, ILogger logger, IOptions<OperatorOptions> options) :
-            base(kube, requeue, cache, logger)
+        public V1TenantEntityController(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger) :
+            base(kube, requeue, cache, options, logger)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+
         }
 
         /// <summary>
@@ -186,7 +184,7 @@ namespace Alethic.Auth0.Operator.Controllers
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             // schedule periodic reconciliation to detect external changes (e.g., manual deletion from Auth0)
-            var interval = _options.Value.Reconciliation.Interval;
+            var interval = Options.Reconciliation.Interval;
             Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
             Requeue(entity, interval);
         }

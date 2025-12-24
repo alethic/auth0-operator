@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Models;
+using Alethic.Auth0.Operator.Options;
 
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
@@ -26,6 +27,7 @@ using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json;
 
@@ -45,6 +47,7 @@ namespace Alethic.Auth0.Operator.Controllers
         readonly IKubernetesClient _kube;
         readonly EntityRequeue<TEntity> _requeue;
         readonly IMemoryCache _cache;
+        readonly IOptions<OperatorOptions> _options;
         readonly ILogger _logger;
 
         /// <summary>
@@ -53,12 +56,14 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="kube"></param>
         /// <param name="requeue"></param>
         /// <param name="cache"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V1Controller(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, ILogger logger)
+        public V1Controller(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _kube = kube ?? throw new ArgumentNullException(nameof(kube));
             _requeue = requeue ?? throw new ArgumentNullException(nameof(requeue));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -82,7 +87,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         protected ILogger Logger => _logger;
 
-
+        /// <summary>
+        /// Gets operator options.
+        /// </summary>
+        protected OperatorOptions Options => _options.Value;
 
         /// <summary>
         /// Attempts to resolve the secret document referenced by the secret reference.
@@ -440,9 +448,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (entity.Spec.Conf == null)
                     throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing configuration.");
 
-                // does the actual work of reconciling
+                // does work of reconciling, and log success
                 await Reconcile(entity, cancellationToken);
-
                 await ReconcileSuccessAsync(entity, cancellationToken);
             }
             catch (ErrorApiException e)
@@ -456,6 +463,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 {
                     Logger.LogCritical(e2, "Unexpected exception creating event.");
                 }
+
+                // retry after the error interval
+                var interval = Options.Reconciliation.ErrorInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                Requeue(entity, interval);
             }
             catch (RateLimitApiException e)
             {
@@ -489,8 +501,10 @@ namespace Alethic.Auth0.Operator.Controllers
                     Logger.LogCritical(e2, "Unexpected exception creating event.");
                 }
 
-                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", TimeSpan.FromMinutes(1));
-                Requeue(entity, TimeSpan.FromMinutes(1));
+                // retry after the error interval
+                var interval = Options.Reconciliation.Interval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                Requeue(entity, interval);
             }
             catch (Exception e)
             {

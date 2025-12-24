@@ -63,6 +63,10 @@ spec:
             - name: Auth0__Operator__Reconciliation__Interval
               value: {{ .Values.options.reconciliation.interval | quote }}
 {{ end }}
+{{ if .Values.options.reconciliation.errorInterval }}
+            - name: Auth0__Operator__Reconciliation__ErrorInterval
+              value: {{ .Values.options.reconciliation.errorInterval | quote }}
+{{ end }}
 {{ range .Values.operator.env }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
