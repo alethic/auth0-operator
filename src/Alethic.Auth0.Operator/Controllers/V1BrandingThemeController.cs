@@ -364,6 +364,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.BackgroundColor is string backgroundColor)
                 target.BackgroundColor = backgroundColor;
+
+            if (source.BackgroundImageUrl is string backgroundImageUrl)
+                target.BackgroundImageUrl = backgroundImageUrl;
+
             if (source.PageLayout is Core.Models.BrandingTheme.PageLayout pageLayout)
                 target.PageLayout = ToApi(pageLayout);
         }
