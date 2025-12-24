@@ -128,7 +128,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting theme from Auth0 with ID: {ThemeId} (reason: Kubernetes entity deleted)", EntityTypeName, id);
-            await api.Clients.DeleteAsync(id, cancellationToken);
+            await api.Branding.DeleteBrandingThemeAsync(id, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully deleted theme from Auth0 with ID: {ThemeId}", EntityTypeName, id);
         }
 
