@@ -393,8 +393,10 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task<string> Create(IManagementApiClient api, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating theme in Auth0 with name: {ThemeName}", EntityTypeName, conf.DisplayName);
+
             var req = new BrandingThemeCreateRequest();
             ApplyToApi(conf, req);
+
             var self = await api.Branding.CreateBrandingThemeAsync(req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created theme in Auth0 with ID: {ThemeId} and name: {ThemeName}", EntityTypeName, self.ThemeId, conf.DisplayName);
             return self.ThemeId;
@@ -404,9 +406,12 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Update(IManagementApiClient api, string id, BrandingThemeConf? last, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
+
+            // apply last conf to request to ensure we don't overwrite any properties not managed by us
             var req = new BrandingThemeUpdateRequest();
             ApplyToApi(last, req);
             ApplyToApi(conf, req);
+
             await api.Branding.UpdateBrandingThemeAsync(id, req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
         }
