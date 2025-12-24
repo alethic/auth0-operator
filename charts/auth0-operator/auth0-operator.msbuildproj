@@ -1,30 +1,68 @@
 ﻿<Project Sdk="Microsoft.Build.NoTargets">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <ChartName>auth0-operator</ChartName>
-    <ChartPackage>$(ChartName)-$(Version).tgz</ChartPackage>
-  </PropertyGroup>
-  <ItemGroup>
-    <ChartItem Include="templates\**\*" TargetPath="templates\%(RecursiveDir)%(Filename)%(Extension)" />
-    <ChartItem Include="*.yaml" TargetPath="%(Filename)%(Extension)" />
-    <ChartItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" TargetPath="crds\%(Filename)%(Extension)" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="templates\" />
-  </ItemGroup>
-  <Target Name="PackageHelm" BeforeTargets="BeforeBuild" Inputs="@(ChartItem)" Outputs="$(IntermediateOutputPath)$(ChartPackage)">
-    <RemoveDir Directories="$(IntermediateOutputPath)chart" />
-    <Copy SourceFiles="@(ChartItem)" DestinationFiles="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
-    <Exec Command="helm package $(IntermediateOutputPath)\chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <ChartName>auth0-operator</ChartName>
+        <ChartPackage>$(ChartName)-$(Version).tgz</ChartPackage>
+    </PropertyGroup>
+
     <ItemGroup>
-      <None Include="$(IntermediateOutputPath)$(ChartPackage)">
-        <TargetPath>$(ChartPackage)</TargetPath>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <FileWrites Include="$(IntermediateOutputPath)chart\**\*" />
-      <FileWrites Include="$(IntermediateOutputPath)$(ChartPackage)" />
+        <PackageReference Include="YamlDotNet" Version="16.3.0" GeneratePathProperty="true" />
     </ItemGroup>
-  </Target>
+
+    <ItemGroup>
+        <ChartItem Include="templates\**\*" TargetPath="templates\%(RecursiveDir)%(Filename)%(Extension)" />
+        <ChartItem Include="*.yaml" TargetPath="%(Filename)%(Extension)" />
+        <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
+    </ItemGroup>
+
+    <UsingTask TaskName="RewriteCrd" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <Source ParameterType="System.String" Required="true" />
+            <Target ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="$(PkgYamlDotNet)/lib/netstandard2.0/YamlDotNet.dll" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+                
+			    var yaml = new YamlStream();
+			    yaml.Load(Source);
+			    yaml.Save(Target);
+                
+]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="RewriteCrds" Inputs="@(CrdItem)" Outputs="@(CrdItem-&gt;'$(IntermediateOutputPath)\crds\%(Filename).yaml">
+        <RewriteCrd Source="%(CrdItem.Identity)" Target="$(IntermediateOutputPath)\crds\%(CrdItem.Filename).yaml" />
+        <ItemGroup>
+            <CrdOutputItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
+            <ChartItem Include="@(CrdOutputItem)" TargetPath="crds\%(CrdOutputItem.Filename).yaml" />
+            <FileWrites Include="@(CrdOutputItem)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="PackageHelm" DependsOnTargets="RewriteCrds" Inputs="@(ChartItem)" Outputs="$(IntermediateOutputPath)$(ChartPackage)">
+        <RemoveDir Directories="$(IntermediateOutputPath)chart" />
+        <Copy SourceFiles="@(ChartItem)" DestinationFiles="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
+        <Exec Command="helm package $(IntermediateOutputPath)\chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
+        <ItemGroup>
+            <None Include="$(IntermediateOutputPath)$(ChartPackage)">
+                <TargetPath>$(ChartPackage)</TargetPath>
+                <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+            <FileWrites Include="$(IntermediateOutputPath)chart\**\*" />
+            <FileWrites Include="$(IntermediateOutputPath)$(ChartPackage)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="BuildHelm" BeforeTargets="BeforeBuild" DependsOnTargets="RewriteCrds;PackageHelm">
+
+    </Target>
+
 </Project>
