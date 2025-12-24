@@ -42,10 +42,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="kube"></param>
         /// <param name="requeue"></param>
         /// <param name="cache"></param>
-        /// <param name="logger"></param>
         /// <param name="options"></param>
-        public V1ResourceServerController(IKubernetesClient kube, EntityRequeue<V1ResourceServer> requeue, IMemoryCache cache, ILogger<V1ResourceServerController> logger, IOptions<OperatorOptions> options) :
-            base(kube, requeue, cache, logger, options)
+        /// <param name="logger"></param>
+        public V1ResourceServerController(IKubernetesClient kube, EntityRequeue<V1ResourceServer> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1ResourceServerController> logger) :
+            base(kube, requeue, cache, options, logger)
         {
 
         }
