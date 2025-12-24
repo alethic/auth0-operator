@@ -17,10 +17,10 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0tenant")]
     public partial class V1Tenant :
         CustomKubernetesEntity<V1Tenant.SpecDef, V1Tenant.StatusDef>,
-        V1Entity<V1Tenant.SpecDef, V1Tenant.StatusDef, V1TenantConf, Hashtable>
+        ApiEntity<V1Tenant.SpecDef, V1Tenant.StatusDef, V1TenantConf, Hashtable>
     {
 
-        public class SpecDef : V1EntitySpec<V1TenantConf>
+        public class SpecDef : ApiEntitySpec<V1TenantConf>
         {
 
             public class AuthDef
@@ -56,7 +56,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1EntityStatus<Hashtable>
+        public class StatusDef : ApiEntityStatus<Hashtable>
         {
 
             [JsonPropertyName("lastConf")]

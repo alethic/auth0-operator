@@ -1,7 +1,7 @@
 ﻿namespace Alethic.Auth0.Operator.Models
 {
 
-    public interface V1TenantEntityStatus<TLastConf> : V1EntityStatus<TLastConf>
+    public interface V1TenantEntityStatus<TLastConf> : ApiEntityStatus<TLastConf>
         where TLastConf : class
     {
 

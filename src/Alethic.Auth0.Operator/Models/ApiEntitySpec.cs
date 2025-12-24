@@ -1,7 +1,7 @@
 ﻿namespace Alethic.Auth0.Operator.Models
 {
 
-    public interface V1EntitySpec<TConf>
+    public interface ApiEntitySpec<TConf>
         where TConf : class
     {
 

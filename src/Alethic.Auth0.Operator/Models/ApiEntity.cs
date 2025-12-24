@@ -3,9 +3,16 @@
 namespace Alethic.Auth0.Operator.Models
 {
 
-    public interface V1Entity<TSpec, TStatus, TConf, TLastConf>
-        where TSpec : V1EntitySpec<TConf>
-        where TStatus : V1EntityStatus<TLastConf>
+    /// <summary>
+    /// An "API Entity" is a kubernetes entity based off of an Auth0 API entity, having an identifier that maps to an API ID.
+    /// </summary>
+    /// <typeparam name="TSpec"></typeparam>
+    /// <typeparam name="TStatus"></typeparam>
+    /// <typeparam name="TConf"></typeparam>
+    /// <typeparam name="TLastConf"></typeparam>
+    public interface ApiEntity<TSpec, TStatus, TConf, TLastConf>
+        where TSpec : ApiEntitySpec<TConf>
+        where TStatus : ApiEntityStatus<TLastConf>
         where TConf : class
         where TLastConf : class
     {

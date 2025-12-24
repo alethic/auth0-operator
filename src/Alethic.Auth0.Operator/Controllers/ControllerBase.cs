@@ -36,9 +36,9 @@ namespace Alethic.Auth0.Operator.Controllers
 {
 
     public abstract class ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf> : IEntityController<TEntity>
-        where TEntity : IKubernetesObject<V1ObjectMeta>, V1Entity<TSpec, TStatus, TConf, TLastConf>
-        where TSpec : V1EntitySpec<TConf>
-        where TStatus : V1EntityStatus<TLastConf>
+        where TEntity : IKubernetesObject<V1ObjectMeta>, ApiEntity<TSpec, TStatus, TConf, TLastConf>
+        where TSpec : ApiEntitySpec<TConf>
+        where TStatus : ApiEntityStatus<TLastConf>
         where TConf : class
         where TLastConf : class
     {
