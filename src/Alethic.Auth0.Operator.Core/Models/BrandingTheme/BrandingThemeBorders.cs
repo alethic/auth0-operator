@@ -8,11 +8,11 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
 
         [JsonPropertyName("button_border_radius")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public float ButtonBorderRadius { get; set; }
+        public float? ButtonBorderRadius { get; set; }
 
         [JsonPropertyName("button_border_weight")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public float ButtonBorderWeight { get; set; }
+        public float? ButtonBorderWeight { get; set; }
 
         [JsonPropertyName("buttons_style")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
