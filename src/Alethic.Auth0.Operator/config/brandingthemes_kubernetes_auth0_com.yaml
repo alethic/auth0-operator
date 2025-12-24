@@ -239,7 +239,7 @@ spec:
                         nullable: true
                         type: string
                     type: object
-                  widgets:
+                  widget:
                     nullable: true
                     properties:
                       header_text_alignment:
@@ -520,7 +520,7 @@ spec:
                         nullable: true
                         type: string
                     type: object
-                  widgets:
+                  widget:
                     nullable: true
                     properties:
                       header_text_alignment:
@@ -769,7 +769,7 @@ spec:
                         nullable: true
                         type: string
                     type: object
-                  widgets:
+                  widget:
                     nullable: true
                     properties:
                       header_text_alignment:
