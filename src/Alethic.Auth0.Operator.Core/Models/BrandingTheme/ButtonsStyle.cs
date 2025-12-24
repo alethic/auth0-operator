@@ -7,13 +7,13 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
     public enum ButtonsStyle
     {
 
-        [JsonStringEnumMemberName( "pill")]
+        [JsonStringEnumMemberName("pill")]
         Pill,
 
-        [JsonStringEnumMemberName( "rounded")]
+        [JsonStringEnumMemberName("rounded")]
         Rounded,
 
-        [JsonStringEnumMemberName( "sharp")]
+        [JsonStringEnumMemberName("sharp")]
         Sharp,
 
     }
