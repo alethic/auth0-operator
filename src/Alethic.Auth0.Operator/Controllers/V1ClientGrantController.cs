@@ -11,8 +11,6 @@ using Alethic.Auth0.Operator.Options;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
 
-using k8s.Models;
-
 using KubeOps.Abstractions.Controller;
 using KubeOps.Abstractions.Queue;
 using KubeOps.Abstractions.Rbac;
@@ -25,11 +23,8 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
-    [EntityRbac(typeof(V1Client), Verbs = RbacVerb.List | RbacVerb.Get)]
-    [EntityRbac(typeof(V1ResourceServer), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(V1ClientGrant), Verbs = RbacVerb.All)]
-    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.Create)]
+    [EntityRbac(typeof(V1Client), Verbs = RbacVerb.List | RbacVerb.Get)]
     public class V1ClientGrantController :
         V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, Hashtable>,
         IEntityController<V1ClientGrant>

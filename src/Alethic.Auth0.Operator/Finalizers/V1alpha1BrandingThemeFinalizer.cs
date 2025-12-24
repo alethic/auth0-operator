@@ -10,22 +10,22 @@ using KubeOps.Abstractions.Finalizer;
 namespace Alethic.Auth0.Operator.Finalizers
 {
 
-    public class V1BrandingThemeFinalizer : IEntityFinalizer<V1BrandingTheme>
+    public class V1alpha1BrandingThemeFinalizer : IEntityFinalizer<V1alpha1BrandingTheme>
     {
 
-        readonly V1BrandingThemeController _controller;
+        readonly V1alpha1BrandingThemeController _controller;
 
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="controller"></param>
-        public V1BrandingThemeFinalizer(V1BrandingThemeController controller)
+        public V1alpha1BrandingThemeFinalizer(V1alpha1BrandingThemeController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
         /// <inheritdoc />
-        public async Task FinalizeAsync(V1BrandingTheme entity, CancellationToken cancellationToken)
+        public async Task FinalizeAsync(V1alpha1BrandingTheme entity, CancellationToken cancellationToken)
         {
             await _controller.DeletedAsync(entity, cancellationToken);
         }

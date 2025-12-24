@@ -16,7 +16,6 @@ using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Models;
 
 using k8s;
 using k8s.Models;
@@ -24,6 +23,7 @@ using k8s.Models;
 using KubeOps.Abstractions.Controller;
 using KubeOps.Abstractions.Entities;
 using KubeOps.Abstractions.Queue;
+using KubeOps.Abstractions.Rbac;
 using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -35,6 +35,8 @@ using Newtonsoft.Json;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public abstract class ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf> : IEntityController<TEntity>
         where TEntity : IKubernetesObject<V1ObjectMeta>, ApiEntity<TSpec, TStatus, TConf, TLastConf>
         where TSpec : ApiEntitySpec<TConf>

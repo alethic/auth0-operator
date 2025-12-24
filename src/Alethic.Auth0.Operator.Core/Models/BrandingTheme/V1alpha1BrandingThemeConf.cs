@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
 {
 
-    public partial class BrandingThemeConf
+    public partial class V1alpha1BrandingThemeConf
     {
 
         [JsonPropertyName("displayName")]

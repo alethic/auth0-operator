@@ -31,10 +31,7 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(V1Connection), Verbs = RbacVerb.All)]
-    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
-    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ConnectionController :
         V1TenantEntityController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>,
         IEntityController<V1Connection>

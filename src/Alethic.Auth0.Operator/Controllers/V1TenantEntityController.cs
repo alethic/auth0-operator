@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +12,7 @@ using k8s;
 using k8s.Models;
 
 using KubeOps.Abstractions.Queue;
+using KubeOps.Abstractions.Rbac;
 using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -22,6 +22,8 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
+    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
     public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf, TLastConf> : ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf>
         where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntity<TSpec, TStatus, TConf, TLastConf>
         where TSpec : V1TenantEntitySpec<TConf>

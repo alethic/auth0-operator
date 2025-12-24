@@ -13,7 +13,7 @@ spec:
     singular: brandingtheme
   scope: Namespaced
   versions:
-  - name: v1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         properties:

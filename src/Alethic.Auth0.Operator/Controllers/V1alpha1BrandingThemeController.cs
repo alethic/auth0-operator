@@ -25,13 +25,10 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
-    [EntityRbac(typeof(V1BrandingTheme), Verbs = RbacVerb.All)]
-    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
-    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
-    public class V1BrandingThemeController :
-        V1TenantEntityController<V1BrandingTheme, V1BrandingTheme.SpecDef, V1BrandingTheme.StatusDef, BrandingThemeConf, BrandingThemeConf>,
-        IEntityController<V1BrandingTheme>
+    [EntityRbac(typeof(V1alpha1BrandingTheme), Verbs = RbacVerb.All)]
+    public class V1alpha1BrandingThemeController :
+        V1TenantEntityController<V1alpha1BrandingTheme, V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef, V1alpha1BrandingThemeConf, V1alpha1BrandingThemeConf>,
+        IEntityController<V1alpha1BrandingTheme>
     {
 
         static global::Auth0.ManagementApi.Models.CaptchaWidgetTheme ToApi(Core.Models.BrandingTheme.CaptchaWidgetTheme source) => source switch
@@ -93,7 +90,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(BrandingThemeConf? source, BrandingThemeBase target)
+        static void ApplyToApi(V1alpha1BrandingThemeConf? source, BrandingThemeBase target)
         {
             if (source is null)
                 return;
@@ -333,7 +330,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V1BrandingThemeController(IKubernetesClient kube, EntityRequeue<V1BrandingTheme> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1BrandingThemeController> logger) :
+        public V1alpha1BrandingThemeController(IKubernetesClient kube, EntityRequeue<V1alpha1BrandingTheme> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1alpha1BrandingThemeController> logger) :
             base(kube, requeue, cache, options, logger)
         {
 
@@ -343,11 +340,11 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override string EntityTypeName => "BrandingTheme";
 
         /// <inheritdoc />
-        protected override async Task<BrandingThemeConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<V1alpha1BrandingThemeConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
             try
             {
-                return TransformToSystemTextJson<BrandingThemeConf>(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
+                return TransformToSystemTextJson<V1alpha1BrandingThemeConf>(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -356,7 +353,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<string?> Find(IManagementApiClient api, V1BrandingTheme entity, V1BrandingTheme.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string?> Find(IManagementApiClient api, V1alpha1BrandingTheme entity, V1alpha1BrandingTheme.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (spec.Find is not null)
             {
@@ -384,13 +381,13 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override string? ValidateCreate(BrandingThemeConf conf)
+        protected override string? ValidateCreate(V1alpha1BrandingThemeConf conf)
         {
             return null;
         }
 
         /// <inheritdoc />
-        protected override async Task<string> Create(IManagementApiClient api, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string> Create(IManagementApiClient api, V1alpha1BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating theme in Auth0 with name: {ThemeName}", EntityTypeName, conf.DisplayName);
 
@@ -403,7 +400,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, BrandingThemeConf? last, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, V1alpha1BrandingThemeConf? last, V1alpha1BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
 
@@ -417,7 +414,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task ApplyStatus(IManagementApiClient api, V1BrandingTheme entity, BrandingThemeConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task ApplyStatus(IManagementApiClient api, V1alpha1BrandingTheme entity, V1alpha1BrandingThemeConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
