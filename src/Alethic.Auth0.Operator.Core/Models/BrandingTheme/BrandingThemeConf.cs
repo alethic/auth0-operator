@@ -28,7 +28,7 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
 
         [JsonPropertyName("widget")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public BrandingThemeWidgets? Widget { get; set; }
+        public BrandingThemeWidget? Widget { get; set; }
 
     }
 

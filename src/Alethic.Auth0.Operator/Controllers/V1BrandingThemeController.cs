@@ -80,6 +80,233 @@ namespace Alethic.Auth0.Operator.Controllers
             _ => throw new InvalidOperationException()
         };
 
+        static global::Auth0.ManagementApi.Models.ButtonsStyle ToApi(Core.Models.BrandingTheme.ButtonsStyle buttonsStyle) => buttonsStyle switch
+        {
+            Core.Models.BrandingTheme.ButtonsStyle.Pill => global::Auth0.ManagementApi.Models.ButtonsStyle.Pill,
+            Core.Models.BrandingTheme.ButtonsStyle.Rounded => global::Auth0.ManagementApi.Models.ButtonsStyle.Rounded,
+            Core.Models.BrandingTheme.ButtonsStyle.Sharp => global::Auth0.ManagementApi.Models.ButtonsStyle.Sharp,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(BrandingThemeConf? source, BrandingThemeBase target)
+        {
+            if (source is null)
+                return;
+
+            if (source.DisplayName is not null)
+                target.DisplayName = source.DisplayName;
+
+            if (source.Borders is not null)
+                ApplyToApi(source.Borders, target.Borders = new global::Auth0.ManagementApi.Models.BrandingThemeBorder());
+
+            if (source.Colors is not null)
+                ApplyToApi(source.Colors, target.Colors = new global::Auth0.ManagementApi.Models.BrandingThemeColors());
+
+            if (source.Fonts is not null)
+                ApplyToApi(source.Fonts, target.Fonts = new global::Auth0.ManagementApi.Models.BrandingThemeFonts());
+
+            if (source.Widget is not null)
+                ApplyToApi(source.Widget, target.Widget = new global::Auth0.ManagementApi.Models.BrandingThemeWidget());
+
+            if (source.PageBackground is not null)
+                ApplyToApi(source.PageBackground, target.PageBackground = new global::Auth0.ManagementApi.Models.BrandingThemePageBackground());
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeBorders source, global::Auth0.ManagementApi.Models.BrandingThemeBorder target)
+        {
+            if (source.ButtonBorderRadius is float buttonBorderRadius)
+                target.ButtonBorderRadius = buttonBorderRadius;
+
+            if (source.ButtonBorderWeight is float buttonBorderWeight)
+                target.ButtonBorderWeight = buttonBorderWeight;
+
+            if (source.ButtonsStyle is Core.Models.BrandingTheme.ButtonsStyle buttonsStyle)
+                target.ButtonsStyle = ToApi(buttonsStyle);
+
+            if (source.InputBorderRadius is float inputBorderRadius)
+                target.InputBorderRadius = inputBorderRadius;
+
+            if (source.InputBorderWeight is float inputBorderWeight)
+                target.InputBorderWeight = inputBorderWeight;
+
+            if (source.InputsStyle is Core.Models.BrandingTheme.ButtonsStyle inputsStyle)
+                target.InputsStyle = ToApi(inputsStyle);
+
+            if (source.ShowWidgetShadow is bool showWidgetShadow)
+                target.ShowWidgetShadow = showWidgetShadow;
+
+            if (source.WidgetBorderWeight is float widgetBorderWeight)
+                target.WidgetBorderWeight = widgetBorderWeight;
+
+            if (source.WidgetCornerRadius is float widgetCornerRadius)
+                target.WidgetCornerRadius = widgetCornerRadius;
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeColors source, global::Auth0.ManagementApi.Models.BrandingThemeColors target)
+        {
+            if (source.BaseFocusColor is string baseFocusColor)
+                target.BaseFocusColor = baseFocusColor;
+
+            if (source.BaseHoverColor is string baseHoverColor)
+                target.BaseHoverColor = baseHoverColor;
+
+            if (source.BodyText is string bodyText)
+                target.BodyText = bodyText;
+
+            if (source.CaptchaWidgetTheme is Core.Models.BrandingTheme.CaptchaWidgetTheme captchaWidgetTheme)
+                target.CaptchaWidgetTheme = ToApi(captchaWidgetTheme);
+
+            if (source.Error is string error)
+                target.Error = error;
+
+            if (source.Header is string header)
+                target.Header = header;
+
+            if (source.Icons is string icons)
+                target.Icons = icons;
+
+            if (source.InputBackground is string inputBackground)
+                target.InputBackground = inputBackground;
+
+            if (source.InputBorder is string inputBorder)
+                target.InputBorder = inputBorder;
+
+            if (source.InputFilledText is string inputFilledText)
+                target.InputFilledText = inputFilledText;
+
+            if (source.InputLabelsPlaceholders is string inputLabelsPlaceholders)
+                target.InputLabelsPlaceholders = inputLabelsPlaceholders;
+
+            if (source.LinksFocusedComponents is string linksFocusedComponents)
+                target.LinksFocusedComponents = linksFocusedComponents;
+
+            if (source.PrimaryButton is string primaryButton)
+                target.PrimaryButton = primaryButton;
+
+            if (source.PrimaryButtonLabel is string primaryButtonLabel)
+                target.PrimaryButtonLabel = primaryButtonLabel;
+
+            if (source.SecondaryButtonBorder is string secondaryButtonBorder)
+                target.SecondaryButtonBorder = secondaryButtonBorder;
+
+            if (source.SecondaryButtonLabel is string secondaryButtonLabel)
+                target.SecondaryButtonLabel = secondaryButtonLabel;
+
+            if (source.Success is string success)
+                target.Success = success;
+
+            if (source.WidgetBackground is string widgetBackground)
+                target.WidgetBackground = widgetBackground;
+
+            if (source.WidgetBorder is string widgetBorder)
+                target.WidgetBorder = widgetBorder;
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeFonts source, global::Auth0.ManagementApi.Models.BrandingThemeFonts target)
+        {
+            if (source.BodyText is not null)
+                ApplyToApi(source.BodyText, target.BodyText = new BodyText());
+
+            if (source.ButtonsText is not null)
+                ApplyToApi(source.ButtonsText, target.ButtonsText = new ButtonsText());
+
+            if (source.FontUrl is not null)
+                target.FontUrl = source.FontUrl;
+
+            if (source.InputLabels is not null)
+                ApplyToApi(source.InputLabels, target.InputLabels = new InputLabels());
+
+            if (source.Links is not null)
+                ApplyToApi(source.Links, target.Links = new Links());
+
+            if (source.LinksStyle is not null)
+                target.LinksStyle = ToApi(source);
+
+            if (source.ReferenceTextSize is float referenceTextSize)
+                target.ReferenceTextSize = referenceTextSize;
+
+            if (source.Subtitle is not null)
+                ApplyToApi(source.Subtitle, target.Subtitle = new Subtitle());
+
+            if (source.Title is not null)
+                ApplyToApi(source.Title, target.Title = new Title());
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(BrandingThemeFont source, BrandingThemeFontsBase target)
+        {
+            if (source.Bold is bool bold)
+                target.Bold = bold;
+
+            if (source.Size is float size)
+                target.Size = size;
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeWidget source, global::Auth0.ManagementApi.Models.BrandingThemeWidget target)
+        {
+            if (source.HeaderTextAlignment is Core.Models.BrandingTheme.HeaderTextAlignment headerTextAlignment)
+                target.HeaderTextAlignment = ToApi(headerTextAlignment);
+
+            if (source.LogoHeight is float logoHeight)
+                target.LogoHeight = logoHeight;
+
+            if (source.LogoPosition is Core.Models.BrandingTheme.LogoPosition logoPosition)
+                target.LogoPosition = ToApi(logoPosition);
+
+            if (source.LogoUrl is string logoUrl)
+                target.LogoUrl = logoUrl;
+
+            if (source.SocialButtonsLayout is Core.Models.BrandingTheme.SocialButtonsLayout socialButtonsLayout)
+                target.SocialButtonsLayout = ToApi(socialButtonsLayout);
+        }
+
+        /// <summary>
+        /// Applies the specified configuration to the target.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemePageBackground source, global::Auth0.ManagementApi.Models.BrandingThemePageBackground target)
+        {
+            if (source.BackgroundColor is string backgroundColor)
+                target.BackgroundColor = backgroundColor;
+
+            if (source.BackgroundImageUrl is string backgroundImageUrl)
+                target.BackgroundImageUrl = backgroundImageUrl;
+
+            if (source.PageLayout is Core.Models.BrandingTheme.PageLayout pageLayout)
+                target.PageLayout = ToApi(pageLayout);
+        }
+
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
@@ -144,243 +371,12 @@ namespace Alethic.Auth0.Operator.Controllers
             return null;
         }
 
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="conf"></param>
-        /// <param name="target"></param>
-        void Apply(BrandingThemeConf? conf, BrandingThemeBase target)
-        {
-            if (conf is null)
-                return;
-
-            if (conf.DisplayName is not null)
-                target.DisplayName = conf.DisplayName;
-
-            if (conf.Borders is not null)
-                Apply(conf.Borders, target.Borders = new global::Auth0.ManagementApi.Models.BrandingThemeBorder());
-
-            if (conf.Colors is not null)
-                Apply(conf.Colors, target.Colors = new global::Auth0.ManagementApi.Models.BrandingThemeColors());
-
-            if (conf.Fonts is not null)
-                Apply(conf.Fonts, target.Fonts = new global::Auth0.ManagementApi.Models.BrandingThemeFonts());
-
-            if (conf.Widget is not null)
-                Apply(conf.Widget, target.Widget = new global::Auth0.ManagementApi.Models.BrandingThemeWidget());
-
-            if (conf.PageBackground is not null)
-                Apply(conf.PageBackground, target.PageBackground = new global::Auth0.ManagementApi.Models.BrandingThemePageBackground());
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        /// <exception cref="InvalidOperationException"></exception>
-        void Apply(Core.Models.BrandingTheme.BrandingThemeBorders source, global::Auth0.ManagementApi.Models.BrandingThemeBorder target)
-        {
-            if (source.ButtonBorderRadius is float buttonBorderRadius)
-                target.ButtonBorderRadius = buttonBorderRadius;
-
-            if (source.ButtonBorderWeight is float buttonBorderWeight)
-                target.ButtonBorderWeight = buttonBorderWeight;
-
-            if (source.ButtonsStyle is Core.Models.BrandingTheme.ButtonsStyle buttonsStyle)
-                target.ButtonsStyle = buttonsStyle switch
-                {
-                    Core.Models.BrandingTheme.ButtonsStyle.Pill => global::Auth0.ManagementApi.Models.ButtonsStyle.Pill,
-                    Core.Models.BrandingTheme.ButtonsStyle.Rounded => global::Auth0.ManagementApi.Models.ButtonsStyle.Rounded,
-                    Core.Models.BrandingTheme.ButtonsStyle.Sharp => global::Auth0.ManagementApi.Models.ButtonsStyle.Sharp,
-                    _ => throw new InvalidOperationException()
-                };
-
-            if (source.InputBorderRadius is float inputBorderRadius)
-                target.InputBorderRadius = inputBorderRadius;
-
-            if (source.InputBorderWeight is float inputBorderWeight)
-                target.InputBorderWeight = inputBorderWeight;
-
-            if (source.InputsStyle is Core.Models.BrandingTheme.ButtonsStyle inputsStyle)
-                target.InputsStyle = inputsStyle switch
-                {
-                    Core.Models.BrandingTheme.ButtonsStyle.Pill => global::Auth0.ManagementApi.Models.ButtonsStyle.Pill,
-                    Core.Models.BrandingTheme.ButtonsStyle.Rounded => global::Auth0.ManagementApi.Models.ButtonsStyle.Rounded,
-                    Core.Models.BrandingTheme.ButtonsStyle.Sharp => global::Auth0.ManagementApi.Models.ButtonsStyle.Sharp,
-                    _ => throw new InvalidOperationException()
-                };
-
-            if (source.ShowWidgetShadow is bool showWidgetShadow)
-                target.ShowWidgetShadow = showWidgetShadow;
-
-            if (source.WidgetBorderWeight is float widgetBorderWeight)
-                target.WidgetBorderWeight = widgetBorderWeight;
-
-            if (source.WidgetCornerRadius is float widgetCornerRadius)
-                target.WidgetCornerRadius = widgetCornerRadius;
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="colors"></param>
-        /// <param name="target"></param>
-        void Apply(Core.Models.BrandingTheme.BrandingThemeColors colors, global::Auth0.ManagementApi.Models.BrandingThemeColors target)
-        {
-            if (colors.BaseFocusColor is string baseFocusColor)
-                target.BaseFocusColor = baseFocusColor;
-
-            if (colors.BaseHoverColor is string baseHoverColor)
-                target.BaseHoverColor = baseHoverColor;
-
-            if (colors.BodyText is string bodyText)
-                target.BodyText = bodyText;
-
-            if (colors.CaptchaWidgetTheme is Core.Models.BrandingTheme.CaptchaWidgetTheme captchaWidgetTheme)
-                target.CaptchaWidgetTheme = ToApi(captchaWidgetTheme);
-
-            if (colors.Error is string error)
-                target.Error = error;
-
-            if (colors.Header is string header)
-                target.Header = header;
-
-            if (colors.Icons is string icons)
-                target.Icons = icons;
-
-            if (colors.InputBackground is string inputBackground)
-                target.InputBackground = inputBackground;
-
-            if (colors.InputBorder is string inputBorder)
-                target.InputBorder = inputBorder;
-
-            if (colors.InputFilledText is string inputFilledText)
-                target.InputFilledText = inputFilledText;
-
-            if (colors.InputLabelsPlaceholders is string inputLabelsPlaceholders)
-                target.InputLabelsPlaceholders = inputLabelsPlaceholders;
-
-            if (colors.LinksFocusedComponents is string linksFocusedComponents)
-                target.LinksFocusedComponents = linksFocusedComponents;
-
-            if (colors.PrimaryButton is string primaryButton)
-                target.PrimaryButton = primaryButton;
-
-            if (colors.PrimaryButtonLabel is string primaryButtonLabel)
-                target.PrimaryButtonLabel = primaryButtonLabel;
-
-            if (colors.SecondaryButtonBorder is string secondaryButtonBorder)
-                target.SecondaryButtonBorder = secondaryButtonBorder;
-
-            if (colors.SecondaryButtonLabel is string secondaryButtonLabel)
-                target.SecondaryButtonLabel = secondaryButtonLabel;
-
-            if (colors.Success is string success)
-                target.Success = success;
-
-            if (colors.WidgetBackground is string widgetBackground)
-                target.WidgetBackground = widgetBackground;
-
-            if (colors.WidgetBorder is string widgetBorder)
-                target.WidgetBorder = widgetBorder;
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="fonts"></param>
-        /// <param name="target"></param>
-        void Apply(Core.Models.BrandingTheme.BrandingThemeFonts fonts, global::Auth0.ManagementApi.Models.BrandingThemeFonts target)
-        {
-            if (fonts.BodyText is not null)
-                Apply(fonts.BodyText, target.BodyText = new BodyText());
-
-            if (fonts.ButtonsText is not null)
-                Apply(fonts.ButtonsText, target.ButtonsText = new ButtonsText());
-
-            if (fonts.FontUrl is not null)
-                target.FontUrl = fonts.FontUrl;
-
-            if (fonts.InputLabels is not null)
-                Apply(fonts.InputLabels, target.InputLabels = new InputLabels());
-
-            if (fonts.Links is not null)
-                Apply(fonts.Links, target.Links = new Links());
-
-            if (fonts.LinksStyle is not null)
-                target.LinksStyle = ToApi(fonts);
-
-            if (fonts.ReferenceTextSize is float referenceTextSize)
-                target.ReferenceTextSize = referenceTextSize;
-
-            if (fonts.Subtitle is not null)
-                Apply(fonts.Subtitle, target.Subtitle = new Subtitle());
-
-            if (fonts.Title is not null)
-                Apply(fonts.Title, target.Title = new Title());
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="font"></param>
-        /// <param name="target"></param>
-        void Apply(BrandingThemeFont font, BrandingThemeFontsBase target)
-        {
-            if (font.Bold is bool bold)
-                target.Bold = bold;
-
-            if (font.Size is float size)
-                target.Size = size;
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        void Apply(Core.Models.BrandingTheme.BrandingThemeWidgets source, global::Auth0.ManagementApi.Models.BrandingThemeWidget target)
-        {
-            if (source.HeaderTextAlignment is Core.Models.BrandingTheme.HeaderTextAlignment headerTextAlignment)
-                target.HeaderTextAlignment = ToApi(headerTextAlignment);
-
-            if (source.LogoHeight is float logoHeight)
-                target.LogoHeight = logoHeight;
-
-            if (source.LogoPosition is Core.Models.BrandingTheme.LogoPosition logoPosition)
-                target.LogoPosition = ToApi(logoPosition);
-
-            if (source.LogoUrl is string logoUrl)
-                target.LogoUrl = logoUrl;
-
-            if (source.SocialButtonsLayout is Core.Models.BrandingTheme.SocialButtonsLayout socialButtonsLayout)
-                target.SocialButtonsLayout = ToApi(socialButtonsLayout);
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        void Apply(Core.Models.BrandingTheme.BrandingThemePageBackground source, global::Auth0.ManagementApi.Models.BrandingThemePageBackground target)
-        {
-            if (source.BackgroundColor is string backgroundColor)
-                target.BackgroundColor = backgroundColor;
-
-            if (source.BackgroundImageUrl is string backgroundImageUrl)
-                target.BackgroundImageUrl = backgroundImageUrl;
-
-            if (source.PageLayout is Core.Models.BrandingTheme.PageLayout pageLayout)
-                target.PageLayout = ToApi(pageLayout);
-        }
-
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, BrandingThemeConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating theme in Auth0 with name: {ThemeName}", EntityTypeName, conf.DisplayName);
             var req = new BrandingThemeCreateRequest();
-            Apply(conf, req);
+            ApplyToApi(conf, req);
             var self = await api.Branding.CreateBrandingThemeAsync(req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created theme in Auth0 with ID: {ThemeId} and name: {ThemeName}", EntityTypeName, self.ThemeId, conf.DisplayName);
             return self.ThemeId;
@@ -391,8 +387,8 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
             var req = new BrandingThemeUpdateRequest();
-            Apply(last, req);
-            Apply(conf, req);
+            ApplyToApi(last, req);
+            ApplyToApi(conf, req);
             await api.Branding.UpdateBrandingThemeAsync(id, req, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
         }

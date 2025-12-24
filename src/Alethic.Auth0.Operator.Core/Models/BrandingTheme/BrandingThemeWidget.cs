@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme
 {
 
-    public class BrandingThemeWidgets
+    public class BrandingThemeWidget
     {
 
         [JsonPropertyName("header_text_alignment")]
