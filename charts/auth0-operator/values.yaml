@@ -42,10 +42,10 @@ operator:
       type: RuntimeDefault
 
   # The volumes must exist *and* be accessible to the Operator pods.
-  volumes: [ ]
+  volumes: []
 
   # An array of volume mount points associated to each Operator container.
-  volumeMounts: [ ]
+  volumeMounts: []
 
   # Any `Node Selectors <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>`__ to apply to Operator pods.
   nodeSelector: { }

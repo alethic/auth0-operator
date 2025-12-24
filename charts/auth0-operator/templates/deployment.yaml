@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth0-operator
-  namespace: {{ .Release.Namespace }}
-  labels: {{- include "auth0-operator.labels" . | nindent 4 }}
+  name: {{ include "auth0-operator.fullname" . }}
+  labels:
+    {{- include "auth0-operator.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.operator.replicaCount }}
   selector:
@@ -47,6 +47,11 @@ spec:
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
           imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
           env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
             # By default we want to use a formatter more suited to Kubernetes.
             - name: Logging__Console__FormatterName
               value: "simple"
@@ -71,13 +76,30 @@ spec:
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
 {{ end }}
+            ports:
+            - containerPort: 8080
+              name: https
           resources: {{- toYaml .Values.operator.resources | nindent 12 }}
           {{- with .Values.operator.containerSecurityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}
+          volumeMounts:
           {{- with .Values.operator.volumeMounts }}
-          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
+            - mountPath: /certs
+              name: certificates
+              readOnly: true
+            - mountPath: /ca
+              name: ca-certificates
+              readOnly: true
+      volumes:
       {{- with .Values.operator.volumes }}
-      volumes: {{- toYaml . | nindent 8 }}
+      {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: certificates
+          secret:
+            secretName: {{ include "auth0-operator.name" . }}-webhook-cert
+        - name: ca-certificates
+          secret:
+            secretName: {{ include "auth0-operator.name" . }}-webhook-ca

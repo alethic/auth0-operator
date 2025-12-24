@@ -5,7 +5,7 @@ COPY ./ ./
 RUN dotnet publish -c Release /p:AssemblyName=operator -o out
 
 # The runner for the application
-FROM mcr.microsoft.com/dotnet/runtime:latest as final
+FROM mcr.microsoft.com/dotnet/aspnet:latest as final
 
 RUN addgroup k8s-operator && useradd -G k8s-operator operator-user
 

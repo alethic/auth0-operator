@@ -26,12 +26,45 @@
             <Reference Include="$(PkgYamlDotNet)/lib/netstandard2.0/YamlDotNet.dll" />
             <Using Namespace="System" />
             <Using Namespace="System.IO" />
+            <Using Namespace="YamlDotNet" />
+            <Using Namespace="YamlDotNet.Core" />
+            <Using Namespace="YamlDotNet.RepresentationModel" />
             <Code Type="Fragment" Language="cs">
                 <![CDATA[
-                
 			    var yaml = new YamlStream();
-			    yaml.Load(Source);
-			    yaml.Save(Target);
+                
+                using var reader = new StreamReader(Source);
+			    yaml.Load(reader);
+                
+                foreach (var doc in yaml.Documents)
+                {
+                    if (doc.RootNode is YamlMappingNode rootMapping && rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping)
+                    {
+                        if (specMapping.Children.TryGetValue(new YamlScalarNode("conversion"), out var conversion) && conversion is YamlMappingNode conversionMapping)
+                        {
+                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("strategy"), out var strategy) && strategy is YamlScalarNode strategyScalar)
+                                if (strategyScalar.Value != "Webhook")
+                                    continue;
+                                    
+                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping)
+                            {
+                                if (webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping)
+                                {
+                                    if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                                    {
+                                        caBundleScalar.Style = ScalarStyle.ForcePlain;
+                                        caBundleScalar.Value = "{{ $ca.Cert | b64enc | quote }}";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                using var writer = new StreamWriter(Target);
+                writer.WriteLine("{{- $ca := dict \"Cert\" (b64dec .Values.global.CACertificate) \"Key\" (b64dec .Values.global.CAKey) -}}");
+                writer.WriteLine();
+			    yaml.Save(writer, false);
                 
 ]]>
             </Code>
