@@ -68,8 +68,8 @@
                 
                 if (includeCaBundle)
                 {                
-                    writer.WriteLine("{{- include \"auth0-operator.gen-ca-cert\" -}}");
-                    writer.WriteLine("{{- $ca := dict \"Cert\" (b64dec .Values.global.CACertificate) \"Key\" (b64dec .Values.global.CAKey) -}}");
+                    writer.WriteLine(@"{{- include ""auth0-operator.gen-ca-cert"" -}}");
+                    writer.WriteLine(@"{{- $ca := dict ""Cert"" (b64dec .Values.global.CACertificate) ""Key"" (b64dec .Values.global.CAKey) -}}");
                     writer.WriteLine();
                 }
                 
