@@ -123,8 +123,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeBorders source, global::Auth0.ManagementApi.Models.BrandingThemeBorder target)
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeBorders? source, global::Auth0.ManagementApi.Models.BrandingThemeBorder target)
         {
+            if (source is null)
+                return;
+
             if (source.ButtonBorderRadius is float buttonBorderRadius)
                 target.ButtonBorderRadius = buttonBorderRadius;
 
@@ -158,8 +161,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeColors source, global::Auth0.ManagementApi.Models.BrandingThemeColors target)
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeColors? source, global::Auth0.ManagementApi.Models.BrandingThemeColors target)
         {
+            if (source is null)
+                return;
+
             if (source.BaseFocusColor is string baseFocusColor)
                 target.BaseFocusColor = baseFocusColor;
 
@@ -223,8 +229,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeFonts source, global::Auth0.ManagementApi.Models.BrandingThemeFonts target)
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeFonts? source, global::Auth0.ManagementApi.Models.BrandingThemeFonts target)
         {
+            if (source is null)
+                return;
+
             if (source.BodyText is not null)
                 ApplyToApi(source.BodyText, target.BodyText = new BodyText());
 
@@ -258,8 +267,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(BrandingThemeFont source, BrandingThemeFontsBase target)
+        static void ApplyToApi(BrandingThemeFont? source, BrandingThemeFontsBase target)
         {
+            if (source is null)
+                return;
+
             if (source.Bold is bool bold)
                 target.Bold = bold;
 
@@ -272,8 +284,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeWidget source, global::Auth0.ManagementApi.Models.BrandingThemeWidget target)
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeWidget? source, global::Auth0.ManagementApi.Models.BrandingThemeWidget target)
         {
+            if (source is null)
+                return;
+
             if (source.HeaderTextAlignment is Core.Models.BrandingTheme.HeaderTextAlignment headerTextAlignment)
                 target.HeaderTextAlignment = ToApi(headerTextAlignment);
 
@@ -295,8 +310,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemePageBackground source, global::Auth0.ManagementApi.Models.BrandingThemePageBackground target)
+        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemePageBackground? source, global::Auth0.ManagementApi.Models.BrandingThemePageBackground target)
         {
+            if (source is null)
+                return;
+
             if (source.BackgroundColor is string backgroundColor)
                 target.BackgroundColor = backgroundColor;
 
