@@ -24,7 +24,6 @@
         </PackageReference>
         <PackageReference Include="KubeOps.Operator" Version="10.0.4" />
         <PackageReference Include="KubeOps.Operator.Web" Version="10.0.4" />
-        <PackageReference Include="System.Text.Json" Version="10.0.1" />
     </ItemGroup>
 
     <ItemGroup>
