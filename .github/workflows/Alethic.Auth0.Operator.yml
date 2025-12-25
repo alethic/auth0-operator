@@ -104,15 +104,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.x
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3
-      with:
-        versionSpec: 5.x
+    - name: DotNet Tool Restore
+      run: dotnet tool restore
     - name: Execute GitVersion
-      id: GitVersion
-      uses: gittools/actions/gitversion/execute@v3
-      with:
-        useConfigFile: true
+      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
     - name: Download Containers
       uses: actions/download-artifact@v4
       with:
