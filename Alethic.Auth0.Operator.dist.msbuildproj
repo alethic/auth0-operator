@@ -9,13 +9,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <TargetsForPrePrepare Include="$(SolutionFile)">
+            <Targets>Alethic_Auth0_Operator</Targets>
+            <Properties>Configuration=Debug;GenerateOperatorResources=false</Properties>
+        </TargetsForPrePrepare>
+    </ItemGroup>
+
+    <ItemGroup>
         <TargetsForPrepare Include="$(SolutionFile)">
             <Targets>Alethic_Auth0_Operator</Targets>
-            <Properties>Configuration=Debug;GenerateOperatorResources=False</Properties>
-        </TargetsForPrepare>
-        <TargetsForPrepare Include="$(SolutionFile)">
-            <Targets>Alethic_Auth0_Operator</Targets>
-            <Properties>GenerateOperatorResources=True</Properties>
+            <Properties>Configuration=Release;GenerateOperatorResources=true</Properties>
         </TargetsForPrepare>
     </ItemGroup>
 
@@ -34,7 +37,17 @@
         </TargetsForPublish>
     </ItemGroup>
 
-    <Target Name="Prepare">
+    <Target Name="PrePrepare">
+        <ItemGroup>
+            <_TargetsForPrePrepare Include="@(TargetsForPrePrepare)">
+                <Properties>%(TargetsForPrePrepare.Properties)</Properties>
+            </_TargetsForPrePrepare>
+        </ItemGroup>
+
+        <MSBuild BuildInParallel="False" ContinueOnError="false" Projects="@(_TargetsForPrePrepare)" Targets="%(_TargetsForPrePrepare.Targets)" />
+    </Target>
+
+    <Target Name="Prepare" DependsOnTargets="PrePrepare">
         <ItemGroup>
             <_TargetsForPrepare Include="@(TargetsForPrepare)">
                 <Properties>%(TargetsForPrepare.Properties)</Properties>

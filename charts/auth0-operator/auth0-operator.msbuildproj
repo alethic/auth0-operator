@@ -95,14 +95,14 @@
                 
                 var buffer = new StringWriter();
                 
-                buffer.WriteLine("{{- if .Values.crds.enabled -}}");
+                buffer.WriteLine("{{- if .Values.crds.enabled }}");
                 
                 if (includeCaBundle)
-                    buffer.WriteLine(@"{{- template ""auth0-operator.gen-ca-cert"" . -}}");
+                    buffer.WriteLine(@"{{- template ""auth0-operator.gen-ca-cert"" . }}");
                 
                 yaml.Save(buffer, false);
                 
-                buffer.WriteLine("{{- end -}}");
+                buffer.WriteLine("{{- end }}");
                 
                 using var writer = new StreamWriter(Target);
                 using var copier = new StringReader(buffer.ToString());

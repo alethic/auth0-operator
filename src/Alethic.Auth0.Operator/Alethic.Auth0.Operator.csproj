@@ -6,6 +6,7 @@
         <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
         <Nullable>enable</Nullable>
         <ContainerRepository>auth0-operator-image</ContainerRepository>
+        <KubeOpsCli>dotnet tool run kubeops</KubeOpsCli>
     </PropertyGroup>
 
     <ItemGroup>
