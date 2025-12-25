@@ -98,9 +98,9 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task<string> Create(IManagementApiClient api, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             var req = new ClientGrantCreateRequest();
-            req.ClientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken);
-            req.Audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken);
-            req.Scope = conf.Scope?.ToList();
+            req.ClientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken) ?? null!;
+            req.Audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken) ?? null!;
+            req.Scope = conf.Scope?.ToList() ?? null!;
             req.AllowAnyOrganization = conf.AllowAnyOrganization;
             req.OrganizationUsage = Convert(conf.OrganizationUsage);
 
@@ -115,7 +115,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             var req = new ClientGrantUpdateRequest();
-            req.Scope = conf.Scope?.ToList();
+            req.Scope = conf.Scope?.ToList() ?? null!;
             req.AllowAnyOrganization = conf.AllowAnyOrganization;
             req.OrganizationUsage = Convert(conf.OrganizationUsage);
 

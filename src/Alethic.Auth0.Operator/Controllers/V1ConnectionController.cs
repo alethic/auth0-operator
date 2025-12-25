@@ -109,7 +109,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf is null || string.IsNullOrEmpty(conf.Name))
                     return null;
 
-                var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), (PaginationInfo?)null, cancellationToken);
+                var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), (PaginationInfo?)null!, cancellationToken);
                 var self = list.FirstOrDefault(i => i.Name == conf.Name);
                 if (self is not null)
                     Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection by name: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
@@ -213,7 +213,7 @@ namespace Alethic.Auth0.Operator.Controllers
             req.Realms = conf.Realms ?? [];
             req.IsDomainConnection = conf.IsDomainConnection ?? false;
             req.ShowAsButton = conf.ShowAsButton;
-            req.EnabledClients = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
+            req.EnabledClients = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken) ?? null!;
         }
 
         /// <inheritdoc />
