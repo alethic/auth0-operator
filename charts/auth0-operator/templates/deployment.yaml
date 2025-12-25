@@ -50,7 +50,7 @@ spec:
             runAsUser: 0
             runAsGroup: 0
           command:
-          - /usr/sbin/update-ca-certificates
+            - /usr/sbin/update-ca-certificates
           volumeMounts:
             - mountPath: /etc/ssl/certs
               name: ssl-certs
@@ -114,6 +114,10 @@ spec:
           {{- end }}
             - mountPath: /etc/ssl/certs
               name: ssl-certs
+              readOnly: true
+            - mountPath: /usr/local/share/ca-certificates/ca.crt
+              name: certs
+              subPath: ca.crt
               readOnly: true
             - mountPath: /certs
               name: certs
