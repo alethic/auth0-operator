@@ -46,7 +46,7 @@
                         if (rootMapping.Children.TryGetValue(new YamlScalarNode("metadata"), out var metadata) && metadata is YamlMappingNode metadataMapping)
                         {
                             if (metadataMapping.Children.TryGetValue(new YamlScalarNode("annotations"), out var annotations) == false)
-                                metadataMapping.Add(new YamlScalarNode("annotations"), annotations = new YamlMappingNode());
+                                metadataMapping.Add("annotations", annotations = new YamlMappingNode());
                         
                             if (annotations is YamlMappingNode annotationsMapping)
                                 annotationsMapping.Children[new YamlScalarNode("helm.sh/resource-policy")] = new YamlScalarNode("keep");
