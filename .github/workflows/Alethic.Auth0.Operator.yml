@@ -46,7 +46,9 @@ jobs:
       env:
         GITHUB_REPOS: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: NuGet Restore
+    - name: DotNet Tool Restore
+      run: dotnet tool restore
+    - name: DotNet Package Restore
       run: dotnet restore Alethic.Auth0.Operator.sln
     - name: Build
       run: |
