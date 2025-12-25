@@ -9,6 +9,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <TargetsForPrepare Include="$(SolutionFile)">
+            <Targets>Alethic_Auth0_Operator</Targets>
+            <Properties>GenerateOperatorResources=False</Properties>
+        </TargetsForPrepare>
+        <TargetsForPrepare Include="$(SolutionFile)">
+            <Targets>Alethic_Auth0_Operator</Targets>
+            <Properties>GenerateOperatorResources=True</Properties>
+        </TargetsForPrepare>
+    </ItemGroup>
+
+    <ItemGroup>
         <TargetsForPublish Include="$(SolutionFile)">
             <Targets>dist%5Cdist-containers:Publish</Targets>
             <Properties>PublishDir=$(DistDir)\containers</Properties>
@@ -23,7 +34,17 @@
         </TargetsForPublish>
     </ItemGroup>
 
-    <Target Name="Publish">
+    <Target Name="Prepare">
+        <ItemGroup>
+            <_TargetsForPrepare Include="@(TargetsForPrepare)">
+                <Properties>%(TargetsForPrepare.Properties)</Properties>
+            </_TargetsForPrepare>
+        </ItemGroup>
+
+        <MSBuild BuildInParallel="$(BuildInParallel)" ContinueOnError="false" Projects="@(_TargetsForPrepare)" Targets="%(_TargetsForPrepare.Targets)" />
+    </Target>
+
+    <Target Name="Publish" DependsOnTargets="Prepare">
         <ItemGroup>
             <_TargetsForPublish Include="@(TargetsForPublish)">
                 <Properties>%(TargetsForPublish.Properties)</Properties>

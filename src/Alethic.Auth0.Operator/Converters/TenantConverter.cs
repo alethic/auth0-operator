@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using System.Text.Json;
 
 using Alethic.Auth0.Operator.Core.Models.Tenant;
@@ -13,6 +14,7 @@ namespace Alethic.Auth0.Operator.Converters
     /// <summary>
     /// Provides conversions targeting <see cref="V2alpha1Tenant"/>.
     /// </summary>
+    [RequiresPreviewFeatures]
     [ConversionWebhook(typeof(V2alpha1Tenant))]
     public class TenantConverter : ConversionWebhook<V2alpha1Tenant>
     {
