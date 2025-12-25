@@ -40,21 +40,33 @@
                 
                 foreach (var doc in yaml.Documents)
                 {
-                    if (doc.RootNode is YamlMappingNode rootMapping &&
-                        rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping &&
-                        specMapping.Children.TryGetValue(new YamlScalarNode("conversion"), out var conversion) && conversion is YamlMappingNode conversionMapping)
+                    if (doc.RootNode is YamlMappingNode rootMapping)
                     {
-                        if (conversionMapping.Children.TryGetValue(new YamlScalarNode("strategy"), out var strategy) && strategy is YamlScalarNode strategyScalar)
-                            if (strategyScalar.Value != "Webhook")
-                                continue;
-                                    
-                        if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping &&
-                            webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping &&
-                            clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                    
+                        if (rootMapping.Children.TryGetValue(new YamlScalarNode("metadata"), out var metadata) && metadata is YamlMappingNode metadataMapping)
                         {
-                            caBundleScalar.Style = ScalarStyle.ForcePlain;
-                            caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
-                            includeCaBundle = true;
+                            if (metadataMapping.Children.TryGetValue(new YamlScalarNode("annotations"), out var annotations) == false)
+                                metadataMapping.Add(new YamlScalarNode("annotations"), annotations = new YamlMappingNode());
+                        
+                            if (annotations is YamlMappingNode annotationsMapping)
+                                annotationsMapping.Children[new YamlScalarNode("helm.sh/resource-policy")] = new YamlScalarNode("keep");
+                        }
+
+                        if (rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping &&
+                            specMapping.Children.TryGetValue(new YamlScalarNode("conversion"), out var conversion) && conversion is YamlMappingNode conversionMapping)
+                        {
+                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("strategy"), out var strategy) && strategy is YamlScalarNode strategyScalar)
+                                if (strategyScalar.Value != "Webhook")
+                                    continue;
+                                    
+                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping &&
+                                webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping &&
+                                clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                            {
+                                caBundleScalar.Style = ScalarStyle.ForcePlain;
+                                caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
+                                includeCaBundle = true;
+                            }
                         }
                     }
                 }
