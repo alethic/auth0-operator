@@ -26,9 +26,6 @@ operator:
   # An array of additional annotations to be applied to the operator service account
   serviceAccountAnnotations: []
 
-  # additional labels to be applied to operator resources
-  additionalLabels: {}
-
   # Specify the Operator container image to use for the deployment.
   image:
     repository: ghcr.io/alethic/auth0-operator-image

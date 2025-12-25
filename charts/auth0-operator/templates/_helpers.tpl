@@ -31,7 +31,7 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Selector labels
+Selector labels.
 */}}
 {{- define "auth0-operator.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "auth0-operator.name" . }}
@@ -39,7 +39,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Common labels
+Common labels.
 */}}
 {{- define "auth0-operator.labels" -}}
 helm.sh/chart: {{ include "auth0-operator.chart" . }}
@@ -48,7 +48,16 @@ helm.sh/chart: {{ include "auth0-operator.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.operator.additionalLabels }}
+{{- with .Values.commonLabels }}
+{{- toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations.
+*/}}
+{{- define "auth0-operator.annotations" -}}
+{{- with .Values.commonAnnotations }}
 {{- toYaml . }}
 {{- end }}
 {{- end }}

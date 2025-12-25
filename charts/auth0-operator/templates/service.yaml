@@ -4,6 +4,8 @@ metadata:
   name: {{ include "auth0-operator.fullname" . }}
   labels:
     {{- include "auth0-operator.labels" . | nindent 4 }}
+  annotations:
+    {{- include "auth0-operator.annotations" . | nindent 4 }}
 spec:
   selector:
     {{- include "auth0-operator.selectorLabels" . | nindent 4 }}

@@ -4,6 +4,8 @@ metadata:
   name: auth0-operator-role
   labels:
     {{- include "auth0-operator.labels" . | nindent 4 }}
+  annotations:
+    {{- include "auth0-operator.annotations" . | nindent 4 }}
 rules:
 - apiGroups:
   - kubernetes.auth0.com
