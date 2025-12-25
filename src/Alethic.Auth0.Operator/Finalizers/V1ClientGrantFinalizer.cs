@@ -1,9 +1,10 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Models;
 
+using KubeOps.Abstractions.Controller;
 using KubeOps.Abstractions.Finalizer;
 
 namespace Alethic.Auth0.Operator.Finalizers
@@ -12,15 +13,15 @@ namespace Alethic.Auth0.Operator.Finalizers
     public class V1ClientGrantFinalizer : IEntityFinalizer<V1ClientGrant>
     {
 
-        readonly V1ClientGrantController _controller;
+        readonly IEntityController<V1ClientGrant> _controller;
 
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="controller"></param>
-        public V1ClientGrantFinalizer(V1ClientGrantController controller)
+        public V1ClientGrantFinalizer(IEntityController<V1ClientGrant> controller)
         {
-            _controller = controller ?? throw new System.ArgumentNullException(nameof(controller));
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
         /// <inheritdoc />
