@@ -48,7 +48,7 @@ spec:
           command: ['/usr/sbin/update-ca-certificates']
           volumeMounts:
             - mountPath: /etc/ssl/certs/auth0-operator-ca.pem
-              name: ca-cert
+              name: certs
               subPath: ca.crt
               readOnly: true
             - mountPath: /certs
