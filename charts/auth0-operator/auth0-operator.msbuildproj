@@ -53,54 +53,69 @@
                             clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
                         {
                             caBundleScalar.Style = ScalarStyle.ForcePlain;
-                            caBundleScalar.Value = "{{ $ca.Cert | b64enc | quote }}";
+                            caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
                             includeCaBundle = true;
                         }
                     }
                 }
                 
-                using var writer = new StreamWriter(Target);
+                var buffer = new StringWriter();
                 
                 if (includeCaBundle)
                 {                
-                    writer.WriteLine(@"{{- template ""auth0-operator.gen-ca-cert"" -}}");
-                    writer.WriteLine(@"{{- $ca := dict ""Cert"" (b64dec .Values.global.CACertificate) ""Key"" (b64dec .Values.global.CAKey) -}}");
-                    writer.WriteLine();
+                    buffer.WriteLine(@"{{- template ""auth0-operator.gen-ca-cert"" . -}}");
+                    buffer.WriteLine();
                 }
                 
-			    yaml.Save(writer, false);
+                yaml.Save(buffer, false);
                 
+                using var writer = new StreamWriter(Target);
+                using var copier = new StringReader(buffer.ToString());
+                
+                string line;
+                while ((line = copier.ReadLine()) != null)
+                {
+                    if (line == "...")
+                        writer.WriteLine("---");
+                    else
+                        writer.WriteLine(line);
+                }
 ]]>
             </Code>
         </Task>
     </UsingTask>
 
-    <Target Name="RewriteCrds" Inputs="@(CrdItem)" Outputs="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')">
+    <Target Name="RewriteCrds">
         <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
         <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" />
         <ItemGroup>
-            <CrdOutputItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
-            <ChartItem Include="@(CrdOutputItem)" TargetPath="crds\%(Filename).yaml" />
-            <FileWrites Include="@(CrdOutputItem)" />
+            <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\crds\%(Filename).yaml" />
+            <FileWrites Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
         </ItemGroup>
     </Target>
 
-    <Target Name="PackageHelm" DependsOnTargets="RewriteCrds" Inputs="@(ChartItem)" Outputs="$(IntermediateOutputPath)$(ChartPackage)">
-        <RemoveDir Directories="$(IntermediateOutputPath)chart" />
+    <Target Name="StageHelm" DependsOnTargets="RewriteCrds">
         <Copy SourceFiles="@(ChartItem)" DestinationFiles="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
+        <ItemGroup>
+            <FileWrites Include="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="PackageHelm" DependsOnTargets="StageHelm">
         <Exec Command="helm package $(IntermediateOutputPath)\chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
-        <Exec Command="helm template --debug $(IntermediateOutputPath)$(ChartPackage)" />
         <ItemGroup>
             <None Include="$(IntermediateOutputPath)$(ChartPackage)">
                 <TargetPath>$(ChartPackage)</TargetPath>
                 <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             </None>
-            <FileWrites Include="$(IntermediateOutputPath)chart\**\*" />
             <FileWrites Include="$(IntermediateOutputPath)$(ChartPackage)" />
         </ItemGroup>
     </Target>
 
-    <Target Name="BuildHelm" BeforeTargets="BeforeBuild" DependsOnTargets="RewriteCrds;PackageHelm">
+    <Target Name="TestHelm" DependsOnTargets="PackageHelm">
+    </Target>
+
+    <Target Name="BuildHelm" BeforeTargets="BeforeBuild" DependsOnTargets="RewriteCrds;StageHelm;PackageHelm;TestHelm">
 
     </Target>
 
