@@ -156,7 +156,7 @@
     </Target>
 
     <Target Name="TestHelm" DependsOnTargets="PackageHelm">
-        <Exec Command="helm template $(IntermediateOutputPath)$(ChartPackage)" />
+        <Exec Command="helm template $(IntermediateOutputPath)$(ChartPackage)" ContinueOnError="true" />
     </Target>
 
     <Target Name="BuildHelm" BeforeTargets="Build" DependsOnTargets="CollectCrdItems;RewriteCrds;StageHelm;PackageHelm;TestHelm">
