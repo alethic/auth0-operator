@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="KubeOps.Operator" Version="9.11.9" />
+        <PackageReference Include="KubeOps.Operator" Version="10.0.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     </ItemGroup>
 

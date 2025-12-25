@@ -15,9 +15,8 @@ using Auth0.ManagementApi.Models;
 
 using k8s.Models;
 
-using KubeOps.Abstractions.Controller;
-using KubeOps.Abstractions.Queue;
 using KubeOps.Abstractions.Rbac;
+using KubeOps.Abstractions.Reconciliation.Controller;
 using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -37,12 +36,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
-        /// <param name="requeue"></param>
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V1ResourceServerController(IKubernetesClient kube, EntityRequeue<V1ResourceServer> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1ResourceServerController> logger) :
-            base(kube, requeue, cache, options, logger)
+        public V1ResourceServerController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1ResourceServerController> logger) :
+            base(kube, cache, options, logger)
         {
 
         }

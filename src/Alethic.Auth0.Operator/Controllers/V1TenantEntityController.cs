@@ -5,13 +5,11 @@ using System.Threading.Tasks;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 
 using k8s;
 using k8s.Models;
 
-using KubeOps.Abstractions.Queue;
 using KubeOps.Abstractions.Rbac;
 using KubeOps.KubernetesClient;
 
@@ -36,12 +34,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
-        /// <param name="requeue"></param>
         /// <param name="cache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
-        public V1TenantEntityController(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger) :
-            base(kube, requeue, cache, options, logger)
+        public V1TenantEntityController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger) :
+            base(kube, cache, options, logger)
         {
 
         }
@@ -180,11 +177,6 @@ namespace Alethic.Auth0.Operator.Controllers
             // apply new configuration
             await ApplyStatus(api, entity, lastConf, entity.Namespace(), cancellationToken);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
-
-            // schedule periodic reconciliation to detect external changes (e.g., manual deletion from Auth0)
-            var interval = Options.Reconciliation.Interval;
-            Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
-            Requeue(entity, interval);
         }
 
         /// <summary>
@@ -212,102 +204,38 @@ namespace Alethic.Auth0.Operator.Controllers
         protected abstract Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public override sealed async Task DeletedAsync(TEntity entity, CancellationToken cancellationToken)
+        protected override async Task DeletedAsync(TEntity entity, CancellationToken cancellationToken)
         {
-            try
+            if (entity.Spec.TenantRef is null)
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant reference.");
+
+            var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
+            if (api is null)
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+
+            if (string.IsNullOrWhiteSpace(entity.Status.Id))
             {
-                if (entity.Spec.TenantRef is null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant reference.");
-
-                var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
-                if (api is null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
-
-                if (string.IsNullOrWhiteSpace(entity.Status.Id))
-                {
-                    Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} has no known ID, skipping delete (reason: entity was never successfully created in Auth0).", EntityTypeName, entity.Namespace(), entity.Name());
-                    return;
-                }
-
-                var self = await Get(api, entity.Status.Id, entity.Namespace(), cancellationToken);
-                if (self is null)
-                {
-                    Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} with ID {Id} not found in Auth0, skipping delete (reason: already deleted externally).", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
-                    return;
-                }
-
-                // reject deletion if disallowed by policy
-                if (entity.HasPolicy(V1EntityPolicyType.Delete) == false)
-                {
-                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} does not support delete (reason: Delete policy not enabled).", EntityTypeName, entity.Namespace(), entity.Name());
-                }
-                else
-                {
-                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} initiating deletion from Auth0 with ID: {Id} (reason: Kubernetes entity was deleted)", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
-                    await Delete(api, entity.Status.Id, cancellationToken);
-                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} deletion completed successfully", EntityTypeName, entity.Namespace(), entity.Name());
-                }
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} has no known ID, skipping delete (reason: entity was never successfully created in Auth0).", EntityTypeName, entity.Namespace(), entity.Name());
+                return;
             }
-            catch (ErrorApiException e)
+
+            var self = await Get(api, entity.Status.Id, entity.Namespace(), cancellationToken);
+            if (self is null)
             {
-                try
-                {
-                    Logger.LogError(e, "API error deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message);
-                    await DeletingWarningAsync(entity, "ApiError", e.ApiError?.Message ?? "", cancellationToken);
-                }
-                catch (Exception e2)
-                {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
-                }
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} with ID {Id} not found in Auth0, skipping delete (reason: already deleted externally).", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                return;
             }
-            catch (RateLimitApiException e)
+
+            // reject deletion if disallowed by policy
+            if (entity.HasPolicy(V1EntityPolicyType.Delete) == false)
             {
-                try
-                {
-                    Logger.LogError("Rate limit hit deleting {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
-                    await DeletingWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? "", cancellationToken);
-                }
-                catch (Exception e2)
-                {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
-                }
-
-                // calculate next attempt time, floored to one minute
-                var n = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
-                if (n < TimeSpan.FromMinutes(1))
-                    n = TimeSpan.FromMinutes(1);
-
-                Logger.LogInformation("Rescheduling delete after {TimeSpan}.", n);
-                Requeue(entity, n);
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} does not support delete (reason: Delete policy not enabled).", EntityTypeName, entity.Namespace(), entity.Name());
             }
-            catch (RetryException e)
+            else
             {
-                try
-                {
-                    Logger.LogError("Retry hit deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Messge}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
-                    await DeletingWarningAsync(entity, "Retry", e.Message, cancellationToken);
-                }
-                catch (Exception e2)
-                {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
-                }
-
-                Logger.LogInformation("Rescheduling delete after {TimeSpan}.", TimeSpan.FromMinutes(1));
-                Requeue(entity, TimeSpan.FromMinutes(1));
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    Logger.LogError(e, "Unexpected exception deleting {EntityTypeName} {EntityNamespace}/{EntityName}.", EntityTypeName, entity.Namespace(), entity.Name());
-                    await DeletingWarningAsync(entity, "Unknown", e.Message, cancellationToken);
-                }
-                catch (Exception e2)
-                {
-                    Logger.LogCritical(e2, "Unexpected exception creating event.");
-                }
-
-                throw;
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} initiating deletion from Auth0 with ID: {Id} (reason: Kubernetes entity was deleted)", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                await Delete(api, entity.Status.Id, cancellationToken);
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} deletion completed successfully", EntityTypeName, entity.Namespace(), entity.Name());
             }
         }
 

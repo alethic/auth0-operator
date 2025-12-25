@@ -20,10 +20,10 @@ using Auth0.ManagementApi;
 using k8s;
 using k8s.Models;
 
-using KubeOps.Abstractions.Controller;
 using KubeOps.Abstractions.Entities;
-using KubeOps.Abstractions.Queue;
 using KubeOps.Abstractions.Rbac;
+using KubeOps.Abstractions.Reconciliation;
+using KubeOps.Abstractions.Reconciliation.Controller;
 using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -49,7 +49,6 @@ namespace Alethic.Auth0.Operator.Controllers
         static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web) { Converters = { new SimplePrimitiveHashtableConverter() } };
 
         readonly IKubernetesClient _kube;
-        readonly EntityRequeue<TEntity> _requeue;
         readonly IMemoryCache _cache;
         readonly IOptions<OperatorOptions> _options;
         readonly ILogger _logger;
@@ -58,15 +57,13 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
-        /// <param name="requeue"></param>
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public ControllerBase(IKubernetesClient kube, EntityRequeue<TEntity> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
+        public ControllerBase(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _kube = kube ?? throw new ArgumentNullException(nameof(kube));
-            _requeue = requeue ?? throw new ArgumentNullException(nameof(requeue));
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -80,11 +77,6 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Gets the Kubernetes API client.
         /// </summary>
         protected IKubernetesClient Kube => _kube;
-
-        /// <summary>
-        /// Gets the requeue function for the entity controller.
-        /// </summary>
-        protected EntityRequeue<TEntity> Requeue => _requeue;
 
         /// <summary>
         /// Gets the logger.
@@ -492,6 +484,29 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="note"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        protected async Task DeletingSuccessAsync(TEntity entity, CancellationToken cancellationToken)
+        {
+            await _kube.CreateAsync(new Eventsv1Event()
+            {
+                EventTime = DateTime.Now,
+                Metadata = new V1ObjectMeta() { NamespaceProperty = entity.Namespace(), GenerateName = "auth0" },
+                ReportingController = "kubernetes.auth0.com/operator",
+                ReportingInstance = Dns.GetHostName(),
+                Regarding = entity.MakeObjectReference(),
+                Action = "Deleting",
+                Type = "Normal",
+                Reason = "Success"
+            }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Updates the Deleting event to a warning.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="reason"></param>
+        /// <param name="note"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         protected async Task DeletingWarningAsync(TEntity entity, string reason, string note, CancellationToken cancellationToken)
         {
             await _kube.CreateAsync(new Eventsv1Event()
@@ -562,7 +577,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected abstract Task Reconcile(TEntity entity, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public async Task ReconcileAsync(TEntity entity, CancellationToken cancellationToken)
+        async Task<ReconciliationResult<TEntity>> IEntityController<TEntity>.ReconcileAsync(TEntity entity, CancellationToken cancellationToken)
         {
             try
             {
@@ -588,7 +603,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 // retry after the retry interval
                 var interval = Options.Reconciliation.RetryInterval;
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
-                Requeue(entity, interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
             catch (RateLimitApiException e)
             {
@@ -603,19 +618,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // calculate next attempt time, floored to one minute
-                var n = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
-                if (n < TimeSpan.FromMinutes(1))
-                    n = TimeSpan.FromMinutes(1);
+                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
+                if (interval < TimeSpan.FromMinutes(1))
+                    interval = TimeSpan.FromMinutes(1);
 
-                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", n);
-                Requeue(entity, n);
+                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
             catch (RetryException e)
             {
                 try
                 {
                     Logger.LogError("Retry hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
-                    await DeletingWarningAsync(entity, "Retry", e.Message, cancellationToken);
+                    await ReconcileWarningAsync(entity, "Retry", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
@@ -625,7 +640,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 // retry after the error interval
                 var interval = Options.Reconciliation.Interval;
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
-                Requeue(entity, interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
             catch (Exception e)
             {
@@ -640,10 +655,100 @@ namespace Alethic.Auth0.Operator.Controllers
 
                 throw;
             }
+
+            return ReconciliationResult<TEntity>.Success(entity, Options.Reconciliation.Interval);
         }
 
+        /// <summary>
+        /// Implement this method to attempt the deletion.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task DeletedAsync(TEntity entity, CancellationToken cancellationToken);
+
         /// <inheritdoc />
-        public abstract Task DeletedAsync(TEntity entity, CancellationToken cancellationToken);
+        async Task<ReconciliationResult<TEntity>> IEntityController<TEntity>.DeletedAsync(TEntity entity, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (entity.Spec.Conf == null)
+                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing configuration.");
+
+                // does work of deleting, and log success
+                await DeletedAsync(entity, cancellationToken);
+                await DeletingSuccessAsync(entity, cancellationToken);
+            }
+            catch (ErrorApiException e)
+            {
+                try
+                {
+                    Logger.LogError(e, "API error deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? "");
+                    await DeletingWarningAsync(entity, "ApiError", e.ApiError?.Message ?? "", cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                // retry after the retry interval
+                var interval = Options.Reconciliation.RetryInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
+            catch (RateLimitApiException e)
+            {
+                try
+                {
+                    Logger.LogError("Rate limit hit deletion {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
+                    await DeletingWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? "", cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                // calculate next attempt time, floored to one minute
+                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
+                if (interval < TimeSpan.FromMinutes(1))
+                    interval = TimeSpan.FromMinutes(1);
+
+                Logger.LogInformation("Rescheduling deletion after {TimeSpan}.", interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
+            catch (RetryException e)
+            {
+                try
+                {
+                    Logger.LogError("Retry hit deletion {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+                    await DeletingWarningAsync(entity, "Retry", e.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                // retry after the error interval
+                var interval = Options.Reconciliation.Interval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    await DeletingWarningAsync(entity, "Unknown", e.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                throw;
+            }
+
+            return ReconciliationResult<TEntity>.Success(entity);
+        }
 
     }
 

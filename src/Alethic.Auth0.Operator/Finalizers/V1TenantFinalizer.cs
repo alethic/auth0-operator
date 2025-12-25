@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Models;
 
-using KubeOps.Abstractions.Controller;
-using KubeOps.Abstractions.Finalizer;
+using KubeOps.Abstractions.Reconciliation;
+using KubeOps.Abstractions.Reconciliation.Controller;
+using KubeOps.Abstractions.Reconciliation.Finalizer;
 
 namespace Alethic.Auth0.Operator.Finalizers
 {
@@ -26,9 +26,9 @@ namespace Alethic.Auth0.Operator.Finalizers
         }
 
         /// <inheritdoc />
-        public async Task FinalizeAsync(V1Tenant entity, CancellationToken cancellationToken)
+        public async Task<ReconciliationResult<V1Tenant>> FinalizeAsync(V1Tenant entity, CancellationToken cancellationToken)
         {
-            await _controller.DeletedAsync(entity, cancellationToken);
+            return await _controller.DeletedAsync(entity, cancellationToken);
         }
 
     }

@@ -11,9 +11,8 @@ using Auth0.ManagementApi.Models;
 
 using k8s.Models;
 
-using KubeOps.Abstractions.Controller;
-using KubeOps.Abstractions.Queue;
 using KubeOps.Abstractions.Rbac;
+using KubeOps.Abstractions.Reconciliation.Controller;
 using KubeOps.KubernetesClient;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -33,12 +32,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
-        /// <param name="requeue"></param>
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V1TenantController(IKubernetesClient kube, EntityRequeue<V1Tenant> requeue, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1TenantController> logger) :
-            base(kube, requeue, cache, options, logger)
+        public V1TenantController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1TenantController> logger) :
+            base(kube, cache, options, logger)
         {
 
         }
@@ -82,7 +80,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        public override Task DeletedAsync(V1Tenant entity, CancellationToken cancellationToken)
+        protected override Task DeletedAsync(V1Tenant entity, CancellationToken cancellationToken)
         {
             Logger.LogWarning("Unsupported operation deleting entity {Entity}.", entity);
             return Task.CompletedTask;
