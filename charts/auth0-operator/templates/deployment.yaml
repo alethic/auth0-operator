@@ -12,7 +12,6 @@ spec:
     metadata:
       labels:
         {{- include "auth0-operator.labels" . | nindent 8 }}
-        {{- include "auth0-operator.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.operator.imagePullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8 }}
