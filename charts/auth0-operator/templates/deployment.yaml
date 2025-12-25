@@ -47,7 +47,7 @@ spec:
           imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
           command: ['/usr/sbin/update-ca-certificates']
           volumeMounts:
-            - mountPath: /etc/ssl/certs/auth0-operator-ca.pem
+            - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
               subPath: ca.crt
               readOnly: true
@@ -108,7 +108,7 @@ spec:
           {{- with .Values.operator.volumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
-            - mountPath: /etc/ssl/certs/auth0-operator-ca.pem
+            - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
               subPath: ca.crt
               readOnly: true
