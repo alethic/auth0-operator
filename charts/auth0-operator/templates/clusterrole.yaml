@@ -10,17 +10,30 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - tenants
   - brandingthemes
+  - clients
   - clientgrants
   - connections
   - resourceservers
-  - tenants
   verbs:
   - '*'
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - clients
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
   verbs:
   - '*'
 - apiGroups:
@@ -37,11 +50,33 @@ rules:
   resources:
   - leases
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 - apiGroups:
   - kubernetes.auth0.com
   resources:
   - brandingthemes/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - tenants/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - tenants/status
   verbs:
   - get
   - update
@@ -74,22 +109,6 @@ rules:
   - kubernetes.auth0.com
   resources:
   - resourceservers/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - tenants/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - tenants/status
   verbs:
   - get
   - update

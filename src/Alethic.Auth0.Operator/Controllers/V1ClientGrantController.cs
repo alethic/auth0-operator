@@ -11,6 +11,8 @@ using Alethic.Auth0.Operator.Options;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
 
+using k8s.Models;
+
 using KubeOps.Abstractions.Rbac;
 using KubeOps.Abstractions.Reconciliation.Controller;
 using KubeOps.KubernetesClient;
@@ -24,6 +26,10 @@ namespace Alethic.Auth0.Operator.Controllers
 
     [EntityRbac(typeof(V1ClientGrant), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(V1Client), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ClientGrantController :
         V1TenantEntityController<V1ClientGrant, V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, Hashtable>,
         IEntityController<V1ClientGrant>

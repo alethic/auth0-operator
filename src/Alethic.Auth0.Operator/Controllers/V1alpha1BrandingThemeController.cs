@@ -25,6 +25,10 @@ namespace Alethic.Auth0.Operator.Controllers
 {
 
     [EntityRbac(typeof(V1alpha1BrandingTheme), Verbs = RbacVerb.All)]
+    [EntityRbac(typeof(V1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1alpha1BrandingThemeController :
         V1TenantEntityController<V1alpha1BrandingTheme, V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef, V1alpha1BrandingThemeConf, V1alpha1BrandingThemeConf>,
         IEntityController<V1alpha1BrandingTheme>
