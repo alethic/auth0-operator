@@ -20,6 +20,9 @@ commonAnnotations: {}
 ##
 clusterDomain: cluster.local
 
+## @param installCRDs Whether to install the Custom Resource Definitions (CRDs) during chart installation.
+installCRDs: true
+
 operator:
   env: []
 
