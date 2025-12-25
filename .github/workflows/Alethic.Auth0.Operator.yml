@@ -36,7 +36,7 @@ jobs:
     - name: DotNet Tool Restore
       run: dotnet tool restore
     - name: Execute GitVersion
-      run: dotnet-gitversion /output buildserver /config GitVersion.yml
+      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
     - name: DotNet Package Restore
       run: dotnet restore Alethic.Auth0.Operator.sln
     - name: Build
