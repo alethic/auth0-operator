@@ -19,7 +19,7 @@ spec:
       {{- with .Values.operator.runtimeClassName }}
       runtimeClassName: {{ . }}
       {{- end }}
-      serviceAccountName: auth0-operator
+      serviceAccountName: {{ include "auth0-operator.fullname" . }}
       {{- with .Values.operator.securityContext }}
       securityContext: {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -42,7 +42,7 @@ spec:
       initContainers: {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: auth0-operator
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
           imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
           env:
@@ -85,7 +85,7 @@ spec:
               value: {{ .value | quote }}
 {{- end }}
           ports:
-            - containerPort: 4443
+            - containerPort: 8443
               name: https
           resources: {{- toYaml .Values.operator.resources | nindent 12 }}
           {{- with .Values.operator.containerSecurityContext }}
