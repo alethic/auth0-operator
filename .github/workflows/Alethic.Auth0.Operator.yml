@@ -33,10 +33,6 @@ jobs:
         dotnet-version: 10.x
     - name: DotNet Tool Restore
       run: dotnet tool restore
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3
-      with:
-        versionSpec: 5.x
     - name: Execute GitVersion
       uses: gittools/actions/gitversion/execute@v3
       with:
