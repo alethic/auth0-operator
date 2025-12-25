@@ -91,7 +91,7 @@ We store this certificate in .Values._.TLS*
 
 {{/*
 CRD labels.
-*/}} 
+*/}}
 {{- define "auth0-operator.crd.labels" -}}
 {{ include "auth0-operator.labels" . }}
 {{- end }}
