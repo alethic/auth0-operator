@@ -13,7 +13,7 @@
     <ItemGroup>
         <ContainerEnvironmentVariable Include="ASPNETCORE_FORWARDEDHEADERS_ENABLED" Value="true" />
         <ContainerEnvironmentVariable Include="ASPNETCORE_ENVIRONMENT" Value="Production" />
-        <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://*:8080,https://*:8443" />
+        <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://*:8080/,https://*:8443/" />
     </ItemGroup>
 
     <ItemGroup>
