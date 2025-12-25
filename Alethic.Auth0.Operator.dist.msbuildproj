@@ -24,9 +24,6 @@
     </ItemGroup>
 
     <Target Name="Publish">
-        <!-- first build for kubeops cli -->
-        <MSBuild BuildInParallel="$(BuildInParallel)" ContinueOnError="false" Projects="src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" Targets="Build" Properties="Configuration=Debug" />
-        
         <ItemGroup>
             <_TargetsForPublish Include="@(TargetsForPublish)">
                 <Properties>%(TargetsForPublish.Properties)</Properties>

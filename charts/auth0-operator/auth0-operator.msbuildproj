@@ -21,6 +21,8 @@
     </ItemGroup>
 
     <Target Name="CollectCrdItems" DependsOnTargets="ResolveProjectReferences">
+        <MSBuild Projects="..\..\src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" Properties="GenerateOperatorResources=False" />
+        <MSBuild Projects="..\..\src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" Properties="GenerateOperatorResources=True" />
         <ItemGroup>
             <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
         </ItemGroup>
