@@ -20,8 +20,12 @@ commonAnnotations: {}
 ##
 clusterDomain: cluster.local
 
-## @param installCRDs Whether to install the Custom Resource Definitions (CRDs) during chart installation.
-installCRDs: true
+## @param crds Options for installing Custom Resource Definitions (CRDs)
+crds:
+  ## @param enabled Whether to install the Custom Resource Definitions (CRDs) during chart installation.
+  enabled: true
+  ## @param keep Whether to retain CRDs when the chart is uninstalled.
+  keep: false
 
 operator:
   env: []

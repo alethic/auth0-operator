@@ -100,5 +100,8 @@ CRD labels.
 CRD annotations.
 */}}
 {{- define "auth0-operator.crd.annotations" -}}
+{{- if .Values.crds.keep }}
+helm.sh/resource-policy: keep
+{{- end }}
 {{ include "auth0-operator.annotations" . }}
 {{- end }}
