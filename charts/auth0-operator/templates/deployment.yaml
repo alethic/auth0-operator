@@ -38,9 +38,22 @@ spec:
       {{- with .Values.operator.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      {{- with .Values.operator.initContainers }}
-      initContainers: {{- toYaml . | nindent 8 }}
-      {{- end }}
+      initContainers:
+        {{- with .Values.operator.initContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: update-ca-certificates
+          image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          command: ['/usr/sbin/update-ca-certificates']
+          volumeMounts:
+            - mountPath: /etc/ssl/certs/auth0-operator-ca.pem
+              name: ca-cert
+              subPath: ca.crt
+              readOnly: true
+            - mountPath: /certs
+              name: certs
+              readOnly: true
       containers:
         - name: auth0-operator
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
@@ -50,10 +63,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-
-            # Include CAs
-            - name: SSL_CERT_DIR
-              value: /certs:/etc/ssl/certs
 
             # Configure Kestrel to use the TLS certificate mounted from the secret.
             - name: Kestrel__Certificates__Default__Path
@@ -99,6 +108,10 @@ spec:
           {{- with .Values.operator.volumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
+            - mountPath: /etc/ssl/certs/auth0-operator-ca.pem
+              name: certs
+              subPath: ca.crt
+              readOnly: true
             - mountPath: /certs
               name: certs
               readOnly: true
