@@ -59,6 +59,17 @@
                         
                             if (annotations is YamlMappingNode annotationsMapping)
                                 annotationsMapping.Children[new YamlScalarNode("helm.sh/resource-policy")] = new YamlScalarNode("keep");
+                                
+                            if (metadataMapping.Children.TryGetValue(new YamlScalarNode("labels"), out var labels) == false)
+                                metadataMapping.Add("labels", labels = new YamlMappingNode());
+                        
+                            if (labels is YamlMappingNode labelsMapping)
+                            {
+                                labelsMapping.Children[new YamlScalarNode("app.kubernetes.io/name")] = new YamlScalarNode(@"{{ include ""auth0-operator.name"" . }}") { Style = ScalarStyle.ForcePlain };
+                                labelsMapping.Children[new YamlScalarNode("app.kubernetes.io/instance")] = new YamlScalarNode("{{ .Release.Name }}") { Style = ScalarStyle.ForcePlain };
+                                labelsMapping.Children[new YamlScalarNode("app.kubernetes.io/version")] = new YamlScalarNode("{{ .Chart.AppVersion | quote }}") { Style = ScalarStyle.ForcePlain };
+                                labelsMapping.Children[new YamlScalarNode("app.kubernetes.io/managed-by")] = new YamlScalarNode("{{ .Release.Service }}") { Style = ScalarStyle.ForcePlain };
+                            }
                         }
 
                         if (rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping &&
