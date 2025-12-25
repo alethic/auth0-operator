@@ -45,6 +45,8 @@ spec:
         - name: update-ca-certificates
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
           imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          securityContext:
+            runAsUser: 0
           command: ['/usr/sbin/update-ca-certificates']
           volumeMounts:
             - mountPath: /usr/local/share/ca-certificates/ca.crt
