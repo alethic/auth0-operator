@@ -41,7 +41,7 @@
             </_TargetsForPrepare>
         </ItemGroup>
 
-        <MSBuild BuildInParallel="$(BuildInParallel)" ContinueOnError="false" Projects="@(_TargetsForPrepare)" Targets="%(_TargetsForPrepare.Targets)" />
+        <MSBuild BuildInParallel="False" ContinueOnError="false" Projects="@(_TargetsForPrepare)" Targets="%(_TargetsForPrepare.Targets)" />
     </Target>
 
     <Target Name="Publish" DependsOnTargets="Prepare">
