@@ -129,7 +129,7 @@
         <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
         <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" Condition="Exists('%(CrdItem.Identity)')" />
         <ItemGroup>
-            <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\crds\%(Filename).yaml" />
+            <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\crd_%(Filename).yaml" />
             <FileWrites Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
         </ItemGroup>
     </Target>
