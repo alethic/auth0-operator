@@ -76,16 +76,16 @@ We store this certificate in .Values._.CA*
 {{- end }}
 
 {{/*
-Generate a common webhook certificate
-We store this certificate in .Values._.Webhook*
+Generate a common TLS certificate
+We store this certificate in .Values._.TLS*
 */}}
-{{- define "auth0-operator.gen-webhook-cert" -}}
+{{- define "auth0-operator.gen-tls-cert" -}}
 {{- template "auth0-operator.gen-ca-cert" . }}
-{{- if not .Values._.Webhook }}
-  {{- $cert := genSignedCert (include "auth0-operator.fullname" .) nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace "cluster.local")) 3650 .Values._.CA }}
-  {{- $_ := set .Values._ "Webhook" $cert }}
-  {{- $_ := set .Values._ "WebhookCert" ($cert.Cert | b64enc) }}
-  {{- $_ := set .Values._ "WebhookKey" ($cert.Key | b64enc) }}
+{{- if not .Values._.TLS }}
+  {{- $cert := genSignedCert "auth0-operator-tls" nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace .Values.clusterDomain)) 3650 .Values._.CA }}
+  {{- $_ := set .Values._ "TLS" $cert }}
+  {{- $_ := set .Values._ "TLSCert" ($cert.Cert | b64enc) }}
+  {{- $_ := set .Values._ "TLSKey" ($cert.Key | b64enc) }}
 {{- end }}
 {{- end }}
 

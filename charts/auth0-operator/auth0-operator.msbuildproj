@@ -142,7 +142,7 @@
     </Target>
 
     <Target Name="PackageHelm" DependsOnTargets="StageHelm" BeforeTargets="AssignTargetPaths">
-        <Exec Command="helm package $(IntermediateOutputPath)\chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
+        <Exec Command="helm package $(IntermediateOutputPath)chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
         <ItemGroup>
             <None Include="$(IntermediateOutputPath)$(ChartPackage)">
                 <TargetPath>$(ChartPackage)</TargetPath>
