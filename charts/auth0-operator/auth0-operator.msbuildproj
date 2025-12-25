@@ -74,7 +74,7 @@
                                     if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) && name is YamlScalarNode nameScalar)
                                     {
                                         nameScalar.Style = ScalarStyle.ForcePlain;
-                                        nameScalar.Value = "{{ include \"auth0-operator.fullname\" . }}";
+                                        nameScalar.Value = @"{{ include ""auth0-operator.fullname"" . }}";
                                     }
                                 }
                             }
