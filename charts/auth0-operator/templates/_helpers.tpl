@@ -31,6 +31,14 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "auth0-operator.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "auth0-operator.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "auth0-operator.labels" -}}
@@ -40,17 +48,15 @@ helm.sh/chart: {{ include "auth0-operator.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.operator.additionalLabels }}
+{{- toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*
-Selector labels
+Generate a common CA certificate
+We store this certificate in .Values.global.CA*
 */}}
-{{- define "auth0-operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "auth0-operator.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/* Generate a common CA certificate */}}
 {{- define "auth0-operator.gen-ca-cert" -}}
 {{- if not (and .Values.global.CAKey .Values.global.CACertificate) }}
   {{- $ca := genCA "auth0-operator-ca" 365 }}
@@ -60,7 +66,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- end }}
 
-{{/* Generate a common webhook certificate */}}
+{{/*
+Generate a common webhook certificate
+We store this certificate in .Values.global.Webhook*
+*/}}
 {{- define "auth0-operator.gen-webhook-cert" -}}
 {{- template "auth0-operator.gen-ca-cert" . }}
 {{- if not (and .Values.global.WebhookKey .Values.global.WebhookCertificate) }}

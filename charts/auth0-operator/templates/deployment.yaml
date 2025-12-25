@@ -49,13 +49,16 @@ spec:
             runAsNonRoot: false
             runAsUser: 0
             runAsGroup: 0
-          command:
-            - /usr/sbin/update-ca-certificates
+            command: ["/bin/sh", "-c"]
+            args:
+            - /usr/sbin/update-ca-certificates && cp -r /etc/ssl/certs/* /ssl-certs
           volumeMounts:
             - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
               subPath: ca.crt
               readOnly: true
+            - mountPath: /ssl-certs
+              name: ssl-certs
       containers:
         - name: auth0-operator
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
@@ -110,9 +113,8 @@ spec:
           {{- with .Values.operator.volumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
-            - mountPath: /usr/local/share/ca-certificates/ca.crt
-              name: certs
-              subPath: ca.crt
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
               readOnly: true
             - mountPath: /certs
               name: certs
@@ -121,6 +123,8 @@ spec:
       {{- with .Values.operator.volumes }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: ssl-certs
+          emptyDir: {}
         - name: certs
           secret:
             defaultMode: 420
