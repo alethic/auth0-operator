@@ -49,8 +49,8 @@ spec:
             runAsNonRoot: false
             runAsUser: 0
             runAsGroup: 0
-            command:
-            - /usr/sbin/update-ca-certificates
+          command:
+          - /usr/sbin/update-ca-certificates
           volumeMounts:
             - mountPath: /etc/ssl/certs
               name: ssl-certs
