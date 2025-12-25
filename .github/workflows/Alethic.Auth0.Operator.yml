@@ -31,6 +31,8 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.x
+    - name: DotNet Tool Restore
+      run: dotnet tool restore
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v3
       with:
@@ -46,8 +48,6 @@ jobs:
       env:
         GITHUB_REPOS: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: DotNet Tool Restore
-      run: dotnet tool restore
     - name: DotNet Package Restore
       run: dotnet restore Alethic.Auth0.Operator.sln
     - name: Build
