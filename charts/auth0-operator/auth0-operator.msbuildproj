@@ -60,12 +60,23 @@
                                     continue;
                                     
                             if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping &&
-                                webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping &&
-                                clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                                webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping)
                             {
-                                caBundleScalar.Style = ScalarStyle.ForcePlain;
-                                caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
-                                includeCaBundle = true;
+                                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                                {
+                                    caBundleScalar.Style = ScalarStyle.ForcePlain;
+                                    caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
+                                    includeCaBundle = true;
+                                }
+                                
+                                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("service"), out var service) && service is YamlMappingNode serviceMapping)
+                                {
+                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) && name is YamlScalarNode nameScalar)
+                                    {
+                                        nameScalar.Style = ScalarStyle.ForcePlain;
+                                        nameScalar.Value = "{{ include \"auth0-operator.fullname\" . }}";
+                                    }
+                                }
                             }
                         }
                     }

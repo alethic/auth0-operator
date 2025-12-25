@@ -50,17 +50,6 @@ app.kubernetes.io/name: {{ include "auth0-operator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "auth0-operator.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "auth0-operator.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
 {{/* Generate a common CA certificate */}}
 {{- define "auth0-operator.gen-ca-cert" -}}
 {{- if not (and .Values.global.CAKey .Values.global.CACertificate) }}
