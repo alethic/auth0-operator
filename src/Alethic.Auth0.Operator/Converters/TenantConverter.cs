@@ -60,7 +60,7 @@ namespace Alethic.Auth0.Operator.Converters
 
             V1TenantConf? Convert(V2alpha1TenantConf? conf)
             {
-                return conf != null ? JsonSerializer.Deserialize<V1TenantConf>(JsonSerializer.Serialize(conf)) : null;
+                return conf != null ? JsonSerializer.Deserialize<V1TenantConf>(JsonSerializer.Serialize(conf.Settings)) : null;
             }
 
         }
