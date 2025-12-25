@@ -34,7 +34,7 @@ jobs:
     - name: DotNet Tool Restore
       run: dotnet tool restore
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/install@v4
+      uses: gittools/actions/gitversion/setup@v4
     - name: Execute GitVersion
       uses: gittools/actions/gitversion/execute@v4
       with:
