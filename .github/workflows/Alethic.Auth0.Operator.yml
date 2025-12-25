@@ -50,7 +50,27 @@ jobs:
       run: dotnet tool restore
     - name: DotNet Package Restore
       run: dotnet restore Alethic.Auth0.Operator.sln
-    - name: Build
+    - name: Build (Debug)
+      run: |
+        dotnet msbuild /m /bl \
+          /p:Configuration="Debug" \
+          /p:Platform="Any CPU" \
+          /p:Version=${GitVersion_FullSemVer} \
+          /p:AssemblyVersion=${GitVersion_AssemblySemVer} \
+          /p:InformationalVersion=${GitVersion_InformationalVersion} \
+          /p:FileVersion=${GitVersion_AssemblySemFileVer} \
+          /p:PackageVersion=${GitVersion_FullSemVer} \
+          /p:RepositoryUrl="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" \
+          /p:PackageProjectUrl="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+          /p:BuildInParallel=true \
+          /p:CreateHardLinksForAdditionalFilesIfPossible=true \
+          /p:CreateHardLinksForCopyAdditionalFilesIfPossible=true \
+          /p:CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true \
+          /p:CreateHardLinksForCopyLocalIfPossible=true \
+          /p:CreateHardLinksForPublishFilesIfPossible=true \
+          /p:ContinuousIntegrationBuild=true \
+          Alethic.Auth0.Operator.dist.msbuildproj
+    - name: Build (Release)
       run: |
         dotnet msbuild /m /bl \
           /p:Configuration="Release" \

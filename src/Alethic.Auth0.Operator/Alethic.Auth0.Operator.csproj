@@ -9,7 +9,7 @@
         <ContainerRepository>auth0-operator-image</ContainerRepository>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <ContainerEnvironmentVariable Include="ASPNETCORE_FORWARDEDHEADERS_ENABLED" Value="true" />
         <ContainerEnvironmentVariable Include="ASPNETCORE_ENVIRONMENT" Value="Production" />
@@ -21,8 +21,8 @@
         <PackageReference Include="Auth0.AuthenticationApi" Version="7.43.0" />
         <PackageReference Include="Auth0.ManagementApi" Version="7.43.0" />
         <PackageReference Include="KubeOps.Generator" Version="9.11.9">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="KubeOps.Operator" Version="9.11.9" />
         <PackageReference Include="KubeOps.Operator.Web" Version="9.11.9" />
@@ -31,11 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="config\" />
+        <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
     </ItemGroup>
 
 </Project>
