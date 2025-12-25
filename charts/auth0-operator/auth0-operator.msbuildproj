@@ -80,7 +80,18 @@
                                 
                                 if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("service"), out var service) && service is YamlMappingNode serviceMapping)
                                 {
-                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) && name is YamlScalarNode nameScalar)
+                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("namespace"), out var @namespace) == false)
+                                        serviceMapping.Add("namespace", @namespace = new YamlScalarNode());
+                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) == false)
+                                        serviceMapping.Add("name", name = new YamlScalarNode());
+                                
+                                    if (@namespace is YamlScalarNode namespaceScalar)
+                                    {
+                                        namespaceScalar.Style = ScalarStyle.ForcePlain;
+                                        namespaceScalar.Value = @"{{ .Release.Namespace }}";
+                                    }
+                                    
+                                    if (name is YamlScalarNode nameScalar)
                                     {
                                         nameScalar.Style = ScalarStyle.ForcePlain;
                                         nameScalar.Value = @"{{ include ""auth0-operator.fullname"" . }}";
