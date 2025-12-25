@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 
-using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Core.Models.BrandingTheme;
 
