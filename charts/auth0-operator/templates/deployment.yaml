@@ -51,14 +51,14 @@ spec:
             runAsGroup: 0
             command: ["/bin/sh", "-c"]
             args:
-            - /usr/sbin/update-ca-certificates && cp -a /etc/ssl/certs/* /ssl-certs
+            - /usr/sbin/update-ca-certificates
           volumeMounts:
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
             - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
               subPath: ca.crt
               readOnly: true
-            - mountPath: /ssl-certs
-              name: ssl-certs
       containers:
         - name: auth0-operator
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
