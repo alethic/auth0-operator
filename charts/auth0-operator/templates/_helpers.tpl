@@ -59,7 +59,7 @@ We store this certificate in .Values.global.CA*
 */}}
 {{- define "auth0-operator.gen-ca-cert" -}}
 {{- if not .Values.global.CA }}
-  {{- $ca := genCA "auth0-operator-ca" 365 }}
+  {{- $ca := genCA "auth0-operator-ca" 3650 }}
   {{- $_ := set .Values.global "CA" $ca }}
   {{- $_ := set .Values.global "CACertificate" ($ca.Cert | b64enc) }}
   {{- $_ := set .Values.global "CAKey" ($ca.Key | b64enc) }}
@@ -73,7 +73,7 @@ We store this certificate in .Values.global.Webhook*
 {{- define "auth0-operator.gen-webhook-cert" -}}
 {{- template "auth0-operator.gen-ca-cert" . }}
 {{- if not .Values.global.Webhook }}
-  {{- $cert := genSignedCert (include "auth0-operator.fullname" .) nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace "cluster.local")) 365 .Values.global.CA }}
+  {{- $cert := genSignedCert (include "auth0-operator.fullname" .) nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace "cluster.local")) 3650 .Values.global.CA }}
   {{- $_ := set .Values.global "Webhook" $cert }}
   {{- $_ := set .Values.global "WebhookCertificate" ($cert.Cert | b64enc) }}
   {{- $_ := set .Values.global "WebhookKey" ($cert.Key | b64enc) }}
