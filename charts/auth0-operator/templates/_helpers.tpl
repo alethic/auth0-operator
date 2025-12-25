@@ -88,3 +88,17 @@ We store this certificate in .Values._.Webhook*
   {{- $_ := set .Values._ "WebhookKey" ($cert.Key | b64enc) }}
 {{- end }}
 {{- end }}
+
+{{/*
+CRD labels.
+*/}}
+{{- define "auth0-operator.crd.labels" -}}
+{{ include "auth0-operator.labels" . }}
+{{- end }}
+
+{{/*
+CRD annotations.
+*/}}
+{{- define "auth0-operator.crd.annotations" -}}
+{{ include "auth0-operator.annotations" . }}
+{{- end }}
