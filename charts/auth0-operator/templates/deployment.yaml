@@ -51,7 +51,7 @@ spec:
             runAsGroup: 0
             command: ["/bin/sh", "-c"]
             args:
-            - /usr/sbin/update-ca-certificates && cp -r /etc/ssl/certs/* /ssl-certs
+            - /usr/sbin/update-ca-certificates && cp -a /etc/ssl/certs/* /ssl-certs
           volumeMounts:
             - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
