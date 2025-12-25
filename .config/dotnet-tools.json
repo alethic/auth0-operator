@@ -1,20 +1,20 @@
 {
-  "version": 1,
-  "isRoot": true,
-  "tools": {
-    "kubeops.cli": {
-      "version": "9.11.9",
-      "commands": [
-        "kubeops"
-      ],
-      "rollForward": false
-    },
-    "gitversion.tool": {
-      "version": "6.5.1",
-      "commands": [
-        "dotnet-gitversion"
-      ],
-      "rollForward": false
+    "version": 1,
+    "isRoot": true,
+    "tools": {
+        "kubeops.cli": {
+            "version": "9.11.9",
+            "commands": [
+                "kubeops"
+            ],
+            "rollForward": false
+        },
+        "gitversion.tool": {
+            "version": "6.5.1",
+            "commands": [
+                "dotnet-gitversion"
+            ],
+            "rollForward": false
+        }
     }
-  }
 }
