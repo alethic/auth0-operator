@@ -51,11 +51,15 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             var api = await GetTenantApiClientAsync(entity, cancellationToken);
             if (api == null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}:{entity.Name()} failed to retrieve API client.");
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}:{entity.Name()} failed to retrieve API client.");
 
             var settings = await api.TenantSettings.GetAsync(cancellationToken: cancellationToken);
             if (settings is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} cannot be loaded from API.");
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} cannot be loaded from API.");
+
+            // apply lastconf to status before attempting update
+            entity.Status.LastConf = TransformToSystemTextJson<Hashtable>(settings);
+            entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
 
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
@@ -71,10 +75,8 @@ namespace Alethic.Auth0.Operator.Controllers
             }
 
             // retrieve and copy applied settings to status
-            settings = await api.TenantSettings.GetAsync(cancellationToken: cancellationToken);
             entity.Status.LastConf = TransformToSystemTextJson<Hashtable>(settings);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
-
             await ReconcileSuccessAsync(entity, cancellationToken);
         }
 

@@ -10,5 +10,4 @@ spec:
     port: 443
     targetPort: https
   selector:
-    matchLabels:
-      {{- include "auth0-operator.selectorLabels" . | nindent 6 }}
+    {{- include "auth0-operator.selectorLabels" . | nindent 4 }}
