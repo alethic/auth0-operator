@@ -33,4 +33,8 @@
       <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="config\" />
+    </ItemGroup>
+
 </Project>

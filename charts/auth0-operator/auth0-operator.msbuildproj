@@ -12,10 +12,19 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ChartItem Include="templates\**\*" TargetPath="templates\%(RecursiveDir)%(Filename)%(Extension)" />
         <ChartItem Include="*.yaml" TargetPath="%(Filename)%(Extension)" />
-        <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
     </ItemGroup>
+
+    <Target Name="CollectCrdItems" DependsOnTargets="ResolveProjectReferences">
+        <ItemGroup>
+            <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
+        </ItemGroup>
+    </Target>
 
     <UsingTask TaskName="RewriteCrd" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
@@ -108,7 +117,7 @@
         </Task>
     </UsingTask>
 
-    <Target Name="RewriteCrds">
+    <Target Name="RewriteCrds" DependsOnTargets="CollectCrdItems">
         <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
         <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" />
         <ItemGroup>
@@ -124,7 +133,7 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="PackageHelm" DependsOnTargets="StageHelm">
+    <Target Name="PackageHelm" DependsOnTargets="StageHelm" BeforeTargets="AssignTargetPaths">
         <Exec Command="helm package $(IntermediateOutputPath)\chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
         <ItemGroup>
             <None Include="$(IntermediateOutputPath)$(ChartPackage)">
@@ -136,9 +145,10 @@
     </Target>
 
     <Target Name="TestHelm" DependsOnTargets="PackageHelm">
+
     </Target>
 
-    <Target Name="BuildHelm" BeforeTargets="BeforeBuild" DependsOnTargets="RewriteCrds;StageHelm;PackageHelm;TestHelm">
+    <Target Name="BuildHelm" BeforeTargets="Build" DependsOnTargets="CollectCrdItems;RewriteCrds;StageHelm;PackageHelm;TestHelm">
 
     </Target>
 
