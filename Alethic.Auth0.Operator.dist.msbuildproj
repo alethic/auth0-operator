@@ -11,7 +11,7 @@
     <ItemGroup>
         <TargetsForPrepare Include="$(SolutionFile)">
             <Targets>Alethic_Auth0_Operator</Targets>
-            <Properties>GenerateOperatorResources=False</Properties>
+            <Properties>Configuration=Debug;GenerateOperatorResources=False</Properties>
         </TargetsForPrepare>
         <TargetsForPrepare Include="$(SolutionFile)">
             <Targets>Alethic_Auth0_Operator</Targets>
