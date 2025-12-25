@@ -51,6 +51,10 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
 
+            # Include CAs
+            - name: SSL_CERT_DIR
+              value: /certs:/etc/ssl/certs
+
             # Configure Kestrel to use the TLS certificate mounted from the secret.
             - name: Kestrel__Certificates__Default__Path
               value: /certs/tls.crt
