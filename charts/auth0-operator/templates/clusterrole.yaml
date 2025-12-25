@@ -10,9 +10,7 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - tenants
   - brandingthemes
-  - clients
   - clientgrants
   - connections
   - resourceservers
@@ -21,6 +19,8 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - tenants
+  - clients
   verbs:
   - '*'
 - apiGroups:
@@ -28,8 +28,7 @@ rules:
   resources:
   - secrets
   verbs:
-  - get
-  - list
+  - '*'
 - apiGroups:
   - events.k8s.io
   resources:
