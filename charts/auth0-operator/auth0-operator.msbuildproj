@@ -74,7 +74,7 @@
                                 if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
                                 {
                                     caBundleScalar.Style = ScalarStyle.ForcePlain;
-                                    caBundleScalar.Value = "{{ .Values.global.CACertificate | quote }}";
+                                    caBundleScalar.Value = "{{ .Values._.CACert | quote }}";
                                     includeCaBundle = true;
                                 }
                                 

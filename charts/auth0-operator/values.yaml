@@ -1,4 +1,24 @@
-global: {}
+_: {}
+
+## @param nameOverride String to partially override common.names.fullname
+##
+nameOverride: ""
+
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param clusterDomain Kubernetes cluster domain name
+##
+clusterDomain: cluster.local
 
 operator:
   env: []

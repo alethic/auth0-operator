@@ -55,27 +55,27 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{/*
 Generate a common CA certificate
-We store this certificate in .Values.global.CA*
+We store this certificate in .Values._.CA*
 */}}
 {{- define "auth0-operator.gen-ca-cert" -}}
-{{- if not .Values.global.CA }}
+{{- if not .Values._.CA }}
   {{- $ca := genCA "auth0-operator-ca" 3650 }}
-  {{- $_ := set .Values.global "CA" $ca }}
-  {{- $_ := set .Values.global "CACertificate" ($ca.Cert | b64enc) }}
-  {{- $_ := set .Values.global "CAKey" ($ca.Key | b64enc) }}
+  {{- $_ := set .Values._ "CA" $ca }}
+  {{- $_ := set .Values._ "CACert" ($ca.Cert | b64enc) }}
+  {{- $_ := set .Values._ "CAKey" ($ca.Key | b64enc) }}
 {{- end }}
 {{- end }}
 
 {{/*
 Generate a common webhook certificate
-We store this certificate in .Values.global.Webhook*
+We store this certificate in .Values._.Webhook*
 */}}
 {{- define "auth0-operator.gen-webhook-cert" -}}
 {{- template "auth0-operator.gen-ca-cert" . }}
-{{- if not .Values.global.Webhook }}
-  {{- $cert := genSignedCert (include "auth0-operator.fullname" .) nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace "cluster.local")) 3650 .Values.global.CA }}
-  {{- $_ := set .Values.global "Webhook" $cert }}
-  {{- $_ := set .Values.global "WebhookCertificate" ($cert.Cert | b64enc) }}
-  {{- $_ := set .Values.global "WebhookKey" ($cert.Key | b64enc) }}
+{{- if not .Values._.Webhook }}
+  {{- $cert := genSignedCert (include "auth0-operator.fullname" .) nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace "cluster.local")) 3650 .Values._.CA }}
+  {{- $_ := set .Values._ "Webhook" $cert }}
+  {{- $_ := set .Values._ "WebhookCert" ($cert.Cert | b64enc) }}
+  {{- $_ := set .Values._ "WebhookKey" ($cert.Key | b64enc) }}
 {{- end }}
 {{- end }}

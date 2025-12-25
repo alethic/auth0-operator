@@ -13,8 +13,8 @@ spec:
       labels:
         {{- include "auth0-operator.labels" . | nindent 8 }}
       annotations:
-        checksum/ca-cert: {{ .Values.global.CACertificate | sha256sum }}
-        checksum/cert: {{ .Values.global.WebhookCertificate | sha256sum }}
+        checksum/ca-cert: {{ .Values._.CACert | sha256sum }}
+        checksum/webhook-cert: {{ .Values._.WebhookCert | sha256sum }}
     spec:
       {{- with .Values.operator.imagePullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8 }}
