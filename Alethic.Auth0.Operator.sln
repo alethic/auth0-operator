@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35027.167
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E13F491D-01A4-4586-9D6C-C2B2150ACB65}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,8 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alethic.Auth0.Operator", "s
 EndProject
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dist-charts", "src\dist-charts\dist-charts.msbuildproj", "{6316A438-2FCF-4954-B46F-5046BEF0D943}"
 EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dist-containers", "src\dist-containers\dist-containers.msbuildproj", "{307042F8-3BDD-44EB-BF70-6DBCC091A596}"
-EndProject
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dist-tests", "src\dist-tests\dist-tests.msbuildproj", "{106A3B4E-8A86-4EE3-93E2-F2FCA88FB5E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{02941759-63AC-4273-B3A6-98952A6C507F}"
@@ -43,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "targets", "targets", "{ABA7
 		targets\PublishContainerProjectReferences.targets = targets\PublishContainerProjectReferences.targets
 	EndProjectSection
 EndProject
+Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dist-images", "src\dist-images\dist-images.msbuildproj", "{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,10 +57,6 @@ Global
 		{6316A438-2FCF-4954-B46F-5046BEF0D943}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6316A438-2FCF-4954-B46F-5046BEF0D943}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6316A438-2FCF-4954-B46F-5046BEF0D943}.Release|Any CPU.Build.0 = Release|Any CPU
-		{307042F8-3BDD-44EB-BF70-6DBCC091A596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{307042F8-3BDD-44EB-BF70-6DBCC091A596}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{307042F8-3BDD-44EB-BF70-6DBCC091A596}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{307042F8-3BDD-44EB-BF70-6DBCC091A596}.Release|Any CPU.Build.0 = Release|Any CPU
 		{106A3B4E-8A86-4EE3-93E2-F2FCA88FB5E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{106A3B4E-8A86-4EE3-93E2-F2FCA88FB5E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{106A3B4E-8A86-4EE3-93E2-F2FCA88FB5E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,16 +73,20 @@ Global
 		{71799DB3-A560-45D9-A9D7-0BEF2A2B8BA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71799DB3-A560-45D9-A9D7-0BEF2A2B8BA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71799DB3-A560-45D9-A9D7-0BEF2A2B8BA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6316A438-2FCF-4954-B46F-5046BEF0D943} = {7701B522-47BC-421D-A489-11A20069ABFE}
-		{307042F8-3BDD-44EB-BF70-6DBCC091A596} = {7701B522-47BC-421D-A489-11A20069ABFE}
 		{106A3B4E-8A86-4EE3-93E2-F2FCA88FB5E8} = {7701B522-47BC-421D-A489-11A20069ABFE}
 		{1B2FC917-BA10-4D6D-AF75-84B04C562F17} = {02941759-63AC-4273-B3A6-98952A6C507F}
 		{ABA7240B-0392-4EB4-802E-9B9016070123} = {E13F491D-01A4-4586-9D6C-C2B2150ACB65}
+		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D} = {7701B522-47BC-421D-A489-11A20069ABFE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C05A34CC-36F2-4012-8B98-F097B08D7D08}

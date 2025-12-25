@@ -21,8 +21,8 @@
 
     <ItemGroup>
         <TargetsForPublish Include="$(SolutionFile)">
-            <Targets>dist%5Cdist-containers:Publish</Targets>
-            <Properties>PublishDir=$(DistDir)\containers</Properties>
+            <Targets>dist%5Cdist-images:Publish</Targets>
+            <Properties>PublishDir=$(DistDir)\images</Properties>
         </TargetsForPublish>
         <TargetsForPublish Include="$(SolutionFile)">
             <Targets>dist%5Cdist-charts:Publish</Targets>

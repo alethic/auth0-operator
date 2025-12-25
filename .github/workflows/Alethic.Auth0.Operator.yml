@@ -65,14 +65,14 @@ jobs:
       with:
         name: msbuild.binlog
         path: msbuild.binlog
-    - name: Package Containers
-      run: tar czvf /tmp/containers.tar.gz containers
+    - name: Package Images
+      run: tar czvf /tmp/images.tar.gz images
       working-directory: dist
-    - name: Upload Containers
+    - name: Upload Images
       uses: actions/upload-artifact@v4
       with:
-        name: containers
-        path: /tmp/containers.tar.gz
+        name: images
+        path: /tmp/images.tar.gz
     - name: Package Charts
       run: tar czvf /tmp/charts.tar.gz charts
       working-directory: dist
@@ -108,13 +108,13 @@ jobs:
       run: dotnet tool restore
     - name: Execute GitVersion
       run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
-    - name: Download Containers
+    - name: Download Images
       uses: actions/download-artifact@v4
       with:
-        name: containers
+        name: images
         path: dist
-    - name: Restore Containers
-      run: tar xzvf containers.tar.gz
+    - name: Restore Images
+      run: tar xzvf images.tar.gz
       working-directory: dist
     - name: Download Charts
       uses: actions/download-artifact@v4
@@ -131,7 +131,7 @@ jobs:
         tag: ${{ steps.GitVersion.outputs.semVer }}
         allowUpdates: true
         omitBodyDuringUpdate: true
-        artifacts: dist/containers/*.tar,dist/charts/*.tgz
+        artifacts: dist/images/*.tar,dist/charts/*.tgz
         makeLatest: true
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login To Repository (GitHub)
@@ -140,11 +140,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
         registry: ghcr.io/${{ github.repository_owner }}
-    - name: Push Containers (GitHub)
+    - name: Push Images (GitHub)
       if: github.event_name != 'pull_request'
       uses: docker://quay.io/skopeo/stable:latest
       with:
-        args: copy "--dest-creds=${{ github.actor }}:${{ github.token }}" docker-archive:/github/workspace/dist/containers/auth0-operator-image.tar docker://ghcr.io/${{ github.repository_owner }}/auth0-operator-image:${{ steps.GitVersion.outputs.semVer }}
+        args: copy "--dest-creds=${{ github.actor }}:${{ github.token }}" docker-archive:/github/workspace/dist/images/auth0-operator-image.tar docker://ghcr.io/${{ github.repository_owner }}/auth0-operator-image:${{ steps.GitVersion.outputs.semVer }}
     - name: Push Charts (GitHub)
       if: github.event_name != 'pull_request'
       run: helm push dist/charts/*.tgz oci://ghcr.io/${{ github.repository_owner }}
