@@ -49,7 +49,6 @@ namespace Alethic.Auth0.Operator.Models
             public string? Id { get; set; }
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
             public V1alpha1BrandingThemeConf? LastConf { get; set; }
 
         }
