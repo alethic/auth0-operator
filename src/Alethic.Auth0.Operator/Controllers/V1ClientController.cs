@@ -171,8 +171,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} referenced secret {SecretName} which does not exist: creating.", EntityTypeName, entity.Namespace(), entity.Name(), entity.Spec.SecretRef.Name);
                 secret = await Kube.CreateAsync(
-                    new V1Secret(
-                        metadata: new V1ObjectMeta(namespaceProperty: entity.Spec.SecretRef.NamespaceProperty ?? defaultNamespace, name: entity.Spec.SecretRef.Name))
+                    new V1Secret() { Metadata = new V1ObjectMeta() { NamespaceProperty = entity.Spec.SecretRef.NamespaceProperty ?? defaultNamespace, Name = entity.Spec.SecretRef.Name } }
                         .WithOwnerReference(entity),
                     cancellationToken);
             }

@@ -447,16 +447,17 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         protected async Task ReconcileSuccessAsync(TEntity entity, CancellationToken cancellationToken)
         {
-            await _kube.CreateAsync(new Eventsv1Event(
-                    DateTime.Now,
-                    metadata: new V1ObjectMeta(namespaceProperty: entity.Namespace(), generateName: "auth0"),
-                    reportingController: "kubernetes.auth0.com/operator",
-                    reportingInstance: Dns.GetHostName(),
-                    regarding: entity.MakeObjectReference(),
-                    action: "Reconcile",
-                    type: "Normal",
-                    reason: "Success"),
-                cancellationToken);
+            await _kube.CreateAsync(new Eventsv1Event()
+            {
+                EventTime = DateTime.Now,
+                Metadata = new V1ObjectMeta() { NamespaceProperty = entity.Namespace(), GenerateName = "auth0" },
+                ReportingController = "kubernetes.auth0.com/operator",
+                ReportingInstance = Dns.GetHostName(),
+                Regarding = entity.MakeObjectReference(),
+                Action = "Reconcile",
+                Type = "Normal",
+                Reason = "Success"
+            }, cancellationToken);
         }
 
         /// <summary>
@@ -469,17 +470,18 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         protected async Task ReconcileWarningAsync(TEntity entity, string reason, string note, CancellationToken cancellationToken)
         {
-            await _kube.CreateAsync(new Eventsv1Event(
-                    DateTime.Now,
-                    metadata: new V1ObjectMeta(namespaceProperty: entity.Namespace(), generateName: "auth0"),
-                    reportingController: "kubernetes.auth0.com/operator",
-                    reportingInstance: Dns.GetHostName(),
-                    regarding: entity.MakeObjectReference(),
-                    action: "Reconcile",
-                    type: "Warning",
-                    reason: reason,
-                    note: note),
-                cancellationToken);
+            await _kube.CreateAsync(new Eventsv1Event()
+            {
+                EventTime = DateTime.Now,
+                Metadata = new V1ObjectMeta() { NamespaceProperty = entity.Namespace(), GenerateName = "auth0" },
+                ReportingController = "kubernetes.auth0.com/operator",
+                ReportingInstance = Dns.GetHostName(),
+                Regarding = entity.MakeObjectReference(),
+                Action = "Reconcile",
+                Type = "Warning",
+                Reason = reason,
+                Note = note
+            }, cancellationToken);
         }
 
         /// <summary>
@@ -492,17 +494,18 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         protected async Task DeletingWarningAsync(TEntity entity, string reason, string note, CancellationToken cancellationToken)
         {
-            await _kube.CreateAsync(new Eventsv1Event(
-                    DateTime.Now,
-                    metadata: new V1ObjectMeta(namespaceProperty: entity.Namespace(), generateName: "auth0"),
-                    reportingController: "kubernetes.auth0.com/operator",
-                    reportingInstance: Dns.GetHostName(),
-                    regarding: entity.MakeObjectReference(),
-                    action: "Deleting",
-                    type: "Warning",
-                    reason: reason,
-                    note: note),
-                cancellationToken);
+            await _kube.CreateAsync(new Eventsv1Event()
+            {
+                EventTime = DateTime.Now,
+                Metadata = new V1ObjectMeta() { NamespaceProperty = entity.Namespace(), GenerateName = "auth0" },
+                ReportingController = "kubernetes.auth0.com/operator",
+                ReportingInstance = Dns.GetHostName(),
+                Regarding = entity.MakeObjectReference(),
+                Action = "Deleting",
+                Type = "Warning",
+                Reason = reason,
+                Note = note
+            }, cancellationToken);
         }
 
         /// <summary>

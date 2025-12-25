@@ -70,6 +70,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
                 // push update to Auth0
                 var req = TransformToNewtonsoftJson<V1TenantConf, TenantSettingsUpdateRequest>(conf);
+                req.Flags ??= new();
                 req.Flags.EnableSSO = null;
                 settings = await api.TenantSettings.UpdateAsync(req, cancellationToken);
             }
