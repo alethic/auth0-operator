@@ -49,14 +49,12 @@ spec:
             runAsNonRoot: false
             runAsUser: 0
             runAsGroup: 0
-          command: ['/usr/sbin/update-ca-certificates']
+          command:
+            - /usr/sbin/update-ca-certificates
           volumeMounts:
             - mountPath: /usr/local/share/ca-certificates/ca.crt
               name: certs
               subPath: ca.crt
-              readOnly: true
-            - mountPath: /certs
-              name: certs
               readOnly: true
       containers:
         - name: auth0-operator
