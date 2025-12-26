@@ -23,6 +23,7 @@ using KubeOps.KubernetesClient;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Alethic.Auth0.Operator.Controllers
 {
@@ -72,6 +73,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (spec.Find is not null)
             {
+                // attempt to search by client ID
                 if (spec.Find.ClientId is string clientId)
                 {
                     try
@@ -83,11 +85,16 @@ namespace Alethic.Auth0.Operator.Controllers
                     catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find client with id {ClientId}.", EntityTypeName, entity.Namespace(), entity.Name(), clientId);
-                        return null;
                     }
                 }
 
-                return null;
+                // attempt to search by name
+                if (spec.Find.Name is string name)
+                {
+                    var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
+                    var self = list.FirstOrDefault(i => i.Name == name);
+                    return self?.ClientId;
+                }
             }
             else
             {
@@ -99,6 +106,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 var self = list.FirstOrDefault(i => i.Name == conf.Name);
                 return self?.ClientId;
             }
+
+            return null;
         }
 
         /// <inheritdoc />
