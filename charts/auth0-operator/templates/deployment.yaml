@@ -1,3 +1,5 @@
+{{- template "auth0-operator.selfsignedcerts" . -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,8 +17,8 @@ spec:
       labels:
         {{- include "auth0-operator.labels" . | nindent 8 }}
       annotations:
-        checksum/ca-cert: {{ .Values._.CACert | sha256sum }}
-        checksum/tls-cert: {{ .Values._.TLSCert | sha256sum }}
+        checksum/ca-cert:  {{ .Values._.selfsignedcerts.cacrt  | sha256sum }}
+        checksum/tls-cert: {{ .Values._.selfsignedcerts.tlscrt | sha256sum }}
     spec:
       {{- with .Values.operator.imagePullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8 }}

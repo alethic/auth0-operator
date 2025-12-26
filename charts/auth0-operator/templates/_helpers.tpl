@@ -63,29 +63,26 @@ Common annotations.
 {{- end }}
 
 {{/*
-Generate a common CA certificate
-We store this certificate in .Values._.CA*
+Generate or retrieve self-signed certificates for the operator.
 */}}
-{{- define "auth0-operator.gen-ca-cert" -}}
-{{- if not .Values._.CA }}
-  {{- $ca := genCA "auth0-operator-ca" 3650 }}
-  {{- $_ := set .Values._ "CA" $ca }}
-  {{- $_ := set .Values._ "CACert" ($ca.Cert | b64enc) }}
-  {{- $_ := set .Values._ "CAKey" ($ca.Key | b64enc) }}
-{{- end }}
-{{- end }}
+{{- define "auth0-operator.selfsignedcerts" -}}
+{{- if not .Values._.selfsignedcerts }}
 
-{{/*
-Generate a common TLS certificate
-We store this certificate in .Values._.TLS*
-*/}}
-{{- define "auth0-operator.gen-tls-cert" -}}
-{{- template "auth0-operator.gen-ca-cert" . }}
-{{- if not .Values._.TLS }}
-  {{- $cert := genSignedCert "auth0-operator-tls" nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace .Values.clusterDomain)) 3650 .Values._.CA }}
-  {{- $_ := set .Values._ "TLS" $cert }}
-  {{- $_ := set .Values._ "TLSCert" ($cert.Cert | b64enc) }}
-  {{- $_ := set .Values._ "TLSKey" ($cert.Key | b64enc) }}
+  {{/* Load existing secret data. These come out as base64 encoded certificate data. */}}
+  {{- $secret := default (dict "data" (dict)) (lookup "v1" "Secret" "" (printf "%s-tls" ( include "auth0-operator.fullname" . ))) }}
+  {{- $cacrt  := index $secret.data "ca.crt"  | default "" }}
+  {{- $tlscrt := index $secret.data "tls.crt" | default "" }}
+  {{- $tlskey := index $secret.data "tls.key" | default "" }}
+
+  {{- if and $cacrt $tlscrt $tlskey }}
+    {{/* Restore loaded data into selfsignedcerts value. */}}
+    {{- $_   := set .Values._ "selfsignedcerts" (dict "cacrt" $cacrt "tlscrt" $tlscrt "tlskey" $tlskey) }}
+  {{- else }}
+    {{/* Generate new CA and TLS certificates and store in selfsignedcerts value. */}}
+    {{- $ca  := genCA "auth0-operator-ca" 3650 }}
+    {{- $tls := genSignedCert "auth0-operator-tls" nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace (.Values.clusterDomain | default "cluster.local"))) 3650 $ca }}
+    {{- $_   := set .Values._ "selfsignedcerts" (dict "cacrt" ($ca.Cert | b64enc) "tlscrt" ($tls.Cert | b64enc) "tlskey" ($tls.Key | b64enc)) }}
+  {{- end }}
 {{- end }}
 {{- end }}
 

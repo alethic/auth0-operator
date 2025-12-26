@@ -71,7 +71,7 @@
                                 if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
                                 {
                                     caBundleScalar.Style = ScalarStyle.ForcePlain;
-                                    caBundleScalar.Value = "{{ .Values._.CACert | quote }}";
+                                    caBundleScalar.Value = "{{ .Values._.selfsignedcerts.cacrt | quote }}";
                                     includeCaBundle = true;
                                 }
                                 
@@ -104,7 +104,7 @@
                 buffer.WriteLine("{{- if .Values.crds.enabled }}");
                 
                 if (includeCaBundle)
-                    buffer.WriteLine(@"{{- template ""auth0-operator.gen-ca-cert"" . }}");
+                    buffer.WriteLine(@"{{- template ""auth0-operator.selfsignedcerts"" . }}");
                 
                 yaml.Save(buffer, false);
                 
