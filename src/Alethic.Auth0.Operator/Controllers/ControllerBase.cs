@@ -581,9 +581,6 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                if (entity.Spec.Conf == null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing configuration.");
-
                 // does work of reconciling, and log success
                 await Reconcile(entity, cancellationToken);
                 await ReconcileSuccessAsync(entity, cancellationToken);
@@ -638,7 +635,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // retry after the error interval
-                var interval = Options.Reconciliation.Interval;
+                var interval = Options.Reconciliation.RetryInterval;
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }

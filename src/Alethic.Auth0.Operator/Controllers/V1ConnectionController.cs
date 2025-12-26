@@ -113,7 +113,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf is null || string.IsNullOrEmpty(conf.Name))
                     return null;
 
-                var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), new PaginationInfo(0, int.MaxValue), cancellationToken: cancellationToken);
+                var list = await api.Connections.GetAllAsync(new GetConnectionsRequest(), (PaginationInfo?)null!, cancellationToken: cancellationToken);
                 var self = list.FirstOrDefault(i => i.Name == conf.Name);
                 if (self is not null)
                     Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection by name: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
