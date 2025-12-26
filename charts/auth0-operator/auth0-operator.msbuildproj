@@ -143,7 +143,7 @@
     </Target>
     
     <Target Name="PackageHelm" DependsOnTargets="StageHelm" BeforeTargets="AssignTargetPaths">
-        <Exec Command="helm package $(IntermediateOutputPath)chart --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
+        <Exec Command="helm package $(IntermediateOutputPath)chart --debug --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
         <ItemGroup>
             <None Include="$(IntermediateOutputPath)$(ChartPackage)">
                 <TargetPath>$(ChartPackage)</TargetPath>
@@ -154,7 +154,7 @@
     </Target>
     
     <Target Name="TestHelm" DependsOnTargets="PackageHelm">
-        <Exec Command="helm template $(IntermediateOutputPath)$(ChartPackage)" ContinueOnError="true" />
+        <Exec Command="helm template --debug $(IntermediateOutputPath)$(ChartPackage)" ContinueOnError="true" />
     </Target>
     
     <Target Name="BuildHelm" BeforeTargets="Build" DependsOnTargets="CollectCrdItems;RewriteCrds;StageHelm;PackageHelm;TestHelm">
