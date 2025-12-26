@@ -8,6 +8,8 @@ using Alethic.Auth0.Operator.Models;
 
 using KubeOps.Operator.Web.Webhooks.Conversion;
 
+using Microsoft.IdentityModel.Tokens;
+
 namespace Alethic.Auth0.Operator.Converters
 {
 
@@ -35,16 +37,10 @@ namespace Alethic.Auth0.Operator.Converters
                 result.Spec.Policy = from.Spec.Policy;
                 result.Spec.Name = from.Spec.Name;
                 result.Spec.Auth = from.Spec.Auth is { } auth ? new V2alpha1Tenant.SpecDef.AuthDef() { SecretRef = auth.SecretRef, Domain = auth.Domain } : null;
-                result.Spec.Init = new V2alpha1TenantConf() { Settings = Convert(from.Spec.Init) };
-                result.Spec.Conf = new V2alpha1TenantConf() { Settings = Convert(from.Spec.Conf) };
-                result.Status.LastConf = new V2alpha1TenantConf();
-                result.Status.LastConf.Settings = JsonSerializer.Deserialize<TenantSettings>(JsonSerializer.Serialize(from.Status.LastConf));
+                result.Spec.Init = new V2alpha1TenantConf() { Settings = JsonSerializer.Deserialize<TenantSettings?>(JsonSerializer.Serialize(from.Spec.Init)) };
+                result.Spec.Conf = new V2alpha1TenantConf() { Settings = JsonSerializer.Deserialize<TenantSettings?>(JsonSerializer.Serialize(from.Spec.Conf)) };
+                result.Status.LastConf = new V2alpha1TenantConf() { Settings = JsonSerializer.Deserialize<TenantSettings?>(JsonSerializer.Serialize(from.Status.LastConf)) };
                 return result;
-            }
-
-            TenantSettings? Convert(V1TenantConf? conf)
-            {
-                return conf != null ? JsonSerializer.Deserialize<TenantSettings>(JsonSerializer.Serialize(conf)) : null;
             }
 
             public V1Tenant Revert(V2alpha1Tenant from)
@@ -53,15 +49,10 @@ namespace Alethic.Auth0.Operator.Converters
                 result.Spec.Policy = from.Spec.Policy;
                 result.Spec.Name = from.Spec.Name;
                 result.Spec.Auth = from.Spec.Auth is { } auth ? new V1Tenant.SpecDef.AuthDef() { SecretRef = auth.SecretRef, Domain = auth.Domain } : null;
-                result.Spec.Init = Convert(from.Spec.Init);
-                result.Spec.Conf = Convert(from.Spec.Conf);
-                result.Status.LastConf = JsonSerializer.Deserialize<Hashtable>(JsonSerializer.Serialize(from.Status.LastConf?.Settings));
+                result.Spec.Init = JsonSerializer.Deserialize<V1TenantConf?>(JsonSerializer.Serialize(from.Spec.Init?.Settings));
+                result.Spec.Conf = JsonSerializer.Deserialize<V1TenantConf?>(JsonSerializer.Serialize(from.Spec.Conf?.Settings));
+                result.Status.LastConf = JsonSerializer.Deserialize<Hashtable?>(JsonSerializer.Serialize(from.Status.LastConf?.Settings));
                 return result;
-            }
-
-            V1TenantConf? Convert(V2alpha1TenantConf? conf)
-            {
-                return conf != null ? JsonSerializer.Deserialize<V1TenantConf>(JsonSerializer.Serialize(conf.Settings)) : null;
             }
 
         }
