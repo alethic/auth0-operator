@@ -37,7 +37,8 @@ namespace Alethic.Auth0.Operator.Converters
                 result.Spec.Auth = from.Spec.Auth is { } auth ? new V2alpha1Tenant.SpecDef.AuthDef() { SecretRef = auth.SecretRef, Domain = auth.Domain } : null;
                 result.Spec.Init = new V2alpha1TenantConf() { Settings = Convert(from.Spec.Init) };
                 result.Spec.Conf = new V2alpha1TenantConf() { Settings = Convert(from.Spec.Conf) };
-                result.Status.LastConf = JsonSerializer.Deserialize<V2alpha1TenantConf>(JsonSerializer.Serialize(from.Status.LastConf));
+                result.Status.LastConf = new V2alpha1TenantConf();
+                result.Status.LastConf.Settings = JsonSerializer.Deserialize<TenantSettings>(JsonSerializer.Serialize(from.Status.LastConf));
                 return result;
             }
 
@@ -54,7 +55,7 @@ namespace Alethic.Auth0.Operator.Converters
                 result.Spec.Auth = from.Spec.Auth is { } auth ? new V1Tenant.SpecDef.AuthDef() { SecretRef = auth.SecretRef, Domain = auth.Domain } : null;
                 result.Spec.Init = Convert(from.Spec.Init);
                 result.Spec.Conf = Convert(from.Spec.Conf);
-                result.Status.LastConf = JsonSerializer.Deserialize<Hashtable>(JsonSerializer.Serialize(from.Status.LastConf));
+                result.Status.LastConf = JsonSerializer.Deserialize<Hashtable>(JsonSerializer.Serialize(from.Status.LastConf?.Settings));
                 return result;
             }
 
