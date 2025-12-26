@@ -106,7 +106,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 
             // ensure we hold a reference to the tenant
             var md = entity.EnsureMetadata();
@@ -213,7 +213,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
             {

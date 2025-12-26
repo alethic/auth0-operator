@@ -213,7 +213,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var client = await ResolveClientRef(api, clientRef, defaultNamespace, cancellationToken);
             if (client is null)
-                throw new InvalidOperationException($"Could not resolve ClientRef {clientRef}.");
+                throw new RetryException($"Could not resolve ClientRef {clientRef}.");
             if (string.IsNullOrWhiteSpace(client.Status.Id))
                 throw new RetryException($"Referenced Client {client.Namespace()}/{client.Name()} has not been reconciled.");
 
@@ -270,7 +270,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 var self = await api.ResourceServers.GetAsync(id, cancellationToken);
                 if (self is null)
-                    throw new InvalidOperationException($"Failed to resolve ResourceServer reference {id}.");
+                    throw new RetryException($"Failed to resolve ResourceServer reference {id}.");
 
                 return self.Identifier;
             }
@@ -279,7 +279,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var resourceServer = await ResolveResourceServerRef(api, reference, defaultNamespace, cancellationToken);
             if (resourceServer is null)
-                throw new InvalidOperationException($"Could not resolve ResourceServerRef {reference}.");
+                throw new RetryException($"Could not resolve ResourceServerRef {reference}.");
 
             if (resourceServer.Status.Identifier is null)
                 throw new RetryException($"Referenced ResourceServer {resourceServer.Namespace()}/{resourceServer.Name()} has not been reconcilled.");
@@ -338,7 +338,7 @@ namespace Alethic.Auth0.Operator.Controllers
             });
 
             if (api is null)
-                throw new InvalidOperationException("Cannot retrieve tenant API client.");
+                throw new RetryException("Cannot retrieve tenant API client.");
 
             return api;
         }
@@ -393,7 +393,7 @@ namespace Alethic.Auth0.Operator.Controllers
             });
 
             if (api is null)
-                throw new InvalidOperationException("Cannot retrieve tenant API client.");
+                throw new RetryException("Cannot retrieve tenant API client.");
 
             return api;
         }
@@ -413,7 +413,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 var api = await GetTenantApiClientAsync(v1Tenant, cancellationToken);
                 if (api is null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+                    throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 
                 return api;
             }
@@ -423,12 +423,12 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 var api = await GetTenantApiClientAsync(v2alpha1Tenant, cancellationToken);
                 if (api is null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
+                    throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
 
                 return api;
             }
 
-            throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
+            throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
         }
 
         /// <summary>
@@ -669,9 +669,6 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                if (entity.Spec.Conf == null)
-                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing configuration.");
-
                 // does work of deleting, and log success
                 await DeletedAsync(entity, cancellationToken);
                 await DeletingSuccessAsync(entity, cancellationToken);
