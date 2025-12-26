@@ -56,11 +56,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{-     $tlscrt := index $secret.data "tls.crt" | default "" }}
 {{-     $tlskey := index $secret.data "tls.key" | default "" }}
 {{-     if and $cacrt $tlscrt $tlskey }}
-{{-       $_   := set .Values._ "selfsignedcerts" (dict "cacrt" $cacrt "tlscrt" $tlscrt "tlskey" $tlskey) }}
+{{-       $_    := set .Values._ "selfsignedcerts" (dict "cacrt" $cacrt "tlscrt" $tlscrt "tlskey" $tlskey) }}
 {{-     else }}
-{{-       $ca  := genCA "auth0-operator-ca" 3650 }}
-{{-       $tls := genSignedCert "auth0-operator-tls" nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace (.Values.clusterDomain | default "cluster.local"))) 3650 $ca }}
-{{-       $_   := set .Values._ "selfsignedcerts" (dict "cacrt" ($ca.Cert | b64enc) "tlscrt" ($tls.Cert | b64enc) "tlskey" ($tls.Key | b64enc)) }}
+{{-       $ca   := genCA "auth0-operator-ca" 3650 }}
+{{-       $tls  := genSignedCert "auth0-operator-tls" nil (list (printf "%s.%2s.svc" (include "auth0-operator.fullname" .) .Release.Namespace) (printf "%s.%s.svc.%s" (include "auth0-operator.fullname" .) .Release.Namespace (.Values.clusterDomain | default "cluster.local"))) 3650 $ca }}
+{{-       $_    := set .Values._ "selfsignedcerts" (dict "cacrt" ($ca.Cert | b64enc) "tlscrt" ($tls.Cert | b64enc) "tlskey" ($tls.Key | b64enc)) }}
 {{-     end }}
 {{-   end }}
 {{- end }}
