@@ -55,6 +55,25 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override string EntityTypeName => "Connection";
 
+        /// <summary>
+        /// Gets the list of enabled client IDs for the specified connection. This populates the legacy field using the newer API.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="connectionId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        async Task<string[]> GetEnabledClientsAsync(IManagementApiClient api, string connectionId, CancellationToken cancellationToken)
+        {
+            var clients = await api.Connections.GetEnabledClientsAsync(new global::Auth0.ManagementApi.Models.Connections.EnabledClientsGetRequest() { ConnectionId = connectionId }, cancellationToken: cancellationToken);
+
+            var l = new List<string>(clients.Count);
+            foreach (var client in clients)
+                if (client.ClientId is not null)
+                    l.Add(client.ClientId);
+
+            return l.ToArray();
+        }
+
         /// <inheritdoc />
         protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
@@ -73,7 +92,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 dict["is_domain_connection"] = self.IsDomainConnection;
                 dict["show_as_button"] = self.ShowAsButton;
                 dict["provisioning_ticket_url"] = self.ProvisioningTicketUrl;
-                dict["enabled_clients"] = self.EnabledClients;
+                dict["enabled_clients"] = await GetEnabledClientsAsync(api, self.Id, cancellationToken);
                 dict["options"] = TransformToSystemTextJson<Hashtable?>(self.Options);
                 dict["metadata"] = TransformToSystemTextJson<Hashtable?>(self.Metadata);
                 return dict;
@@ -135,7 +154,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        async Task<string[]?> ResolveClientRefsToIds(IManagementApiClient api, V1ClientReference[]? refs, string defaultNamespace, CancellationToken cancellationToken)
+        async Task<string[]> ResolveClientRefsToIds(IManagementApiClient api, V1ClientReference[]? refs, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (refs is null)
                 return Array.Empty<string>();
@@ -192,6 +211,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 req.Options = options;
 
             await api.Connections.UpdateAsync(id, req, cancellationToken);
+            await UpdateEnabledClientsAsync(api, id, conf, defaultNamespace, cancellationToken);
+
             Logger.LogInformation("{EntityTypeName} successfully updated connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, id, conf.Name, conf.Strategy);
         }
 
@@ -216,7 +237,25 @@ namespace Alethic.Auth0.Operator.Controllers
             req.Realms = conf.Realms ?? [];
             req.IsDomainConnection = conf.IsDomainConnection ?? false;
             req.ShowAsButton = conf.ShowAsButton;
-            req.EnabledClients = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken) ?? null!;
+        }
+
+        /// <summary>
+        /// Applies the update of enabled clients. This is a separate call in the API, so we need to handle it separately.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="id"></param>
+        /// <param name="conf"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        async Task UpdateEnabledClientsAsync(IManagementApiClient api, string id, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            if (conf.EnabledClients is not null)
+            {
+                var clientIds = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
+                var enabledClients = clientIds.Select(i => new global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate() { ClientId = i });
+                await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = enabledClients }, cancellationToken: cancellationToken);
+            }
         }
 
         /// <inheritdoc />
