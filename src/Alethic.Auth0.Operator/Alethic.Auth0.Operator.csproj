@@ -19,12 +19,12 @@
     <ItemGroup>
         <PackageReference Include="Auth0.AuthenticationApi" Version="7.45.1" />
         <PackageReference Include="Auth0.ManagementApi" Version="7.46.0" />
-        <PackageReference Include="KubeOps.Generator" Version="10.0.4">
+        <PackageReference Include="KubeOps.Generator" Version="10.3.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="KubeOps.Operator" Version="10.0.4" />
-        <PackageReference Include="KubeOps.Operator.Web" Version="10.0.4" />
+        <PackageReference Include="KubeOps.Operator" Version="10.3.2" />
+        <PackageReference Include="KubeOps.Operator.Web" Version="10.3.2" />
     </ItemGroup>
 
     <ItemGroup>

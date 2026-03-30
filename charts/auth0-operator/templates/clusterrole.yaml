@@ -75,14 +75,6 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - tenants/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
   - clients/status
   verbs:
   - get
