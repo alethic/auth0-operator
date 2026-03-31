@@ -116,6 +116,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 entity = await Kube.UpdateAsync(entity, cancellationToken);
             }
 
+            if (entity.Spec.TenantRef is null)
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
+
             // get API client for tenant
             var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
