@@ -3,17 +3,6 @@ kind: CustomResourceDefinition
 metadata:
   name: tenants.kubernetes.auth0.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        caBundle: {{ .Values._.selfsignedcerts.cacrt | quote }}
-        service:
-          name: {{ include "auth0-operator.fullname" . }}
-          path: /convert/kubernetes.auth0.com/tenants
-          namespace: {{ .Release.Namespace }}
-      conversionReviewVersions:
-      - v1
   group: kubernetes.auth0.com
   names:
     kind: Tenant
