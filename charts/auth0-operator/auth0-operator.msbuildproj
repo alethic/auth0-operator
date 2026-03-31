@@ -117,7 +117,7 @@
                 while ((line = copier.ReadLine()) != null)
                 {
                     if (line == "...")
-                        writer.WriteLine("---");
+                        writer.WriteLine("");
                     else
                         writer.WriteLine(line);
                 }
@@ -130,7 +130,7 @@
         <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
         <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" Condition="Exists('%(CrdItem.Identity)')" />
         <ItemGroup>
-            <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\customresourcedefinitions\%(Filename).yaml" />
+            <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\%(Filename).yaml" />
             <FileWrites Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
         </ItemGroup>
     </Target>
