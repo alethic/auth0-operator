@@ -43,64 +43,64 @@
                 
                 var includeCaBundle = false;
                 
-                foreach (var doc in yaml.Documents)
-                {
-                    if (doc.RootNode is YamlMappingNode rootMapping)
-                    {
-                    
-                        //if (rootMapping.Children.TryGetValue(new YamlScalarNode("metadata"), out var metadata) && metadata is YamlMappingNode metadataMapping)
-                        //{
-                        //    metadataMapping.Children[new YamlScalarNode("labels")] = new YamlScalarNode(@"{{- include ""auth0-operator.crd.labels"" . | nindent 4 }}") { Style = ScalarStyle.ForcePlain };
-                        //    metadataMapping.Children[new YamlScalarNode("annotations")] = new YamlScalarNode(@"{{- include ""auth0-operator.crd.annotations"" . | nindent 4 }}") { Style = ScalarStyle.ForcePlain };
-                        //}
-                
-                        if (rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping &&
-                            specMapping.Children.TryGetValue(new YamlScalarNode("conversion"), out var conversion) && conversion is YamlMappingNode conversionMapping)
-                        {
-                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("strategy"), out var strategy) && strategy is YamlScalarNode strategyScalar)
-                                if (strategyScalar.Value != "Webhook")
-                                    continue;
-                                    
-                            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping &&
-                                webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping)
-                            {
-                                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
-                                {
-                                    caBundleScalar.Style = ScalarStyle.ForcePlain;
-                                    caBundleScalar.Value = "{{ .Values._.selfsignedcerts.cacrt | quote }}";
-                                    includeCaBundle = true;
-                                }
-                                
-                                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("service"), out var service) && service is YamlMappingNode serviceMapping)
-                                {
-                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("namespace"), out var @namespace) == false)
-                                        serviceMapping.Add("namespace", @namespace = new YamlScalarNode());
-                                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) == false)
-                                        serviceMapping.Add("name", name = new YamlScalarNode());
-                                
-                                    if (@namespace is YamlScalarNode namespaceScalar)
-                                    {
-                                        namespaceScalar.Style = ScalarStyle.ForcePlain;
-                                        namespaceScalar.Value = @"{{ .Release.Namespace }}";
-                                    }
-                                    
-                                    if (name is YamlScalarNode nameScalar)
-                                    {
-                                        nameScalar.Style = ScalarStyle.ForcePlain;
-                                        nameScalar.Value = @"{{ include ""auth0-operator.fullname"" . }}";
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                //foreach (var doc in yaml.Documents)
+                //{
+                //    if (doc.RootNode is YamlMappingNode rootMapping)
+                //    {
+                //    
+                //        if (rootMapping.Children.TryGetValue(new YamlScalarNode("metadata"), out var metadata) && metadata is YamlMappingNode metadataMapping)
+                //        {
+                //            metadataMapping.Children[new YamlScalarNode("labels")] = new YamlScalarNode(@"{{- include ""auth0-operator.crd.labels"" . | nindent 4 }}") { Style = ScalarStyle.ForcePlain };
+                //            metadataMapping.Children[new YamlScalarNode("annotations")] = new YamlScalarNode(@"{{- include ""auth0-operator.crd.annotations"" . | nindent 4 }}") { Style = ScalarStyle.ForcePlain };
+                //        }
+                //
+                //        if (rootMapping.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) && spec is YamlMappingNode specMapping &&
+                //            specMapping.Children.TryGetValue(new YamlScalarNode("conversion"), out var conversion) && conversion is YamlMappingNode conversionMapping)
+                //        {
+                //            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("strategy"), out var strategy) && strategy is YamlScalarNode strategyScalar)
+                //                if (strategyScalar.Value != "Webhook")
+                //                    continue;
+                //                    
+                //            if (conversionMapping.Children.TryGetValue(new YamlScalarNode("webhook"), out var webhook) && webhook is YamlMappingNode webhookMapping &&
+                //                webhookMapping.Children.TryGetValue(new YamlScalarNode("clientConfig"), out var clientConfig) && clientConfig is YamlMappingNode clientConfigMapping)
+                //            {
+                //                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("caBundle"), out var caBundle) && caBundle is YamlScalarNode caBundleScalar)
+                //                {
+                //                    caBundleScalar.Style = ScalarStyle.ForcePlain;
+                //                    caBundleScalar.Value = "{{ .Values._.selfsignedcerts.cacrt | quote }}";
+                //                    includeCaBundle = true;
+                //                }
+                //                
+                //                if (clientConfigMapping.Children.TryGetValue(new YamlScalarNode("service"), out var service) && service is YamlMappingNode serviceMapping)
+                //                {
+                //                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("namespace"), out var @namespace) == false)
+                //                        serviceMapping.Add("namespace", @namespace = new YamlScalarNode());
+                //                    if (serviceMapping.Children.TryGetValue(new YamlScalarNode("name"), out var name) == false)
+                //                        serviceMapping.Add("name", name = new YamlScalarNode());
+                //                
+                //                    if (@namespace is YamlScalarNode namespaceScalar)
+                //                    {
+                //                        namespaceScalar.Style = ScalarStyle.ForcePlain;
+                //                        namespaceScalar.Value = @"{{ .Release.Namespace }}";
+                //                    }
+                //                    
+                //                    if (name is YamlScalarNode nameScalar)
+                //                    {
+                //                        nameScalar.Style = ScalarStyle.ForcePlain;
+                //                        nameScalar.Value = @"{{ include ""auth0-operator.fullname"" . }}";
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
                 
                 var buffer = new StringWriter();
                 
                 //buffer.WriteLine("{{- if .Values.crds.enabled }}");
                 
-                if (includeCaBundle)
-                    buffer.WriteLine(@"{{- template ""auth0-operator.selfsignedcerts"" . }}");
+                //if (includeCaBundle)
+                //    buffer.WriteLine(@"{{- template ""auth0-operator.selfsignedcerts"" . }}");
                 
                 yaml.Save(buffer, false);
                 
@@ -113,7 +113,7 @@
                 while ((line = copier.ReadLine()) != null)
                 {
                     if (string.IsNullOrWhiteSpace(line.Trim()))
-                        writer.WriteLine("sdf");
+                        writer.WriteLine("");
                     else if (line == "...")
                         writer.WriteLine("");
                     else
@@ -124,12 +124,12 @@
         </Task>
     </UsingTask>
     <Target Name="RewriteCrds" DependsOnTargets="CollectCrdItems">
-        <!--<MakeDir Directories="$(IntermediateOutputPath)\crds\" />
-        <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).1yaml" Condition="Exists('%(CrdItem.Identity)')" />
+        <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
+        <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" Condition="Exists('%(CrdItem.Identity)')" />
         <ItemGroup>
             <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\crd-%(Filename).yaml" />
             <FileWrites Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
-        </ItemGroup>-->
+        </ItemGroup>
     </Target>
     <Target Name="StageHelm" DependsOnTargets="RewriteCrds">
         <Copy SourceFiles="@(ChartItem)" DestinationFiles="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
