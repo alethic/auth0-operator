@@ -16,14 +16,6 @@
         <ChartItem Include="templates\**\*" TargetPath="templates\%(RecursiveDir)%(Filename)%(Extension)" />
         <ChartItem Include="*.yaml" TargetPath="%(Filename)%(Extension)" />
     </ItemGroup>
-    <ItemGroup>
-        <ChartItem Remove="templates\crd-brandingthemes_kubernetes_auth0_com.yaml" />
-        <ChartItem Remove="templates\crd-clientgrants_kubernetes_auth0_com.yaml" />
-        <ChartItem Remove="templates\crd-clients_kubernetes_auth0_com.yaml" />
-        <ChartItem Remove="templates\crd-connections_kubernetes_auth0_com.yaml" />
-        <ChartItem Remove="templates\crd-resourceservers_kubernetes_auth0_com.yaml" />
-        <ChartItem Remove="templates\crd-tenants_kubernetes_auth0_com.yaml" />
-    </ItemGroup>
     <Target Name="CollectCrdItems" DependsOnTargets="ResolveProjectReferences">
         <ItemGroup>
             <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
