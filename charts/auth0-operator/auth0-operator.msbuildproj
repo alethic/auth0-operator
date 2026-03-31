@@ -6,26 +6,29 @@
         <ChartName>auth0-operator</ChartName>
         <ChartPackage>$(ChartName)-$(Version).tgz</ChartPackage>
     </PropertyGroup>
-    
     <ItemGroup>
         <PackageReference Include="YamlDotNet" Version="16.3.0" GeneratePathProperty="true" />
     </ItemGroup>
-    
     <ItemGroup>
         <ProjectReference Include="..\..\src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" />
     </ItemGroup>
-    
     <ItemGroup>
         <ChartItem Include="templates\**\*" TargetPath="templates\%(RecursiveDir)%(Filename)%(Extension)" />
         <ChartItem Include="*.yaml" TargetPath="%(Filename)%(Extension)" />
     </ItemGroup>
-    
+    <ItemGroup>
+        <ChartItem Remove="templates\crd-brandingthemes_kubernetes_auth0_com.yaml" />
+        <ChartItem Remove="templates\crd-clientgrants_kubernetes_auth0_com.yaml" />
+        <ChartItem Remove="templates\crd-clients_kubernetes_auth0_com.yaml" />
+        <ChartItem Remove="templates\crd-connections_kubernetes_auth0_com.yaml" />
+        <ChartItem Remove="templates\crd-resourceservers_kubernetes_auth0_com.yaml" />
+        <ChartItem Remove="templates\crd-tenants_kubernetes_auth0_com.yaml" />
+    </ItemGroup>
     <Target Name="CollectCrdItems" DependsOnTargets="ResolveProjectReferences">
         <ItemGroup>
             <CrdItem Include="..\..\src\Alethic.Auth0.Operator\config\*_kubernetes_auth0_com.yaml" />
         </ItemGroup>
     </Target>
-    
     <UsingTask TaskName="RewriteCrd" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
             <Source ParameterType="System.String" Required="true" />
@@ -39,7 +42,7 @@
             <Using Namespace="YamlDotNet.Core" />
             <Using Namespace="YamlDotNet.RepresentationModel" />
             <Code Type="Fragment" Language="cs">
-                        <![CDATA[
+                <![CDATA[
             
 			    var yaml = new YamlStream();
                 
@@ -128,23 +131,20 @@
             </Code>
         </Task>
     </UsingTask>
-    
     <Target Name="RewriteCrds" DependsOnTargets="CollectCrdItems">
-        <MakeDir Directories="$(IntermediateOutputPath)\crds\" />
-        <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).yaml" Condition="Exists('%(CrdItem.Identity)')" />
+        <!--<MakeDir Directories="$(IntermediateOutputPath)\crds\" />
+        <RewriteCrd Source="@(CrdItem)" Target="$(IntermediateOutputPath)\crds\%(Filename).1yaml" Condition="Exists('%(CrdItem.Identity)')" />
         <ItemGroup>
             <ChartItem Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" TargetPath="templates\crd-%(Filename).yaml" />
             <FileWrites Include="@(CrdItem->'$(IntermediateOutputPath)\crds\%(Filename).yaml')" />
-        </ItemGroup>
+        </ItemGroup>-->
     </Target>
-    
     <Target Name="StageHelm" DependsOnTargets="RewriteCrds">
         <Copy SourceFiles="@(ChartItem)" DestinationFiles="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
         <ItemGroup>
             <FileWrites Include="@(ChartItem->'$(IntermediateOutputPath)chart\%(TargetPath)')" />
         </ItemGroup>
     </Target>
-    
     <Target Name="PackageHelm" DependsOnTargets="StageHelm" BeforeTargets="AssignTargetPaths">
         <Exec Command="helm package $(IntermediateOutputPath)chart --debug --version $(Version) --app-version $(Version) -u -d $(IntermediateOutputPath)" />
         <ItemGroup>
@@ -155,13 +155,9 @@
             <FileWrites Include="$(IntermediateOutputPath)$(ChartPackage)" />
         </ItemGroup>
     </Target>
-    
     <Target Name="TestHelm" DependsOnTargets="PackageHelm">
         <Exec Command="helm template --debug $(IntermediateOutputPath)$(ChartPackage)" ContinueOnError="true" />
     </Target>
-    
     <Target Name="BuildHelm" BeforeTargets="Build" DependsOnTargets="CollectCrdItems;RewriteCrds;StageHelm;PackageHelm;TestHelm">
-        
     </Target>
-    
 </Project>
