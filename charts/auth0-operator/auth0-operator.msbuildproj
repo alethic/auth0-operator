@@ -115,7 +115,7 @@
                     if (string.IsNullOrWhiteSpace(line.Trim()))
                         writer.WriteLine("");
                     else if (line == "...")
-                        writer.WriteLine("");
+                        writer.WriteLine("---");
                     else
                         writer.WriteLine(line);
                 }
