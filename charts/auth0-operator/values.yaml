@@ -24,6 +24,8 @@ clusterDomain: cluster.local
 crds:
   ## @param enabled Whether to install the Custom Resource Definitions (CRDs) during chart installation.
   enabled: true
+  ## @param keep Whether to retain CRDs when the chart is uninstalled.
+  keep: false
 
 operator:
   env: []
