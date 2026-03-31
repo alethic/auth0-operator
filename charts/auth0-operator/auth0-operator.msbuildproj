@@ -107,6 +107,7 @@
                 //buffer.WriteLine("{{- end }}");
                 
                 using var writer = new StreamWriter(Target);
+                writer.NewLine = "\n";
                 using var copier = new StringReader(buffer.ToString().Trim());
                 
                 string line;
