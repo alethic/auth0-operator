@@ -112,9 +112,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // tenant is in the same namespace, ensure we have an owner reference to it for automatic cleanup
             if (v2alpha1Tenant.Namespace() == entity.Namespace())
             {
-                entity = entity.WithOwnerReference(v2alpha1Tenant);
-                entity.GetOwnerReference(v2alpha1Tenant).BlockOwnerDeletion = true;
-                entity = await Kube.UpdateAsync(entity, cancellationToken);
+                entity = await Kube.UpdateAsync(entity.WithOwnerReference(v2alpha1Tenant), cancellationToken);
                 if (entity.Spec.TenantRef is null)
                     throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
             }
