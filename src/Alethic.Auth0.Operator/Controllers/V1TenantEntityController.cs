@@ -10,6 +10,7 @@ using Auth0.ManagementApi;
 using k8s;
 using k8s.Models;
 
+using KubeOps.Abstractions.Entities;
 using KubeOps.Abstractions.Rbac;
 using KubeOps.KubernetesClient;
 
@@ -103,6 +104,19 @@ namespace Alethic.Auth0.Operator.Controllers
             if (entity.Spec.Conf is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
 
+            // resolve the tenant object
+            var v2alpha1Tenant = await ResolveV2alpha1TenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
+            if (v2alpha1Tenant is null)
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
+
+            // tenant is in the same namespace, ensure we have an owner reference to it for automatic cleanup
+            if (v2alpha1Tenant.Namespace() == entity.Namespace())
+            {
+                entity = entity.WithOwnerReference(v2alpha1Tenant);
+                entity = await Kube.UpdateAsync(entity, cancellationToken);
+            }
+
+            // get API client for tenant
             var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
