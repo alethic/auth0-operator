@@ -114,19 +114,14 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 entity = entity.WithOwnerReference(v2alpha1Tenant);
                 entity = await Kube.UpdateAsync(entity, cancellationToken);
+                if (entity.Spec.TenantRef is null)
+                    throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
             }
-
-            if (entity.Spec.TenantRef is null)
-                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
 
             // get API client for tenant
             var api = await GetTenantApiClientAsync(entity, entity.Spec.TenantRef, cancellationToken);
             if (api is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} failed to retrieve API client.");
-
-            // ensure we hold a reference to the tenant
-            var md = entity.EnsureMetadata();
-            var an = md.EnsureAnnotations();
 
             // we have not resolved a remote entity
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
