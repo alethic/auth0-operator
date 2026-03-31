@@ -31,7 +31,6 @@ namespace Alethic.Auth0.Operator.Finalizers
             return await _controller.DeletedAsync(entity, cancellationToken);
         }
 
-
     }
 
 }
