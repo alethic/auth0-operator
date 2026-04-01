@@ -524,7 +524,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // calculate next attempt time, floored to one minute
-                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
+                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : Options.Reconciliation.RetryInterval;
                 if (interval < TimeSpan.FromMinutes(1))
                     interval = TimeSpan.FromMinutes(1);
 
@@ -552,14 +552,18 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 try
                 {
-                    await ReconcileWarningAsync(entity, "Unknown", e.Message, cancellationToken);
+                    Logger.LogError("Retry hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+                    await ReconcileWarningAsync(entity, "Retry", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
                 {
                     Logger.LogCritical(e2, "Unexpected exception creating event.");
                 }
 
-                throw;
+                // retry after the error interval
+                var interval = Options.Reconciliation.RetryInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
 
             return ReconciliationResult<TEntity>.Success(entity, Options.Reconciliation.Interval);
@@ -612,7 +616,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // calculate next attempt time, floored to one minute
-                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : TimeSpan.FromMinutes(1);
+                var interval = e.RateLimit?.Reset is DateTimeOffset r ? r - DateTimeOffset.Now : Options.Reconciliation.RetryInterval;
                 if (interval < TimeSpan.FromMinutes(1))
                     interval = TimeSpan.FromMinutes(1);
 
@@ -632,7 +636,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // retry after the error interval
-                var interval = Options.Reconciliation.Interval;
+                var interval = Options.Reconciliation.RetryInterval;
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
@@ -647,7 +651,10 @@ namespace Alethic.Auth0.Operator.Controllers
                     Logger.LogCritical(e2, "Unexpected exception creating event.");
                 }
 
-                throw;
+                // retry after the error interval
+                var interval = Options.Reconciliation.RetryInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
 
             return ReconciliationResult<TEntity>.Success(entity);
