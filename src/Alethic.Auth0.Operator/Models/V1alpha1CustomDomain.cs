@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
-using Alethic.Auth0.Operator.Core.Models.Client;
+using Alethic.Auth0.Operator.Core.Models.CustomDomain;
 
 using k8s.Models;
 
@@ -18,7 +16,7 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0app")]
     public partial class V1alpha1CustomDomain :
         CustomKubernetesEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef>,
-        V1TenantEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, Hashtable>
+        V1TenantEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>
     {
 
         public class SpecDef : V1TenantEntitySpec<V1alpha1CustomDomainConf>
@@ -34,9 +32,6 @@ namespace Alethic.Auth0.Operator.Models
             [JsonPropertyName("secretRef")]
             public V1SecretReference? SecretRef { get; set; }
 
-            [JsonPropertyName("find")]
-            public V1alpha1CustomDomainFind? Find { get; set; }
-
             [JsonPropertyName("init")]
             public V1alpha1CustomDomainConf? Init { get; set; }
 
@@ -46,15 +41,14 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityStatus<Hashtable>
+        public class StatusDef : V1TenantEntityStatus<V1alpha1CustomDomainConf>
         {
 
             [JsonPropertyName("id")]
             public string? Id { get; set; }
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-            public Hashtable? LastConf { get; set; }
+            public V1alpha1CustomDomainConf? LastConf { get; set; }
 
         }
 
