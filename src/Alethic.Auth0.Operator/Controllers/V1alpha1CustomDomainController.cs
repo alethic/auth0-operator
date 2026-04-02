@@ -36,7 +36,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.CustomDomainCertificateProvisioning value) => value switch
         {
-            Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate=> global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
             Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate,
             _ => throw new InvalidOperationException()
         };
@@ -90,6 +90,20 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.CustomClientIpHeader = source.CustomClientIpHeader;
         }
 
+        static Core.Models.CustomDomain.CustomDomainCertificateProvisioning FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning value) => value switch
+        {
+            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            _ => throw new InvalidOperationException()
+        };
+
+        static Core.Models.CustomDomain.CustomDomainVerificationMethod FromApi(string value) => value switch
+        {
+            "txt" => Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT,
+            "cname" => Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME,
+            _ => throw new InvalidOperationException()
+        };
+
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
@@ -111,7 +125,18 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return TransformToSystemTextJson<V1alpha1CustomDomainConf>(await api.CustomDomains.GetAsync(id, cancellationToken: cancellationToken));
+                var self = await api.CustomDomains.GetAsync(id, cancellationToken: cancellationToken);
+                if (self == null)
+                    return null;
+
+                var conf = new V1alpha1CustomDomainConf();
+                conf.Domain = self.Domain;
+                conf.Type = FromApi(self.Type);
+                conf.VerificationMethod = self.Verification.Methods.Length > 0 ? FromApi(self.Verification.Methods[0].Name) : null;
+                conf.TlsPolicy = self.TlsPolicy;
+                conf.CustomClientIpHeader = self.CustomClientIpHeader;
+                conf.Primary = self.Primary;
+                return conf;
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {

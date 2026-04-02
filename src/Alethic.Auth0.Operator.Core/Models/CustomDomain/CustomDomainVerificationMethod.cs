@@ -10,6 +10,9 @@ namespace Alethic.Auth0.Operator.Core.Models.CustomDomain
         [JsonStringEnumMemberName("txt")]
         TXT,
 
+        [JsonStringEnumMemberName("cname")]
+        CNAME,
+
     }
 
 }
