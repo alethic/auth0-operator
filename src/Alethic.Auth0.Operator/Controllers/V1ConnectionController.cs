@@ -253,7 +253,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.EnabledClients is not null)
             {
                 var clientIds = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
-                var enabledClients = clientIds.Select(i => new global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate() { ClientId = i });
+                var enabledClients = clientIds.Select(i => new global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate() { ClientId = i, Status = true });
                 await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = enabledClients }, cancellationToken: cancellationToken);
             }
         }
