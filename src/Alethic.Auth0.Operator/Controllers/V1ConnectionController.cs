@@ -15,7 +15,6 @@ using Alethic.Auth0.Operator.Options;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
-using Auth0.ManagementApi.Models.Connections;
 using Auth0.ManagementApi.Paging;
 
 using k8s.Models;
@@ -253,7 +252,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (conf.EnabledClients is not null)
             {
-                var req = new List<EnabledClientsToUpdate>();
+                var req = new List<global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate>();
 
                 // apply existing clients, disabled by default
                 foreach (var current in await api.Connections.GetEnabledClientsAsync(new() { ConnectionId = id }, cancellationToken: cancellationToken))
