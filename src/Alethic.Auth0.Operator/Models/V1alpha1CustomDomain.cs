@@ -13,7 +13,7 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1alpha1", Kind = "CustomDomain")]
-    [KubernetesEntityShortNames("a0app")]
+    [KubernetesEntityShortNames("a0domain")]
     public partial class V1alpha1CustomDomain :
         CustomKubernetesEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef>,
         V1TenantEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>
