@@ -270,7 +270,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 }
 
                 // apply update
-                await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = req }, cancellationToken: cancellationToken);
+                if (req.Count > 0)
+                    await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = req }, cancellationToken: cancellationToken);
             }
         }
 
