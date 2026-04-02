@@ -44,6 +44,7 @@ namespace Alethic.Auth0.Operator.Controllers
         static string ToApi(Core.Models.CustomDomain.CustomDomainVerificationMethod value) => value switch
         {
             Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT => "txt",
+            Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME => "cname",
             _ => throw new InvalidOperationException()
         };
 
