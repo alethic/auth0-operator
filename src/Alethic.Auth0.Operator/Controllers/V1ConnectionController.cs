@@ -253,22 +253,19 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (conf.EnabledClients is not null)
             {
-                var clientIds = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
-                var currentClients = await api.Connections.GetEnabledClientsAsync(new() { ConnectionId = id }, cancellationToken: cancellationToken);
-
                 var req = new List<EnabledClientsToUpdate>();
 
                 // apply existing clients, disabled by default
-                foreach (var current in currentClients)
+                foreach (var current in await api.Connections.GetEnabledClientsAsync(new() { ConnectionId = id }, cancellationToken: cancellationToken))
                     if (current.ClientId is not null)
                         req.Add(new() { ClientId = current.ClientId, Status = false });
 
                 // add or enable clients specified in the configuration
-                foreach (var clientId in clientIds)
+                foreach (var clientId in await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken))
                 {
                     var existing = req.FirstOrDefault(i => i.ClientId == clientId);
                     if (existing is null)
-                        req.Add(existing = new EnabledClientsToUpdate() { ClientId = clientId });
+                        req.Add(existing = new() { ClientId = clientId });
 
                     existing.Status = true;
                 }
