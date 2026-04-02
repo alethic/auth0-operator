@@ -91,17 +91,20 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.CustomClientIpHeader = source.CustomClientIpHeader;
         }
 
-        static Core.Models.CustomDomain.CustomDomainCertificateProvisioning FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning value) => value switch
+        static Core.Models.CustomDomain.CustomDomainCertificateProvisioning? FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning? value) => value switch
         {
             global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
             global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            null => null,
             _ => throw new InvalidOperationException()
         };
 
-        static Core.Models.CustomDomain.CustomDomainVerificationMethod FromApi(string value) => value switch
+        static Core.Models.CustomDomain.CustomDomainVerificationMethod? FromApi(string? value) => value switch
         {
             "txt" => Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT,
             "cname" => Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME,
+            "" => null,
+            null => null,
             _ => throw new InvalidOperationException()
         };
 
