@@ -15,6 +15,7 @@ using Alethic.Auth0.Operator.Options;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.Models.Connections;
 using Auth0.ManagementApi.Paging;
 
 using k8s.Models;
@@ -253,8 +254,27 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.EnabledClients is not null)
             {
                 var clientIds = await ResolveClientRefsToIds(api, conf.EnabledClients, defaultNamespace, cancellationToken);
-                var enabledClients = clientIds.Select(i => new global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate() { ClientId = i, Status = true });
-                await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = enabledClients }, cancellationToken: cancellationToken);
+                var currentClients = await api.Connections.GetEnabledClientsAsync(new global::Auth0.ManagementApi.Models.Connections.EnabledClientsGetRequest() { ConnectionId = id }, cancellationToken: cancellationToken);
+
+                var req = new List<EnabledClientsToUpdate>();
+
+                // apply existing clients, disabled by default
+                foreach (var current in currentClients)
+                    if (current.ClientId is not null)
+                        req.Add(new EnabledClientsToUpdate() { ClientId = current.ClientId, Status = false });
+
+                // add or enable clients specified in the configuration
+                foreach (var clientId in clientIds)
+                {
+                    var existing = req.FirstOrDefault(i => i.ClientId == clientId);
+                    if (existing != null)
+                        existing.Status = true;
+                    else
+                        req.Add(new EnabledClientsToUpdate() { ClientId = clientId, Status = true });
+                }
+
+                // apply update
+                await api.Connections.UpdateEnabledClientsAsync(id, new() { EnabledClients = req }, cancellationToken: cancellationToken);
             }
         }
 
