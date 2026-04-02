@@ -267,10 +267,10 @@ namespace Alethic.Auth0.Operator.Controllers
                 foreach (var clientId in clientIds)
                 {
                     var existing = req.FirstOrDefault(i => i.ClientId == clientId);
-                    if (existing != null)
-                        existing.Status = true;
-                    else
-                        req.Add(new() { ClientId = clientId, Status = true });
+                    if (existing is null)
+                        req.Add(existing = new EnabledClientsToUpdate() { ClientId = clientId });
+
+                    existing.Status = true;
                 }
 
                 // apply update
