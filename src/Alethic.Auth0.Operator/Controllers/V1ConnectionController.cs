@@ -261,7 +261,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 // apply existing clients, disabled by default
                 foreach (var current in currentClients)
                     if (current.ClientId is not null)
-                        req.Add(new EnabledClientsToUpdate() { ClientId = current.ClientId, Status = false });
+                        req.Add(new() { ClientId = current.ClientId, Status = false });
 
                 // add or enable clients specified in the configuration
                 foreach (var clientId in clientIds)
@@ -270,7 +270,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     if (existing != null)
                         existing.Status = true;
                     else
-                        req.Add(new EnabledClientsToUpdate() { ClientId = clientId, Status = true });
+                        req.Add(new() { ClientId = clientId, Status = true });
                 }
 
                 // apply update
