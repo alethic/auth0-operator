@@ -99,7 +99,7 @@ namespace Alethic.Auth0.Operator.Controllers
             _ => throw new InvalidOperationException()
         };
 
-        static Core.Models.CustomDomain.CustomDomainVerificationMethod? FromApi(string? value) => value switch
+        static Core.Models.CustomDomain.CustomDomainVerificationMethod? FromApi(string? value) => value?.Trim()?.ToLowerInvariant() switch
         {
             "txt" => Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT,
             "cname" => Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME,
