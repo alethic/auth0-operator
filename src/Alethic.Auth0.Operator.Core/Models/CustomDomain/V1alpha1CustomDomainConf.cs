@@ -16,7 +16,7 @@ namespace Alethic.Auth0.Operator.Core.Models.CustomDomain
 
         [JsonPropertyName("verification_method")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? VerificationMethod { get; set; }
+        public CustomDomainVerificationMethod? VerificationMethod { get; set; }
 
         [JsonPropertyName("primary")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

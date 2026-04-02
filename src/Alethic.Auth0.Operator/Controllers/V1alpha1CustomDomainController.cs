@@ -34,10 +34,16 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V1alpha1CustomDomain>
     {
 
-        static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.CustomDomainCertificateProvisioning buttonsStyle) => buttonsStyle switch
+        static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.CustomDomainCertificateProvisioning value) => value switch
         {
             Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate=> global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
             Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            _ => throw new InvalidOperationException()
+        };
+
+        static string ToApi(Core.Models.CustomDomain.CustomDomainVerificationMethod value) => value switch
+        {
+            Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT => "txt",
             _ => throw new InvalidOperationException()
         };
 
@@ -58,7 +64,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Type = ToApi(source.Type.Value);
 
             if (source.VerificationMethod is not null)
-                target.VerificationMethod = source.VerificationMethod;
+                target.VerificationMethod = ToApi(source.VerificationMethod.Value);
 
             if (source.TlsPolicy is not null)
                 target.TlsPolicy = source.TlsPolicy;
