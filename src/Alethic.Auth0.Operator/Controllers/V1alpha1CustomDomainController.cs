@@ -199,7 +199,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting custom domain from Auth0 with ID: {Domain} (reason: Kubernetes entity deleted)", EntityTypeName, id);
-            await api.Branding.DeleteBrandingThemeAsync(id, cancellationToken);
+            await api.CustomDomains.DeleteAsync(id, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully deleted custom domain from Auth0 with ID: {Domain}", EntityTypeName, id);
         }
 
