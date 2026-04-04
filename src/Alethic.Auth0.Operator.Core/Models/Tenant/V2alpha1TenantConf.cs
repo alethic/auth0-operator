@@ -14,6 +14,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public TenantBranding? Branding { get; set; }
 
+        [JsonPropertyName("prompts")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public TenantPrompts? Prompts { get; set; }
+
     }
 
 }

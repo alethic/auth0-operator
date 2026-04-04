@@ -6,6 +6,7 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
 using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.Models.Prompts;
 
 using k8s.Models;
 
@@ -59,6 +60,10 @@ namespace Alethic.Auth0.Operator.Controllers
             if (branding is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} branding cannot be loaded from API.");
 
+            var prompts = await api.Prompts.GetAsync(cancellationToken: cancellationToken);
+            if (prompts is null)
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} prompts cannot be loaded from API.");
+
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
             {
@@ -82,12 +87,21 @@ namespace Alethic.Auth0.Operator.Controllers
                     var req = TransformToNewtonsoftJson<TenantBranding, BrandingUpdateRequest>(newBranding!);
                     branding = await api.Branding.UpdateAsync(req, cancellationToken);
                 }
+
+                // branding may not be specified
+                if (conf.Prompts is { } newPrompts)
+                {
+                    // push update to Auth0
+                    var req = TransformToNewtonsoftJson<TenantPrompts, PromptUpdateRequest>(newPrompts);
+                    prompts = await api.Prompts.UpdateAsync(req, cancellationToken);
+                }
             }
 
             // retrieve and copy new properties to status
             entity.Status.LastConf ??= new V2alpha1TenantConf();
             entity.Status.LastConf.Settings = TransformToSystemTextJson<Core.Models.Tenant.TenantSettings>(settings);
             entity.Status.LastConf.Branding = TransformToSystemTextJson<TenantBranding>(branding);
+            entity.Status.LastConf.Prompts = TransformToSystemTextJson<TenantPrompts>(prompts);
             entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
             await ReconcileSuccessAsync(entity, cancellationToken);
         }
