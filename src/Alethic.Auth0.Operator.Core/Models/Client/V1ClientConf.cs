@@ -22,17 +22,9 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public TokenEndpointAuthMethod? TokenEndpointAuthMethod { get; set; }
 
-        [JsonPropertyName("client_authentication_methods")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ClientAuthenticationMethods? ClientAuthenticationMethods { get; set; }
-
-        [JsonPropertyName("signed_request_object")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public SignedRequestObject? SignedRequestObject { get; set; }
-
         [JsonPropertyName("addons")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Addons? AddOns { get; set; }
+        public ClientAddons? AddOns { get; set; }
 
         [JsonPropertyName("allowed_clients")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

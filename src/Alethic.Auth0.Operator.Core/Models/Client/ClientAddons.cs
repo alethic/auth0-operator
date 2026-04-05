@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Client
 {
 
-    public class Addons
+    public class ClientAddons
     {
 
         [JsonPropertyName("aws")]
