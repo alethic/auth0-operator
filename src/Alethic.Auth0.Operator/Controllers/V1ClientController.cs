@@ -114,7 +114,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientSigningKey FromApi(SigningKey source) => new V1ClientSigningKey()
+        V1ClientSigningKey FromApi(SigningKey source) => new()
         {
             Cert = source.Cert,
             Key = source.Key,
@@ -1077,7 +1077,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // This ensures secret resources are created for existing clients even when Auth0 API doesn't return the secret
             if (entity.Spec.SecretRef is not null && entity.Status.Id is not null)
             {
-                var client = await api.Clients.GetAsync(entity.Status.Id);
+                var client = await api.Clients.GetAsync(entity.Status.Id, "client_id,client_secret", cancellationToken: cancellationToken);
                 await ApplySecret(entity, client.ClientId, client.ClientSecret, defaultNamespace, cancellationToken);
             }
 
