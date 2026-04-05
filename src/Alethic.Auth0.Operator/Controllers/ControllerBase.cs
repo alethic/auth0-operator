@@ -493,6 +493,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 // does work of reconciling, and log success
                 await Reconcile(entity, cancellationToken);
                 await ReconcileSuccessAsync(entity, cancellationToken);
+                return ReconciliationResult<TEntity>.Success(entity, Options.Reconciliation.Interval);
             }
             catch (ErrorApiException e)
             {
@@ -569,8 +570,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
-
-            return ReconciliationResult<TEntity>.Success(entity, Options.Reconciliation.Interval);
         }
 
         /// <summary>
@@ -589,6 +588,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 // does work of deleting, and log success
                 await DeletedAsync(entity, cancellationToken);
                 await DeletingSuccessAsync(entity, cancellationToken);
+                return ReconciliationResult<TEntity>.Success(entity);
             }
             catch (ErrorApiException e)
             {
@@ -665,8 +665,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
-
-            return ReconciliationResult<TEntity>.Success(entity);
         }
 
     }
