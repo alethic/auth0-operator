@@ -168,7 +168,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return FromApi(await api.CustomDomains.GetAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.CustomDomains.GetAsync(id, cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
