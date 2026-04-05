@@ -1017,12 +1017,12 @@ namespace Alethic.Auth0.Operator.Controllers
             else
             {
                 var conf = spec.Init ?? spec.Conf;
-                if (conf is null)
-                    return null;
-
-                var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
-                var self = list.FirstOrDefault(i => i.Name == conf.Name);
-                return self?.ClientId;
+                if (conf is { Name: string name })
+                {
+                    var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
+                    var self = list.FirstOrDefault(i => i.Name == name);
+                    return self?.ClientId;
+                }
             }
 
             return null;
