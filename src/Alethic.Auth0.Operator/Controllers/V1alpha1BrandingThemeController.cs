@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.BrandingTheme;
+using Alethic.Auth0.Operator.Core.Models.BrandingTheme.V1alpha1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -33,57 +33,100 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V1alpha1BrandingTheme>
     {
 
-        static global::Auth0.ManagementApi.Models.CaptchaWidgetTheme ToApi(Core.Models.BrandingTheme.CaptchaWidgetTheme source) => source switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static CaptchaWidgetTheme ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme source) => source switch
         {
-            Core.Models.BrandingTheme.CaptchaWidgetTheme.Light => global::Auth0.ManagementApi.Models.CaptchaWidgetTheme.Light,
-            Core.Models.BrandingTheme.CaptchaWidgetTheme.Dark => global::Auth0.ManagementApi.Models.CaptchaWidgetTheme.Dark,
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Light => CaptchaWidgetTheme.Light,
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Dark => CaptchaWidgetTheme.Dark,
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Auto => CaptchaWidgetTheme.Auto,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.LinksStyle ToApi(Core.Models.BrandingTheme.BrandingThemeFonts source) => source.LinksStyle switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static LinksStyle ToApi(V1alpha1BrandingThemeFonts source) => source.LinksStyle switch
         {
-            Core.Models.BrandingTheme.LinksStyle.Normal => global::Auth0.ManagementApi.Models.LinksStyle.Normal,
-            Core.Models.BrandingTheme.LinksStyle.Underlined => global::Auth0.ManagementApi.Models.LinksStyle.Underlined,
+            V1alpha1BrandingThemeLinksStyle.Normal => LinksStyle.Normal,
+            V1alpha1BrandingThemeLinksStyle.Underlined => LinksStyle.Underlined,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.SocialButtonsLayout ToApi(Core.Models.BrandingTheme.SocialButtonsLayout source) => source switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static SocialButtonsLayout ToApi(V1alpha1BrandingThemeSocialButtonsLayout source) => source switch
         {
-            Core.Models.BrandingTheme.SocialButtonsLayout.Top => global::Auth0.ManagementApi.Models.SocialButtonsLayout.Top,
-            Core.Models.BrandingTheme.SocialButtonsLayout.Bottom => global::Auth0.ManagementApi.Models.SocialButtonsLayout.Bottom,
+            V1alpha1BrandingThemeSocialButtonsLayout.Top => SocialButtonsLayout.Top,
+            V1alpha1BrandingThemeSocialButtonsLayout.Bottom => SocialButtonsLayout.Bottom,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.LogoPosition ToApi(Core.Models.BrandingTheme.LogoPosition source) => source switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static LogoPosition ToApi(V1alpha1BrandingThemeLogoPosition source) => source switch
         {
-            Core.Models.BrandingTheme.LogoPosition.Center => global::Auth0.ManagementApi.Models.LogoPosition.Center,
-            Core.Models.BrandingTheme.LogoPosition.Left => global::Auth0.ManagementApi.Models.LogoPosition.Left,
-            Core.Models.BrandingTheme.LogoPosition.Right => global::Auth0.ManagementApi.Models.LogoPosition.Right,
-            Core.Models.BrandingTheme.LogoPosition.None => global::Auth0.ManagementApi.Models.LogoPosition.None,
+            V1alpha1BrandingThemeLogoPosition.Center => LogoPosition.Center,
+            V1alpha1BrandingThemeLogoPosition.Left => LogoPosition.Left,
+            V1alpha1BrandingThemeLogoPosition.Right => LogoPosition.Right,
+            V1alpha1BrandingThemeLogoPosition.None => LogoPosition.None,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.HeaderTextAlignment ToApi(Core.Models.BrandingTheme.HeaderTextAlignment source) => source switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static HeaderTextAlignment ToApi(V1alpha1BrandingThemeHeaderTextAlignment source) => source switch
         {
-            Core.Models.BrandingTheme.HeaderTextAlignment.Center => global::Auth0.ManagementApi.Models.HeaderTextAlignment.Center,
-            Core.Models.BrandingTheme.HeaderTextAlignment.Left => global::Auth0.ManagementApi.Models.HeaderTextAlignment.Left,
-            Core.Models.BrandingTheme.HeaderTextAlignment.Right => global::Auth0.ManagementApi.Models.HeaderTextAlignment.Right,
+            V1alpha1BrandingThemeHeaderTextAlignment.Center => HeaderTextAlignment.Center,
+            V1alpha1BrandingThemeHeaderTextAlignment.Left => HeaderTextAlignment.Left,
+            V1alpha1BrandingThemeHeaderTextAlignment.Right => HeaderTextAlignment.Right,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.PageLayout ToApi(Core.Models.BrandingTheme.PageLayout source) => source switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static PageLayout ToApi(V1alpha1BrandingThemePageLayout source) => source switch
         {
-            Core.Models.BrandingTheme.PageLayout.Right => global::Auth0.ManagementApi.Models.PageLayout.Right,
-            Core.Models.BrandingTheme.PageLayout.Center => global::Auth0.ManagementApi.Models.PageLayout.Center,
-            Core.Models.BrandingTheme.PageLayout.Left => global::Auth0.ManagementApi.Models.PageLayout.Left,
+            V1alpha1BrandingThemePageLayout.Right => PageLayout.Right,
+            V1alpha1BrandingThemePageLayout.Center => PageLayout.Center,
+            V1alpha1BrandingThemePageLayout.Left => PageLayout.Left,
             _ => throw new InvalidOperationException()
         };
 
-        static global::Auth0.ManagementApi.Models.ButtonsStyle ToApi(Core.Models.BrandingTheme.ButtonsStyle buttonsStyle) => buttonsStyle switch
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        /// <param name="buttonsStyle"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static ButtonsStyle ToApi(V1alpha1BrandingThemeButtonsStyle buttonsStyle) => buttonsStyle switch
         {
-            Core.Models.BrandingTheme.ButtonsStyle.Pill => global::Auth0.ManagementApi.Models.ButtonsStyle.Pill,
-            Core.Models.BrandingTheme.ButtonsStyle.Rounded => global::Auth0.ManagementApi.Models.ButtonsStyle.Rounded,
-            Core.Models.BrandingTheme.ButtonsStyle.Sharp => global::Auth0.ManagementApi.Models.ButtonsStyle.Sharp,
+            V1alpha1BrandingThemeButtonsStyle.Pill => ButtonsStyle.Pill,
+            V1alpha1BrandingThemeButtonsStyle.Rounded => ButtonsStyle.Rounded,
+            V1alpha1BrandingThemeButtonsStyle.Sharp => ButtonsStyle.Sharp,
             _ => throw new InvalidOperationException()
         };
 
@@ -101,19 +144,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.DisplayName = source.DisplayName;
 
             if (source.Borders is not null)
-                ApplyToApi(source.Borders, target.Borders = new global::Auth0.ManagementApi.Models.BrandingThemeBorder());
+                ApplyToApi(source.Borders, target.Borders = new BrandingThemeBorder());
 
             if (source.Colors is not null)
-                ApplyToApi(source.Colors, target.Colors = new global::Auth0.ManagementApi.Models.BrandingThemeColors());
+                ApplyToApi(source.Colors, target.Colors = new BrandingThemeColors());
 
             if (source.Fonts is not null)
-                ApplyToApi(source.Fonts, target.Fonts = new global::Auth0.ManagementApi.Models.BrandingThemeFonts());
+                ApplyToApi(source.Fonts, target.Fonts = new BrandingThemeFonts());
 
             if (source.Widget is not null)
-                ApplyToApi(source.Widget, target.Widget = new global::Auth0.ManagementApi.Models.BrandingThemeWidget());
+                ApplyToApi(source.Widget, target.Widget = new BrandingThemeWidget());
 
             if (source.PageBackground is not null)
-                ApplyToApi(source.PageBackground, target.PageBackground = new global::Auth0.ManagementApi.Models.BrandingThemePageBackground());
+                ApplyToApi(source.PageBackground, target.PageBackground = new BrandingThemePageBackground());
         }
 
         /// <summary>
@@ -122,7 +165,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeBorders? source, global::Auth0.ManagementApi.Models.BrandingThemeBorder target)
+        static void ApplyToApi(V1alpha1BrandingThemeBorders? source, BrandingThemeBorder target)
         {
             if (source is null)
                 return;
@@ -133,7 +176,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ButtonBorderWeight is float buttonBorderWeight)
                 target.ButtonBorderWeight = buttonBorderWeight;
 
-            if (source.ButtonsStyle is Core.Models.BrandingTheme.ButtonsStyle buttonsStyle)
+            if (source.ButtonsStyle is V1alpha1BrandingThemeButtonsStyle buttonsStyle)
                 target.ButtonsStyle = ToApi(buttonsStyle);
 
             if (source.InputBorderRadius is float inputBorderRadius)
@@ -142,7 +185,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.InputBorderWeight is float inputBorderWeight)
                 target.InputBorderWeight = inputBorderWeight;
 
-            if (source.InputsStyle is Core.Models.BrandingTheme.ButtonsStyle inputsStyle)
+            if (source.InputsStyle is V1alpha1BrandingThemeButtonsStyle inputsStyle)
                 target.InputsStyle = ToApi(inputsStyle);
 
             if (source.ShowWidgetShadow is bool showWidgetShadow)
@@ -160,7 +203,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeColors? source, global::Auth0.ManagementApi.Models.BrandingThemeColors target)
+        static void ApplyToApi(V1alpha1BrandingThemeColors? source, BrandingThemeColors target)
         {
             if (source is null)
                 return;
@@ -174,7 +217,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.BodyText is string bodyText)
                 target.BodyText = bodyText;
 
-            if (source.CaptchaWidgetTheme is Core.Models.BrandingTheme.CaptchaWidgetTheme captchaWidgetTheme)
+            if (source.CaptchaWidgetTheme is V1alpha1BrandingThemeCaptchaWidgetTheme captchaWidgetTheme)
                 target.CaptchaWidgetTheme = ToApi(captchaWidgetTheme);
 
             if (source.Error is string error)
@@ -228,7 +271,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeFonts? source, global::Auth0.ManagementApi.Models.BrandingThemeFonts target)
+        static void ApplyToApi(V1alpha1BrandingThemeFonts? source, BrandingThemeFonts target)
         {
             if (source is null)
                 return;
@@ -266,7 +309,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(BrandingThemeFont? source, BrandingThemeFontsBase target)
+        static void ApplyToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontsBase target)
         {
             if (source is null)
                 return;
@@ -283,24 +326,24 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemeWidget? source, global::Auth0.ManagementApi.Models.BrandingThemeWidget target)
+        static void ApplyToApi(V1alpha1BrandingThemeWidget? source, BrandingThemeWidget target)
         {
             if (source is null)
                 return;
 
-            if (source.HeaderTextAlignment is Core.Models.BrandingTheme.HeaderTextAlignment headerTextAlignment)
+            if (source.HeaderTextAlignment is V1alpha1BrandingThemeHeaderTextAlignment headerTextAlignment)
                 target.HeaderTextAlignment = ToApi(headerTextAlignment);
 
             if (source.LogoHeight is float logoHeight)
                 target.LogoHeight = logoHeight;
 
-            if (source.LogoPosition is Core.Models.BrandingTheme.LogoPosition logoPosition)
+            if (source.LogoPosition is V1alpha1BrandingThemeLogoPosition logoPosition)
                 target.LogoPosition = ToApi(logoPosition);
 
             if (source.LogoUrl is string logoUrl)
                 target.LogoUrl = logoUrl;
 
-            if (source.SocialButtonsLayout is Core.Models.BrandingTheme.SocialButtonsLayout socialButtonsLayout)
+            if (source.SocialButtonsLayout is V1alpha1BrandingThemeSocialButtonsLayout socialButtonsLayout)
                 target.SocialButtonsLayout = ToApi(socialButtonsLayout);
         }
 
@@ -309,7 +352,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(Core.Models.BrandingTheme.BrandingThemePageBackground? source, global::Auth0.ManagementApi.Models.BrandingThemePageBackground target)
+        static void ApplyToApi(V1alpha1BrandingThemePageBackground? source, BrandingThemePageBackground target)
         {
             if (source is null)
                 return;
@@ -320,7 +363,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.BackgroundImageUrl is string backgroundImageUrl)
                 target.BackgroundImageUrl = backgroundImageUrl;
 
-            if (source.PageLayout is Core.Models.BrandingTheme.PageLayout pageLayout)
+            if (source.PageLayout is V1alpha1BrandingThemePageLayout pageLayout)
                 target.PageLayout = ToApi(pageLayout);
         }
 

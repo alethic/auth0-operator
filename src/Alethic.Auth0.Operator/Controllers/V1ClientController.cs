@@ -38,24 +38,11 @@ namespace Alethic.Auth0.Operator.Controllers
     {
 
         /// <summary>
-        /// Initializes a new instance.
-        /// </summary>
-        /// <param name="kube"></param>
-        /// <param name="cache"></param>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
-        public V1ClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1ClientController> logger) :
-            base(kube, cache, options, logger)
-        {
-
-        }
-
-        /// <summary>
         /// Transforms the Auth0 Management API client model to the operator's client configuration model.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientConf FromApi(Client source) => new()
+        static V1ClientConf FromApi(Client source) => new()
         {
             AllowedClients = source.AllowedClients,
             AllowedLogoutUrls = source.AllowedLogoutUrls,
@@ -100,12 +87,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod source) => source switch
+        static V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod source) => source switch
         {
             TokenEndpointAuthMethod.None => V1ClientTokenEndpointAuthMethod.None,
             TokenEndpointAuthMethod.ClientSecretPost => V1ClientTokenEndpointAuthMethod.ClientSecretPost,
             TokenEndpointAuthMethod.ClientSecretBasic => V1ClientTokenEndpointAuthMethod.ClientSecretBasic,
-            _ => null,
+            _ => throw new NotImplementedException(),
         };
 
         /// <summary>
@@ -114,7 +101,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientSigningKey FromApi(SigningKey source) => new()
+        static V1ClientSigningKey FromApi(SigningKey source) => new()
         {
             Cert = source.Cert,
             Key = source.Key,
@@ -126,7 +113,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientResourceServerAssociation FromApi(ClientResourceServerAssociation source) => new()
+        static V1ClientResourceServerAssociation FromApi(ClientResourceServerAssociation source) => new()
         {
             Identifier = source.Identifier,
             Scopes = source.Scopes,
@@ -137,7 +124,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        V1ClientRefreshToken FromApi(RefreshToken refreshToken) => new()
+        static V1ClientRefreshToken FromApi(RefreshToken refreshToken) => new()
         {
             ExpirationType = FromApi(refreshToken.ExpirationType),
             InfiniteIdleTokenLifetime = refreshToken.InfiniteIdleTokenLifetime,
@@ -153,7 +140,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientRefreshTokenRotationType FromApi(RefreshTokenRotationType source) => source switch
+        static V1ClientRefreshTokenRotationType FromApi(RefreshTokenRotationType source) => source switch
         {
             RefreshTokenRotationType.Rotating => V1ClientRefreshTokenRotationType.Rotating,
             RefreshTokenRotationType.NonRotating => V1ClientRefreshTokenRotationType.NonRotating,
@@ -166,7 +153,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientRefreshTokenExpirationType FromApi(RefreshTokenExpirationType source) => source switch
+        static V1ClientRefreshTokenExpirationType FromApi(RefreshTokenExpirationType source) => source switch
         {
             RefreshTokenExpirationType.Expiring => V1ClientRefreshTokenExpirationType.Expiring,
             RefreshTokenExpirationType.NonExpiring => V1ClientRefreshTokenExpirationType.NonExpiring,
@@ -179,7 +166,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
+        static V1ClientOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
         {
             OrganizationUsage.Deny => V1ClientOrganizationUsage.Deny,
             OrganizationUsage.Allow => V1ClientOrganizationUsage.Allow,
@@ -194,7 +181,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientOrganizationRequireBehavior? FromApi(OrganizationRequireBehavior? source) => source switch
+        static V1ClientOrganizationRequireBehavior? FromApi(OrganizationRequireBehavior? source) => source switch
         {
             OrganizationRequireBehavior.NoPrompt => V1ClientOrganizationRequireBehavior.NoPrompt,
             OrganizationRequireBehavior.PreLoginPrompt => V1ClientOrganizationRequireBehavior.PreLoginPrompt,
@@ -208,7 +195,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientOidcLogoutConfig FromApi(OidcLogoutConfig source) => new()
+        static V1ClientOidcLogoutConfig FromApi(OidcLogoutConfig source) => new()
         {
             BackchannelLogoutUrls = source.BackchannelLogoutUrls,
             BackchannelLogoutInitiators = FromApi(source.BackchannelLogoutInitiators),
@@ -219,7 +206,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientBackchannelLogoutInitiators FromApi(BackchannelLogoutInitiators source) => new()
+        static V1ClientBackchannelLogoutInitiators FromApi(BackchannelLogoutInitiators source) => new()
         {
             Mode = FromApi(source.Mode),
             SelectedInitiators = source.SelectedInitiators?.Select(i => FromApi(i)).ToArray(),
@@ -231,7 +218,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientLogoutInitiators FromApi(LogoutInitiators source) => source switch
+        static V1ClientLogoutInitiators FromApi(LogoutInitiators source) => source switch
         {
             LogoutInitiators.RpLogout => V1ClientLogoutInitiators.RpLogout,
             LogoutInitiators.IdpLogout => V1ClientLogoutInitiators.IdpLogout,
@@ -246,7 +233,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="mode"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientLogoutInitiatorModes FromApi(LogoutInitiatorModes mode) => mode switch
+        static V1ClientLogoutInitiatorModes FromApi(LogoutInitiatorModes mode) => mode switch
         {
             LogoutInitiatorModes.All => V1ClientLogoutInitiatorModes.All,
             LogoutInitiatorModes.Custom => V1ClientLogoutInitiatorModes.Custom,
@@ -258,7 +245,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientMobile FromApi(Mobile source) => new()
+        static V1ClientMobile FromApi(Mobile source) => new()
         {
             Android = FromApi(source.Android),
             Ios = FromApi(source.Ios),
@@ -269,7 +256,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientMobile.MobileIos FromApi(Mobile.MobileIos source) => new()
+        static V1ClientMobile.MobileIos FromApi(Mobile.MobileIos source) => new()
         {
             AppBundleIdentifier = source.AppBundleIdentifier,
             TeamId = source.TeamId,
@@ -280,7 +267,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        V1ClientMobile.MobileAndroid FromApi(Mobile.MobileAndroid source) => new()
+        static V1ClientMobile.MobileAndroid FromApi(Mobile.MobileAndroid source) => new()
         {
             AppPackageName = source.AppPackageName,
             KeystoreHash = source.KeystoreHash,
@@ -291,7 +278,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="jwtConfiguration"></param>
         /// <returns></returns>
-        V1ClientJwtConfiguration FromApi(JwtConfiguration jwtConfiguration) => new()
+        static V1ClientJwtConfiguration FromApi(JwtConfiguration jwtConfiguration) => new()
         {
             IsSecretEncoded = jwtConfiguration.IsSecretEncoded,
             LifetimeInSeconds = jwtConfiguration.LifetimeInSeconds,
@@ -304,7 +291,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        V1ClientScopes FromApi(Scopes scopes) => new()
+        static V1ClientScopes FromApi(Scopes scopes) => new()
         {
             Users = FromApi(scopes.Users),
             UsersAppMetadata = FromApi(scopes.UsersAppMetadata),
@@ -319,7 +306,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="users"></param>
         /// <returns></returns>
-        V1ClientScopeEntry FromApi(ScopeEntry users) => new()
+        static V1ClientScopeEntry FromApi(ScopeEntry users) => new()
         {
             Actions = users.Actions,
         };
@@ -329,7 +316,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="encryptionKey"></param>
         /// <returns></returns>
-        V1ClientEncryptionKey FromApi(EncryptionKey encryptionKey) => new()
+        static V1ClientEncryptionKey FromApi(EncryptionKey encryptionKey) => new()
         {
             Certificate = encryptionKey.Certificate,
             PublicKey = encryptionKey.PublicKey,
@@ -341,7 +328,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="defaultOrganization"></param>
         /// <returns></returns>
-        V1ClientDefaultOrganization FromApi(DefaultOrganization defaultOrganization) => new()
+        static V1ClientDefaultOrganization FromApi(DefaultOrganization defaultOrganization) => new()
         {
             OrganizationId = defaultOrganization.OrganizationId,
             Flows = defaultOrganization.Flows?.Select(FromApi).ToArray(),
@@ -353,7 +340,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientFlows FromApi(Flows source) => source switch
+        static V1ClientFlows FromApi(Flows source) => source switch
         {
             Flows.ClientCredentials => V1ClientFlows.ClientCredentials,
             _ => throw new NotImplementedException(),
@@ -365,7 +352,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientComplianceLevel? FromApi(ComplianceLevel? source) => source switch
+        static V1ClientComplianceLevel? FromApi(ComplianceLevel? source) => source switch
         {
             ComplianceLevel.NONE => V1ClientComplianceLevel.NONE,
             ComplianceLevel.FAPI1_ADV_PKJ_PAR => V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR,
@@ -380,7 +367,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="applicationType"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        V1ClientApplicationType FromApi(ClientApplicationType applicationType) => applicationType switch
+        static V1ClientApplicationType FromApi(ClientApplicationType applicationType) => applicationType switch
         {
             ClientApplicationType.Box => V1ClientApplicationType.Box,
             ClientApplicationType.Cloudbees => V1ClientApplicationType.Cloudbees,
@@ -415,7 +402,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="addOns"></param>
         /// <returns></returns>
-        V1ClientAddons FromApi(Addons addOns) => new V1ClientAddons()
+        static V1ClientAddons FromApi(Addons addOns) => new V1ClientAddons()
         {
             AmazonWebServices = addOns.AmazonWebServices,
             AzureMobileServices = addOns.AzureMobileServices,
@@ -447,7 +434,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientAddons source, Addons target)
+        static void ApplyToApi(V1ClientAddons source, Addons target)
         {
             if (source.AmazonWebServices is { } aws)
                 target.AmazonWebServices = aws;
@@ -524,7 +511,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientEncryptionKey source, EncryptionKey target)
+        static void ApplyToApi(V1ClientEncryptionKey source, EncryptionKey target)
         {
             if (source.Certificate is { } cert)
                 target.Certificate = cert;
@@ -541,7 +528,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientScopeEntry source, ScopeEntry target)
+        static void ApplyToApi(V1ClientScopeEntry source, ScopeEntry target)
         {
             if (source.Actions is { } actions)
                 target.Actions = actions;
@@ -552,7 +539,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientScopes source, Scopes target)
+        static void ApplyToApi(V1ClientScopes source, Scopes target)
         {
             if (source.Users is { } users)
                 ApplyToApi(users, target.Users ??= new ScopeEntry());
@@ -578,7 +565,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientJwtConfiguration source, JwtConfiguration target)
+        static void ApplyToApi(V1ClientJwtConfiguration source, JwtConfiguration target)
         {
             if (source.IsSecretEncoded is { } secret_encoded)
                 target.IsSecretEncoded = secret_encoded;
@@ -598,7 +585,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientMobile.MobileAndroid source, Mobile.MobileAndroid target)
+        static void ApplyToApi(V1ClientMobile.MobileAndroid source, Mobile.MobileAndroid target)
         {
             if (source.AppPackageName is { } app_package_name)
                 target.AppPackageName = app_package_name;
@@ -612,7 +599,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientMobile.MobileIos source, Mobile.MobileIos target)
+        static void ApplyToApi(V1ClientMobile.MobileIos source, Mobile.MobileIos target)
         {
             if (source.AppBundleIdentifier is { } app_bundle_identifier)
                 target.AppBundleIdentifier = app_bundle_identifier;
@@ -626,7 +613,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientMobile source, Mobile target)
+        static void ApplyToApi(V1ClientMobile source, Mobile target)
         {
             if (source.Android is { } android)
                 ApplyToApi(android, target.Android ??= new Mobile.MobileAndroid());
@@ -641,7 +628,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        ComplianceLevel ToApi(V1ClientComplianceLevel source) => source switch
+        static ComplianceLevel ToApi(V1ClientComplianceLevel source) => source switch
         {
             V1ClientComplianceLevel.NONE => ComplianceLevel.NONE,
             V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR => ComplianceLevel.FAPI1_ADV_PKJ_PAR,
@@ -655,7 +642,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        OrganizationRequireBehavior ToApi(V1ClientOrganizationRequireBehavior source) => source switch
+        static OrganizationRequireBehavior ToApi(V1ClientOrganizationRequireBehavior source) => source switch
         {
             V1ClientOrganizationRequireBehavior.NoPrompt => OrganizationRequireBehavior.NoPrompt,
             V1ClientOrganizationRequireBehavior.PreLoginPrompt => OrganizationRequireBehavior.PreLoginPrompt,
@@ -669,7 +656,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        OrganizationUsage ToApi(V1ClientOrganizationUsage source) => source switch
+        static OrganizationUsage ToApi(V1ClientOrganizationUsage source) => source switch
         {
             V1ClientOrganizationUsage.Deny => OrganizationUsage.Deny,
             V1ClientOrganizationUsage.Allow => OrganizationUsage.Allow,
@@ -683,7 +670,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        RefreshTokenRotationType ToApi(V1ClientRefreshTokenRotationType source) => source switch
+        static RefreshTokenRotationType ToApi(V1ClientRefreshTokenRotationType source) => source switch
         {
             V1ClientRefreshTokenRotationType.Rotating => RefreshTokenRotationType.Rotating,
             V1ClientRefreshTokenRotationType.NonRotating => RefreshTokenRotationType.NonRotating,
@@ -696,7 +683,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        RefreshTokenExpirationType ToApi(V1ClientRefreshTokenExpirationType source) => source switch
+        static RefreshTokenExpirationType ToApi(V1ClientRefreshTokenExpirationType source) => source switch
         {
             V1ClientRefreshTokenExpirationType.Expiring => RefreshTokenExpirationType.Expiring,
             V1ClientRefreshTokenExpirationType.NonExpiring => RefreshTokenExpirationType.NonExpiring,
@@ -708,7 +695,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientRefreshToken source, RefreshToken target)
+        static void ApplyToApi(V1ClientRefreshToken source, RefreshToken target)
         {
             if (source.RotationType is { } rotation_type)
                 target.RotationType = ToApi(rotation_type);
@@ -738,7 +725,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        LogoutInitiatorModes ToApi(V1ClientLogoutInitiatorModes source)
+        static LogoutInitiatorModes ToApi(V1ClientLogoutInitiatorModes source)
         {
             return source switch
             {
@@ -754,7 +741,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        LogoutInitiators ToApi(V1ClientLogoutInitiators source) => source switch
+        static LogoutInitiators ToApi(V1ClientLogoutInitiators source) => source switch
         {
             V1ClientLogoutInitiators.RpLogout => LogoutInitiators.RpLogout,
             V1ClientLogoutInitiators.IdpLogout => LogoutInitiators.IdpLogout,
@@ -768,7 +755,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientBackchannelLogoutInitiators source, BackchannelLogoutInitiators target)
+        static void ApplyToApi(V1ClientBackchannelLogoutInitiators source, BackchannelLogoutInitiators target)
         {
             if (source.Mode is { } backchannel_logout_urls)
                 target.Mode = ToApi(backchannel_logout_urls);
@@ -782,7 +769,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        void ApplyToApi(V1ClientOidcLogoutConfig source, OidcLogoutConfig target)
+        static void ApplyToApi(V1ClientOidcLogoutConfig source, OidcLogoutConfig target)
         {
             if (source.BackchannelLogoutUrls is { } backchannel_logout_urls)
                 target.BackchannelLogoutUrls = backchannel_logout_urls;
@@ -796,7 +783,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        void ApplyToApi(V1ClientConf conf, ClientBase request)
+        static void ApplyToApi(V1ClientConf conf, ClientBase request)
         {
             if (conf.AddOns is { } addons)
                 ApplyToApi(addons, request.AddOns ??= new());
@@ -898,7 +885,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        ClientApplicationType ToApi(V1ClientApplicationType source) => source switch
+        static ClientApplicationType ToApi(V1ClientApplicationType source) => source switch
         {
             V1ClientApplicationType.Box => ClientApplicationType.Box,
             V1ClientApplicationType.Cloudbees => ClientApplicationType.Cloudbees,
@@ -930,7 +917,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        TokenEndpointAuthMethod ToApi(V1ClientTokenEndpointAuthMethod source) => source switch
+        static TokenEndpointAuthMethod ToApi(V1ClientTokenEndpointAuthMethod source) => source switch
         {
             V1ClientTokenEndpointAuthMethod.None => TokenEndpointAuthMethod.None,
             V1ClientTokenEndpointAuthMethod.ClientSecretPost => TokenEndpointAuthMethod.ClientSecretPost,
@@ -943,7 +930,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        void ApplyToApi(V1ClientConf conf, ClientCreateRequest request)
+        static void ApplyToApi(V1ClientConf conf, ClientCreateRequest request)
         {
             if (conf.ApplicationType is { } app_type)
                 request.ApplicationType = ToApi(app_type);
@@ -959,7 +946,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        void ApplyToApi(V1ClientConf conf, ClientUpdateRequest request)
+        static void ApplyToApi(V1ClientConf conf, ClientUpdateRequest request)
         {
             if (conf.ApplicationType is { } app_type)
                 request.ApplicationType = ToApi(app_type);
@@ -968,6 +955,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.TokenEndpointAuthMethod = ToApi(token_endpoint_auth_method);
 
             ApplyToApi(conf, (ClientBase)request);
+        }
+
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="kube"></param>
+        /// <param name="cache"></param>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        public V1ClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V1ClientController> logger) :
+            base(kube, cache, options, logger)
+        {
+
         }
 
         /// <inheritdoc />

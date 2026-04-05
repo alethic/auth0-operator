@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.ResourceServer;
+using Alethic.Auth0.Operator.Core.Models.ResourceServer.V1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 

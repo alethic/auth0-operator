@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Models;
-using Alethic.Auth0.Operator.Core.Models.CustomDomain;
+using Alethic.Auth0.Operator.Core.Models.CustomDomain.V1alpha1;
 
 using k8s.Models;
 

@@ -4,8 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.Client.V1;
-using Alethic.Auth0.Operator.Core.Models.ClientGrant;
+using Alethic.Auth0.Operator.Core.Models.ClientGrant.V1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -47,6 +46,21 @@ namespace Alethic.Auth0.Operator.Controllers
         {
 
         }
+
+        /// <summary>
+        /// Converts a from a local model type to a request type.
+        /// </summary>
+        /// <param name="organizationUsage"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        OrganizationUsage? ToApi(V1ClientGrantOrganizationUsage? organizationUsage) => organizationUsage switch
+        {
+            V1ClientGrantOrganizationUsage.Deny => OrganizationUsage.Deny,
+            V1ClientGrantOrganizationUsage.Allow => OrganizationUsage.Allow,
+            V1ClientGrantOrganizationUsage.Require => OrganizationUsage.Require,
+            null => null,
+            _ => throw new InvalidOperationException(),
+        };
 
         /// <inheritdoc />
         protected override string EntityTypeName => "ClientGrant";
@@ -108,7 +122,7 @@ namespace Alethic.Auth0.Operator.Controllers
             req.Audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken) ?? null!;
             req.Scope = conf.Scope?.ToList() ?? null!;
             req.AllowAnyOrganization = conf.AllowAnyOrganization;
-            req.OrganizationUsage = Convert(conf.OrganizationUsage);
+            req.OrganizationUsage = ToApi(conf.OrganizationUsage);
 
             var self = await api.ClientGrants.CreateAsync(req, cancellationToken);
             if (self is null)
@@ -123,7 +137,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var req = new ClientGrantUpdateRequest();
             req.Scope = conf.Scope?.ToList() ?? null!;
             req.AllowAnyOrganization = conf.AllowAnyOrganization;
-            req.OrganizationUsage = Convert(conf.OrganizationUsage);
+            req.OrganizationUsage = ToApi(conf.OrganizationUsage);
 
             await api.ClientGrants.UpdateAsync(id, req, cancellationToken);
         }
@@ -132,24 +146,6 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             return api.ClientGrants.DeleteAsync(id, cancellationToken);
-        }
-
-        /// <summary>
-        /// Converts a from a local model type to a request type.
-        /// </summary>
-        /// <param name="organizationUsage"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        global::Auth0.ManagementApi.Models.OrganizationUsage? Convert(global::Alethic.Auth0.Operator.Core.Models.Client.V1.V1ClientOrganizationUsage? organizationUsage)
-        {
-            return organizationUsage switch
-            {
-                V1ClientOrganizationUsage.Deny => global::Auth0.ManagementApi.Models.OrganizationUsage.Deny,
-                V1ClientOrganizationUsage.Allow => global::Auth0.ManagementApi.Models.OrganizationUsage.Allow,
-                V1ClientOrganizationUsage.Require => global::Auth0.ManagementApi.Models.OrganizationUsage.Require,
-                null => null,
-                _ => throw new InvalidOperationException(),
-            };
         }
 
     }

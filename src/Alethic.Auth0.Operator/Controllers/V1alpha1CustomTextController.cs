@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.CustomText;
+using Alethic.Auth0.Operator.Core.Models.CustomText.V1alpha1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -74,7 +74,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // apply resulting values to status
             entity.Status.LastConf ??= new V1alpha1CustomTextConf();
-            entity.Status.LastConf.Screens = TransformToSystemTextJson<Dictionary<string, CustomTextScreen>>(screens);
+            entity.Status.LastConf.Screens = TransformToSystemTextJson<Dictionary<string, V1alpha1CustomTextScreen>>(screens);
             return entity;
         }
 

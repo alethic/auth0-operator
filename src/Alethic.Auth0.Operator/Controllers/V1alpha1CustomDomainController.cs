@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.CustomDomain;
+using Alethic.Auth0.Operator.Core.Models.CustomDomain.V1alpha1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -34,17 +34,17 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V1alpha1CustomDomain>
     {
 
-        static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.CustomDomainCertificateProvisioning value) => value switch
+        static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning value) => value switch
         {
-            Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
-            Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.SelfManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate,
             _ => throw new InvalidOperationException()
         };
 
-        static string ToApi(Core.Models.CustomDomain.CustomDomainVerificationMethod value) => value switch
+        static string ToApi(Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod value) => value switch
         {
-            Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT => "txt",
-            Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME => "cname",
+            Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.TXT => "txt",
+            Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.CNAME => "cname",
             _ => throw new InvalidOperationException()
         };
 
@@ -91,18 +91,18 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.CustomClientIpHeader = source.CustomClientIpHeader;
         }
 
-        static Core.Models.CustomDomain.CustomDomainCertificateProvisioning? FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning? value) => value switch
+        static Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning? FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning? value) => value switch
         {
-            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
-            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate => Core.Models.CustomDomain.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate => Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.SelfManagedCertificate,
             null => null,
             _ => throw new InvalidOperationException()
         };
 
-        static Core.Models.CustomDomain.CustomDomainVerificationMethod? FromApi(string? value) => value?.Trim()?.ToLowerInvariant() switch
+        static Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod? FromApi(string? value) => value?.Trim()?.ToLowerInvariant() switch
         {
-            "txt" => Core.Models.CustomDomain.CustomDomainVerificationMethod.TXT,
-            "cname" => Core.Models.CustomDomain.CustomDomainVerificationMethod.CNAME,
+            "txt" => Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.TXT,
+            "cname" => Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.CNAME,
             "" => null,
             null => null,
             _ => throw new InvalidOperationException()

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Alethic.Auth0.Operator.Core.Models;
-using Alethic.Auth0.Operator.Core.Models.Connection;
+using Alethic.Auth0.Operator.Core.Models.Connection.V1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -178,7 +178,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException("Missing connection strategy.");
 
             // calculate options, depends on strategy
-            var options = conf.Strategy == "auth0" ? (dynamic?)TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+            var options = conf.Strategy == "auth0" ? (dynamic?)TransformToNewtonsoftJson<V1ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
             if (options is null)
                 throw new InvalidOperationException("Missing connection options.");
 
@@ -206,7 +206,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // calculate options: depends on current strategy, possibly null, which means no apply
             var strategy = last?["strategy"] as string ?? conf.Strategy;
-            var options = strategy == "auth0" && conf.Options is not null ? (dynamic?)TransformToNewtonsoftJson<ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
+            var options = strategy == "auth0" && conf.Options is not null ? (dynamic?)TransformToNewtonsoftJson<V1ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
             if (options is not null)
                 req.Options = options;
 
