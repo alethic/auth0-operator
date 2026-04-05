@@ -34,17 +34,29 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V1alpha1CustomDomain>
     {
 
-        static global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning ToApi(Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning value) => value switch
+        /// <summary>
+        /// Transforms the specified certificate provisioning method to the API representation.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static CustomDomainCertificateProvisioning ToApi(V1alpha1CustomDomainCertificateProvisioning value) => value switch
         {
-            Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
-            Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.SelfManagedCertificate => global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            V1alpha1CustomDomainCertificateProvisioning.Auth0ManagedCertificate => CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            V1alpha1CustomDomainCertificateProvisioning.SelfManagedCertificate => CustomDomainCertificateProvisioning.SelfManagedCertificate,
             _ => throw new InvalidOperationException()
         };
 
-        static string ToApi(Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod value) => value switch
+        /// <summary>
+        /// Transforms the specified verification method to the API representation.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static string ToApi(V1alpha1CustomDomainVerificationMethod value) => value switch
         {
-            Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.TXT => "txt",
-            Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.CNAME => "cname",
+            V1alpha1CustomDomainVerificationMethod.TXT => "txt",
+            V1alpha1CustomDomainVerificationMethod.CNAME => "cname",
             _ => throw new InvalidOperationException()
         };
 
@@ -91,21 +103,48 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.CustomClientIpHeader = source.CustomClientIpHeader;
         }
 
-        static Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning? FromApi(global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning? value) => value switch
+        /// <summary>
+        /// Transforms the specified certificate provisioning method from the API representation to the internal representation.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1CustomDomainCertificateProvisioning? FromApi(CustomDomainCertificateProvisioning? value) => value switch
         {
-            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.Auth0ManagedCertificate => Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
-            global::Auth0.ManagementApi.Models.CustomDomainCertificateProvisioning.SelfManagedCertificate => Core.Models.CustomDomain.V1alpha1.CustomDomainCertificateProvisioning.SelfManagedCertificate,
+            CustomDomainCertificateProvisioning.Auth0ManagedCertificate => V1alpha1CustomDomainCertificateProvisioning.Auth0ManagedCertificate,
+            CustomDomainCertificateProvisioning.SelfManagedCertificate => V1alpha1CustomDomainCertificateProvisioning.SelfManagedCertificate,
             null => null,
             _ => throw new InvalidOperationException()
         };
 
-        static Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod? FromApi(string? value) => value?.Trim()?.ToLowerInvariant() switch
+        /// <summary>
+        /// Transforms the specified verification method from the API representation to the internal representation.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1CustomDomainVerificationMethod? FromApi(string? value) => value?.Trim()?.ToLowerInvariant() switch
         {
-            "txt" => Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.TXT,
-            "cname" => Core.Models.CustomDomain.V1alpha1.CustomDomainVerificationMethod.CNAME,
+            "txt" => V1alpha1CustomDomainVerificationMethod.TXT,
+            "cname" => V1alpha1CustomDomainVerificationMethod.CNAME,
             "" => null,
             null => null,
             _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified API representation to the internal representation.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1CustomDomainConf FromApi(CustomDomain source) => new()
+        {
+            Domain = source.Domain,
+            Type = FromApi(source.Type),
+            VerificationMethod = source.Verification.Methods.Length > 0 ? FromApi(source.Verification.Methods[0].Name) : null,
+            TlsPolicy = source.TlsPolicy,
+            CustomClientIpHeader = source.CustomClientIpHeader,
+            Primary = source.Primary
         };
 
         /// <summary>
@@ -129,18 +168,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                var self = await api.CustomDomains.GetAsync(id, cancellationToken: cancellationToken);
-                if (self == null)
-                    return null;
-
-                var conf = new V1alpha1CustomDomainConf();
-                conf.Domain = self.Domain;
-                conf.Type = FromApi(self.Type);
-                conf.VerificationMethod = self.Verification.Methods.Length > 0 ? FromApi(self.Verification.Methods[0].Name) : null;
-                conf.TlsPolicy = self.TlsPolicy;
-                conf.CustomClientIpHeader = self.CustomClientIpHeader;
-                conf.Primary = self.Primary;
-                return conf;
+                return FromApi(await api.CustomDomains.GetAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {

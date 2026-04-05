@@ -4,7 +4,7 @@ namespace Alethic.Auth0.Operator.Core.Models.CustomDomain.V1alpha1
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CustomDomainVerificationMethod
+    public enum V1alpha1CustomDomainVerificationMethod
     {
 
         [JsonStringEnumMemberName("txt")]

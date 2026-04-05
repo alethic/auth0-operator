@@ -12,11 +12,11 @@ namespace Alethic.Auth0.Operator.Core.Models.CustomDomain.V1alpha1
 
         [JsonPropertyName("type")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public CustomDomainCertificateProvisioning? Type { get; set; }
+        public V1alpha1CustomDomainCertificateProvisioning? Type { get; set; }
 
         [JsonPropertyName("verification_method")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public CustomDomainVerificationMethod? VerificationMethod { get; set; }
+        public V1alpha1CustomDomainVerificationMethod? VerificationMethod { get; set; }
 
         [JsonPropertyName("primary")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
