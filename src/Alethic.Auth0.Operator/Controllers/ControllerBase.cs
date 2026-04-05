@@ -496,9 +496,10 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (ErrorApiException e)
             {
+                Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? "");
+
                 try
                 {
-                    Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? "");
                     await ReconcileWarningAsync(entity, "ApiError", e.ApiError?.Message ?? "", cancellationToken);
                 }
                 catch (Exception e2)
@@ -513,9 +514,10 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (RateLimitApiException e)
             {
+                Logger.LogError(e, "Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
+
                 try
                 {
-                    Logger.LogError("Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
                     await ReconcileWarningAsync(entity, "RateLimit", e.ApiError?.Message ?? "", cancellationToken);
                 }
                 catch (Exception e2)
@@ -533,9 +535,10 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (RetryException e)
             {
+                Logger.LogError(e, "Retry exception reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+
                 try
                 {
-                    Logger.LogError("Retry hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
                     await ReconcileWarningAsync(entity, "Retry", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
@@ -550,9 +553,10 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (Exception e)
             {
+                Logger.LogError(e, "Unexpected exception reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+
                 try
                 {
-                    Logger.LogError("Retry hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
                     await ReconcileWarningAsync(entity, "Retry", e.Message, cancellationToken);
                 }
                 catch (Exception e2)
@@ -627,7 +631,7 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (RetryException e)
             {
-                Logger.LogError(e, "Retry hit deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+                Logger.LogError(e, "Retry exception hit deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
 
                 try
                 {
