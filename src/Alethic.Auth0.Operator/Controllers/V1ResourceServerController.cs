@@ -31,7 +31,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ResourceServerController :
-        V1TenantEntityController<V1ResourceServer, V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, Hashtable>,
+        V1TenantEntityInstanceController<V1ResourceServer, V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, Hashtable>,
         IEntityController<V1ResourceServer>
     {
 
@@ -107,7 +107,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
+        protected override Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             return api.ResourceServers.DeleteAsync(id, cancellationToken);
         }

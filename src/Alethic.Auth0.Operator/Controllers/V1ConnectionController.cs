@@ -35,7 +35,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ConnectionController :
-        V1TenantEntityController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>,
+        V1TenantEntityInstanceController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>,
         IEntityController<V1Connection>
     {
 
@@ -276,7 +276,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
+        protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting connection from Auth0 with ID: {ConnectionId} (reason: Kubernetes entity deleted)", EntityTypeName, id);
             await api.Connections.DeleteAsync(id, cancellationToken);

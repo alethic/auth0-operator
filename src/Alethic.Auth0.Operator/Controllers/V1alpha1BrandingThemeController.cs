@@ -29,7 +29,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1alpha1BrandingThemeController :
-        V1TenantEntityController<V1alpha1BrandingTheme, V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef, V1alpha1BrandingThemeConf, V1alpha1BrandingThemeConf>,
+        V1TenantEntityInstanceController<V1alpha1BrandingTheme, V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef, V1alpha1BrandingThemeConf, V1alpha1BrandingThemeConf>,
         IEntityController<V1alpha1BrandingTheme>
     {
 
@@ -421,7 +421,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
+        protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting theme from Auth0 with ID: {ThemeId} (reason: Kubernetes entity deleted)", EntityTypeName, id);
             await api.Branding.DeleteBrandingThemeAsync(id, cancellationToken);

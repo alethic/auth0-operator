@@ -16,10 +16,10 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0domain")]
     public partial class V1alpha1CustomDomain :
         CustomKubernetesEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef>,
-        V1TenantEntity<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>
+        V1TenantEntityInstance<V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>
     {
 
-        public class SpecDef : V1TenantEntitySpec<V1alpha1CustomDomainConf>
+        public class SpecDef : V1TenantEntityInstanceSpec<V1alpha1CustomDomainConf>
         {
 
             [JsonPropertyName("policy")]
@@ -41,7 +41,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityStatus<V1alpha1CustomDomainConf>
+        public class StatusDef : V1TenantEntityInstanceStatus<V1alpha1CustomDomainConf>
         {
 
             [JsonPropertyName("id")]

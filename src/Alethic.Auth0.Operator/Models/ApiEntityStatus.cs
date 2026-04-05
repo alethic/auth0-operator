@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Alethic.Auth0.Operator.Models
+﻿namespace Alethic.Auth0.Operator.Models
 {
 
     public interface ApiEntityStatus<TLastConf>

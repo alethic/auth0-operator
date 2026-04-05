@@ -12,6 +12,7 @@ rules:
   resources:
   - brandingthemes
   - customdomains
+  - customtexts
   - clientgrants
   - connections
   - resourceservers
@@ -77,6 +78,14 @@ rules:
   - kubernetes.auth0.com
   resources:
   - customdomains/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - customtexts/status
   verbs:
   - get
   - update

@@ -18,10 +18,10 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0cgr")]
     public partial class V1ClientGrant :
         CustomKubernetesEntity<V1ClientGrant.SpecDef, V1ClientGrant.StatusDef>,
-        V1TenantEntity<V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, Hashtable>
+        V1TenantEntityInstance<V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, Hashtable>
     {
 
-        public class SpecDef : V1TenantEntitySpec<V1ClientGrantConf>
+        public class SpecDef : V1TenantEntityInstanceSpec<V1ClientGrantConf>
         {
 
             [JsonPropertyName("policy")]
@@ -40,7 +40,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityStatus<Hashtable>
+        public class StatusDef : V1TenantEntityInstanceStatus<Hashtable>
         {
 
             [JsonPropertyName("id")]

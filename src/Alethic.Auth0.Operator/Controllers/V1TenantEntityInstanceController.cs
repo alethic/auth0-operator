@@ -1,0 +1,238 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Alethic.Auth0.Operator.Models;
+using Alethic.Auth0.Operator.Options;
+
+using Auth0.ManagementApi;
+
+using k8s;
+using k8s.Models;
+
+using KubeOps.Abstractions.Rbac;
+using KubeOps.KubernetesClient;
+
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Alethic.Auth0.Operator.Controllers
+{
+
+    /// <summary>
+    /// Base controller type for a tenant entity that represents an instance of a specific API object within a tenant. This controller handles
+    /// the common reconciliation logic for ensuring the existence of the remote entity and applying updates to it, while delegating the
+    /// specifics of how to interact with the API to the derived type.
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TSpec"></typeparam>
+    /// <typeparam name="TStatus"></typeparam>
+    /// <typeparam name="TConf"></typeparam>
+    /// <typeparam name="TLastConf"></typeparam>
+    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
+    public abstract class V1TenantEntityInstanceController<TEntity, TSpec, TStatus, TConf, TLastConf> : V1TenantEntityController<TEntity, TSpec, TStatus, TConf, TLastConf>
+        where TEntity : IKubernetesObject<V1ObjectMeta>, V1TenantEntityInstance<TSpec, TStatus, TConf, TLastConf>
+        where TSpec : V1TenantEntityInstanceSpec<TConf>
+        where TStatus : V1TenantEntityInstanceStatus<TLastConf>
+        where TConf : class
+        where TLastConf : class
+    {
+
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="kube"></param>
+        /// <param name="cache"></param>
+        /// <param name="logger"></param>
+        /// <param name="options"></param>
+        public V1TenantEntityInstanceController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger) :
+            base(kube, cache, options, logger)
+        {
+
+        }
+
+        /// <summary>
+        /// Attempts to perform a get operation through the API.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="id"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task<TLastConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Attempts to locate a matching API element by the given configuration.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="entity"></param>
+        /// <param name="spec"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task<string?> Find(IManagementApiClient api, TEntity entity, TSpec spec, string defaultNamespace, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Performs a validation on the <paramref name="conf"/> parameter for usage in create operations.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <returns></returns>
+        protected abstract string? ValidateCreate(TConf conf);
+
+        /// <summary>
+        /// Attempts to perform a creation through the API. If successful returns the new ID value.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="conf"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task<string> Create(IManagementApiClient api, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Attempts to perform an update through the API.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="id"></param>
+        /// <param name="last"></param>
+        /// <param name="conf"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task Update(IManagementApiClient api, string id, TLastConf? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken)
+        {
+            if (entity.Spec.Conf is null)
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
+
+            // we have not resolved a remote entity
+            if (string.IsNullOrWhiteSpace(entity.Status.Id))
+            {
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} has not yet been reconciled, checking if entity exists in Auth0.", EntityTypeName, entity.Namespace(), entity.Name());
+
+                // find existing remote entity
+                var entityId = await Find(api, entity, entity.Spec, entity.Namespace(), cancellationToken);
+                if (entityId is null)
+                {
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} could not be located, creating.", EntityTypeName, entity.Namespace(), entity.Name());
+
+                    // reject creation if disallowed
+                    if (entity.HasPolicy(V1EntityPolicyType.Create) == false)
+                    {
+                        Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} does not support creation.", EntityTypeName, entity.Namespace(), entity.Name());
+                        return entity;
+                    }
+
+                    // validate configuration version used for initialization
+                    var init = entity.Spec.Init ?? entity.Spec.Conf;
+                    if (ValidateCreate(init) is string msg)
+                        throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is invalid: {msg}");
+
+                    // create new entity and associate
+                    entity.Status.Id = await Create(api, init, entity.Namespace(), cancellationToken);
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} created with {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                    entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
+                }
+                else
+                {
+                    entity.Status.Id = entityId;
+                    Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} found with {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                    entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
+                }
+            }
+
+            // at this point we must have a reference to an entity
+            if (string.IsNullOrWhiteSpace(entity.Status.Id))
+                throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing an existing ID.");
+
+            // attempt to retrieve existing entity
+            Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} checking if entity exists in Auth0 with ID {Id}", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+            var lastConf = await Get(api, entity.Status.Id, entity.Namespace(), cancellationToken);
+            if (lastConf is null)
+            {
+                // no matching remote entity that correlates directly with ID, reset and retry to go back to Find/Create
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} not found in Auth0, clearing status and scheduling recreation", EntityTypeName, entity.Namespace(), entity.Name());
+                entity.Status.LastConf = null;
+                entity.Status.Id = null;
+                entity = await Kube.UpdateStatusAsync(entity, cancellationToken);
+                throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} has missing API object, invalidating.");
+            }
+
+            // apply updates if allowed
+            if (entity.HasPolicy(V1EntityPolicyType.Update))
+            {
+                if (entity.Spec.Conf is { } conf)
+                    await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+            }
+            else
+            {
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} does not support update.", EntityTypeName, entity.Namespace(), entity.Name());
+            }
+
+            // apply new configuration
+            await ApplyStatus(api, entity, lastConf, entity.Namespace(), cancellationToken);
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Applies any modification to the entity status just before saving it.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="entity"></param>
+        /// <param name="lastConf"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected virtual Task ApplyStatus(IManagementApiClient api, TEntity entity, TLastConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            entity.Status.LastConf = lastConf;
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Implement this method to delete a specific entity from the API.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected abstract Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        protected override async Task DeletedAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(entity.Status.Id))
+            {
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} has no known ID, skipping delete (reason: entity was never successfully created in Auth0).", EntityTypeName, entity.Namespace(), entity.Name());
+                return;
+            }
+
+            var self = await Get(api, entity.Status.Id, entity.Namespace(), cancellationToken);
+            if (self is null)
+            {
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} with ID {Id} not found in Auth0, skipping delete (reason: already deleted externally).", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                return;
+            }
+
+            // reject deletion if disallowed by policy
+            if (entity.HasPolicy(V1EntityPolicyType.Delete) == false)
+            {
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} does not support delete (reason: Delete policy not enabled).", EntityTypeName, entity.Namespace(), entity.Name());
+            }
+            else
+            {
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} initiating deletion from Auth0 with ID: {Id} (reason: Kubernetes entity was deleted)", EntityTypeName, entity.Namespace(), entity.Name(), entity.Status.Id);
+                await DeletedAsync(api, entity.Status.Id, cancellationToken);
+                Logger.LogInformation("{EntityTypeName} {Namespace}/{Name} deletion completed successfully", EntityTypeName, entity.Namespace(), entity.Name());
+            }
+        }
+
+    }
+
+}

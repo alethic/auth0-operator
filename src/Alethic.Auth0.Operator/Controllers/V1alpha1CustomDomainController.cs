@@ -30,7 +30,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1alpha1CustomDomainController :
-        V1TenantEntityController<V1alpha1CustomDomain, V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>,
+        V1TenantEntityInstanceController<V1alpha1CustomDomain, V1alpha1CustomDomain.SpecDef, V1alpha1CustomDomain.StatusDef, V1alpha1CustomDomainConf, V1alpha1CustomDomainConf>,
         IEntityController<V1alpha1CustomDomain>
     {
 
@@ -200,7 +200,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Delete(IManagementApiClient api, string id, CancellationToken cancellationToken)
+        protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting custom domain from Auth0 with ID: {Domain} (reason: Kubernetes entity deleted)", EntityTypeName, id);
             await api.CustomDomains.DeleteAsync(id, cancellationToken);

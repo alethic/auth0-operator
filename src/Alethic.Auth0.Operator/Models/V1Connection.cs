@@ -18,10 +18,10 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0con")]
     public partial class V1Connection :
         CustomKubernetesEntity<V1Connection.SpecDef, V1Connection.StatusDef>,
-        V1TenantEntity<V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>
+        V1TenantEntityInstance<V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>
     {
 
-        public class SpecDef : V1TenantEntitySpec<V1ConnectionConf>
+        public class SpecDef : V1TenantEntityInstanceSpec<V1ConnectionConf>
         {
 
             [JsonPropertyName("policy")]
@@ -43,7 +43,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityStatus<Hashtable>
+        public class StatusDef : V1TenantEntityInstanceStatus<Hashtable>
         {
 
             [JsonPropertyName("id")]
