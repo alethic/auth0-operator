@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Alethic.Auth0.Operator.Core.Models.Client.V1;
 using Alethic.Auth0.Operator.Core.Models.ClientGrant;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
@@ -139,13 +140,13 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="organizationUsage"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        global::Auth0.ManagementApi.Models.OrganizationUsage? Convert(global::Alethic.Auth0.Operator.Core.Models.OrganizationUsage? organizationUsage)
+        global::Auth0.ManagementApi.Models.OrganizationUsage? Convert(global::Alethic.Auth0.Operator.Core.Models.Client.V1.V1ClientOrganizationUsage? organizationUsage)
         {
             return organizationUsage switch
             {
-                Core.Models.OrganizationUsage.Deny => global::Auth0.ManagementApi.Models.OrganizationUsage.Deny,
-                Core.Models.OrganizationUsage.Allow => global::Auth0.ManagementApi.Models.OrganizationUsage.Allow,
-                Core.Models.OrganizationUsage.Require => global::Auth0.ManagementApi.Models.OrganizationUsage.Require,
+                V1ClientOrganizationUsage.Deny => global::Auth0.ManagementApi.Models.OrganizationUsage.Deny,
+                V1ClientOrganizationUsage.Allow => global::Auth0.ManagementApi.Models.OrganizationUsage.Allow,
+                V1ClientOrganizationUsage.Require => global::Auth0.ManagementApi.Models.OrganizationUsage.Require,
                 null => null,
                 _ => throw new InvalidOperationException(),
             };

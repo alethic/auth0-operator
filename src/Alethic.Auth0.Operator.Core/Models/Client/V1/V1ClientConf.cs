@@ -2,9 +2,8 @@
 using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Extensions;
-using Alethic.Auth0.Operator.Core.Models.Organization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
     public partial class V1ClientConf
@@ -12,19 +11,19 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("signing_keys")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public SigningKey[]? SigningKeys { get; set; }
+        public V1ClientSigningKey[]? SigningKeys { get; set; }
 
         [JsonPropertyName("app_type")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ClientApplicationType? ApplicationType { get; set; }
+        public V1ClientApplicationType? ApplicationType { get; set; }
 
         [JsonPropertyName("token_endpoint_auth_method")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TokenEndpointAuthMethod? TokenEndpointAuthMethod { get; set; }
+        public V1ClientTokenEndpointAuthMethod? TokenEndpointAuthMethod { get; set; }
 
         [JsonPropertyName("addons")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ClientAddons? AddOns { get; set; }
+        public V1ClientAddons? AddOns { get; set; }
 
         [JsonPropertyName("allowed_clients")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -77,7 +76,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("encryption_key")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public EncryptionKey? EncryptionKey { get; set; }
+        public V1ClientEncryptionKey? EncryptionKey { get; set; }
 
         [JsonPropertyName("form_template")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -89,11 +88,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("jwt_configuration")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public JwtConfiguration? JwtConfiguration { get; set; }
+        public V1ClientJwtConfiguration? JwtConfiguration { get; set; }
 
         [JsonPropertyName("mobile")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Mobile? Mobile { get; set; }
+        public V1ClientMobile? Mobile { get; set; }
 
         [JsonPropertyName("name")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -111,11 +110,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("oidc_logout")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public OidcLogoutConfig? OidcLogout { get; set; }
+        public V1ClientOidcLogoutConfig? OidcLogout { get; set; }
 
         [JsonPropertyName("resource_servers")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ClientResourceServerAssociation[]? ResourceServers { get; set; }
+        public V1ClientResourceServerAssociation[]? ResourceServers { get; set; }
 
         [JsonPropertyName("sso")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -123,15 +122,15 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("refresh_token")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public RefreshToken? RefreshToken { get; set; }
+        public V1ClientRefreshToken? RefreshToken { get; set; }
 
         [JsonPropertyName("organization_usage")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public OrganizationUsage? OrganizationUsage { get; set; }
+        public V1ClientOrganizationUsage? OrganizationUsage { get; set; }
 
         [JsonPropertyName("organization_require_behavior")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public OrganizationRequireBehavior? OrganizationRequireBehavior { get; set; }
+        public V1ClientOrganizationRequireBehavior? OrganizationRequireBehavior { get; set; }
 
         [JsonPropertyName("cross_origin_authentication")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -143,11 +142,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
 
         [JsonPropertyName("default_organization")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public DefaultOrganization? DefaultOrganization { get; set; }
+        public V1ClientDefaultOrganization? DefaultOrganization { get; set; }
 
         [JsonPropertyName("compliance_level")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ComplianceLevel? ComplianceLevel { get; set; }
+        public V1ClientComplianceLevel? ComplianceLevel { get; set; }
 
         [JsonPropertyName("require_proof_of_possession")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

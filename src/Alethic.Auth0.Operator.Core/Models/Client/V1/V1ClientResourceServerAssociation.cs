@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class ClientResourceServerAssociation
+    public class V1ClientResourceServerAssociation
     {
 
         [JsonPropertyName("identifier")]

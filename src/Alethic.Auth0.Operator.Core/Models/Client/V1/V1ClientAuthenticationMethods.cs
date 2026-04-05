@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class ClientAuthenticationMethods
+    public class V1ClientAuthenticationMethods
     {
 
         public class CredentialIdDef

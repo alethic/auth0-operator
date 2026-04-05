@@ -1,18 +1,18 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class RefreshToken
+    public class V1ClientRefreshToken
     {
 
         [JsonPropertyName("rotation_type")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public RefreshTokenRotationType? RotationType { get; set; }
+        public V1ClientRefreshTokenRotationType? RotationType { get; set; }
 
         [JsonPropertyName("expiration_type")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public RefreshTokenExpirationType? ExpirationType { get; set; }
+        public V1ClientRefreshTokenExpirationType? ExpirationType { get; set; }
 
         [JsonPropertyName("leeway")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

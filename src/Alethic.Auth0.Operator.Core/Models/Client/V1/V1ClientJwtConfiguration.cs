@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class JwtConfiguration
+    public class V1ClientJwtConfiguration
     {
 
         [JsonPropertyName("secret_encoded")]
@@ -16,7 +16,7 @@ namespace Alethic.Auth0.Operator.Core.Models
 
         [JsonPropertyName("scopes")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Scopes? Scopes { get; set; }
+        public V1ClientScopes? Scopes { get; set; }
 
         [JsonPropertyName("alg")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

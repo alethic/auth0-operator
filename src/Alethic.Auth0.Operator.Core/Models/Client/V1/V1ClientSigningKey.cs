@@ -1,22 +1,22 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class EncryptionKey
+    public class V1ClientSigningKey
     {
 
         [JsonPropertyName("cert")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Certificate { get; set; }
+        public string? Cert { get; set; }
 
-        [JsonPropertyName("pub")]
+        [JsonPropertyName("key")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? PublicKey { get; set; }
+        public string? Key { get; set; }
 
-        [JsonPropertyName("subject")]
+        [JsonPropertyName("pkcs7")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Subject { get; set; }
+        public string? Pkcs7 { get; set; }
 
     }
 

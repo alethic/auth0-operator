@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Models.Client;
+using Alethic.Auth0.Operator.Core.Models.Client.V1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
@@ -34,7 +33,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ClientController :
-        V1TenantEntityInstanceController<V1Client, V1Client.SpecDef, V1Client.StatusDef, V1ClientConf, Hashtable>,
+        V1TenantEntityInstanceController<V1Client, V1Client.SpecDef, V1Client.StatusDef, V1ClientConf, V1ClientConf>,
         IEntityController<V1Client>
     {
 
@@ -51,7 +50,404 @@ namespace Alethic.Auth0.Operator.Controllers
 
         }
 
-        void ApplyToApi(ClientAddons source, Addons target)
+        /// <summary>
+        /// Transforms the Auth0 Management API client model to the operator's client configuration model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientConf FromApi(Client source) => new()
+        {
+            AllowedClients = source.AllowedClients,
+            AllowedLogoutUrls = source.AllowedLogoutUrls,
+            AllowedOrigins = source.AllowedOrigins,
+            WebOrigins = source.WebOrigins,
+            InitiateLoginUri = source.InitiateLoginUri,
+            Callbacks = source.Callbacks,
+            ClientAliases = source.ClientAliases,
+            ClientMetaData = source.ClientMetaData,
+            IsCustomLoginPageOn = source.IsCustomLoginPageOn,
+            IsFirstParty = source.IsFirstParty,
+            CustomLoginPage = source.CustomLoginPage,
+            CustomLoginPagePreview = source.CustomLoginPagePreview,
+            FormTemplate = source.FormTemplate,
+            GrantTypes = source.GrantTypes,
+            Name = source.Name,
+            Description = source.Description,
+            LogoUri = source.LogoUri,
+            OidcConformant = source.OidcConformant,
+            Sso = source.Sso,
+            CrossOriginAuthentication = source.CrossOriginAuthentication,
+            RequirePushedAuthorizationRequests = source.RequirePushedAuthorizationRequests,
+            RequireProofOfPossession = source.RequireProofOfPossession,
+            AddOns = FromApi(source.AddOns),
+            ApplicationType = FromApi(source.ApplicationType),
+            ComplianceLevel = FromApi(source.ComplianceLevel),
+            DefaultOrganization = FromApi(source.DefaultOrganization),
+            EncryptionKey = FromApi(source.EncryptionKey),
+            JwtConfiguration = FromApi(source.JwtConfiguration),
+            Mobile = FromApi(source.Mobile),
+            OidcLogout = FromApi(source.OidcLogout),
+            OrganizationRequireBehavior = FromApi(source.OrganizationRequireBehavior),
+            OrganizationUsage = FromApi(source.OrganizationUsage),
+            RefreshToken = FromApi(source.RefreshToken),
+            ResourceServers = source.ResourceServers.Select(FromApi).ToArray(),
+            SigningKeys = source.SigningKeys.Select(FromApi).ToArray(),
+            TokenEndpointAuthMethod = FromApi(source.TokenEndpointAuthMethod),
+        };
+
+        /// <summary>
+        /// Transforms the token endpoint authentication method from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod source) => source switch
+        {
+            TokenEndpointAuthMethod.None => V1ClientTokenEndpointAuthMethod.None,
+            TokenEndpointAuthMethod.ClientSecretPost => V1ClientTokenEndpointAuthMethod.ClientSecretPost,
+            TokenEndpointAuthMethod.ClientSecretBasic => V1ClientTokenEndpointAuthMethod.ClientSecretBasic,
+            _ => null,
+        };
+
+        /// <summary>
+        /// Transforms the client signing keys from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientSigningKey FromApi(SigningKey source) => new V1ClientSigningKey()
+        {
+            Cert = source.Cert,
+            Key = source.Key,
+            Pkcs7 = source.Pkcs7,
+        };
+
+        /// <summary>
+        /// Transforms the client resource server association from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientResourceServerAssociation FromApi(ClientResourceServerAssociation source) => new()
+        {
+            Identifier = source.Identifier,
+            Scopes = source.Scopes,
+        };
+
+        /// <summary>
+        /// Transforms the refresh token configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        V1ClientRefreshToken FromApi(RefreshToken refreshToken) => new()
+        {
+            ExpirationType = FromApi(refreshToken.ExpirationType),
+            InfiniteIdleTokenLifetime = refreshToken.InfiniteIdleTokenLifetime,
+            InfiniteTokenLifetime = refreshToken.InfiniteTokenLifetime,
+            Leeway = refreshToken.Leeway,
+            RotationType = FromApi(refreshToken.RotationType),
+            TokenLifetime = refreshToken.TokenLifetime,
+        };
+
+        /// <summary>
+        /// Transforms the refresh token rotation type from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientRefreshTokenRotationType FromApi(RefreshTokenRotationType source) => source switch
+        {
+            RefreshTokenRotationType.Rotating => V1ClientRefreshTokenRotationType.Rotating,
+            RefreshTokenRotationType.NonRotating => V1ClientRefreshTokenRotationType.NonRotating,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the refresh token expiration type from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientRefreshTokenExpirationType FromApi(RefreshTokenExpirationType source) => source switch
+        {
+            RefreshTokenExpirationType.Expiring => V1ClientRefreshTokenExpirationType.Expiring,
+            RefreshTokenExpirationType.NonExpiring => V1ClientRefreshTokenExpirationType.NonExpiring,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the organization usage from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
+        {
+            OrganizationUsage.Deny => V1ClientOrganizationUsage.Deny,
+            OrganizationUsage.Allow => V1ClientOrganizationUsage.Allow,
+            OrganizationUsage.Require => V1ClientOrganizationUsage.Require,
+            null => null,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the organization require behavior from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientOrganizationRequireBehavior? FromApi(OrganizationRequireBehavior? source) => source switch
+        {
+            OrganizationRequireBehavior.NoPrompt => V1ClientOrganizationRequireBehavior.NoPrompt,
+            OrganizationRequireBehavior.PreLoginPrompt => V1ClientOrganizationRequireBehavior.PreLoginPrompt,
+            OrganizationRequireBehavior.PostLoginPrompt => V1ClientOrganizationRequireBehavior.PostLoginPrompt,
+            null => null,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the OIDC logout configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientOidcLogoutConfig FromApi(OidcLogoutConfig source) => new()
+        {
+            BackchannelLogoutUrls = source.BackchannelLogoutUrls,
+            BackchannelLogoutInitiators = FromApi(source.BackchannelLogoutInitiators),
+        };
+
+        /// <summary>
+        /// Transforms the backchannel logout initiators from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientBackchannelLogoutInitiators FromApi(BackchannelLogoutInitiators source) => new()
+        {
+            Mode = FromApi(source.Mode),
+            SelectedInitiators = source.SelectedInitiators?.Select(i => FromApi(i)).ToArray(),
+        };
+
+        /// <summary>
+        /// Transforms the logout initiators from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientLogoutInitiators FromApi(LogoutInitiators source) => source switch
+        {
+            LogoutInitiators.RpLogout => V1ClientLogoutInitiators.RpLogout,
+            LogoutInitiators.IdpLogout => V1ClientLogoutInitiators.IdpLogout,
+            LogoutInitiators.PasswordChanged => V1ClientLogoutInitiators.PasswordChanged,
+            LogoutInitiators.SessionExpired => V1ClientLogoutInitiators.SessionExpired,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the logout initiator modes from the API model to the operator model.
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientLogoutInitiatorModes FromApi(LogoutInitiatorModes mode) => mode switch
+        {
+            LogoutInitiatorModes.All => V1ClientLogoutInitiatorModes.All,
+            LogoutInitiatorModes.Custom => V1ClientLogoutInitiatorModes.Custom,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the mobile configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientMobile FromApi(Mobile source) => new()
+        {
+            Android = FromApi(source.Android),
+            Ios = FromApi(source.Ios),
+        };
+
+        /// <summary>
+        /// Transforms the iOS mobile configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientMobile.MobileIos FromApi(Mobile.MobileIos source) => new()
+        {
+            AppBundleIdentifier = source.AppBundleIdentifier,
+            TeamId = source.TeamId,
+        };
+
+        /// <summary>
+        /// Transforms the Android mobile configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        V1ClientMobile.MobileAndroid FromApi(Mobile.MobileAndroid source) => new()
+        {
+            AppPackageName = source.AppPackageName,
+            KeystoreHash = source.KeystoreHash,
+        };
+
+        /// <summary>
+        /// Transforms the client JWT configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="jwtConfiguration"></param>
+        /// <returns></returns>
+        V1ClientJwtConfiguration FromApi(JwtConfiguration jwtConfiguration) => new()
+        {
+            IsSecretEncoded = jwtConfiguration.IsSecretEncoded,
+            LifetimeInSeconds = jwtConfiguration.LifetimeInSeconds,
+            Scopes = FromApi(jwtConfiguration.Scopes),
+            SigningAlgorithm = jwtConfiguration.SigningAlgorithm,
+        };
+
+        /// <summary>
+        /// Transforms the client scopes from the API model to the operator model.
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        V1ClientScopes FromApi(Scopes scopes) => new()
+        {
+            Users = FromApi(scopes.Users),
+            UsersAppMetadata = FromApi(scopes.UsersAppMetadata),
+            Clients = FromApi(scopes.Clients),
+            ClientKeys = FromApi(scopes.ClientKeys),
+            Tokens = FromApi(scopes.Tokens),
+            Stats = FromApi(scopes.Stats),
+        };
+
+        /// <summary>
+        /// Transforms the client scope entry from the API model to the operator model.
+        /// </summary>
+        /// <param name="users"></param>
+        /// <returns></returns>
+        V1ClientScopeEntry FromApi(ScopeEntry users) => new()
+        {
+            Actions = users.Actions,
+        };
+
+        /// <summary>
+        /// Transforms the client encryption key configuration from the API model to the operator model.
+        /// </summary>
+        /// <param name="encryptionKey"></param>
+        /// <returns></returns>
+        V1ClientEncryptionKey FromApi(EncryptionKey encryptionKey) => new()
+        {
+            Certificate = encryptionKey.Certificate,
+            PublicKey = encryptionKey.PublicKey,
+            Subject = encryptionKey.Subject,
+        };
+
+        /// <summary>
+        /// Extracts the default organization configuration from the API response and transforms it to the operator model.
+        /// </summary>
+        /// <param name="defaultOrganization"></param>
+        /// <returns></returns>
+        V1ClientDefaultOrganization FromApi(DefaultOrganization defaultOrganization) => new()
+        {
+            OrganizationId = defaultOrganization.OrganizationId,
+            Flows = defaultOrganization.Flows?.Select(FromApi).ToArray(),
+        };
+
+        /// <summary>
+        /// Transforms the client flow from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientFlows FromApi(Flows source) => source switch
+        {
+            Flows.ClientCredentials => V1ClientFlows.ClientCredentials,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the compliance level from the API model to the operator model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientComplianceLevel? FromApi(ComplianceLevel? source) => source switch
+        {
+            ComplianceLevel.NONE => V1ClientComplianceLevel.NONE,
+            ComplianceLevel.FAPI1_ADV_PKJ_PAR => V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR,
+            ComplianceLevel.FAPI1_ADV_MTLS_PAR => V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR,
+            null => null,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the application type from the API model to the operator model.
+        /// </summary>
+        /// <param name="applicationType"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        V1ClientApplicationType FromApi(ClientApplicationType applicationType) => applicationType switch
+        {
+            ClientApplicationType.Box => V1ClientApplicationType.Box,
+            ClientApplicationType.Cloudbees => V1ClientApplicationType.Cloudbees,
+            ClientApplicationType.Concur => V1ClientApplicationType.Concur,
+            ClientApplicationType.Dropbox => V1ClientApplicationType.Dropbox,
+            ClientApplicationType.Echosign => V1ClientApplicationType.Echosign,
+            ClientApplicationType.Egnyte => V1ClientApplicationType.Egnyte,
+            ClientApplicationType.MsCrm => V1ClientApplicationType.MsCrm,
+            ClientApplicationType.Native => V1ClientApplicationType.Native,
+            ClientApplicationType.NewRelic => V1ClientApplicationType.NewRelic,
+            ClientApplicationType.NonInteractive => V1ClientApplicationType.NonInteractive,
+            ClientApplicationType.Office365 => V1ClientApplicationType.Office365,
+            ClientApplicationType.RegularWeb => V1ClientApplicationType.RegularWeb,
+            ClientApplicationType.Rms => V1ClientApplicationType.Rms,
+            ClientApplicationType.Salesforce => V1ClientApplicationType.Salesforce,
+            ClientApplicationType.Sentry => V1ClientApplicationType.Sentry,
+            ClientApplicationType.SharePoint => V1ClientApplicationType.SharePoint,
+            ClientApplicationType.Slack => V1ClientApplicationType.Slack,
+            ClientApplicationType.SpringCm => V1ClientApplicationType.SpringCm,
+            ClientApplicationType.Spa => V1ClientApplicationType.Spa,
+            ClientApplicationType.Zendesk => V1ClientApplicationType.Zendesk,
+            ClientApplicationType.Zoom => V1ClientApplicationType.Zoom,
+            ClientApplicationType.ResourceServer => V1ClientApplicationType.ResourceServer,
+            ClientApplicationType.ExpressConfiguration => V1ClientApplicationType.ExpressConfiguration,
+            ClientApplicationType.SsoIntegration => V1ClientApplicationType.SsoIntegration,
+            ClientApplicationType.Oag => V1ClientApplicationType.Oag,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Extracts the add-ons configuration from the API response and transforms it to the operator model.
+        /// </summary>
+        /// <param name="addOns"></param>
+        /// <returns></returns>
+        V1ClientAddons FromApi(Addons addOns) => new V1ClientAddons()
+        {
+            AmazonWebServices = addOns.AmazonWebServices,
+            AzureMobileServices = addOns.AzureMobileServices,
+            AzureServiceBus = addOns.AzureServiceBus,
+            Box = addOns.Box,
+            CloudBees = addOns.CloudBees,
+            Concur = addOns.Concur,
+            DropBox = addOns.DropBox,
+            EchoSign = addOns.EchoSign,
+            Egnyte = addOns.Egnyte,
+            FireBase = addOns.FireBase,
+            NewRelic = addOns.NewRelic,
+            Office365 = addOns.Office365,
+            SalesForce = addOns.SalesForce,
+            SalesForceApi = addOns.SalesForceApi,
+            SalesForceSandboxApi = addOns.SalesForceSandboxApi,
+            SamlP = addOns.SamlP,
+            SapApi = addOns.SapApi,
+            SharePoint = addOns.SharePoint,
+            SpringCM = addOns.SpringCM,
+            WebApi = addOns.WebApi,
+            WsFed = addOns.WsFed,
+            Zendesk = addOns.Zendesk,
+            Zoom = addOns.Zoom,
+        };
+
+        /// <summary>
+        /// Applies the add-ons configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientAddons source, Addons target)
         {
             if (source.AmazonWebServices is { } aws)
                 target.AmazonWebServices = aws;
@@ -123,7 +519,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Zoom = zoom;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.EncryptionKey source, EncryptionKey target)
+        /// <summary>
+        /// Applies the encryption key configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientEncryptionKey source, EncryptionKey target)
         {
             if (source.Certificate is { } cert)
                 target.Certificate = cert;
@@ -135,13 +536,23 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Subject = subject;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.ScopeEntry source, ScopeEntry target)
+        /// <summary>
+        /// Applies the scope entry configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientScopeEntry source, ScopeEntry target)
         {
             if (source.Actions is { } actions)
                 target.Actions = actions;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.Scopes source, Scopes target)
+        /// <summary>
+        /// Applies the scopes configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientScopes source, Scopes target)
         {
             if (source.Users is { } users)
                 ApplyToApi(users, target.Users ??= new ScopeEntry());
@@ -162,7 +573,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 ApplyToApi(stats, target.Stats ??= new ScopeEntry());
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.JwtConfiguration source, JwtConfiguration target)
+        /// <summary>
+        /// Applies the JWT configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientJwtConfiguration source, JwtConfiguration target)
         {
             if (source.IsSecretEncoded is { } secret_encoded)
                 target.IsSecretEncoded = secret_encoded;
@@ -177,7 +593,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SigningAlgorithm = alg;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.Mobile.MobileAndroid source, Mobile.MobileAndroid target)
+        /// <summary>
+        /// Applies the mobile configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientMobile.MobileAndroid source, Mobile.MobileAndroid target)
         {
             if (source.AppPackageName is { } app_package_name)
                 target.AppPackageName = app_package_name;
@@ -186,7 +607,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.KeystoreHash = keystore_hash;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.Mobile.MobileIos source, Mobile.MobileIos target)
+        /// <summary>
+        /// Applies the iOS mobile configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientMobile.MobileIos source, Mobile.MobileIos target)
         {
             if (source.AppBundleIdentifier is { } app_bundle_identifier)
                 target.AppBundleIdentifier = app_bundle_identifier;
@@ -195,7 +621,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.TeamId = team_id;
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.Mobile source, Mobile target)
+        /// <summary>
+        /// Applies the mobile configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientMobile source, Mobile target)
         {
             if (source.Android is { } android)
                 ApplyToApi(android, target.Android ??= new Mobile.MobileAndroid());
@@ -204,60 +635,80 @@ namespace Alethic.Auth0.Operator.Controllers
                 ApplyToApi(ios, target.Ios ??= new Mobile.MobileIos());
         }
 
-        global::Auth0.ManagementApi.Models.ComplianceLevel ToApi(Core.Models.Client.ComplianceLevel source)
+        /// <summary>
+        /// Transforms the compliance level from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        ComplianceLevel ToApi(V1ClientComplianceLevel source) => source switch
         {
-            return source switch
-            {
-                Core.Models.Client.ComplianceLevel.NONE => global::Auth0.ManagementApi.Models.ComplianceLevel.NONE,
-                Core.Models.Client.ComplianceLevel.FAPI1_ADV_PKJ_PAR => global::Auth0.ManagementApi.Models.ComplianceLevel.FAPI1_ADV_PKJ_PAR,
-                Core.Models.Client.ComplianceLevel.FAPI1_ADV_MTLS_PAR => global::Auth0.ManagementApi.Models.ComplianceLevel.FAPI1_ADV_MTLS_PAR,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientComplianceLevel.NONE => ComplianceLevel.NONE,
+            V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR => ComplianceLevel.FAPI1_ADV_PKJ_PAR,
+            V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR => ComplianceLevel.FAPI1_ADV_MTLS_PAR,
+            _ => throw new NotImplementedException(),
+        };
 
-        OrganizationRequireBehavior ToApi(Core.Models.Organization.OrganizationRequireBehavior source)
+        /// <summary>
+        /// Transforms the organization require behavior from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        OrganizationRequireBehavior ToApi(V1ClientOrganizationRequireBehavior source) => source switch
         {
-            return source switch
-            {
-                Core.Models.Organization.OrganizationRequireBehavior.NoPrompt => global::Auth0.ManagementApi.Models.OrganizationRequireBehavior.NoPrompt,
-                Core.Models.Organization.OrganizationRequireBehavior.PreLoginPrompt => global::Auth0.ManagementApi.Models.OrganizationRequireBehavior.PreLoginPrompt,
-                Core.Models.Organization.OrganizationRequireBehavior.PostLoginPrompt => global::Auth0.ManagementApi.Models.OrganizationRequireBehavior.PostLoginPrompt,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientOrganizationRequireBehavior.NoPrompt => OrganizationRequireBehavior.NoPrompt,
+            V1ClientOrganizationRequireBehavior.PreLoginPrompt => OrganizationRequireBehavior.PreLoginPrompt,
+            V1ClientOrganizationRequireBehavior.PostLoginPrompt => OrganizationRequireBehavior.PostLoginPrompt,
+            _ => throw new NotImplementedException(),
+        };
 
-        OrganizationUsage ToApi(Core.Models.OrganizationUsage source)
+        /// <summary>
+        /// Transforms the organization usage from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        OrganizationUsage ToApi(V1ClientOrganizationUsage source) => source switch
         {
-            return source switch
-            {
-                Core.Models.OrganizationUsage.Deny => OrganizationUsage.Deny,
-                Core.Models.OrganizationUsage.Allow => OrganizationUsage.Allow,
-                Core.Models.OrganizationUsage.Require => OrganizationUsage.Require,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientOrganizationUsage.Deny => OrganizationUsage.Deny,
+            V1ClientOrganizationUsage.Allow => OrganizationUsage.Allow,
+            V1ClientOrganizationUsage.Require => OrganizationUsage.Require,
+            _ => throw new NotImplementedException(),
+        };
 
-        global::Auth0.ManagementApi.Models.RefreshTokenRotationType ToApi(Core.Models.Client.RefreshTokenRotationType source)
+        /// <summary>
+        /// Transforms the refresh token rotation type from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        RefreshTokenRotationType ToApi(V1ClientRefreshTokenRotationType source) => source switch
         {
-            return source switch
-            {
-                Auth0.Operator.Core.Models.Client.RefreshTokenRotationType.Rotating => global::Auth0.ManagementApi.Models.RefreshTokenRotationType.Rotating,
-                Auth0.Operator.Core.Models.Client.RefreshTokenRotationType.NonRotating => global::Auth0.ManagementApi.Models.RefreshTokenRotationType.NonRotating,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientRefreshTokenRotationType.Rotating => RefreshTokenRotationType.Rotating,
+            V1ClientRefreshTokenRotationType.NonRotating => RefreshTokenRotationType.NonRotating,
+            _ => throw new NotImplementedException(),
+        };
 
-        global::Auth0.ManagementApi.Models.RefreshTokenExpirationType ToApi(Core.Models.RefreshTokenExpirationType source)
+        /// <summary>
+        /// Transforms the refresh token expiration type from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        RefreshTokenExpirationType ToApi(V1ClientRefreshTokenExpirationType source) => source switch
         {
-            return source switch
-            {
-                Auth0.Operator.Core.Models.RefreshTokenExpirationType.Expiring => global::Auth0.ManagementApi.Models.RefreshTokenExpirationType.Expiring,
-                Auth0.Operator.Core.Models.RefreshTokenExpirationType.NonExpiring => global::Auth0.ManagementApi.Models.RefreshTokenExpirationType.NonExpiring,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientRefreshTokenExpirationType.Expiring => RefreshTokenExpirationType.Expiring,
+            V1ClientRefreshTokenExpirationType.NonExpiring => RefreshTokenExpirationType.NonExpiring,
+            _ => throw new NotImplementedException(),
+        };
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.Client.RefreshToken source, global::Auth0.ManagementApi.Models.RefreshToken target)
+        /// <summary>
+        /// Applies the refresh token configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientRefreshToken source, RefreshToken target)
         {
             if (source.RotationType is { } rotation_type)
                 target.RotationType = ToApi(rotation_type);
@@ -281,29 +732,43 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.InfiniteIdleTokenLifetime = infinite_idle_token_lifetime;
         }
 
-        global::Auth0.ManagementApi.Models.LogoutInitiatorModes ToApi(Core.Models.LogoutInitiatorModes source)
+        /// <summary>
+        /// Transforms the logout initiator modes from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        LogoutInitiatorModes ToApi(V1ClientLogoutInitiatorModes source)
         {
             return source switch
             {
-                Auth0.Operator.Core.Models.LogoutInitiatorModes.All => global::Auth0.ManagementApi.Models.LogoutInitiatorModes.All,
-                Auth0.Operator.Core.Models.LogoutInitiatorModes.Custom => global::Auth0.ManagementApi.Models.LogoutInitiatorModes.Custom,
+                V1ClientLogoutInitiatorModes.All => LogoutInitiatorModes.All,
+                V1ClientLogoutInitiatorModes.Custom => LogoutInitiatorModes.Custom,
                 _ => throw new NotImplementedException(),
             };
         }
 
-        global::Auth0.ManagementApi.Models.LogoutInitiators ToApi(Core.Models.LogoutInitiators source)
+        /// <summary>
+        /// Transforms the logout initiators from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        LogoutInitiators ToApi(V1ClientLogoutInitiators source) => source switch
         {
-            return source switch
-            {
-                Auth0.Operator.Core.Models.LogoutInitiators.RpLogout => global::Auth0.ManagementApi.Models.LogoutInitiators.RpLogout,
-                Auth0.Operator.Core.Models.LogoutInitiators.IdpLogout => global::Auth0.ManagementApi.Models.LogoutInitiators.IdpLogout,
-                Auth0.Operator.Core.Models.LogoutInitiators.PasswordChanged => global::Auth0.ManagementApi.Models.LogoutInitiators.PasswordChanged,
-                Auth0.Operator.Core.Models.LogoutInitiators.SessionExpired => global::Auth0.ManagementApi.Models.LogoutInitiators.SessionExpired,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientLogoutInitiators.RpLogout => LogoutInitiators.RpLogout,
+            V1ClientLogoutInitiators.IdpLogout => LogoutInitiators.IdpLogout,
+            V1ClientLogoutInitiators.PasswordChanged => LogoutInitiators.PasswordChanged,
+            V1ClientLogoutInitiators.SessionExpired => LogoutInitiators.SessionExpired,
+            _ => throw new NotImplementedException(),
+        };
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.BackchannelLogoutInitiators source, global::Auth0.ManagementApi.Models.BackchannelLogoutInitiators target)
+        /// <summary>
+        /// Applies the backchannel logout initiators configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientBackchannelLogoutInitiators source, BackchannelLogoutInitiators target)
         {
             if (source.Mode is { } backchannel_logout_urls)
                 target.Mode = ToApi(backchannel_logout_urls);
@@ -312,7 +777,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SelectedInitiators = [.. backchannel_logout_initiators.Select(ToApi)];
         }
 
-        void ApplyToApi(Alethic.Auth0.Operator.Core.Models.OidcLogoutConfig source, global::Auth0.ManagementApi.Models.OidcLogoutConfig target)
+        /// <summary>
+        /// Applies the OIDC logout configuration to the API request.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        void ApplyToApi(V1ClientOidcLogoutConfig source, OidcLogoutConfig target)
         {
             if (source.BackchannelLogoutUrls is { } backchannel_logout_urls)
                 target.BackchannelLogoutUrls = backchannel_logout_urls;
@@ -422,46 +892,57 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.RequireProofOfPossession = conf.RequireProofOfPossession;
         }
 
-        global::Auth0.ManagementApi.Models.ClientApplicationType ToApi(Core.Models.Client.ClientApplicationType source)
+        /// <summary>
+        /// Transforms the application type from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        ClientApplicationType ToApi(V1ClientApplicationType source) => source switch
         {
-            return source switch
-            {
-                Core.Models.Client.ClientApplicationType.Box => global::Auth0.ManagementApi.Models.ClientApplicationType.Box,
-                Core.Models.Client.ClientApplicationType.Cloudbees => global::Auth0.ManagementApi.Models.ClientApplicationType.Cloudbees,
-                Core.Models.Client.ClientApplicationType.Concur => global::Auth0.ManagementApi.Models.ClientApplicationType.Concur,
-                Core.Models.Client.ClientApplicationType.Dropbox => global::Auth0.ManagementApi.Models.ClientApplicationType.Dropbox,
-                Core.Models.Client.ClientApplicationType.Echosign => global::Auth0.ManagementApi.Models.ClientApplicationType.Echosign,
-                Core.Models.Client.ClientApplicationType.Egnyte => global::Auth0.ManagementApi.Models.ClientApplicationType.Egnyte,
-                Core.Models.Client.ClientApplicationType.MsCrm => global::Auth0.ManagementApi.Models.ClientApplicationType.MsCrm,
-                Core.Models.Client.ClientApplicationType.Native => global::Auth0.ManagementApi.Models.ClientApplicationType.Native,
-                Core.Models.Client.ClientApplicationType.NewRelic => global::Auth0.ManagementApi.Models.ClientApplicationType.NewRelic,
-                Core.Models.Client.ClientApplicationType.NonInteractive => global::Auth0.ManagementApi.Models.ClientApplicationType.NonInteractive,
-                Core.Models.Client.ClientApplicationType.Office365 => global::Auth0.ManagementApi.Models.ClientApplicationType.Office365,
-                Core.Models.Client.ClientApplicationType.RegularWeb => global::Auth0.ManagementApi.Models.ClientApplicationType.RegularWeb,
-                Core.Models.Client.ClientApplicationType.Rms => global::Auth0.ManagementApi.Models.ClientApplicationType.Rms,
-                Core.Models.Client.ClientApplicationType.Salesforce => global::Auth0.ManagementApi.Models.ClientApplicationType.Salesforce,
-                Core.Models.Client.ClientApplicationType.Sentry => global::Auth0.ManagementApi.Models.ClientApplicationType.Sentry,
-                Core.Models.Client.ClientApplicationType.SharePoint => global::Auth0.ManagementApi.Models.ClientApplicationType.SharePoint,
-                Core.Models.Client.ClientApplicationType.Slack => global::Auth0.ManagementApi.Models.ClientApplicationType.Slack,
-                Core.Models.Client.ClientApplicationType.SpringCm => global::Auth0.ManagementApi.Models.ClientApplicationType.SpringCm,
-                Core.Models.Client.ClientApplicationType.Spa => global::Auth0.ManagementApi.Models.ClientApplicationType.Spa,
-                Core.Models.Client.ClientApplicationType.Zendesk => global::Auth0.ManagementApi.Models.ClientApplicationType.Zendesk,
-                Core.Models.Client.ClientApplicationType.Zoom => global::Auth0.ManagementApi.Models.ClientApplicationType.Zoom,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientApplicationType.Box => ClientApplicationType.Box,
+            V1ClientApplicationType.Cloudbees => ClientApplicationType.Cloudbees,
+            V1ClientApplicationType.Concur => ClientApplicationType.Concur,
+            V1ClientApplicationType.Dropbox => ClientApplicationType.Dropbox,
+            V1ClientApplicationType.Echosign => ClientApplicationType.Echosign,
+            V1ClientApplicationType.Egnyte => ClientApplicationType.Egnyte,
+            V1ClientApplicationType.MsCrm => ClientApplicationType.MsCrm,
+            V1ClientApplicationType.Native => ClientApplicationType.Native,
+            V1ClientApplicationType.NewRelic => ClientApplicationType.NewRelic,
+            V1ClientApplicationType.NonInteractive => ClientApplicationType.NonInteractive,
+            V1ClientApplicationType.Office365 => ClientApplicationType.Office365,
+            V1ClientApplicationType.RegularWeb => ClientApplicationType.RegularWeb,
+            V1ClientApplicationType.Rms => ClientApplicationType.Rms,
+            V1ClientApplicationType.Salesforce => ClientApplicationType.Salesforce,
+            V1ClientApplicationType.Sentry => ClientApplicationType.Sentry,
+            V1ClientApplicationType.SharePoint => ClientApplicationType.SharePoint,
+            V1ClientApplicationType.Slack => ClientApplicationType.Slack,
+            V1ClientApplicationType.SpringCm => ClientApplicationType.SpringCm,
+            V1ClientApplicationType.Spa => ClientApplicationType.Spa,
+            V1ClientApplicationType.Zendesk => ClientApplicationType.Zendesk,
+            V1ClientApplicationType.Zoom => ClientApplicationType.Zoom,
+            _ => throw new NotImplementedException(),
+        };
 
-        global::Auth0.ManagementApi.Models.TokenEndpointAuthMethod ToApi(Core.Models.Client.TokenEndpointAuthMethod source)
+        /// <summary>
+        /// Transforms the token endpoint authentication method from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        TokenEndpointAuthMethod ToApi(V1ClientTokenEndpointAuthMethod source) => source switch
         {
-            return source switch
-            {
-                Core.Models.Client.TokenEndpointAuthMethod.None => global::Auth0.ManagementApi.Models.TokenEndpointAuthMethod.None,
-                Core.Models.Client.TokenEndpointAuthMethod.ClientSecretPost => global::Auth0.ManagementApi.Models.TokenEndpointAuthMethod.ClientSecretPost,
-                Core.Models.Client.TokenEndpointAuthMethod.ClientSecretBasic => global::Auth0.ManagementApi.Models.TokenEndpointAuthMethod.ClientSecretBasic,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientTokenEndpointAuthMethod.None => TokenEndpointAuthMethod.None,
+            V1ClientTokenEndpointAuthMethod.ClientSecretPost => TokenEndpointAuthMethod.ClientSecretPost,
+            V1ClientTokenEndpointAuthMethod.ClientSecretBasic => TokenEndpointAuthMethod.ClientSecretBasic,
+            _ => throw new NotImplementedException(),
+        };
 
+        /// <summary>
+        /// Applies client configuration settings to the specified API client creation request.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="request"></param>
         void ApplyToApi(V1ClientConf conf, ClientCreateRequest request)
         {
             if (conf.ApplicationType is { } app_type)
@@ -473,6 +954,11 @@ namespace Alethic.Auth0.Operator.Controllers
             ApplyToApi(conf, (ClientBase)request);
         }
 
+        /// <summary>
+        /// Applies the specified client configuration to the API update request.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="request"></param>
         void ApplyToApi(V1ClientConf conf, ClientUpdateRequest request)
         {
             if (conf.ApplicationType is { } app_type)
@@ -488,11 +974,11 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override string EntityTypeName => "Client";
 
         /// <inheritdoc />
-        protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<V1ClientConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
             try
             {
-                return TransformToSystemTextJson<Hashtable>(await api.Clients.GetAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.Clients.GetAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -566,7 +1052,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, V1ClientConf? last, V1ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);
 
@@ -575,8 +1061,8 @@ namespace Alethic.Auth0.Operator.Controllers
             ApplyToApi(conf, req);
 
             // explicitely null out missing metadata if previously present
-            if (last is not null && last.ContainsKey("client_metadata") && conf.ClientMetaData != null)
-                foreach (string key in ((Hashtable)last["client_metadata"]!).Keys)
+            if (last is not null && last.ClientMetaData != null && conf.ClientMetaData != null)
+                foreach (string key in last.ClientMetaData.Keys)
                     if (conf.ClientMetaData.ContainsKey(key) == false)
                         req.ClientMetaData[key] = null;
 
@@ -585,19 +1071,16 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task ApplyStatus(IManagementApiClient api, V1Client entity, Hashtable lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task ApplyStatus(IManagementApiClient api, V1Client entity, V1ClientConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             // Always attempt to apply secret if secretRef is specified, regardless of whether we have the clientSecret value
             // This ensures secret resources are created for existing clients even when Auth0 API doesn't return the secret
-            if (entity.Spec.SecretRef is not null)
+            if (entity.Spec.SecretRef is not null && entity.Status.Id is not null)
             {
-                var clientId = (string?)lastConf["client_id"];
-                var clientSecret = (string?)lastConf["client_secret"];
-                await ApplySecret(entity, clientId, clientSecret, defaultNamespace, cancellationToken);
+                var client = await api.Clients.GetAsync(entity.Status.Id);
+                await ApplySecret(entity, client.ClientId, client.ClientSecret, defaultNamespace, cancellationToken);
             }
 
-            lastConf.Remove("client_id");
-            lastConf.Remove("client_secret");
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
 

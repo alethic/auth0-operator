@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
     public partial class V1ClientFind

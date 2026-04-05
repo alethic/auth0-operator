@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.ResourceServer
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

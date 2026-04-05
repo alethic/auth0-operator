@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class Mobile
+    public class V1ClientMobile
     {
 
         public class MobileAndroid

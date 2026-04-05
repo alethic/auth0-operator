@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Organization
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum OrganizationRequireBehavior
+    public enum V1ClientOrganizationRequireBehavior
     {
 
         [JsonStringEnumMemberName("no_prompt")]

@@ -1,18 +1,18 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class BackchannelLogoutInitiators
+    public class V1ClientBackchannelLogoutInitiators
     {
 
         [JsonPropertyName("mode")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public LogoutInitiatorModes? Mode { get; set; }
+        public V1ClientLogoutInitiatorModes? Mode { get; set; }
 
         [JsonPropertyName("selected_initiators")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public LogoutInitiators[]? SelectedInitiators { get; set; }
+        public V1ClientLogoutInitiators[]? SelectedInitiators { get; set; }
 
     }
 

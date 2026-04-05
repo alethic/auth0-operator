@@ -1,10 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Client
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum ClientApplicationType
+    public enum V1ClientApplicationType
     {
 
         [JsonStringEnumMemberName("box")]
@@ -68,7 +69,19 @@ namespace Alethic.Auth0.Operator.Core.Models.Client
         Zendesk,
 
         [JsonStringEnumMemberName("zoom")]
-        Zoom
+        Zoom,
+
+        [JsonStringEnumMemberName("resource_server")]
+        ResourceServer,
+
+        [JsonStringEnumMemberName("express_configuration")]
+        ExpressConfiguration,
+
+        [JsonStringEnumMemberName("sso_integration")]
+        SsoIntegration,
+
+        [JsonStringEnumMemberName("oag")]
+        Oag
 
     }
 

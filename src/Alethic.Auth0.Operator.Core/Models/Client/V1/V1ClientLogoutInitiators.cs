@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum LogoutInitiators
+    public enum V1ClientLogoutInitiators
     {
 
         [JsonStringEnumMemberName("rp-logout")]

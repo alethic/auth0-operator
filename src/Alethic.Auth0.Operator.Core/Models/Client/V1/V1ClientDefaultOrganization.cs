@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Organization
+namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class DefaultOrganization
+    public class V1ClientDefaultOrganization
     {
 
         [JsonPropertyName("organization_id")]
@@ -12,7 +12,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Organization
 
         [JsonPropertyName("flows")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Flows[]? Flows { get; set; }
+        public V1ClientFlows[]? Flows { get; set; }
 
     }
 
