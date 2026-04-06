@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class V1TenantBrandingColors
+    public record V1TenantBrandingColors
     {
         
         [JsonPropertyName("primary")]

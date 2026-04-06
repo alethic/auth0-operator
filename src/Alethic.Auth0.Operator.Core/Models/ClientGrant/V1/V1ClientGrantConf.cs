@@ -5,7 +5,7 @@ using KubeOps.Abstractions.Entities.Attributes;
 namespace Alethic.Auth0.Operator.Core.Models.ClientGrant.V1
 {
 
-    public partial class V1ClientGrantConf
+    public record V1ClientGrantConf
     {
 
         [JsonPropertyName("clientRef")]

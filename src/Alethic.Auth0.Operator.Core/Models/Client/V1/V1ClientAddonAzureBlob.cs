@@ -5,7 +5,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1;
 /// <summary>
 /// Azure Blob Storage addon configuration.
 /// </summary>
-public class V1ClientAddonAzureBlob
+public record V1ClientAddonAzureBlob
 {
 
     /// <summary>

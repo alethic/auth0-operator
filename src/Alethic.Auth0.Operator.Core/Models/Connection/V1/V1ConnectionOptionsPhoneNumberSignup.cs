@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
-    public class V1ConnectionOptionsPhoneNumberSignup
+    public record V1ConnectionOptionsPhoneNumberSignup
     {
 
         [JsonPropertyName("status")]

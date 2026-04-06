@@ -13,21 +13,21 @@ public record V1ClientAddonLayer
     /// </summary>
     [JsonPropertyName("providerId")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public  string? ProviderId { get; set; }
+    public string? ProviderId { get; set; }
 
     /// <summary>
     /// Authentication Key identifier used to sign the Layer token.
     /// </summary>
     [JsonPropertyName("keyId")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public  string? KeyId { get; set; }
+    public string? KeyId { get; set; }
 
     /// <summary>
     /// Private key for signing the Layer token.
     /// </summary>
     [JsonPropertyName("privateKey")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public  string? PrivateKey { get; set; }
+    public string? PrivateKey { get; set; }
 
     /// <summary>
     /// Name of the property used as the unique user id in Layer. If not specified `user_id` is used.

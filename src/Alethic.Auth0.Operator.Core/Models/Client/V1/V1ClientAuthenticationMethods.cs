@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class V1ClientAuthenticationMethods
+    public record V1ClientAuthenticationMethods
     {
 
-        public class CredentialIdDef
+        public record CredentialIdDef
         {
 
             [JsonPropertyName("id")]
@@ -16,29 +15,29 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 
         }
 
-        public class PrivateKeyJwtDef
+        public record PrivateKeyJwtDef
         {
 
             [JsonPropertyName("credentials")]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-            public IList<CredentialIdDef>? Credentials { get; set; }
+            public CredentialIdDef[]? Credentials { get; set; }
 
         }
 
-        public class TlsClientAuthDef
+        public record TlsClientAuthDef
         {
 
             [JsonPropertyName("credentials")]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-            public IList<CredentialIdDef>? Credentials { get; set; }
+            public CredentialIdDef[]? Credentials { get; set; }
 
         }
-        public class SelfSignedTlsClientAuthDef
+        public record SelfSignedTlsClientAuthDef
         {
 
             [JsonPropertyName("credentials")]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-            public IList<CredentialIdDef>? Credentials { get; set; }
+            public CredentialIdDef[]? Credentials { get; set; }
 
         }
 

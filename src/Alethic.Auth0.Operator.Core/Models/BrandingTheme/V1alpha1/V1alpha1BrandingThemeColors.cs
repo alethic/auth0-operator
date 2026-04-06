@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme.V1alpha1
 {
 
-    public class V1alpha1BrandingThemeColors
+    public record V1alpha1BrandingThemeColors
     {
 
         [JsonPropertyName("base_focus_color")]

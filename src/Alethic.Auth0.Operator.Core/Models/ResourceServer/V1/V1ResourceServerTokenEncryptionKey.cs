@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
 {
 
-    public class V1ResourceServerTokenEncryptionKey
+    public record V1ResourceServerTokenEncryptionKey
     {
 
         [JsonPropertyName("name")]

@@ -5,7 +5,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1;
 /// <summary>
 /// Adobe EchoSign SSO configuration.
 /// </summary>
-public class V1ClientAddonEchoSign 
+public record V1ClientAddonEchoSign 
 {
 
     /// <summary>

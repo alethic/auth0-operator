@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class V1TenantFlags
+    public record V1TenantFlags
     {
 
         [JsonPropertyName("allow_legacy_ro_grant_types")]

@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
 {
 
-    public partial class V1ResourceServerScope
+    public record V1ResourceServerScope
     {
 
         [JsonPropertyName("value")]

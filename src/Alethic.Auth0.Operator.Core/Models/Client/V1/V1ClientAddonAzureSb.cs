@@ -5,7 +5,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1;
 /// <summary>
 /// Azure Storage Bus addon configuration.
 /// </summary>
-public class V1ClientAddonAzureSb
+public record V1ClientAddonAzureSb
 {
 
     /// <summary>

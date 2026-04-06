@@ -5,7 +5,8 @@ using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
-    public class V1TenantSettings
+
+    public record V1TenantSettings
     {
 
         [JsonPropertyName("friendly_name")]

@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class V1ClientEncryptionKey
+    public record V1ClientEncryptionKey
     {
 
         [JsonPropertyName("cert")]

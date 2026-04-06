@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models
 {
 
-    public class V1ResourceServerReference
+    public record V1ResourceServerReference
     {
 
         [JsonPropertyName("namespace")]
@@ -25,10 +25,7 @@ namespace Alethic.Auth0.Operator.Core.Models
         /// <inheritdoc />
         public override string ToString()
         {
-            if (Id is not null)
-                return Id;
-            else
-                return $"{Namespace}/{Name}";
+            return Id is not null ? Id : $"{Namespace}/{Name}";
         }
 
     }

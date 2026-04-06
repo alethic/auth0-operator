@@ -5,7 +5,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1;
 /// <summary>
 /// Google Firebase addon configuration.
 /// </summary>
-public class V1ClientAddonFirebase
+public record V1ClientAddonFirebase
 {
 
     /// <summary>

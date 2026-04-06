@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
-
-using Alethic.Auth0.Operator.Core.Extensions;
 
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public partial class V1ClientConf
+    public record V1ClientConf
     {
 
         [JsonPropertyName("signing_keys")]

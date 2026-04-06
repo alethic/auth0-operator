@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
-    public class V1ConnectionOptionsAttributeValidation
+    public record V1ConnectionOptionsAttributeValidation
     {
 
         [JsonPropertyName("min_length")]

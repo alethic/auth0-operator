@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
-    public class V1ConnectionOptionsCustomScripts
+    public record V1ConnectionOptionsCustomScripts
     {
 
         [JsonPropertyName("login")]

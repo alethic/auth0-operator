@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme.V1alpha1
 {
 
-    public partial class V1alpha1BrandingThemeFind
+    public record V1alpha1BrandingThemeFind
     {
 
         [JsonPropertyName("id")]

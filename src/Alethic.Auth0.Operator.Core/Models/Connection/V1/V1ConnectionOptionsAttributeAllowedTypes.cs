@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
-    public class V1ConnectionOptionsAttributeAllowedTypes
+    public record V1ConnectionOptionsAttributeAllowedTypes
     {
 
         [JsonPropertyName("email")]

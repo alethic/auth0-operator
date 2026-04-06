@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
-    public partial class V2alpha1TenantDeviceFlow
+    public record V2alpha1TenantDeviceFlow
     {
 
         [JsonPropertyName("charset")]

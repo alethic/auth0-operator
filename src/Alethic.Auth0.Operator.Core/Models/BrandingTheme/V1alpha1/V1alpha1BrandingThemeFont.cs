@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme.V1alpha1
 {
 
-    public class V1alpha1BrandingThemeFont
+    public record V1alpha1BrandingThemeFont
     {
 
         [JsonPropertyName("bold")]

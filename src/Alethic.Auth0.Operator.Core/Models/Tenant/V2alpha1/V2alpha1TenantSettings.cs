@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
-    public class V2alpha1TenantSettings
+
+    public record V2alpha1TenantSettings
     {
 
         [JsonPropertyName("friendly_name")]

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.CustomText.V1alpha1
 {
 
-    public partial class V1alpha1CustomTextConf
+    public record V1alpha1CustomTextConf
     {
 
         [JsonPropertyName("screens")]

@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class V1TenantChangePassword
+    public record V1TenantChangePassword
     {
 
         [JsonPropertyName("enabled")]

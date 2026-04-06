@@ -5,7 +5,7 @@ using KubeOps.Abstractions.Entities.Attributes;
 namespace Alethic.Auth0.Operator.Core.Models
 {
 
-    public class V1TenantReference
+    public record V1TenantReference
     {
 
         [JsonPropertyName("namespace")]

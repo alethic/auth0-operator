@@ -5,7 +5,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1;
 /// <summary>
 /// Egnyte SSO configuration.
 /// </summary>
-public class V1ClientAddonEgnyte
+public record V1ClientAddonEgnyte
 {
 
     /// <summary>

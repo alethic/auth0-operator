@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Alethic.Auth0.Operator.Core.Models.CustomText.V1alpha1
 {

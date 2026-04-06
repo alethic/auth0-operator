@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class V1TenantPrompts
+    public record V1TenantPrompts
     {
 
         [JsonPropertyName("universal_login_experience")]

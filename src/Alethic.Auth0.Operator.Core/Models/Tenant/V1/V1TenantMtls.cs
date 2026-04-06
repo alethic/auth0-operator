@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class V1TenantMtls
+    public record V1TenantMtls
     {
 
         [JsonPropertyName("enable_endpoint_aliases")]

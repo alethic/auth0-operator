@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class V1ClientRefreshToken
+    public record V1ClientRefreshToken
     {
 
         [JsonPropertyName("rotation_type")]

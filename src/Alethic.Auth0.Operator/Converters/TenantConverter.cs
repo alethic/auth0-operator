@@ -51,60 +51,60 @@ namespace Alethic.Auth0.Operator.Converters
                     SupportEmail = conf.SupportEmail,
                     SupportUrl = conf.SupportUrl,
                     EnabledLocales = conf.EnabledLocales,
-                    ChangePassword = conf.ChangePassword is { } cp ? new()
+                    ChangePassword = conf.ChangePassword is { } change_password ? new()
                     {
-                        Enabled = cp.Enabled,
-                        Html = cp.Html
+                        Enabled = change_password.Enabled,
+                        Html = change_password.Html
                     } : null,
-                    DeviceFlow = conf.DeviceFlow is { } df ? new()
+                    DeviceFlow = conf.DeviceFlow is { } device_flow ? new()
                     {
-                        Charset = df.Charset is { } c ? Convert(c) : null,
-                        Mask = df.Mask
+                        Charset = device_flow.Charset is { } charset ? Convert(charset) : null,
+                        Mask = device_flow.Mask
                     } : null,
-                    Flags = conf.Flags is { } f ? new()
+                    Flags = conf.Flags is { } flags ? new()
                     {
-                        AllowLegacyRoGrantTypes = f.AllowLegacyRoGrantTypes,
-                        AllowLegacyDelegationGrantTypes = f.AllowLegacyDelegationGrantTypes,
-                        AllowLegacyTokeninfoEndpoint = f.AllowLegacyTokeninfoEndpoint,
-                        ChangePwdFlowV1 = f.ChangePwdFlowV1,
-                        DisableClickjackProtectionHeaders = f.DisableClickjackProtectionHeaders,
-                        DisableManagementApiSmsObfuscation = f.DisableManagementApiSmsObfuscation,
-                        EnableAdfsWaadEmailVerification = f.EnableAdfsWaadEmailVerification,
-                        EnableAPIsSection = f.EnableAPIsSection,
-                        EnableClientConnections = f.EnableClientConnections,
-                        EnableCustomDomainInEmails = f.EnableCustomDomainInEmails,
-                        EnableDynamicClientRegistration = f.EnableDynamicClientRegistration,
-                        EnableIdTokenApi2 = f.EnableIdTokenApi2,
-                        EnableLegacyProfile = f.EnableLegacyProfile,
-                        EnablePipeline2 = f.EnablePipeline2,
-                        EnablePublicSignupUserExistsError = f.EnablePublicSignupUserExistsError,
-                        EnableSSO = f.EnableSSO,
-                        EnforceClientAuthenticationOnPasswordlessStart = f.EnforceClientAuthenticationOnPasswordlessStart,
-                        NoDiscloseEnterpriseConnections = f.NoDiscloseEnterpriseConnections,
-                        RemoveAlgFromJwks = f.RemoveAlgFromJwks,
-                        RequirePushedAuthorizationRequests = f.RequirePushedAuthorizationRequests,
-                        RevokeRefreshTokenGrant = f.RevokeRefreshTokenGrant,
-                        TrustAzureAdfsEmailVerifiedConnectionProperty = f.TrustAzureAdfsEmailVerifiedConnectionProperty,
-                        DashboardLogStreamsNext = f.DashboardLogStreamsNext,
-                        DashboardInsightsView = f.DashboardInsightsView,
-                        DisableFieldsMapFix = f.DisableFieldsMapFix,
-                        MfaShowFactorListOnEnrollment = f.MfaShowFactorListOnEnrollment,
-                        ImprovedSignupBotDetectionInClassic = f.ImprovedSignupBotDetectionInClassic,
-                        GenaiTrial = f.GenaiTrial,
-                        CustomDomainsProvisioning = f.CustomDomainsProvisioning,
+                        AllowLegacyRoGrantTypes = flags.AllowLegacyRoGrantTypes,
+                        AllowLegacyDelegationGrantTypes = flags.AllowLegacyDelegationGrantTypes,
+                        AllowLegacyTokeninfoEndpoint = flags.AllowLegacyTokeninfoEndpoint,
+                        ChangePwdFlowV1 = flags.ChangePwdFlowV1,
+                        DisableClickjackProtectionHeaders = flags.DisableClickjackProtectionHeaders,
+                        DisableManagementApiSmsObfuscation = flags.DisableManagementApiSmsObfuscation,
+                        EnableAdfsWaadEmailVerification = flags.EnableAdfsWaadEmailVerification,
+                        EnableAPIsSection = flags.EnableAPIsSection,
+                        EnableClientConnections = flags.EnableClientConnections,
+                        EnableCustomDomainInEmails = flags.EnableCustomDomainInEmails,
+                        EnableDynamicClientRegistration = flags.EnableDynamicClientRegistration,
+                        EnableIdTokenApi2 = flags.EnableIdTokenApi2,
+                        EnableLegacyProfile = flags.EnableLegacyProfile,
+                        EnablePipeline2 = flags.EnablePipeline2,
+                        EnablePublicSignupUserExistsError = flags.EnablePublicSignupUserExistsError,
+                        EnableSSO = flags.EnableSSO,
+                        EnforceClientAuthenticationOnPasswordlessStart = flags.EnforceClientAuthenticationOnPasswordlessStart,
+                        NoDiscloseEnterpriseConnections = flags.NoDiscloseEnterpriseConnections,
+                        RemoveAlgFromJwks = flags.RemoveAlgFromJwks,
+                        RequirePushedAuthorizationRequests = flags.RequirePushedAuthorizationRequests,
+                        RevokeRefreshTokenGrant = flags.RevokeRefreshTokenGrant,
+                        TrustAzureAdfsEmailVerifiedConnectionProperty = flags.TrustAzureAdfsEmailVerifiedConnectionProperty,
+                        DashboardLogStreamsNext = flags.DashboardLogStreamsNext,
+                        DashboardInsightsView = flags.DashboardInsightsView,
+                        DisableFieldsMapFix = flags.DisableFieldsMapFix,
+                        MfaShowFactorListOnEnrollment = flags.MfaShowFactorListOnEnrollment,
+                        ImprovedSignupBotDetectionInClassic = flags.ImprovedSignupBotDetectionInClassic,
+                        GenaiTrial = flags.GenaiTrial,
+                        CustomDomainsProvisioning = flags.CustomDomainsProvisioning,
                     } : null,
-                    GuardianMfaPage = conf.GuardianMfaPage is { } g ? new()
+                    GuardianMfaPage = conf.GuardianMfaPage is { } guardian_mfa_page ? new()
                     {
-                        Enabled = g.Enabled,
-                        Html = g.Html
+                        Enabled = guardian_mfa_page.Enabled,
+                        Html = guardian_mfa_page.Html
                     } : null,
                     DefaultAudience = conf.DefaultAudience,
                     DefaultDirectory = conf.DefaultDirectory,
-                    ErrorPage = conf.ErrorPage is { } e ? new()
+                    ErrorPage = conf.ErrorPage is { } error_page ? new()
                     {
-                        Html = e.Html,
-                        ShowLogLink = e.ShowLogLink,
-                        Url = e.Url
+                        Html = error_page.Html,
+                        ShowLogLink = error_page.ShowLogLink,
+                        Url = error_page.Url
                     } : null,
                     PictureUrl = conf.PictureUrl,
                     AllowedLogoutUrls = conf.AllowedLogoutUrls,
@@ -112,16 +112,16 @@ namespace Alethic.Auth0.Operator.Converters
                     IdleSessionLifetime = conf.IdleSessionLifetime,
                     SandboxVersion = conf.SandboxVersion,
                     SandboxVersionsAvailable = conf.SandboxVersionsAvailable,
-                    SessionCookie = conf.SessionCookie is { } sc ? new()
+                    SessionCookie = conf.SessionCookie is { } session_cookie ? new()
                     {
-                        Mode = sc.Mode
+                        Mode = session_cookie.Mode
                     } : null,
                     CustomizeMfaInPostLoginAction = conf.CustomizeMfaInPostLoginAction,
                     AcrValuesSupported = conf.AcrValuesSupported,
                     PushedAuthorizationRequestsSupported = conf.PushedAuthorizationRequestsSupported,
-                    Mtls = conf.Mtls is { } m ? new()
+                    Mtls = conf.Mtls is { } mtls ? new()
                     {
-                        EnableEndpointAliases = m.EnableEndpointAliases
+                        EnableEndpointAliases = mtls.EnableEndpointAliases
                     } : null,
                 };
             }
@@ -160,60 +160,60 @@ namespace Alethic.Auth0.Operator.Converters
                     SupportEmail = source.SupportEmail,
                     SupportUrl = source.SupportUrl,
                     EnabledLocales = source.EnabledLocales,
-                    ChangePassword = source.ChangePassword is { } cp ? new()
+                    ChangePassword = source.ChangePassword is { } change_password ? new()
                     {
-                        Enabled = cp.Enabled,
-                        Html = cp.Html,
+                        Enabled = change_password.Enabled,
+                        Html = change_password.Html,
                     } : null,
-                    DeviceFlow = source.DeviceFlow is { } df ? new()
+                    DeviceFlow = source.DeviceFlow is { } device_flow ? new()
                     {
-                        Charset = df.Charset is { } c ? Revert(c) : null,
-                        Mask = df.Mask,
+                        Charset = device_flow.Charset is { } charset ? Revert(charset) : null,
+                        Mask = device_flow.Mask,
                     } : null,
-                    Flags = source.Flags is { } f ? new()
+                    Flags = source.Flags is { } flags ? new()
                     {
-                        AllowLegacyRoGrantTypes = f.AllowLegacyRoGrantTypes,
-                        AllowLegacyDelegationGrantTypes = f.AllowLegacyDelegationGrantTypes,
-                        AllowLegacyTokeninfoEndpoint = f.AllowLegacyTokeninfoEndpoint,
-                        ChangePwdFlowV1 = f.ChangePwdFlowV1,
-                        DisableClickjackProtectionHeaders = f.DisableClickjackProtectionHeaders,
-                        DisableManagementApiSmsObfuscation = f.DisableManagementApiSmsObfuscation,
-                        EnableAdfsWaadEmailVerification = f.EnableAdfsWaadEmailVerification,
-                        EnableAPIsSection = f.EnableAPIsSection,
-                        EnableClientConnections = f.EnableClientConnections,
-                        EnableCustomDomainInEmails = f.EnableCustomDomainInEmails,
-                        EnableDynamicClientRegistration = f.EnableDynamicClientRegistration,
-                        EnableIdTokenApi2 = f.EnableIdTokenApi2,
-                        EnableLegacyProfile = f.EnableLegacyProfile,
-                        EnablePipeline2 = f.EnablePipeline2,
-                        EnablePublicSignupUserExistsError = f.EnablePublicSignupUserExistsError,
-                        EnableSSO = f.EnableSSO,
-                        EnforceClientAuthenticationOnPasswordlessStart = f.EnforceClientAuthenticationOnPasswordlessStart,
-                        NoDiscloseEnterpriseConnections = f.NoDiscloseEnterpriseConnections,
-                        RemoveAlgFromJwks = f.RemoveAlgFromJwks,
-                        RequirePushedAuthorizationRequests = f.RequirePushedAuthorizationRequests,
-                        RevokeRefreshTokenGrant = f.RevokeRefreshTokenGrant,
-                        TrustAzureAdfsEmailVerifiedConnectionProperty = f.TrustAzureAdfsEmailVerifiedConnectionProperty,
-                        DashboardLogStreamsNext = f.DashboardLogStreamsNext,
-                        DashboardInsightsView = f.DashboardInsightsView,
-                        DisableFieldsMapFix = f.DisableFieldsMapFix,
-                        MfaShowFactorListOnEnrollment = f.MfaShowFactorListOnEnrollment,
-                        ImprovedSignupBotDetectionInClassic = f.ImprovedSignupBotDetectionInClassic,
-                        GenaiTrial = f.GenaiTrial,
-                        CustomDomainsProvisioning = f.CustomDomainsProvisioning,
+                        AllowLegacyRoGrantTypes = flags.AllowLegacyRoGrantTypes,
+                        AllowLegacyDelegationGrantTypes = flags.AllowLegacyDelegationGrantTypes,
+                        AllowLegacyTokeninfoEndpoint = flags.AllowLegacyTokeninfoEndpoint,
+                        ChangePwdFlowV1 = flags.ChangePwdFlowV1,
+                        DisableClickjackProtectionHeaders = flags.DisableClickjackProtectionHeaders,
+                        DisableManagementApiSmsObfuscation = flags.DisableManagementApiSmsObfuscation,
+                        EnableAdfsWaadEmailVerification = flags.EnableAdfsWaadEmailVerification,
+                        EnableAPIsSection = flags.EnableAPIsSection,
+                        EnableClientConnections = flags.EnableClientConnections,
+                        EnableCustomDomainInEmails = flags.EnableCustomDomainInEmails,
+                        EnableDynamicClientRegistration = flags.EnableDynamicClientRegistration,
+                        EnableIdTokenApi2 = flags.EnableIdTokenApi2,
+                        EnableLegacyProfile = flags.EnableLegacyProfile,
+                        EnablePipeline2 = flags.EnablePipeline2,
+                        EnablePublicSignupUserExistsError = flags.EnablePublicSignupUserExistsError,
+                        EnableSSO = flags.EnableSSO,
+                        EnforceClientAuthenticationOnPasswordlessStart = flags.EnforceClientAuthenticationOnPasswordlessStart,
+                        NoDiscloseEnterpriseConnections = flags.NoDiscloseEnterpriseConnections,
+                        RemoveAlgFromJwks = flags.RemoveAlgFromJwks,
+                        RequirePushedAuthorizationRequests = flags.RequirePushedAuthorizationRequests,
+                        RevokeRefreshTokenGrant = flags.RevokeRefreshTokenGrant,
+                        TrustAzureAdfsEmailVerifiedConnectionProperty = flags.TrustAzureAdfsEmailVerifiedConnectionProperty,
+                        DashboardLogStreamsNext = flags.DashboardLogStreamsNext,
+                        DashboardInsightsView = flags.DashboardInsightsView,
+                        DisableFieldsMapFix = flags.DisableFieldsMapFix,
+                        MfaShowFactorListOnEnrollment = flags.MfaShowFactorListOnEnrollment,
+                        ImprovedSignupBotDetectionInClassic = flags.ImprovedSignupBotDetectionInClassic,
+                        GenaiTrial = flags.GenaiTrial,
+                        CustomDomainsProvisioning = flags.CustomDomainsProvisioning,
                     } : null,
-                    GuardianMfaPage = source.GuardianMfaPage is { } g ? new()
+                    GuardianMfaPage = source.GuardianMfaPage is { } guardian_mfa_page ? new()
                     {
-                        Enabled = g.Enabled,
-                        Html = g.Html
+                        Enabled = guardian_mfa_page.Enabled,
+                        Html = guardian_mfa_page.Html
                     } : null,
                     DefaultAudience = source.DefaultAudience,
                     DefaultDirectory = source.DefaultDirectory,
-                    ErrorPage = source.ErrorPage is { } e ? new()
+                    ErrorPage = source.ErrorPage is { } error_page ? new()
                     {
-                        Html = e.Html,
-                        ShowLogLink = e.ShowLogLink,
-                        Url = e.Url
+                        Html = error_page.Html,
+                        ShowLogLink = error_page.ShowLogLink,
+                        Url = error_page.Url
                     } : null,
                     PictureUrl = source.PictureUrl,
                     AllowedLogoutUrls = source.AllowedLogoutUrls,
@@ -221,16 +221,16 @@ namespace Alethic.Auth0.Operator.Converters
                     IdleSessionLifetime = source.IdleSessionLifetime,
                     SandboxVersion = source.SandboxVersion,
                     SandboxVersionsAvailable = source.SandboxVersionsAvailable,
-                    SessionCookie = source.SessionCookie is { } sc ? new()
+                    SessionCookie = source.SessionCookie is { } session_cookie ? new()
                     {
-                        Mode = sc.Mode
+                        Mode = session_cookie.Mode
                     } : null,
                     CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostLoginAction,
                     AcrValuesSupported = source.AcrValuesSupported,
                     PushedAuthorizationRequestsSupported = source.PushedAuthorizationRequestsSupported,
-                    Mtls = source.Mtls is { } m ? new()
+                    Mtls = source.Mtls is { } mtls ? new()
                     {
-                        EnableEndpointAliases = m.EnableEndpointAliases
+                        EnableEndpointAliases = mtls.EnableEndpointAliases
                     } : null,
                 };
             }

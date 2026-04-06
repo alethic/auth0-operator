@@ -3,7 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class V1ClientOidcLogoutConfig
+    public record V1ClientOidcLogoutConfig
     {
 
         [JsonPropertyName("backchannel_logout_urls")]

@@ -3,10 +3,10 @@
 namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 {
 
-    public class V1ClientMobile
+    public record V1ClientMobile
     {
 
-        public class MobileAndroid
+        public record MobileAndroid
         {
 
             [JsonPropertyName("app_package_name")]
@@ -19,7 +19,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1
 
         }
 
-        public class MobileIos
+        public record MobileIos
         {
 
             [JsonPropertyName("app_bundle_identifier")]

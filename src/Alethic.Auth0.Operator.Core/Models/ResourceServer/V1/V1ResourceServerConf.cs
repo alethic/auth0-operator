@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
 {
 
-    public partial class V1ResourceServerConf
+    public record V1ResourceServerConf
     {
 
         [JsonPropertyName("id")]
