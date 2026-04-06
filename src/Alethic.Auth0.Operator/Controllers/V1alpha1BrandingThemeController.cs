@@ -368,6 +368,274 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeConf FromApi(BrandingTheme source) => new()
+        {
+            DisplayName = source.DisplayName,
+            Borders = FromApi(source.Borders),
+            Colors = FromApi(source.Colors),
+            Fonts = FromApi(source.Fonts),
+            PageBackground = FromApi(source.PageBackground),
+            Widget = FromApi(source.Widget),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeWidget FromApi(BrandingThemeWidget source) => new()
+        {
+            HeaderTextAlignment = FromApi(source.HeaderTextAlignment),
+            LogoHeight = source.LogoHeight,
+            LogoPosition = FromApi(source.LogoPosition),
+            LogoUrl = source.LogoUrl,
+            SocialButtonsLayout = FromApi(source.SocialButtonsLayout)
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemeSocialButtonsLayout? FromApi(SocialButtonsLayout source) => source switch
+        {
+            SocialButtonsLayout.Top => V1alpha1BrandingThemeSocialButtonsLayout.Top,
+            SocialButtonsLayout.Bottom => V1alpha1BrandingThemeSocialButtonsLayout.Bottom,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemeLogoPosition? FromApi(LogoPosition source) => source switch
+        {
+            LogoPosition.Center => V1alpha1BrandingThemeLogoPosition.Center,
+            LogoPosition.Left => V1alpha1BrandingThemeLogoPosition.Left,
+            LogoPosition.Right => V1alpha1BrandingThemeLogoPosition.Right,
+            LogoPosition.None => V1alpha1BrandingThemeLogoPosition.None,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemeHeaderTextAlignment? FromApi(HeaderTextAlignment source) => source switch
+        {
+            HeaderTextAlignment.Center => V1alpha1BrandingThemeHeaderTextAlignment.Center,
+            HeaderTextAlignment.Left => V1alpha1BrandingThemeHeaderTextAlignment.Left,
+            HeaderTextAlignment.Right => V1alpha1BrandingThemeHeaderTextAlignment.Right,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemePageBackground FromApi(BrandingThemePageBackground source) => new()
+        {
+            BackgroundColor = source.BackgroundColor,
+            BackgroundImageUrl = source.BackgroundImageUrl,
+            PageLayout = FromApi(source.PageLayout)
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemePageLayout? FromApi(PageLayout source) => source switch
+        {
+            PageLayout.Center => V1alpha1BrandingThemePageLayout.Center,
+            PageLayout.Left => V1alpha1BrandingThemePageLayout.Left,
+            PageLayout.Right => V1alpha1BrandingThemePageLayout.Right,
+            _ => throw new InvalidOperationException(),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFonts FromApi(BrandingThemeFonts source) => new()
+        {
+            BodyText = FromApi(source.BodyText),
+            ButtonsText = FromApi(source.ButtonsText),
+            FontUrl = source.FontUrl,
+            InputLabels = FromApi(source.InputLabels),
+            Links = FromApi(source.Links),
+            LinksStyle = FromApi(source.LinksStyle),
+            ReferenceTextSize = source.ReferenceTextSize,
+            Subtitle = FromApi(source.Subtitle),
+            Title = FromApi(source.Title)
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(Title source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(Links source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(Subtitle source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemeLinksStyle? FromApi(LinksStyle source) => source switch
+        {
+            LinksStyle.Normal => V1alpha1BrandingThemeLinksStyle.Normal,
+            LinksStyle.Underlined => V1alpha1BrandingThemeLinksStyle.Underlined,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(InputLabels source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(ButtonsText source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeFont FromApi(BodyText source) => new()
+        {
+            Bold = source.Bold,
+            Size = source.Size
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeColors FromApi(BrandingThemeColors source) => new()
+        {
+            BaseFocusColor = source.BaseFocusColor,
+            BaseHoverColor = source.BaseHoverColor,
+            BodyText = source.BodyText,
+            CaptchaWidgetTheme = FromApi(source.CaptchaWidgetTheme),
+            Error = source.Error,
+            Header = source.Header,
+            Icons = source.Icons,
+            InputBackground = source.InputBackground,
+            InputBorder = source.InputBorder,
+            InputFilledText = source.InputFilledText,
+            InputLabelsPlaceholders = source.InputLabelsPlaceholders,
+            LinksFocusedComponents = source.LinksFocusedComponents,
+            PrimaryButton = source.PrimaryButton,
+            PrimaryButtonLabel = source.PrimaryButtonLabel,
+            SecondaryButtonBorder = source.SecondaryButtonBorder,
+            SecondaryButtonLabel = source.SecondaryButtonLabel,
+            Success = source.Success,
+            WidgetBackground = source.WidgetBackground,
+            WidgetBorder = source.WidgetBorder
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        static V1alpha1BrandingThemeCaptchaWidgetTheme? FromApi(CaptchaWidgetTheme source) => source switch
+        {
+            CaptchaWidgetTheme.Light => V1alpha1BrandingThemeCaptchaWidgetTheme.Light,
+            CaptchaWidgetTheme.Dark => V1alpha1BrandingThemeCaptchaWidgetTheme.Dark,
+            CaptchaWidgetTheme.Auto => V1alpha1BrandingThemeCaptchaWidgetTheme.Auto,
+            _ => throw new InvalidOperationException()
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        static V1alpha1BrandingThemeBorders? FromApi(BrandingThemeBorder source) => new()
+        {
+            ButtonBorderRadius = source.ButtonBorderRadius,
+            ButtonBorderWeight = source.ButtonBorderWeight,
+            InputBorderRadius = source.InputBorderRadius,
+            InputBorderWeight = source.InputBorderWeight,
+            ShowWidgetShadow = source.ShowWidgetShadow,
+            WidgetBorderWeight = source.WidgetBorderWeight,
+            WidgetCornerRadius = source.WidgetCornerRadius,
+            ButtonsStyle = FromApi(source.ButtonsStyle),
+            InputsStyle = FromApi(source.InputsStyle),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="inputsStyle"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        static V1alpha1BrandingThemeButtonsStyle FromApi(ButtonsStyle inputsStyle) => inputsStyle switch
+        {
+            ButtonsStyle.Pill => V1alpha1BrandingThemeButtonsStyle.Pill,
+            ButtonsStyle.Rounded => V1alpha1BrandingThemeButtonsStyle.Rounded,
+            ButtonsStyle.Sharp => V1alpha1BrandingThemeButtonsStyle.Sharp,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
@@ -388,7 +656,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return TransformToSystemTextJson<V1alpha1BrandingThemeConf>(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
