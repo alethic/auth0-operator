@@ -60,7 +60,6 @@ namespace Alethic.Auth0.Operator.Models
         {
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
             public V1TenantConf? LastConf { get; set; }
 
         }
