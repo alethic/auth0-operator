@@ -44,20 +44,20 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         static V1ClientConf FromApi(Client source) => new()
         {
-            AllowedClients = source.AllowedClients,
-            AllowedLogoutUrls = source.AllowedLogoutUrls,
-            AllowedOrigins = source.AllowedOrigins,
-            WebOrigins = source.WebOrigins,
+            AllowedClients = source.AllowedClients?.ToArray(),
+            AllowedLogoutUrls = source.AllowedLogoutUrls?.ToArray(),
+            AllowedOrigins = source.AllowedOrigins?.ToArray(),
+            WebOrigins = source.WebOrigins?.ToArray(),
             InitiateLoginUri = source.InitiateLoginUri,
-            Callbacks = source.Callbacks,
-            ClientAliases = source.ClientAliases,
+            Callbacks = source.Callbacks?.ToArray(),
+            ClientAliases = source.ClientAliases?.ToArray(),
             ClientMetaData = source.ClientMetaData,
             IsCustomLoginPageOn = source.IsCustomLoginPageOn,
             IsFirstParty = source.IsFirstParty,
             CustomLoginPage = source.CustomLoginPage,
             CustomLoginPagePreview = source.CustomLoginPagePreview,
             FormTemplate = source.FormTemplate,
-            GrantTypes = source.GrantTypes,
+            GrantTypes = source.GrantTypes?.ToArray(),
             Name = source.Name,
             Description = source.Description,
             LogoUri = source.LogoUri,
@@ -367,7 +367,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="applicationType"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientApplicationType FromApi(ClientApplicationType applicationType) => applicationType switch
+        static V1ClientApplicationType? FromApi(ClientApplicationType? applicationType) => applicationType switch
         {
             ClientApplicationType.Box => V1ClientApplicationType.Box,
             ClientApplicationType.Cloudbees => V1ClientApplicationType.Cloudbees,
@@ -394,6 +394,7 @@ namespace Alethic.Auth0.Operator.Controllers
             ClientApplicationType.ExpressConfiguration => V1ClientApplicationType.ExpressConfiguration,
             ClientApplicationType.SsoIntegration => V1ClientApplicationType.SsoIntegration,
             ClientApplicationType.Oag => V1ClientApplicationType.Oag,
+            null => null,
             _ => throw new NotImplementedException(),
         };
 
@@ -402,32 +403,30 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="addOns"></param>
         /// <returns></returns>
-        static V1ClientAddons FromApi(Addons addOns) => new V1ClientAddons()
+        static V1ClientAddons? FromApi(Addons? source) => source is { } addOns ? new V1ClientAddons()
         {
-            AmazonWebServices = addOns.AmazonWebServices,
-            AzureMobileServices = addOns.AzureMobileServices,
-            AzureServiceBus = addOns.AzureServiceBus,
-            Box = addOns.Box,
-            CloudBees = addOns.CloudBees,
-            Concur = addOns.Concur,
-            DropBox = addOns.DropBox,
-            EchoSign = addOns.EchoSign,
-            Egnyte = addOns.Egnyte,
-            FireBase = addOns.FireBase,
-            NewRelic = addOns.NewRelic,
-            Office365 = addOns.Office365,
-            SalesForce = addOns.SalesForce,
-            SalesForceApi = addOns.SalesForceApi,
-            SalesForceSandboxApi = addOns.SalesForceSandboxApi,
-            SamlP = addOns.SamlP,
-            SapApi = addOns.SapApi,
-            SharePoint = addOns.SharePoint,
-            SpringCM = addOns.SpringCM,
-            WebApi = addOns.WebApi,
-            WsFed = addOns.WsFed,
-            Zendesk = addOns.Zendesk,
-            Zoom = addOns.Zoom,
-        };
+            Aws = TransformToSystemTextJson<V1ClientAddonAws>(addOns.AmazonWebServices),
+            AzureSb = TransformToSystemTextJson<V1ClientAddonAws>(addOns.AzureServiceBus),
+            Box = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Box),
+            Cloudbees = TransformToSystemTextJson<V1ClientAddonAws>(addOns.CloudBees),
+            Concur = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Concur),
+            Dropbox = TransformToSystemTextJson<V1ClientAddonAws>(addOns.DropBox),
+            Echosign = TransformToSystemTextJson<V1ClientAddonAws>(addOns.EchoSign),
+            Egnyte = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Egnyte),
+            Firebase = TransformToSystemTextJson<V1ClientAddonAws>(addOns.FireBase),
+            Newrelic = TransformToSystemTextJson<V1ClientAddonAws>(addOns.NewRelic),
+            Office365 = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Office365),
+            Salesforce = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SalesForce),
+            SalesforceApi = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SalesForceApi),
+            SalesforceSandboxApi = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SalesForceSandboxApi),
+            Samlp = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SamlP),
+            SapApi = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SapApi),
+            Sharepoint = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SharePoint),
+            Springcm = TransformToSystemTextJson<V1ClientAddonAws>(addOns.SpringCM),
+            Wsfed = TransformToSystemTextJson<V1ClientAddonAws>(addOns.WsFed),
+            Zendesk = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Zendesk),
+            Zoom = TransformToSystemTextJson<V1ClientAddonAws>(addOns.Zoom),
+        } : null;
 
         /// <summary>
         /// Applies the add-ons configuration to the API request.
@@ -436,67 +435,61 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="target"></param>
         static void ApplyToApi(V1ClientAddons source, Addons target)
         {
-            if (source.AmazonWebServices is { } aws)
+            if (source.Aws is { } aws)
                 target.AmazonWebServices = aws;
 
-            if (source.AzureMobileServices is { } wams)
-                target.AzureMobileServices = wams;
-
-            if (source.AzureServiceBus is { } azure_sb)
+            if (source.AzureSb is { } azure_sb)
                 target.AzureServiceBus = azure_sb;
 
             if (source.Box is { } box)
                 target.Box = box;
 
-            if (source.CloudBees is { } cloudbees)
+            if (source.Cloudbees is { } cloudbees)
                 target.CloudBees = cloudbees;
 
             if (source.Concur is { } concur)
                 target.Concur = concur;
 
-            if (source.DropBox is { } dropbox)
+            if (source.Dropbox is { } dropbox)
                 target.DropBox = dropbox;
 
-            if (source.EchoSign is { } echosign)
+            if (source.Echosign is { } echosign)
                 target.EchoSign = echosign;
 
             if (source.Egnyte is { } egnyte)
                 target.Egnyte = egnyte;
 
-            if (source.FireBase is { } firebase)
+            if (source.Firebase is { } firebase)
                 target.FireBase = firebase;
 
-            if (source.NewRelic is { } newrelic)
+            if (source.Newrelic is { } newrelic)
                 target.NewRelic = newrelic;
 
             if (source.Office365 is { } office365)
                 target.Office365 = office365;
 
-            if (source.SalesForce is { } salesforce)
+            if (source.Salesforce is { } salesforce)
                 target.SalesForce = salesforce;
 
-            if (source.SalesForceApi is { } salesforce_api)
+            if (source.SalesforceApi is { } salesforce_api)
                 target.SalesForceApi = salesforce_api;
 
-            if (source.SalesForceSandboxApi is { } salesforce_sandbox_api)
+            if (source.SalesforceSandboxApi is { } salesforce_sandbox_api)
                 target.SalesForceSandboxApi = salesforce_sandbox_api;
 
-            if (source.SamlP is { } samlp)
+            if (source.Samlp is { } samlp)
                 target.SamlP = samlp;
 
             if (source.SapApi is { } sap_api)
                 target.SapApi = sap_api;
 
-            if (source.SharePoint is { } sharepoint)
+            if (source.Sharepoint is { } sharepoint)
                 target.SharePoint = sharepoint;
 
-            if (source.SpringCM is { } springcm)
+            if (source.Springcm is { } springcm)
                 target.SpringCM = springcm;
 
-            if (source.WebApi is { } webapi)
-                target.WebApi = webapi;
-
-            if (source.WsFed is { } wsfed)
+            if (source.Wsfed is { } wsfed)
                 target.WsFed = wsfed;
 
             if (source.Zendesk is { } zendesk)

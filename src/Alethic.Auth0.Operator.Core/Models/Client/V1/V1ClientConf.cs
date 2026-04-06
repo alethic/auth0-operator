@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Extensions;
@@ -54,9 +55,8 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1
         public string[]? ClientAliases { get; set; }
 
         [JsonPropertyName("client_metadata")]
-        [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Hashtable? ClientMetaData { get; set; }
+        public Dictionary<string, object?>? ClientMetaData { get; set; }
 
         [JsonPropertyName("custom_login_page_on")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
