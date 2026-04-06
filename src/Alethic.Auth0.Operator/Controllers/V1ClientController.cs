@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -42,7 +43,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientConf FromApi(Client source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientConf? FromApi(Client? source) => source is null ? null : new()
         {
             AllowedClients = source.AllowedClients?.ToArray(),
             AllowedLogoutUrls = source.AllowedLogoutUrls?.ToArray(),
@@ -77,8 +79,8 @@ namespace Alethic.Auth0.Operator.Controllers
             OrganizationRequireBehavior = FromApi(source.OrganizationRequireBehavior),
             OrganizationUsage = FromApi(source.OrganizationUsage),
             RefreshToken = FromApi(source.RefreshToken),
-            ResourceServers = source.ResourceServers.Select(FromApi).ToArray(),
-            SigningKeys = source.SigningKeys.Select(FromApi).ToArray(),
+            ResourceServers = source.ResourceServers?.Select(i => FromApi(i)).ToArray(),
+            SigningKeys = source.SigningKeys?.Select(i => FromApi(i)).ToArray(),
             TokenEndpointAuthMethod = FromApi(source.TokenEndpointAuthMethod),
         };
 
@@ -87,11 +89,13 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod source) => source switch
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod? source) => source switch
         {
             TokenEndpointAuthMethod.None => V1ClientTokenEndpointAuthMethod.None,
             TokenEndpointAuthMethod.ClientSecretPost => V1ClientTokenEndpointAuthMethod.ClientSecretPost,
             TokenEndpointAuthMethod.ClientSecretBasic => V1ClientTokenEndpointAuthMethod.ClientSecretBasic,
+            null => null,
             _ => throw new NotImplementedException(),
         };
 
@@ -101,7 +105,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientSigningKey FromApi(SigningKey source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientSigningKey? FromApi(SigningKey? source) => source is null ? null : new()
         {
             Cert = source.Cert,
             Key = source.Key,
@@ -113,7 +118,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientResourceServerAssociation FromApi(ClientResourceServerAssociation source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientResourceServerAssociation? FromApi(ClientResourceServerAssociation? source) => source is null ? null : new()
         {
             Identifier = source.Identifier,
             Scopes = source.Scopes,
@@ -122,16 +128,17 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Transforms the refresh token configuration from the API model to the operator model.
         /// </summary>
-        /// <param name="refreshToken"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientRefreshToken FromApi(RefreshToken refreshToken) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientRefreshToken? FromApi(RefreshToken? source) => source is null ? null : new()
         {
-            ExpirationType = FromApi(refreshToken.ExpirationType),
-            InfiniteIdleTokenLifetime = refreshToken.InfiniteIdleTokenLifetime,
-            InfiniteTokenLifetime = refreshToken.InfiniteTokenLifetime,
-            Leeway = refreshToken.Leeway,
-            RotationType = FromApi(refreshToken.RotationType),
-            TokenLifetime = refreshToken.TokenLifetime,
+            ExpirationType = FromApi(source.ExpirationType),
+            InfiniteIdleTokenLifetime = source.InfiniteIdleTokenLifetime,
+            InfiniteTokenLifetime = source.InfiniteTokenLifetime,
+            Leeway = source.Leeway,
+            RotationType = FromApi(source.RotationType),
+            TokenLifetime = source.TokenLifetime,
         };
 
         /// <summary>
@@ -140,10 +147,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientRefreshTokenRotationType FromApi(RefreshTokenRotationType source) => source switch
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientRefreshTokenRotationType? FromApi(RefreshTokenRotationType? source) => source switch
         {
             RefreshTokenRotationType.Rotating => V1ClientRefreshTokenRotationType.Rotating,
             RefreshTokenRotationType.NonRotating => V1ClientRefreshTokenRotationType.NonRotating,
+            null => null,
             _ => throw new NotImplementedException(),
         };
 
@@ -153,10 +162,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientRefreshTokenExpirationType FromApi(RefreshTokenExpirationType source) => source switch
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientRefreshTokenExpirationType? FromApi(RefreshTokenExpirationType? source) => source switch
         {
             RefreshTokenExpirationType.Expiring => V1ClientRefreshTokenExpirationType.Expiring,
             RefreshTokenExpirationType.NonExpiring => V1ClientRefreshTokenExpirationType.NonExpiring,
+            null => null,
             _ => throw new NotImplementedException(),
         };
 
@@ -166,6 +177,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
+        [return: NotNullIfNotNull(nameof(source))]
         static V1ClientOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
         {
             OrganizationUsage.Deny => V1ClientOrganizationUsage.Deny,
@@ -181,6 +193,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
+        [return: NotNullIfNotNull(nameof(source))]
         static V1ClientOrganizationRequireBehavior? FromApi(OrganizationRequireBehavior? source) => source switch
         {
             OrganizationRequireBehavior.NoPrompt => V1ClientOrganizationRequireBehavior.NoPrompt,
@@ -195,7 +208,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientOidcLogoutConfig FromApi(OidcLogoutConfig source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientOidcLogoutConfig? FromApi(OidcLogoutConfig? source) => source is null ? null : new()
         {
             BackchannelLogoutUrls = source.BackchannelLogoutUrls,
             BackchannelLogoutInitiators = FromApi(source.BackchannelLogoutInitiators),
@@ -206,10 +220,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientBackchannelLogoutInitiators FromApi(BackchannelLogoutInitiators source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientBackchannelLogoutInitiators? FromApi(BackchannelLogoutInitiators? source) => source is null ? null : new()
         {
             Mode = FromApi(source.Mode),
-            SelectedInitiators = source.SelectedInitiators?.Select(i => FromApi(i)).ToArray(),
+            SelectedInitiators = source.SelectedInitiators?.Select(FromApi).ToArray(),
         };
 
         /// <summary>
@@ -230,13 +245,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Transforms the logout initiator modes from the API model to the operator model.
         /// </summary>
-        /// <param name="mode"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientLogoutInitiatorModes FromApi(LogoutInitiatorModes mode) => mode switch
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientLogoutInitiatorModes? FromApi(LogoutInitiatorModes? source) => source switch
         {
             LogoutInitiatorModes.All => V1ClientLogoutInitiatorModes.All,
             LogoutInitiatorModes.Custom => V1ClientLogoutInitiatorModes.Custom,
+            null => null,
             _ => throw new NotImplementedException(),
         };
 
@@ -245,7 +262,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientMobile FromApi(Mobile source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientMobile? FromApi(Mobile? source) => source is null ? null : new()
         {
             Android = FromApi(source.Android),
             Ios = FromApi(source.Ios),
@@ -256,7 +274,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientMobile.MobileIos FromApi(Mobile.MobileIos source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientMobile.MobileIos? FromApi(Mobile.MobileIos? source) => source is null ? null : new()
         {
             AppBundleIdentifier = source.AppBundleIdentifier,
             TeamId = source.TeamId,
@@ -267,7 +286,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientMobile.MobileAndroid FromApi(Mobile.MobileAndroid source) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientMobile.MobileAndroid? FromApi(Mobile.MobileAndroid? source) => source is null ? null : new()
         {
             AppPackageName = source.AppPackageName,
             KeystoreHash = source.KeystoreHash,
@@ -276,62 +296,67 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Transforms the client JWT configuration from the API model to the operator model.
         /// </summary>
-        /// <param name="jwtConfiguration"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientJwtConfiguration FromApi(JwtConfiguration jwtConfiguration) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientJwtConfiguration? FromApi(JwtConfiguration? source) => source is null ? null : new()
         {
-            IsSecretEncoded = jwtConfiguration.IsSecretEncoded,
-            LifetimeInSeconds = jwtConfiguration.LifetimeInSeconds,
-            Scopes = FromApi(jwtConfiguration.Scopes),
-            SigningAlgorithm = jwtConfiguration.SigningAlgorithm,
+            IsSecretEncoded = source.IsSecretEncoded,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+            Scopes = FromApi(source.Scopes),
+            SigningAlgorithm = source.SigningAlgorithm,
         };
 
         /// <summary>
         /// Transforms the client scopes from the API model to the operator model.
         /// </summary>
-        /// <param name="scopes"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientScopes FromApi(Scopes scopes) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientScopes? FromApi(Scopes? source) => source is null ? null : new()
         {
-            Users = FromApi(scopes.Users),
-            UsersAppMetadata = FromApi(scopes.UsersAppMetadata),
-            Clients = FromApi(scopes.Clients),
-            ClientKeys = FromApi(scopes.ClientKeys),
-            Tokens = FromApi(scopes.Tokens),
-            Stats = FromApi(scopes.Stats),
+            Users = FromApi(source.Users),
+            UsersAppMetadata = FromApi(source.UsersAppMetadata),
+            Clients = FromApi(source.Clients),
+            ClientKeys = FromApi(source.ClientKeys),
+            Tokens = FromApi(source.Tokens),
+            Stats = FromApi(source.Stats),
         };
 
         /// <summary>
         /// Transforms the client scope entry from the API model to the operator model.
         /// </summary>
-        /// <param name="users"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientScopeEntry FromApi(ScopeEntry users) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientScopeEntry? FromApi(ScopeEntry? source) => source is null ? null : new()
         {
-            Actions = users.Actions,
+            Actions = source.Actions,
         };
 
         /// <summary>
         /// Transforms the client encryption key configuration from the API model to the operator model.
         /// </summary>
-        /// <param name="encryptionKey"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientEncryptionKey FromApi(EncryptionKey encryptionKey) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientEncryptionKey? FromApi(EncryptionKey? source) => source is null ? null : new()
         {
-            Certificate = encryptionKey.Certificate,
-            PublicKey = encryptionKey.PublicKey,
-            Subject = encryptionKey.Subject,
+            Certificate = source.Certificate,
+            PublicKey = source.PublicKey,
+            Subject = source.Subject,
         };
 
         /// <summary>
         /// Extracts the default organization configuration from the API response and transforms it to the operator model.
         /// </summary>
-        /// <param name="defaultOrganization"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
-        static V1ClientDefaultOrganization FromApi(DefaultOrganization defaultOrganization) => new()
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientDefaultOrganization? FromApi(DefaultOrganization? source) => source is null ? null : new()
         {
-            OrganizationId = defaultOrganization.OrganizationId,
-            Flows = defaultOrganization.Flows?.Select(FromApi).ToArray(),
+            OrganizationId = source.OrganizationId,
+            Flows = source.Flows?.Select(FromApi).ToArray(),
         };
 
         /// <summary>
@@ -340,6 +365,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
+        [return: NotNullIfNotNull(nameof(source))]
         static V1ClientFlows FromApi(Flows source) => source switch
         {
             Flows.ClientCredentials => V1ClientFlows.ClientCredentials,
@@ -352,6 +378,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
+        [return: NotNullIfNotNull(nameof(source))]
         static V1ClientComplianceLevel? FromApi(ComplianceLevel? source) => source switch
         {
             ComplianceLevel.NONE => V1ClientComplianceLevel.NONE,
@@ -364,10 +391,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Transforms the application type from the API model to the operator model.
         /// </summary>
-        /// <param name="applicationType"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1ClientApplicationType? FromApi(ClientApplicationType? applicationType) => applicationType switch
+        [return: NotNullIfNotNull(nameof(source))]
+        static V1ClientApplicationType? FromApi(ClientApplicationType? source) => source switch
         {
             ClientApplicationType.Box => V1ClientApplicationType.Box,
             ClientApplicationType.Cloudbees => V1ClientApplicationType.Cloudbees,
@@ -403,6 +431,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="addOns"></param>
         /// <returns></returns>
+        [return: NotNullIfNotNull(nameof(source))]
         static V1ClientAddons? FromApi(Addons? source) => source is { } addOns ? new V1ClientAddons()
         {
             Aws = TransformToSystemTextJson<V1ClientAddonAws>(addOns.AmazonWebServices),
