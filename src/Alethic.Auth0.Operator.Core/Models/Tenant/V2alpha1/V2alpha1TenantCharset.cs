@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum TenantCharset
+    public enum V2alpha1TenantCharset
     {
 
         [JsonStringEnumMemberName("base20")]

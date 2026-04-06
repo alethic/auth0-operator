@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-using Alethic.Auth0.Operator.Core.Models.Tenant;
+using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 
 using k8s.Models;
 

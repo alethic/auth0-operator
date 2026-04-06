@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class TenantErrorPage
+    public class V1TenantErrorPage
     {
 
         [JsonPropertyName("html")]

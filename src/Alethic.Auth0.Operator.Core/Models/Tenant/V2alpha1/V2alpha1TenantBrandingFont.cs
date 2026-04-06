@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
-    public class BrandingFont
+    public class V2alpha1TenantBrandingFont
     {
 
         [JsonPropertyName("url")]

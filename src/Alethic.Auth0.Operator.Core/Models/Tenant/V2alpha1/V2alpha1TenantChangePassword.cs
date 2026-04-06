@@ -1,0 +1,18 @@
+﻿using System.Text.Json.Serialization;
+
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
+{
+
+    public class V2alpha1TenantChangePassword
+    {
+
+        [JsonPropertyName("enabled")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Enabled { get; set; }
+
+        [JsonPropertyName("html")]
+        public string? Html { get; set; }
+
+    }
+
+}

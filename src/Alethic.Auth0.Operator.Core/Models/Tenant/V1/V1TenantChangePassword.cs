@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 {
 
-    public class TenantChangePassword
+    public class V1TenantChangePassword
     {
 
         [JsonPropertyName("enabled")]

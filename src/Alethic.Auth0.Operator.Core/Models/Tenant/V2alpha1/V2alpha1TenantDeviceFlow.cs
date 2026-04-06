@@ -1,14 +1,14 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
-    public partial class TenantDeviceFlow
+    public partial class V2alpha1TenantDeviceFlow
     {
 
         [JsonPropertyName("charset")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantCharset? Charset { get; set; }
+        public V2alpha1TenantCharset? Charset { get; set; }
 
         [JsonPropertyName("mask")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

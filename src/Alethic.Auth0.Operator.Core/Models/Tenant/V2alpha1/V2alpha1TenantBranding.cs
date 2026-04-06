@@ -1,14 +1,14 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
-    public class TenantBranding
+    public class V2alpha1TenantBranding
     {
 
         [JsonPropertyName("colors")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public BrandingColors? Colors { get; set; }
+        public V2alpha1TenantBrandingColors? Colors { get; set; }
 
         [JsonPropertyName("favicon_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -20,7 +20,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("font")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public BrandingFont? Font { get; set; }
+        public V2alpha1TenantBrandingFont? Font { get; set; }
 
     }
 

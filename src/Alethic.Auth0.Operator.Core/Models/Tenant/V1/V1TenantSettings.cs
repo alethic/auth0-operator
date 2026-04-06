@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
-{
+using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 
-    public partial class V1TenantConf
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
+{
+    public class V1TenantSettings
     {
 
         [JsonPropertyName("friendly_name")]
@@ -25,19 +26,19 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("change_password")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantChangePassword? ChangePassword { get; set; }
+        public V1TenantChangePassword? ChangePassword { get; set; }
 
         [JsonPropertyName("device_flow")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantDeviceFlow? DeviceFlow { get; set; }
+        public V2alpha1TenantDeviceFlow? DeviceFlow { get; set; }
 
         [JsonPropertyName("flags")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantFlags? Flags { get; set; }
+        public V1TenantFlags? Flags { get; set; }
 
         [JsonPropertyName("guardian_mfa_page")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantGuardianMfaPage? GuardianMfaPage { get; set; }
+        public V1TenantGuardianMfaPage? GuardianMfaPage { get; set; }
 
         [JsonPropertyName("default_audience")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -49,7 +50,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("error_page")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantErrorPage? ErrorPage { get; set; }
+        public V1TenantErrorPage? ErrorPage { get; set; }
 
         [JsonPropertyName("picture_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -77,7 +78,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("session_cookie")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public SessionCookie? SessionCookie { get; set; }
+        public V1TenantSessionCookie? SessionCookie { get; set; }
 
         [JsonPropertyName("customize_mfa_in_postlogin_action")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -93,7 +94,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("mtls")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantMtls? Mtls { get; set; }
+        public V1TenantMtls? Mtls { get; set; }
 
     }
 

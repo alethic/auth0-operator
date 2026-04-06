@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alethic.Auth0.Operator.Core.Models.Tenant
+namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
 {
 
     public partial class V2alpha1TenantConf
@@ -8,15 +8,15 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant
 
         [JsonPropertyName("settings")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantSettings? Settings { get; set; }
+        public V2alpha1TenantSettings? Settings { get; set; }
 
         [JsonPropertyName("branding")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantBranding? Branding { get; set; }
+        public V2alpha1TenantBranding? Branding { get; set; }
 
         [JsonPropertyName("prompts")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TenantPrompts? Prompts { get; set; }
+        public V2alpha1TenantPrompts? Prompts { get; set; }
 
     }
 
