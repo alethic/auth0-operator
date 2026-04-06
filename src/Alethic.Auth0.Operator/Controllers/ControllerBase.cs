@@ -304,10 +304,16 @@ namespace Alethic.Auth0.Operator.Controllers
                     throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} failed to retrieve management API token.");
 
                 // contact API using token and domain
-                var api = new ManagementApiClient(authToken.AccessToken, new Uri($"https://{domain}/api/v2/"));
+                var api = new ManagementApiClient(authToken.AccessToken, new Uri($"https://{domain}/api/v2/"), new HttpClientManagementConnection());
 
-                // cache API client for 1 minute
-                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                // expire cache entry slightly before token expiration to allow for refresh
+                var expire = TimeSpan.FromSeconds(authToken.ExpiresIn);
+                expire = expire.Add(TimeSpan.FromMinutes(-1));
+                if (expire < TimeSpan.FromMinutes(1))
+                    expire = TimeSpan.FromMinutes(1);
+
+                // cache API client for lifetime of the token
+                entry.SetAbsoluteExpiration(expire);
                 return (IManagementApiClient)api;
             });
 

@@ -26,6 +26,8 @@
         </PackageReference>
         <PackageReference Include="KubeOps.Operator" Version="10.3.2" />
         <PackageReference Include="KubeOps.Operator.Web" Version="10.3.2" />
+        <PackageReference Include="Polly" Version="8.6.6" />
+        <PackageReference Include="Polly.RateLimiting" Version="8.6.6" />
     </ItemGroup>
 
     <ItemGroup>
