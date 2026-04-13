@@ -869,7 +869,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.FormTemplate = conf.FormTemplate;
 
             if (conf.GrantTypes is not null)
-                request.GrantTypes = conf.GrantTypes;
+                request.GrantTypes = conf.GrantTypes.Distinct().ToArray();
 
             if (conf.JwtConfiguration is { } jwt_configuration)
                 ApplyToApi(jwt_configuration, request.JwtConfiguration ??= new());
