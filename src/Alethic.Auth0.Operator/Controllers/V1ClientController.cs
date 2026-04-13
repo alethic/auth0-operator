@@ -875,7 +875,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 ApplyToApi(jwt_configuration, request.JwtConfiguration ??= new());
 
             if (conf.Mobile is { } mobile)
-                ApplyToApi(mobile, request.Mobile ??= new());
+            {
+                var target = new Mobile();
+                ApplyToApi(mobile, target);
+
+                // only set on request if at least one of the mobile configurations is set, as the API will reject an empty mobile object
+                if (target.Android is not null || target.Ios is not null)
+                    request.Mobile = target;
+            }
 
             if (conf.Name is not null)
                 request.Name = conf.Name;
