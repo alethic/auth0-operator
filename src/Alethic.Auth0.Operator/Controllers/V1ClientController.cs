@@ -274,24 +274,38 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(source))]
-        static V1ClientMobile.MobileIos? FromApi(Mobile.MobileIos? source) => source is null ? null : new()
+        static V1ClientMobile.MobileIos? FromApi(Mobile.MobileIos? source)
         {
-            AppBundleIdentifier = source.AppBundleIdentifier,
-            TeamId = source.TeamId,
-        };
+            if (source is null)
+                return null;
+            if (source.AppBundleIdentifier is null && source.TeamId is null)
+                return null;
+
+            return new()
+            {
+                AppBundleIdentifier = source.AppBundleIdentifier,
+                TeamId = source.TeamId,
+            };
+        }
 
         /// <summary>
         /// Transforms the Android mobile configuration from the API model to the operator model.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(source))]
-        static V1ClientMobile.MobileAndroid? FromApi(Mobile.MobileAndroid? source) => source is null ? null : new()
+        static V1ClientMobile.MobileAndroid? FromApi(Mobile.MobileAndroid? source)
         {
-            AppPackageName = source.AppPackageName,
-            KeystoreHash = source.KeystoreHash,
-        };
+            if (source is null)
+                return null;
+            if (source.AppPackageName is null && source.KeystoreHash is null)
+                return null;
+
+            return new()
+            {
+                AppPackageName = source.AppPackageName,
+                KeystoreHash = source.KeystoreHash,
+            };
+        }
 
         /// <summary>
         /// Transforms the client JWT configuration from the API model to the operator model.
@@ -638,10 +652,12 @@ namespace Alethic.Auth0.Operator.Controllers
         static void ApplyToApi(V1ClientMobile source, Mobile target)
         {
             if (source.Android is { } android)
-                ApplyToApi(android, target.Android ??= new Mobile.MobileAndroid());
+                if (source.Android.AppPackageName is not null || source.Android.KeystoreHash is not null)
+                    ApplyToApi(android, target.Android ??= new Mobile.MobileAndroid());
 
             if (source.Ios is { } ios)
-                ApplyToApi(ios, target.Ios ??= new Mobile.MobileIos());
+                if (source.Ios.AppBundleIdentifier is not null || source.Ios.TeamId is not null)
+                    ApplyToApi(ios, target.Ios ??= new Mobile.MobileIos());
         }
 
         /// <summary>
