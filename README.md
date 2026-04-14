@@ -377,13 +377,6 @@ Available on `Client`, `Connection`, and `BrandingTheme` resources to locate an 
 |-------|------------------------------------|
 | `id`  | Match by Auth0 branding theme ID   |
 
-**CustomText find fields:**
-
-| Field     | Description                         |
-|-----------|-------------------------------------|
-| `prompt`  | Match by Auth0 custom text prompt   |
-| `language`| Match by Auth0 custom text language |
-
 **Client find fields:**
 
 | Field     | Description                         |
