@@ -36,6 +36,9 @@ Since the entire API is derived from the Auth0 Management API their documentatio
 - [x] kubernetes.auth0.com/v1:ClientGrant `a0cgr`
 - [x] kubernetes.auth0.com/v1:ResourceServer `a0api`
 - [x] kubernetes.auth0.com/v1:Connection `a0con`
+- [x] kubernetes.auth0.com/v1alpha1:BrandingTheme `a0theme`
+- [x] kubernetes.auth0.com/v1alpha1:CustomDomain `a0domain`
+- [x] kubernetes.auth0.com/v1alpha1:CustomText `a0customtext`
 
 ## Examples
 
@@ -225,30 +228,142 @@ spec:
       brute_force_protection: true
 ```
 
+### BrandingTheme
+
+The `BrandingTheme` resource manages the [branding theme](https://auth0.com/docs/customize/branding/branding-themes) for a tenant, controlling the visual appearance of login pages and other Auth0-hosted screens. An optional `spec.find` entry can locate an existing theme by its Auth0 `id`.
+
+```yaml
+apiVersion: kubernetes.auth0.com/v1alpha1
+kind: BrandingTheme
+metadata:
+  name: example-theme
+  namespace: example
+spec:
+  tenantRef:
+    name: example-tenant
+  policy:
+    - Create
+    - Update
+  find:
+    id: btheme_abc123
+  conf:
+    displayName: Example Theme
+    borders:
+      button_border_radius: 3
+      button_border_weight: 1
+      buttons_style: rounded
+      input_border_radius: 3
+      input_border_weight: 1
+      inputs_style: rounded
+      show_widget_shadow: true
+      widget_border_weight: 0
+      widget_corner_radius: 5
+    colors:
+      primary_button: "#0059d6"
+      primary_button_label: "#ffffff"
+      body_text: "#1e212a"
+      header: "#1e212a"
+      icons: "#65676e"
+      input_background: "#ffffff"
+      input_border: "#c9cace"
+      input_filled_text: "#1e212a"
+      input_labels_placeholders: "#65676e"
+      links_focused_components: "#0059d6"
+      widget_background: "#ffffff"
+      widget_border: "#c9cace"
+      error: "#d03c38"
+      success: "#13a688"
+    fonts:
+      font_url: https://fonts.googleapis.com/css2?family=Inter
+      reference_text_size: 16
+      title:
+        bold: true
+        size: 150
+      subtitle:
+        bold: false
+        size: 100
+      body_text:
+        bold: false
+        size: 87.5
+      buttons_text:
+        bold: false
+        size: 100
+      input_labels:
+        bold: false
+        size: 100
+      links:
+        bold: true
+        size: 87.5
+      links_style: normal
+    page_background:
+      background_color: "#f0f0f0"
+      background_image_url: https://example.com/bg.png
+      page_layout: center
+    widget:
+      header_text_alignment: center
+      logo_height: 52
+      logo_position: center
+      logo_url: https://example.com/logo.png
+      social_buttons_layout: bottom
+```
+
+### CustomDomain
+
+The `CustomDomain` resource manages Auth0 [custom domains](https://auth0.com/docs/customize/custom-domains). The operator finds existing custom domains by matching on the `domain` field. An optional `spec.secretRef` can reference a Kubernetes secret.
+
+```yaml
+apiVersion: kubernetes.auth0.com/v1alpha1
+kind: CustomDomain
+metadata:
+  name: example-domain
+  namespace: example
+spec:
+  tenantRef:
+    name: example-tenant
+  policy:
+    - Create
+    - Update
+  conf:
+    domain: login.example.com
+    type: auth0_managed_certs
+    verification_method: txt
+    primary: true
+    tls_policy: recommended
+    custom_client_ip_header: X-Forwarded-For
+```
+
+### CustomText
+
+The `CustomText` resource manages Auth0 custom text [localization](https://auth0.com/docs/customize/ui-features/localization) for a tenant. The operator finds existing custom text entries by matching on the `prompt` and `language` fields.
+
+```yaml
+apiVersion: kubernetes.auth0.com/v1alpha1
+kind: CustomText
+metadata:
+  name: example-login-text
+  namespace: example
+spec:
+  tenantRef:
+    name: example-tenant
+  prompt: login
+  language: en
+  policy:
+    - Update
+  conf:
+    screens:
+      login:
+        title: Welcome to Example
+        description: Log in to continue
+      login-id:
+        title: Sign In
+        description: Enter your email to get started
+```
+
 ## Reference
 
-This section documents shared fields that appear across multiple resource types.
+Available on `Client`, `Connection`, and `BrandingTheme` resources to locate an existing Auth0 entity instead of creating a new one.
 
-### `spec.policy`
-
-Controls which operations the operator is allowed to perform on the Auth0 entity:
-
-| Value    | Description                          |
-|----------|--------------------------------------|
-| `Create` | Allow creating new entities          |
-| `Update` | Allow updating existing entities     |
-| `Delete` | Allow deleting remote entities       |
-
-### `spec.find`
-
-Available on `Client` and `Connection` resources to locate an existing Auth0 entity instead of creating a new one.
-
-**Client find fields:**
-
-| Field       | Description                                  |
-|-------------|----------------------------------------------|
-| `client_id` | Match by Auth0 client ID                     |
-| `name`      | Match by application name                    |
+### spec.find
 
 **Connection find fields:**
 
@@ -256,15 +371,41 @@ Available on `Client` and `Connection` resources to locate an existing Auth0 ent
 |-------|--------------------------------|
 | `id`  | Match by Auth0 connection ID   |
 
-### `spec.secretRef`
+**BrandingTheme find fields:**
 
-The `Client` resource supports an optional `secretRef` field which can point to either an existing secret or the name of a secret to be created containing the `client_id` and `client_secret` values extracted from the app.
+| Field | Description                        |
+|-------|------------------------------------|
+| `id`  | Match by Auth0 branding theme ID   |
+
+**CustomText find fields:**
+
+| Field     | Description                         |
+|-----------|-------------------------------------|
+| `prompt`  | Match by Auth0 custom text prompt   |
+| `language`| Match by Auth0 custom text language |
+
+**Client find fields:**
+
+| Field     | Description                         |
+|-----------|-------------------------------------|
+| `client_id`| Match by Auth0 client ID            |
+| `name`    | Match by Auth0 client name          |
+
+### spec.policy
+
+| Policy | Description                           |
+|--------|---------------------------------------|
+| `Create` | Can create new entities                 |
+| `Update` | Can update existing entities             |
+| `Delete` | Can delete remote entities               |
+
+### spec.secretRef
+
+Used by `Client` and `CustomDomain` resources to refer to a Kubernetes secret containing Auth0 credentials.
 
 ### Cross-resource references
 
-Some fields reference other operator-managed Kubernetes resources:
-
-- **`tenantRef`** — `{ name, namespace? }` — references a `Tenant` resource.
-- **`clientRef`** — `{ name, namespace?, id? }` — references a `Client` resource by Kubernetes name or Auth0 `client_id`.
-- **`audience`** — `{ name, namespace?, id?, identifier? }` — references a `ResourceServer` by Kubernetes name, Auth0 ID, or API `identifier`.
-- **`enabled_clients`** — array of `{ name, namespace?, id? }` — references `Client` resources.
+- `tenantRef`: References the owning `Tenant` resource.
+- `clientRef`: References a `Client` resource, used in `ClientGrant` and `Connection` resources.
+- `audience`: References a `ResourceServer` resource, used in `ClientGrant` resources.
+- `enabled_clients`: References `Client` resources by name, used in `Connection` resources.
