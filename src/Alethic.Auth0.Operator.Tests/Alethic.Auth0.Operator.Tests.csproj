@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
+      <ProjectReference Include="..\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" />
     </ItemGroup>
 
 </Project>

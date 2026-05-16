@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static CaptchaWidgetTheme ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme source) => source switch
+        internal static CaptchaWidgetTheme ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme source) => source switch
         {
             V1alpha1BrandingThemeCaptchaWidgetTheme.Light => CaptchaWidgetTheme.Light,
             V1alpha1BrandingThemeCaptchaWidgetTheme.Dark => CaptchaWidgetTheme.Dark,
@@ -53,7 +53,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static LinksStyle ToApi(V1alpha1BrandingThemeFonts source) => source.LinksStyle switch
+        internal static LinksStyle ToApi(V1alpha1BrandingThemeFonts source) => source.LinksStyle switch
         {
             V1alpha1BrandingThemeLinksStyle.Normal => LinksStyle.Normal,
             V1alpha1BrandingThemeLinksStyle.Underlined => LinksStyle.Underlined,
@@ -66,7 +66,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static SocialButtonsLayout ToApi(V1alpha1BrandingThemeSocialButtonsLayout source) => source switch
+        internal static SocialButtonsLayout ToApi(V1alpha1BrandingThemeSocialButtonsLayout source) => source switch
         {
             V1alpha1BrandingThemeSocialButtonsLayout.Top => SocialButtonsLayout.Top,
             V1alpha1BrandingThemeSocialButtonsLayout.Bottom => SocialButtonsLayout.Bottom,
@@ -79,7 +79,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static LogoPosition ToApi(V1alpha1BrandingThemeLogoPosition source) => source switch
+        internal static LogoPosition ToApi(V1alpha1BrandingThemeLogoPosition source) => source switch
         {
             V1alpha1BrandingThemeLogoPosition.Center => LogoPosition.Center,
             V1alpha1BrandingThemeLogoPosition.Left => LogoPosition.Left,
@@ -94,7 +94,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static HeaderTextAlignment ToApi(V1alpha1BrandingThemeHeaderTextAlignment source) => source switch
+        internal static HeaderTextAlignment ToApi(V1alpha1BrandingThemeHeaderTextAlignment source) => source switch
         {
             V1alpha1BrandingThemeHeaderTextAlignment.Center => HeaderTextAlignment.Center,
             V1alpha1BrandingThemeHeaderTextAlignment.Left => HeaderTextAlignment.Left,
@@ -108,7 +108,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static PageLayout ToApi(V1alpha1BrandingThemePageLayout source) => source switch
+        internal static PageLayout ToApi(V1alpha1BrandingThemePageLayout source) => source switch
         {
             V1alpha1BrandingThemePageLayout.Right => PageLayout.Right,
             V1alpha1BrandingThemePageLayout.Center => PageLayout.Center,
@@ -122,7 +122,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="buttonsStyle"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static ButtonsStyle ToApi(V1alpha1BrandingThemeButtonsStyle buttonsStyle) => buttonsStyle switch
+        internal static ButtonsStyle ToApi(V1alpha1BrandingThemeButtonsStyle buttonsStyle) => buttonsStyle switch
         {
             V1alpha1BrandingThemeButtonsStyle.Pill => ButtonsStyle.Pill,
             V1alpha1BrandingThemeButtonsStyle.Rounded => ButtonsStyle.Rounded,
@@ -135,7 +135,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemeConf? source, BrandingThemeBase target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeConf? source, BrandingThemeBase target)
         {
             if (source is null)
                 return;
@@ -165,7 +165,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        static void ApplyToApi(V1alpha1BrandingThemeBorders? source, BrandingThemeBorder target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeBorders? source, BrandingThemeBorder target)
         {
             if (source is null)
                 return;
@@ -203,7 +203,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemeColors? source, BrandingThemeColors target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeColors? source, BrandingThemeColors target)
         {
             if (source is null)
                 return;
@@ -271,7 +271,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemeFonts? source, BrandingThemeFonts target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeFonts? source, BrandingThemeFonts target)
         {
             if (source is null)
                 return;
@@ -309,7 +309,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontsBase target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontsBase target)
         {
             if (source is null)
                 return;
@@ -326,7 +326,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemeWidget? source, BrandingThemeWidget target)
+        internal static void ApplyToApi(V1alpha1BrandingThemeWidget? source, BrandingThemeWidget target)
         {
             if (source is null)
                 return;
@@ -352,7 +352,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        static void ApplyToApi(V1alpha1BrandingThemePageBackground? source, BrandingThemePageBackground target)
+        internal static void ApplyToApi(V1alpha1BrandingThemePageBackground? source, BrandingThemePageBackground target)
         {
             if (source is null)
                 return;
@@ -372,7 +372,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeConf FromApi(BrandingTheme source) => new()
+        internal static V1alpha1BrandingThemeConf FromApi(BrandingTheme source) => new()
         {
             DisplayName = source.DisplayName,
             Borders = FromApi(source.Borders),
@@ -387,7 +387,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeWidget FromApi(BrandingThemeWidget source) => new()
+        internal static V1alpha1BrandingThemeWidget FromApi(BrandingThemeWidget source) => new()
         {
             HeaderTextAlignment = FromApi(source.HeaderTextAlignment),
             LogoHeight = source.LogoHeight,
@@ -402,7 +402,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemeSocialButtonsLayout? FromApi(SocialButtonsLayout source) => source switch
+        internal static V1alpha1BrandingThemeSocialButtonsLayout? FromApi(SocialButtonsLayout source) => source switch
         {
             SocialButtonsLayout.Top => V1alpha1BrandingThemeSocialButtonsLayout.Top,
             SocialButtonsLayout.Bottom => V1alpha1BrandingThemeSocialButtonsLayout.Bottom,
@@ -415,7 +415,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemeLogoPosition? FromApi(LogoPosition source) => source switch
+        internal static V1alpha1BrandingThemeLogoPosition? FromApi(LogoPosition source) => source switch
         {
             LogoPosition.Center => V1alpha1BrandingThemeLogoPosition.Center,
             LogoPosition.Left => V1alpha1BrandingThemeLogoPosition.Left,
@@ -430,7 +430,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemeHeaderTextAlignment? FromApi(HeaderTextAlignment source) => source switch
+        internal static V1alpha1BrandingThemeHeaderTextAlignment? FromApi(HeaderTextAlignment source) => source switch
         {
             HeaderTextAlignment.Center => V1alpha1BrandingThemeHeaderTextAlignment.Center,
             HeaderTextAlignment.Left => V1alpha1BrandingThemeHeaderTextAlignment.Left,
@@ -443,7 +443,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemePageBackground FromApi(BrandingThemePageBackground source) => new()
+        internal static V1alpha1BrandingThemePageBackground FromApi(BrandingThemePageBackground source) => new()
         {
             BackgroundColor = source.BackgroundColor,
             BackgroundImageUrl = source.BackgroundImageUrl,
@@ -456,7 +456,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemePageLayout? FromApi(PageLayout source) => source switch
+        internal static V1alpha1BrandingThemePageLayout? FromApi(PageLayout source) => source switch
         {
             PageLayout.Center => V1alpha1BrandingThemePageLayout.Center,
             PageLayout.Left => V1alpha1BrandingThemePageLayout.Left,
@@ -469,7 +469,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFonts FromApi(BrandingThemeFonts source) => new()
+        internal static V1alpha1BrandingThemeFonts FromApi(BrandingThemeFonts source) => new()
         {
             BodyText = FromApi(source.BodyText),
             ButtonsText = FromApi(source.ButtonsText),
@@ -487,7 +487,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(Title source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(Title source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -498,7 +498,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(Links source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(Links source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -509,7 +509,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(Subtitle source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(Subtitle source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -521,7 +521,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemeLinksStyle? FromApi(LinksStyle source) => source switch
+        internal static V1alpha1BrandingThemeLinksStyle? FromApi(LinksStyle source) => source switch
         {
             LinksStyle.Normal => V1alpha1BrandingThemeLinksStyle.Normal,
             LinksStyle.Underlined => V1alpha1BrandingThemeLinksStyle.Underlined,
@@ -533,7 +533,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(InputLabels source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(InputLabels source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -544,7 +544,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(ButtonsText source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(ButtonsText source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -555,7 +555,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeFont FromApi(BodyText source) => new()
+        internal static V1alpha1BrandingThemeFont FromApi(BodyText source) => new()
         {
             Bold = source.Bold,
             Size = source.Size
@@ -566,7 +566,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeColors FromApi(BrandingThemeColors source) => new()
+        internal static V1alpha1BrandingThemeColors FromApi(BrandingThemeColors source) => new()
         {
             BaseFocusColor = source.BaseFocusColor,
             BaseHoverColor = source.BaseHoverColor,
@@ -595,7 +595,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        static V1alpha1BrandingThemeCaptchaWidgetTheme? FromApi(CaptchaWidgetTheme source) => source switch
+        internal static V1alpha1BrandingThemeCaptchaWidgetTheme? FromApi(CaptchaWidgetTheme source) => source switch
         {
             CaptchaWidgetTheme.Light => V1alpha1BrandingThemeCaptchaWidgetTheme.Light,
             CaptchaWidgetTheme.Dark => V1alpha1BrandingThemeCaptchaWidgetTheme.Dark,
@@ -608,7 +608,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static V1alpha1BrandingThemeBorders? FromApi(BrandingThemeBorder source) => new()
+        internal static V1alpha1BrandingThemeBorders? FromApi(BrandingThemeBorder source) => new()
         {
             ButtonBorderRadius = source.ButtonBorderRadius,
             ButtonBorderWeight = source.ButtonBorderWeight,
@@ -627,7 +627,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="inputsStyle"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        static V1alpha1BrandingThemeButtonsStyle FromApi(ButtonsStyle inputsStyle) => inputsStyle switch
+        internal static V1alpha1BrandingThemeButtonsStyle FromApi(ButtonsStyle inputsStyle) => inputsStyle switch
         {
             ButtonsStyle.Pill => V1alpha1BrandingThemeButtonsStyle.Pill,
             ButtonsStyle.Rounded => V1alpha1BrandingThemeButtonsStyle.Rounded,

@@ -34,4 +34,8 @@
         <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Alethic.Auth0.Operator.Tests" />
+    </ItemGroup>
+
 </Project>

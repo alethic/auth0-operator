@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Core.Models.ResourceServer.V1;
 
@@ -18,7 +16,7 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0api")]
     public partial class V1ResourceServer :
         CustomKubernetesEntity<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef>,
-        V1TenantEntityInstance<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, Hashtable>
+        V1TenantEntityInstance<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, V1ResourceServerConf>
     {
 
         public class SpecDef : V1TenantEntityInstanceSpec<V1ResourceServerConf>
@@ -40,7 +38,7 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityInstanceStatus<Hashtable>
+        public class StatusDef : V1TenantEntityInstanceStatus<V1ResourceServerConf>
         {
 
             [JsonPropertyName("id")]
@@ -50,8 +48,7 @@ namespace Alethic.Auth0.Operator.Models
             public string? Identifier { get; set; }
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-            public Hashtable? LastConf { get; set; }
+            public V1ResourceServerConf? LastConf { get; set; }
 
         }
 

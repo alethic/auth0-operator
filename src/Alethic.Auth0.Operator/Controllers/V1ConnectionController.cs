@@ -57,6 +57,380 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override string EntityTypeName => "Connection";
 
         /// <summary>
+        /// Converts a <see cref="Connection"/> API response to a <see cref="V1ConnectionConf"/>.
+        /// Note: <see cref="V1ConnectionConf.EnabledClients"/> is populated separately and left null here.
+        /// </summary>
+        internal static V1ConnectionConf? FromApi(Connection? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V1ConnectionConf
+            {
+                Name = source.Name,
+                DisplayName = source.DisplayName,
+                Strategy = source.Strategy,
+                Realms = source.Realms,
+                IsDomainConnection = source.IsDomainConnection,
+                ShowAsButton = source.ShowAsButton,
+                ProvisioningTicketUrl = source.ProvisioningTicketUrl,
+                Options = FromApiOptions(source.Options, source.Strategy),
+                Metadata = TransformToSystemTextJson<System.Collections.Hashtable>(source.Metadata),
+            };
+        }
+
+        internal static V1ConnectionOptions? FromApiOptions(object? source, string? strategy)
+        {
+            if (source is null)
+                return null;
+
+            if (strategy == "auth0")
+            {
+                var src = source as ConnectionOptions ?? TransformToNewtonsoftJson<object, ConnectionOptions>(source);
+                if (src is null)
+                    return null;
+
+                return FromApi(src);
+            }
+            else
+            {
+                return TransformToSystemTextJson<V1ConnectionOptions>(source);
+            }
+        }
+
+        internal static V1ConnectionOptions FromApi(ConnectionOptions source)
+        {
+            return new V1ConnectionOptions
+            {
+                Validation = source.Validation is { } v ? FromApi(v) : null,
+                NonPersistentAttributes = source.NonPersistentAttributes,
+                Precedence = source.Precedence is { } prec ? Array.ConvertAll(prec, FromApi) : null,
+                Attributes = source.Attributes is { } attr ? FromApi(attr) : null,
+                EnableScriptContext = source.EnableScriptContext,
+                EnableDatabaseCustomization = source.EnableDatabaseCustomization,
+                ImportMode = source.ImportMode,
+                CustomScripts = source.CustomScripts is { } cs ? FromApi(cs) : null,
+                AuthenticationMethods = source.AuthenticationMethods is { } am ? FromApi(am) : null,
+                PasskeyOptions = source.PasskeyOptions is { } po ? FromApi(po) : null,
+                PasswordPolicy = source.PasswordPolicy is { } pp ? FromApi(pp) : null,
+                PasswordComplexityOptions = source.PasswordComplexityOptions is { } pco ? FromApi(pco) : null,
+                PasswordHistory = source.PasswordHistory is { } ph ? FromApi(ph) : null,
+                PasswordNoPersonalInfo = source.PasswordNoPersonalInfo is { } pnpi ? FromApi(pnpi) : null,
+                PasswordDictionary = source.PasswordDictionary is { } pd ? FromApi(pd) : null,
+                ApiEnableUsers = source.ApiEnableUsers,
+                BasicProfile = source.BasicProfile,
+                ExtAdmin = source.ExtAdmin,
+                ExtIsSuspended = source.ExtIsSuspended,
+                ExtAgreedTerms = source.ExtAgreedTerms,
+                ExtGroups = source.ExtGroups,
+                ExtAssignedPlans = source.ExtAssignedPlans,
+                ExtProfile = source.ExtProfile,
+                DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword,
+                UpstreamParams = source.UpstreamParams,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                GatewayAuthentication = source.GatewayAuthentication is { } ga ? FromApi(ga) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsValidation FromApi(ConnectionOptionsValidation source)
+        {
+            return new V1ConnectionOptionsValidation
+            {
+                UserName = source.UserName is { } u ? FromApi(u) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsUserName FromApi(ConnectionOptionsUserName source)
+        {
+            return new V1ConnectionOptionsUserName
+            {
+                Min = source.Min,
+                Max = source.Max,
+            };
+        }
+
+        internal static V1ConnectionOptionsAttributes FromApi(ConnectionOptionsAttributes source)
+        {
+            return new V1ConnectionOptionsAttributes
+            {
+                Email = source.Email is { } e ? FromApi(e) : null,
+                PhoneNumber = source.PhoneNumber is { } p ? FromApi(p) : null,
+                Username = source.Username is { } u ? FromApi(u) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsEmailAttribute FromApi(ConnectionOptionsEmailAttribute source)
+        {
+            return new V1ConnectionOptionsEmailAttribute
+            {
+                Identifier = source.Identifier is { } i ? FromApi(i) : null,
+                ProfileRequired = source.ProfileRequired,
+                Signup = source.Signup is { } s ? FromApi(s) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsEmailSignup FromApi(ConnectionOptionsEmailSignup source)
+        {
+            return new V1ConnectionOptionsEmailSignup
+            {
+                Status = FromApi(source.Status),
+                Verification = source.Verification is { } v ? FromApi(v) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsPhoneNumberAttribute FromApi(ConnectionOptionsPhoneNumberAttribute source)
+        {
+            return new V1ConnectionOptionsPhoneNumberAttribute
+            {
+                Signup = source.Signup is { } s ? FromApi(s) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsPhoneNumberSignup FromApi(ConnectionOptionsPhoneNumberSignup source)
+        {
+            return new V1ConnectionOptionsPhoneNumberSignup
+            {
+                Status = FromApi(source.Status),
+                Verification = source.Verification is { } v ? FromApi(v) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsUsernameAttribute FromApi(ConnectionOptionsUsernameAttribute source)
+        {
+            return new V1ConnectionOptionsUsernameAttribute
+            {
+                Identifier = source.Identifier is { } i ? FromApi(i) : null,
+                ProfileRequired = source.ProfileRequired,
+                Signup = source.Signup is { } s ? FromApi(s) : null,
+                Validation = source.Validation is { } v ? FromApi(v) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsUsernameSignup FromApi(ConnectionOptionsUsernameSignup source)
+        {
+            return new V1ConnectionOptionsUsernameSignup
+            {
+                Status = FromApi(source.Status),
+            };
+        }
+
+        internal static V1ConnectionOptionsAttributeIdentifier FromApi(ConnectionOptionsAttributeIdentifier source)
+        {
+            return new V1ConnectionOptionsAttributeIdentifier
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V1ConnectionOptionsAttributeValidation FromApi(ConnectionOptionsAttributeValidation source)
+        {
+            return new V1ConnectionOptionsAttributeValidation
+            {
+                MinLength = source.MinLength,
+                MaxLength = source.MaxLength,
+                AllowedTypes = source.AllowedTypes is { } at ? FromApi(at) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsAttributeAllowedTypes FromApi(ConnectionOptionsAttributeAllowedTypes source)
+        {
+            return new V1ConnectionOptionsAttributeAllowedTypes
+            {
+                Email = source.Email,
+                PhoneNumber = source.PhoneNumber,
+            };
+        }
+
+        internal static V1ConnectionOptionsVerification FromApi(ConnectionOptionsVerification source)
+        {
+            return new V1ConnectionOptionsVerification
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V1ConnectionOptionsCustomScripts FromApi(ConnectionOptionsCustomScripts source)
+        {
+            return new V1ConnectionOptionsCustomScripts
+            {
+                Login = source.Login,
+                GetUser = source.GetUser,
+                Delete = source.Delete,
+                ChangePassword = source.ChangePassword,
+                Verify = source.Verify,
+                Create = source.Create,
+                ChangeUsername = source.ChangeUsername,
+                ChangeEmail = source.ChangeEmail,
+                ChangePhoneNumber = source.ChangePhoneNumber,
+            };
+        }
+
+        internal static V1ConnectionOptionsAuthenticationMethods FromApi(ConnectionOptionsAuthenticationMethods source)
+        {
+            return new V1ConnectionOptionsAuthenticationMethods
+            {
+                Password = source.Password is { } p ? FromApi(p) : null,
+                Passkey = source.Passkey is { } pk ? FromApi(pk) : null,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasswordAuthenticationMethod FromApi(ConnectionOptionsPasswordAuthenticationMethod source)
+        {
+            return new V1ConnectionOptionsPasswordAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasskeyAuthenticationMethod FromApi(ConnectionOptionsPasskeyAuthenticationMethod source)
+        {
+            return new V1ConnectionOptionsPasskeyAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasskeyOptions FromApi(ConnectionOptionsPasskeyOptions source)
+        {
+            return new V1ConnectionOptionsPasskeyOptions
+            {
+                ChallengeUi = FromApi(source.ChallengeUi),
+                ProgressiveEnrollmentEnabled = source.ProgressiveEnrollmentEnabled,
+                LocalEnrollmentEnabled = source.LocalEnrollmentEnabled,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasswordComplexityOptions FromApi(ConnectionOptionsPasswordComplexityOptions source)
+        {
+            return new V1ConnectionOptionsPasswordComplexityOptions
+            {
+                MinLength = source.MinLength,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasswordHistory FromApi(ConnectionOptionsPasswordHistory source)
+        {
+            return new V1ConnectionOptionsPasswordHistory
+            {
+                Enable = source.Enable,
+                Size = source.Size,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasswordNoPersonalInfo FromApi(ConnectionOptionsPasswordNoPersonalInfo source)
+        {
+            return new V1ConnectionOptionsPasswordNoPersonalInfo
+            {
+                Enable = source.Enable,
+            };
+        }
+
+        internal static V1ConnectionOptionsPasswordDictionary FromApi(ConnectionOptionsPasswordDictionary source)
+        {
+            return new V1ConnectionOptionsPasswordDictionary
+            {
+                Enable = source.Enable,
+                Dictionary = source.Dictionary,
+            };
+        }
+
+        internal static V1ConnectionGatewayAuthentication FromApi(GatewayAuthentication source)
+        {
+            return new V1ConnectionGatewayAuthentication
+            {
+                Method = source.Method,
+                Subject = source.Subject,
+                Audience = source.Audience,
+                Secret = source.Secret,
+                SecretBase64Encoded = source.SecretBase64Encoded,
+            };
+        }
+
+        internal static V1ConnectionOptionsPrecedence FromApi(ConnectionOptionsPrecedence source) => source switch
+        {
+            ConnectionOptionsPrecedence.Email => V1ConnectionOptionsPrecedence.Email,
+            ConnectionOptionsPrecedence.PhoneNumber => V1ConnectionOptionsPrecedence.PhoneNumber,
+            ConnectionOptionsPrecedence.UserName => V1ConnectionOptionsPrecedence.UserName,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static ConnectionOptionsPrecedence ToApi(V1ConnectionOptionsPrecedence source) => source switch
+        {
+            V1ConnectionOptionsPrecedence.Email => ConnectionOptionsPrecedence.Email,
+            V1ConnectionOptionsPrecedence.PhoneNumber => ConnectionOptionsPrecedence.PhoneNumber,
+            V1ConnectionOptionsPrecedence.UserName => ConnectionOptionsPrecedence.UserName,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static V1ConnectionOptionsAttributeStatus FromApi(ConnectionOptionsAttributeStatus source) => source switch
+        {
+            ConnectionOptionsAttributeStatus.Required => V1ConnectionOptionsAttributeStatus.Required,
+            ConnectionOptionsAttributeStatus.Optional => V1ConnectionOptionsAttributeStatus.Optional,
+            ConnectionOptionsAttributeStatus.Inactive => V1ConnectionOptionsAttributeStatus.Inactive,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static ConnectionOptionsAttributeStatus ToApi(V1ConnectionOptionsAttributeStatus source) => source switch
+        {
+            V1ConnectionOptionsAttributeStatus.Required => ConnectionOptionsAttributeStatus.Required,
+            V1ConnectionOptionsAttributeStatus.Optional => ConnectionOptionsAttributeStatus.Optional,
+            V1ConnectionOptionsAttributeStatus.Inactive => ConnectionOptionsAttributeStatus.Inactive,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static V1ConnectionOptionsPasswordPolicy FromApi(ConnectionOptionsPasswordPolicy source) => source switch
+        {
+            ConnectionOptionsPasswordPolicy.None => V1ConnectionOptionsPasswordPolicy.None,
+            ConnectionOptionsPasswordPolicy.Low => V1ConnectionOptionsPasswordPolicy.Low,
+            ConnectionOptionsPasswordPolicy.Fair => V1ConnectionOptionsPasswordPolicy.Fair,
+            ConnectionOptionsPasswordPolicy.Good => V1ConnectionOptionsPasswordPolicy.Good,
+            ConnectionOptionsPasswordPolicy.Excellent => V1ConnectionOptionsPasswordPolicy.Excellent,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static ConnectionOptionsPasswordPolicy ToApi(V1ConnectionOptionsPasswordPolicy source) => source switch
+        {
+            V1ConnectionOptionsPasswordPolicy.None => ConnectionOptionsPasswordPolicy.None,
+            V1ConnectionOptionsPasswordPolicy.Low => ConnectionOptionsPasswordPolicy.Low,
+            V1ConnectionOptionsPasswordPolicy.Fair => ConnectionOptionsPasswordPolicy.Fair,
+            V1ConnectionOptionsPasswordPolicy.Good => ConnectionOptionsPasswordPolicy.Good,
+            V1ConnectionOptionsPasswordPolicy.Excellent => ConnectionOptionsPasswordPolicy.Excellent,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static V1ConnectionSetUserRootAttributes FromApi(SetUserRootAttributes source) => source switch
+        {
+            SetUserRootAttributes.OnEachLogin => V1ConnectionSetUserRootAttributes.OnEachLogin,
+            SetUserRootAttributes.OnFirstLogin => V1ConnectionSetUserRootAttributes.OnFirstLogin,
+            SetUserRootAttributes.NeverOnLogin => V1ConnectionSetUserRootAttributes.NeverOnLogin,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static SetUserRootAttributes ToApi(V1ConnectionSetUserRootAttributes source) => source switch
+        {
+            V1ConnectionSetUserRootAttributes.OnEachLogin => SetUserRootAttributes.OnEachLogin,
+            V1ConnectionSetUserRootAttributes.OnFirstLogin => SetUserRootAttributes.OnFirstLogin,
+            V1ConnectionSetUserRootAttributes.NeverOnLogin => SetUserRootAttributes.NeverOnLogin,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static V1ConnectionChallengeUi FromApi(ChallengeUi source) => source switch
+        {
+            ChallengeUi.Both => V1ConnectionChallengeUi.Both,
+            ChallengeUi.AutoFill => V1ConnectionChallengeUi.AutoFill,
+            ChallengeUi.Button => V1ConnectionChallengeUi.Button,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static ChallengeUi ToApi(V1ConnectionChallengeUi source) => source switch
+        {
+            V1ConnectionChallengeUi.Both => ChallengeUi.Both,
+            V1ConnectionChallengeUi.AutoFill => ChallengeUi.AutoFill,
+            V1ConnectionChallengeUi.Button => ChallengeUi.Button,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        /// <summary>
         /// Gets the list of enabled client IDs for the specified connection.
         /// </summary>
         /// <param name="api"></param>
@@ -84,21 +458,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (self == null)
                     return null;
 
-                return new V1ConnectionConf()
-                {
-                    Name = self.Name,
-                    DisplayName = self.DisplayName,
-                    Strategy = self.Strategy,
-                    Realms = self.Realms,
-                    IsDomainConnection = self.IsDomainConnection,
-                    ShowAsButton = self.ShowAsButton,
-                    ProvisioningTicketUrl = self.ProvisioningTicketUrl,
-                    EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken))
-                        .Select(i => new V1ClientReference() { Id = i })
-                        .ToArray(),
-                    Options = TransformToSystemTextJson<System.Collections.Hashtable>(self.Options),
-                    Metadata = TransformToSystemTextJson<System.Collections.Hashtable>(self.Metadata),
-                };
+                var conf = FromApi(self)!;
+                conf.EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken))
+                    .Select(i => new V1ClientReference() { Id = i })
+                    .ToArray();
+                return conf;
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -187,9 +551,21 @@ namespace Alethic.Auth0.Operator.Controllers
 
             req.Strategy = conf.Strategy;
 
-            //req.Options = conf.Strategy == "auth0"
-            //    ? TransformToNewtonsoftJson<System.Collections.Hashtable, ConnectionOptions>(conf.Options)
-            //    : conf.Options;
+            // calculate options: depends on current strategy, but we need to potentially patch the existing resource
+            if (conf.Options is not null)
+            {
+                if (conf.Strategy == "auth0")
+                {
+                    req.Options = new ConnectionOptions();
+                    ApplyToApi(conf.Options, (ConnectionOptions)req.Options);
+                }
+                else
+                {
+                    var options = (dynamic)new JObject();
+                    req.Options = options;
+                    ApplyToApi(conf.Options, ref options);
+                }
+            }
 
             var self = await api.Connections.CreateAsync(req, cancellationToken);
             if (self is null)
@@ -216,13 +592,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 var current = await api.Connections.GetAsync(id, cancellationToken: cancellationToken);
                 if (current.Strategy == "auth0")
                 {
-                    var options = (ConnectionOptions)current.Options;
+                    var options = (ConnectionOptions)current.Options ?? new ConnectionOptions();
                     req.Options = options;
                     ApplyToApi(conf.Options, options);
                 }
                 else
                 {
-                    var options = current.Options;
+                    var options = (dynamic)((JObject?)current.Options ?? new JObject());
                     req.Options = options;
                     ApplyToApi(conf.Options, ref options);
                 }
@@ -239,7 +615,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="target"></param>
         /// <param name="source"></param>
-        static void ApplyToApi(V1ConnectionConf source, ConnectionBase target)
+        internal static void ApplyToApi(V1ConnectionConf source, ConnectionBase target)
         {
             if (source.Name is { } name)
                 target.Name = name;
@@ -272,7 +648,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.NonPersistentAttributes = nonPersistentAttributes;
 
             if (source.Precedence is { } precedence)
-                target.Precedence = Array.ConvertAll(precedence, p => (ConnectionOptionsPrecedence)(int)p);
+                target.Precedence = Array.ConvertAll(precedence, ToApi);
 
             if (source.Attributes is { } attributes)
             {
@@ -308,7 +684,7 @@ namespace Alethic.Auth0.Operator.Controllers
             }
 
             if (source.PasswordPolicy is { } passwordPolicy)
-                target.PasswordPolicy = (ConnectionOptionsPasswordPolicy)(int)passwordPolicy;
+                target.PasswordPolicy = ToApi(passwordPolicy);
 
             if (source.PasswordComplexityOptions is { } passwordComplexityOptions)
             {
@@ -365,7 +741,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.UpstreamParams = upstreamParams;
 
             if (source.SetUserRootAttributes is { } setUserRootAttributes)
-                target.SetUserRootAttributes = (SetUserRootAttributes)(int)setUserRootAttributes;
+                target.SetUserRootAttributes = ToApi(setUserRootAttributes);
 
             if (source.GatewayAuthentication is { } gatewayAuthentication)
             {
@@ -434,7 +810,7 @@ namespace Alethic.Auth0.Operator.Controllers
         static void ApplyToApi(V1ConnectionOptionsEmailSignup source, ConnectionOptionsEmailSignup target)
         {
             if (source.Status is { } status)
-                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+                target.Status = ToApi(status);
 
             if (source.Verification is { } verification)
             {
@@ -455,7 +831,7 @@ namespace Alethic.Auth0.Operator.Controllers
         static void ApplyToApi(V1ConnectionOptionsPhoneNumberSignup source, ConnectionOptionsPhoneNumberSignup target)
         {
             if (source.Status is { } status)
-                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+                target.Status = ToApi(status);
 
             if (source.Verification is { } verification)
             {
@@ -491,7 +867,7 @@ namespace Alethic.Auth0.Operator.Controllers
         static void ApplyToApi(V1ConnectionOptionsUsernameSignup source, ConnectionOptionsUsernameSignup target)
         {
             if (source.Status is { } status)
-                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+                target.Status = ToApi(status);
         }
 
         static void ApplyToApi(V1ConnectionOptionsAttributeIdentifier source, ConnectionOptionsAttributeIdentifier target)
@@ -590,7 +966,7 @@ namespace Alethic.Auth0.Operator.Controllers
         static void ApplyToApi(V1ConnectionOptionsPasskeyOptions source, ConnectionOptionsPasskeyOptions target)
         {
             if (source.ChallengeUi is { } challengeUi)
-                target.ChallengeUi = (ChallengeUi)(int)challengeUi;
+                target.ChallengeUi = ToApi(challengeUi);
 
             if (source.ProgressiveEnrollmentEnabled is { } progressiveEnrollmentEnabled)
                 target.ProgressiveEnrollmentEnabled = progressiveEnrollmentEnabled;
@@ -647,9 +1023,28 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SecretBase64Encoded = secretBase64Encoded;
         }
 
-        void ApplyToApi(V1ConnectionOptions source, ref dynamic target)
+        static void ApplyToApi(V1ConnectionOptions source, ref dynamic target)
         {
-            target = TransformToNewtonsoftJson<V1ConnectionOptions, JObject>(source);
+            var patch = TransformToNewtonsoftJson<V1ConnectionOptions, JObject>(source);
+            if (patch is null)
+                return;
+
+            if (target is not JObject targetObj)
+                targetObj = new JObject();
+
+            MergeJObject(patch, targetObj);
+            target = targetObj;
+        }
+
+        static void MergeJObject(JObject source, JObject target)
+        {
+            foreach (var property in source.Properties())
+            {
+                if (target[property.Name] is JObject existingObj && property.Value is JObject sourceObj)
+                    MergeJObject(sourceObj, existingObj);
+                else
+                    target[property.Name] = property.Value;
+            }
         }
 
         /// <summary>

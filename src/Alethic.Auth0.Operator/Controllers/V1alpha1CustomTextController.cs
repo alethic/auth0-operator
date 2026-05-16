@@ -19,6 +19,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Newtonsoft.Json.Linq;
+
 namespace Alethic.Auth0.Operator.Controllers
 {
 
@@ -30,6 +32,30 @@ namespace Alethic.Auth0.Operator.Controllers
         V1TenantEntityController<V1alpha1CustomText, V1alpha1CustomText.SpecDef, V1alpha1CustomText.StatusDef, V1alpha1CustomTextConf, V1alpha1CustomTextConf>,
         IEntityController<V1alpha1CustomText>
     {
+
+        static V1alpha1CustomTextScreen FromApiScreen(JObject source)
+        {
+            var screen = new V1alpha1CustomTextScreen();
+
+            foreach (var prop in source.Properties())
+                screen[prop.Name] = prop.Value.Value<string>() ?? string.Empty;
+
+            return screen;
+        }
+
+        static Dictionary<string, V1alpha1CustomTextScreen>? FromApiScreens(object? source)
+        {
+            if (source is not JObject root)
+                return null;
+
+            var result = new Dictionary<string, V1alpha1CustomTextScreen>();
+
+            foreach (var prop in root.Properties())
+                if (prop.Value is JObject screenObj)
+                    result[prop.Name] = FromApiScreen(screenObj);
+
+            return result;
+        }
 
         /// <summary>
         /// Initializes a new instance.
@@ -74,7 +100,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             // apply resulting values to status
             entity.Status.LastConf ??= new V1alpha1CustomTextConf();
-            entity.Status.LastConf.Screens = TransformToSystemTextJson<Dictionary<string, V1alpha1CustomTextScreen>>(screens);
+            entity.Status.LastConf.Screens = FromApiScreens(screens);
             return entity;
         }
 
