@@ -9,7 +9,7 @@ using Alethic.Auth0.Operator.Options;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.Branding;
 
 using k8s.Models;
 
@@ -39,11 +39,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static CaptchaWidgetTheme ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme source) => source switch
+        internal static BrandingThemeColorsCaptchaWidgetThemeEnum ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme source) => source switch
         {
-            V1alpha1BrandingThemeCaptchaWidgetTheme.Light => CaptchaWidgetTheme.Light,
-            V1alpha1BrandingThemeCaptchaWidgetTheme.Dark => CaptchaWidgetTheme.Dark,
-            V1alpha1BrandingThemeCaptchaWidgetTheme.Auto => CaptchaWidgetTheme.Auto,
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Light => new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Light),
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Dark => new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Dark),
+            V1alpha1BrandingThemeCaptchaWidgetTheme.Auto => new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Auto),
             _ => throw new InvalidOperationException()
         };
 
@@ -53,10 +53,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static LinksStyle ToApi(V1alpha1BrandingThemeFonts source) => source.LinksStyle switch
+        internal static BrandingThemeFontLinksStyleEnum ToApiLinksStyle(V1alpha1BrandingThemeLinksStyle? source) => source switch
         {
-            V1alpha1BrandingThemeLinksStyle.Normal => LinksStyle.Normal,
-            V1alpha1BrandingThemeLinksStyle.Underlined => LinksStyle.Underlined,
+            V1alpha1BrandingThemeLinksStyle.Normal => new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Normal),
+            V1alpha1BrandingThemeLinksStyle.Underlined => new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Underlined),
+            null => new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Normal),
             _ => throw new InvalidOperationException()
         };
 
@@ -66,10 +67,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static SocialButtonsLayout ToApi(V1alpha1BrandingThemeSocialButtonsLayout source) => source switch
+        internal static BrandingThemeWidgetSocialButtonsLayoutEnum ToApi(V1alpha1BrandingThemeSocialButtonsLayout source) => source switch
         {
-            V1alpha1BrandingThemeSocialButtonsLayout.Top => SocialButtonsLayout.Top,
-            V1alpha1BrandingThemeSocialButtonsLayout.Bottom => SocialButtonsLayout.Bottom,
+            V1alpha1BrandingThemeSocialButtonsLayout.Top => new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Top),
+            V1alpha1BrandingThemeSocialButtonsLayout.Bottom => new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom),
             _ => throw new InvalidOperationException()
         };
 
@@ -79,12 +80,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static LogoPosition ToApi(V1alpha1BrandingThemeLogoPosition source) => source switch
+        internal static BrandingThemeWidgetLogoPositionEnum ToApi(V1alpha1BrandingThemeLogoPosition source) => source switch
         {
-            V1alpha1BrandingThemeLogoPosition.Center => LogoPosition.Center,
-            V1alpha1BrandingThemeLogoPosition.Left => LogoPosition.Left,
-            V1alpha1BrandingThemeLogoPosition.Right => LogoPosition.Right,
-            V1alpha1BrandingThemeLogoPosition.None => LogoPosition.None,
+            V1alpha1BrandingThemeLogoPosition.Center => new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Center),
+            V1alpha1BrandingThemeLogoPosition.Left => new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Left),
+            V1alpha1BrandingThemeLogoPosition.Right => new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Right),
+            V1alpha1BrandingThemeLogoPosition.None => new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.None),
             _ => throw new InvalidOperationException()
         };
 
@@ -94,11 +95,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static HeaderTextAlignment ToApi(V1alpha1BrandingThemeHeaderTextAlignment source) => source switch
+        internal static BrandingThemeWidgetHeaderTextAlignmentEnum ToApi(V1alpha1BrandingThemeHeaderTextAlignment source) => source switch
         {
-            V1alpha1BrandingThemeHeaderTextAlignment.Center => HeaderTextAlignment.Center,
-            V1alpha1BrandingThemeHeaderTextAlignment.Left => HeaderTextAlignment.Left,
-            V1alpha1BrandingThemeHeaderTextAlignment.Right => HeaderTextAlignment.Right,
+            V1alpha1BrandingThemeHeaderTextAlignment.Center => new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center),
+            V1alpha1BrandingThemeHeaderTextAlignment.Left => new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Left),
+            V1alpha1BrandingThemeHeaderTextAlignment.Right => new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Right),
             _ => throw new InvalidOperationException()
         };
 
@@ -108,11 +109,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static PageLayout ToApi(V1alpha1BrandingThemePageLayout source) => source switch
+        internal static BrandingThemePageBackgroundPageLayoutEnum ToApi(V1alpha1BrandingThemePageLayout source) => source switch
         {
-            V1alpha1BrandingThemePageLayout.Right => PageLayout.Right,
-            V1alpha1BrandingThemePageLayout.Center => PageLayout.Center,
-            V1alpha1BrandingThemePageLayout.Left => PageLayout.Left,
+            V1alpha1BrandingThemePageLayout.Right => new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Right),
+            V1alpha1BrandingThemePageLayout.Center => new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Center),
+            V1alpha1BrandingThemePageLayout.Left => new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Left),
             _ => throw new InvalidOperationException()
         };
 
@@ -122,257 +123,195 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="buttonsStyle"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static ButtonsStyle ToApi(V1alpha1BrandingThemeButtonsStyle buttonsStyle) => buttonsStyle switch
+        internal static BrandingThemeBordersButtonsStyleEnum ToApiButtonsStyle(V1alpha1BrandingThemeButtonsStyle buttonsStyle) => buttonsStyle switch
         {
-            V1alpha1BrandingThemeButtonsStyle.Pill => ButtonsStyle.Pill,
-            V1alpha1BrandingThemeButtonsStyle.Rounded => ButtonsStyle.Rounded,
-            V1alpha1BrandingThemeButtonsStyle.Sharp => ButtonsStyle.Sharp,
+            V1alpha1BrandingThemeButtonsStyle.Pill => new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Pill),
+            V1alpha1BrandingThemeButtonsStyle.Rounded => new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Rounded),
+            V1alpha1BrandingThemeButtonsStyle.Sharp => new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Sharp),
             _ => throw new InvalidOperationException()
         };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Transforms the specified source to the API type.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemeConf? source, BrandingThemeBase target)
-        {
-            if (source is null)
-                return;
-
-            if (source.DisplayName is not null)
-                target.DisplayName = source.DisplayName;
-
-            if (source.Borders is not null)
-                ApplyToApi(source.Borders, target.Borders = new BrandingThemeBorder());
-
-            if (source.Colors is not null)
-                ApplyToApi(source.Colors, target.Colors = new BrandingThemeColors());
-
-            if (source.Fonts is not null)
-                ApplyToApi(source.Fonts, target.Fonts = new BrandingThemeFonts());
-
-            if (source.Widget is not null)
-                ApplyToApi(source.Widget, target.Widget = new BrandingThemeWidget());
-
-            if (source.PageBackground is not null)
-                ApplyToApi(source.PageBackground, target.PageBackground = new BrandingThemePageBackground());
-        }
-
-        /// <summary>
-        /// Applies the specified configuration to the target.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
+        /// <param name="inputsStyle"></param>
+        /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static void ApplyToApi(V1alpha1BrandingThemeBorders? source, BrandingThemeBorder target)
+        internal static BrandingThemeBordersInputsStyleEnum ToApiInputsStyle(V1alpha1BrandingThemeButtonsStyle inputsStyle) => inputsStyle switch
         {
-            if (source is null)
-                return;
-
-            if (source.ButtonBorderRadius is float buttonBorderRadius)
-                target.ButtonBorderRadius = buttonBorderRadius;
-
-            if (source.ButtonBorderWeight is float buttonBorderWeight)
-                target.ButtonBorderWeight = buttonBorderWeight;
-
-            if (source.ButtonsStyle is V1alpha1BrandingThemeButtonsStyle buttonsStyle)
-                target.ButtonsStyle = ToApi(buttonsStyle);
-
-            if (source.InputBorderRadius is float inputBorderRadius)
-                target.InputBorderRadius = inputBorderRadius;
-
-            if (source.InputBorderWeight is float inputBorderWeight)
-                target.InputBorderWeight = inputBorderWeight;
-
-            if (source.InputsStyle is V1alpha1BrandingThemeButtonsStyle inputsStyle)
-                target.InputsStyle = ToApi(inputsStyle);
-
-            if (source.ShowWidgetShadow is bool showWidgetShadow)
-                target.ShowWidgetShadow = showWidgetShadow;
-
-            if (source.WidgetBorderWeight is float widgetBorderWeight)
-                target.WidgetBorderWeight = widgetBorderWeight;
-
-            if (source.WidgetCornerRadius is float widgetCornerRadius)
-                target.WidgetCornerRadius = widgetCornerRadius;
-        }
+            V1alpha1BrandingThemeButtonsStyle.Pill => new BrandingThemeBordersInputsStyleEnum(BrandingThemeBordersInputsStyleEnum.Values.Pill),
+            V1alpha1BrandingThemeButtonsStyle.Rounded => new BrandingThemeBordersInputsStyleEnum(BrandingThemeBordersInputsStyleEnum.Values.Rounded),
+            V1alpha1BrandingThemeButtonsStyle.Sharp => new BrandingThemeBordersInputsStyleEnum(BrandingThemeBordersInputsStyleEnum.Values.Sharp),
+            _ => throw new InvalidOperationException()
+        };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontBodyText"/>.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemeColors? source, BrandingThemeColors target)
+        internal static BrandingThemeFontBodyText ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontBodyText? existing = null) => new()
         {
-            if (source is null)
-                return;
-
-            if (source.BaseFocusColor is string baseFocusColor)
-                target.BaseFocusColor = baseFocusColor;
-
-            if (source.BaseHoverColor is string baseHoverColor)
-                target.BaseHoverColor = baseHoverColor;
-
-            if (source.BodyText is string bodyText)
-                target.BodyText = bodyText;
-
-            if (source.CaptchaWidgetTheme is V1alpha1BrandingThemeCaptchaWidgetTheme captchaWidgetTheme)
-                target.CaptchaWidgetTheme = ToApi(captchaWidgetTheme);
-
-            if (source.Error is string error)
-                target.Error = error;
-
-            if (source.Header is string header)
-                target.Header = header;
-
-            if (source.Icons is string icons)
-                target.Icons = icons;
-
-            if (source.InputBackground is string inputBackground)
-                target.InputBackground = inputBackground;
-
-            if (source.InputBorder is string inputBorder)
-                target.InputBorder = inputBorder;
-
-            if (source.InputFilledText is string inputFilledText)
-                target.InputFilledText = inputFilledText;
-
-            if (source.InputLabelsPlaceholders is string inputLabelsPlaceholders)
-                target.InputLabelsPlaceholders = inputLabelsPlaceholders;
-
-            if (source.LinksFocusedComponents is string linksFocusedComponents)
-                target.LinksFocusedComponents = linksFocusedComponents;
-
-            if (source.PrimaryButton is string primaryButton)
-                target.PrimaryButton = primaryButton;
-
-            if (source.PrimaryButtonLabel is string primaryButtonLabel)
-                target.PrimaryButtonLabel = primaryButtonLabel;
-
-            if (source.SecondaryButtonBorder is string secondaryButtonBorder)
-                target.SecondaryButtonBorder = secondaryButtonBorder;
-
-            if (source.SecondaryButtonLabel is string secondaryButtonLabel)
-                target.SecondaryButtonLabel = secondaryButtonLabel;
-
-            if (source.Success is string success)
-                target.Success = success;
-
-            if (source.WidgetBackground is string widgetBackground)
-                target.WidgetBackground = widgetBackground;
-
-            if (source.WidgetBorder is string widgetBorder)
-                target.WidgetBorder = widgetBorder;
-        }
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontButtonsText"/>.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemeFonts? source, BrandingThemeFonts target)
+        internal static BrandingThemeFontButtonsText ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontButtonsText? existing = null) => new()
         {
-            if (source is null)
-                return;
-
-            if (source.BodyText is not null)
-                ApplyToApi(source.BodyText, target.BodyText = new BodyText());
-
-            if (source.ButtonsText is not null)
-                ApplyToApi(source.ButtonsText, target.ButtonsText = new ButtonsText());
-
-            if (source.FontUrl is not null)
-                target.FontUrl = source.FontUrl;
-
-            if (source.InputLabels is not null)
-                ApplyToApi(source.InputLabels, target.InputLabels = new InputLabels());
-
-            if (source.Links is not null)
-                ApplyToApi(source.Links, target.Links = new Links());
-
-            if (source.LinksStyle is not null)
-                target.LinksStyle = ToApi(source);
-
-            if (source.ReferenceTextSize is float referenceTextSize)
-                target.ReferenceTextSize = referenceTextSize;
-
-            if (source.Subtitle is not null)
-                ApplyToApi(source.Subtitle, target.Subtitle = new Subtitle());
-
-            if (source.Title is not null)
-                ApplyToApi(source.Title, target.Title = new Title());
-        }
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontInputLabels"/>.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontsBase target)
+        internal static BrandingThemeFontInputLabels ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontInputLabels? existing = null) => new()
         {
-            if (source is null)
-                return;
-
-            if (source.Bold is bool bold)
-                target.Bold = bold;
-
-            if (source.Size is float size)
-                target.Size = size;
-        }
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontLinks"/>.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemeWidget? source, BrandingThemeWidget target)
+        internal static BrandingThemeFontLinks ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontLinks? existing = null) => new()
         {
-            if (source is null)
-                return;
-
-            if (source.HeaderTextAlignment is V1alpha1BrandingThemeHeaderTextAlignment headerTextAlignment)
-                target.HeaderTextAlignment = ToApi(headerTextAlignment);
-
-            if (source.LogoHeight is float logoHeight)
-                target.LogoHeight = logoHeight;
-
-            if (source.LogoPosition is V1alpha1BrandingThemeLogoPosition logoPosition)
-                target.LogoPosition = ToApi(logoPosition);
-
-            if (source.LogoUrl is string logoUrl)
-                target.LogoUrl = logoUrl;
-
-            if (source.SocialButtonsLayout is V1alpha1BrandingThemeSocialButtonsLayout socialButtonsLayout)
-                target.SocialButtonsLayout = ToApi(socialButtonsLayout);
-        }
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
         /// <summary>
-        /// Applies the specified configuration to the target.
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontSubtitle"/>.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1alpha1BrandingThemePageBackground? source, BrandingThemePageBackground target)
+        internal static BrandingThemeFontSubtitle ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontSubtitle? existing = null) => new()
         {
-            if (source is null)
-                return;
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
-            if (source.BackgroundColor is string backgroundColor)
-                target.BackgroundColor = backgroundColor;
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFontTitle"/>.
+        /// </summary>
+        internal static BrandingThemeFontTitle ToApi(V1alpha1BrandingThemeFont? source, BrandingThemeFontTitle? existing = null) => new()
+        {
+            Bold = source?.Bold ?? existing?.Bold ?? false,
+            Size = source?.Size ?? (existing?.Size is double es ? (float)es : 0f),
+        };
 
-            if (source.BackgroundImageUrl is string backgroundImageUrl)
-                target.BackgroundImageUrl = backgroundImageUrl;
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemeBorders"/>.
+        /// </summary>
+        internal static BrandingThemeBorders ToApi(V1alpha1BrandingThemeBorders? source, BrandingThemeBorders? existing = null) => new()
+        {
+            ButtonBorderRadius = source?.ButtonBorderRadius ?? (existing?.ButtonBorderRadius is double ebr ? (float)ebr : 0f),
+            ButtonBorderWeight = source?.ButtonBorderWeight ?? (existing?.ButtonBorderWeight is double ebw ? (float)ebw : 0f),
+            ButtonsStyle = source?.ButtonsStyle is { } bs ? ToApiButtonsStyle(bs) : existing?.ButtonsStyle ?? new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Rounded),
+            InputBorderRadius = source?.InputBorderRadius ?? (existing?.InputBorderRadius is double eibr ? (float)eibr : 0f),
+            InputBorderWeight = source?.InputBorderWeight ?? (existing?.InputBorderWeight is double eibw ? (float)eibw : 0f),
+            InputsStyle = source?.InputsStyle is { } iss ? ToApiInputsStyle(iss) : existing?.InputsStyle ?? new BrandingThemeBordersInputsStyleEnum(BrandingThemeBordersInputsStyleEnum.Values.Rounded),
+            ShowWidgetShadow = source?.ShowWidgetShadow ?? existing?.ShowWidgetShadow ?? false,
+            WidgetBorderWeight = source?.WidgetBorderWeight ?? (existing?.WidgetBorderWeight is double ewbw ? (float)ewbw : 0f),
+            WidgetCornerRadius = source?.WidgetCornerRadius ?? (existing?.WidgetCornerRadius is double ewcr ? (float)ewcr : 0f),
+        };
 
-            if (source.PageLayout is V1alpha1BrandingThemePageLayout pageLayout)
-                target.PageLayout = ToApi(pageLayout);
-        }
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemeColors"/>.
+        /// </summary>
+        internal static BrandingThemeColors ToApi(V1alpha1BrandingThemeColors? source, BrandingThemeColors? existing = null) => new()
+        {
+            BaseFocusColor = source?.BaseFocusColor ?? existing?.BaseFocusColor ?? string.Empty,
+            BaseHoverColor = source?.BaseHoverColor ?? existing?.BaseHoverColor ?? string.Empty,
+            BodyText = source?.BodyText ?? existing?.BodyText ?? string.Empty,
+            CaptchaWidgetTheme = source?.CaptchaWidgetTheme is { } cwt ? ToApi(cwt) : existing?.CaptchaWidgetTheme,
+            Error = source?.Error ?? existing?.Error ?? string.Empty,
+            Header = source?.Header ?? existing?.Header ?? string.Empty,
+            Icons = source?.Icons ?? existing?.Icons ?? string.Empty,
+            InputBackground = source?.InputBackground ?? existing?.InputBackground ?? string.Empty,
+            InputBorder = source?.InputBorder ?? existing?.InputBorder ?? string.Empty,
+            InputFilledText = source?.InputFilledText ?? existing?.InputFilledText ?? string.Empty,
+            InputLabelsPlaceholders = source?.InputLabelsPlaceholders ?? existing?.InputLabelsPlaceholders ?? string.Empty,
+            LinksFocusedComponents = source?.LinksFocusedComponents ?? existing?.LinksFocusedComponents ?? string.Empty,
+            PrimaryButton = source?.PrimaryButton ?? existing?.PrimaryButton ?? string.Empty,
+            PrimaryButtonLabel = source?.PrimaryButtonLabel ?? existing?.PrimaryButtonLabel ?? string.Empty,
+            SecondaryButtonBorder = source?.SecondaryButtonBorder ?? existing?.SecondaryButtonBorder ?? string.Empty,
+            SecondaryButtonLabel = source?.SecondaryButtonLabel ?? existing?.SecondaryButtonLabel ?? string.Empty,
+            Success = source?.Success ?? existing?.Success ?? string.Empty,
+            WidgetBackground = source?.WidgetBackground ?? existing?.WidgetBackground ?? string.Empty,
+            WidgetBorder = source?.WidgetBorder ?? existing?.WidgetBorder ?? string.Empty,
+        };
+
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemeFonts"/>.
+        /// </summary>
+        internal static BrandingThemeFonts ToApi(V1alpha1BrandingThemeFonts? source, BrandingThemeFonts? existing = null) => new()
+        {
+            BodyText = ToApi(source?.BodyText, existing?.BodyText),
+            ButtonsText = ToApi(source?.ButtonsText, existing?.ButtonsText),
+            FontUrl = source?.FontUrl ?? existing?.FontUrl ?? string.Empty,
+            InputLabels = ToApi(source?.InputLabels, existing?.InputLabels),
+            Links = ToApi(source?.Links, existing?.Links),
+            LinksStyle = source?.LinksStyle is { } ls ? ToApiLinksStyle(ls) : existing?.LinksStyle ?? new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Normal),
+            ReferenceTextSize = source?.ReferenceTextSize ?? (existing?.ReferenceTextSize is double ers ? (float)ers : 0f),
+            Subtitle = ToApi(source?.Subtitle, existing?.Subtitle),
+            Title = ToApi(source?.Title, existing?.Title),
+        };
+
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemeWidget"/>.
+        /// </summary>
+        internal static BrandingThemeWidget ToApi(V1alpha1BrandingThemeWidget? source, BrandingThemeWidget? existing = null) => new()
+        {
+            HeaderTextAlignment = source?.HeaderTextAlignment is { } hta ? ToApi(hta) : existing?.HeaderTextAlignment ?? new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center),
+            LogoHeight = source?.LogoHeight ?? (existing?.LogoHeight is double elh ? (float)elh : 0f),
+            LogoPosition = source?.LogoPosition is { } lp ? ToApi(lp) : existing?.LogoPosition ?? new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Center),
+            LogoUrl = source?.LogoUrl ?? existing?.LogoUrl ?? string.Empty,
+            SocialButtonsLayout = source?.SocialButtonsLayout is { } sbl ? ToApi(sbl) : existing?.SocialButtonsLayout ?? new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom),
+        };
+
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="BrandingThemePageBackground"/>.
+        /// </summary>
+        internal static BrandingThemePageBackground ToApi(V1alpha1BrandingThemePageBackground? source, BrandingThemePageBackground? existing = null) => new()
+        {
+            BackgroundColor = source?.BackgroundColor ?? existing?.BackgroundColor ?? string.Empty,
+            BackgroundImageUrl = source?.BackgroundImageUrl ?? existing?.BackgroundImageUrl ?? string.Empty,
+            PageLayout = source?.PageLayout is { } pl ? ToApi(pl) : existing?.PageLayout ?? new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Center),
+        };
+
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="CreateBrandingThemeRequestContent"/>.
+        /// </summary>
+        internal static CreateBrandingThemeRequestContent ToCreateRequest(V1alpha1BrandingThemeConf conf) => new()
+        {
+            DisplayName = conf.DisplayName,
+            Borders = ToApi(conf.Borders),
+            Colors = ToApi(conf.Colors),
+            Fonts = ToApi(conf.Fonts),
+            Widget = ToApi(conf.Widget),
+            PageBackground = ToApi(conf.PageBackground),
+        };
+
+        /// <summary>
+        /// Converts the specified configuration to a new <see cref="UpdateBrandingThemeRequestContent"/>,
+        /// layering <paramref name="conf"/> over <paramref name="existing"/> so unmanaged fields are preserved.
+        /// </summary>
+        internal static UpdateBrandingThemeRequestContent ToUpdateRequest(V1alpha1BrandingThemeConf conf, GetBrandingThemeResponseContent existing) => new()
+        {
+            DisplayName = conf.DisplayName ?? existing?.DisplayName,
+            Borders = ToApi(conf.Borders, existing?.Borders),
+            Colors = ToApi(conf.Colors, existing?.Colors),
+            Fonts = ToApi(conf.Fonts, existing?.Fonts),
+            Widget = ToApi(conf.Widget, existing?.Widget),
+            PageBackground = ToApi(conf.PageBackground, existing?.PageBackground),
+        };
 
         /// <summary>
         /// Transforms the specified source from the API type.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeConf FromApi(BrandingTheme source) => new()
+        internal static V1alpha1BrandingThemeConf FromApi(GetBrandingThemeResponseContent source) => new()
         {
             DisplayName = source.DisplayName,
             Borders = FromApi(source.Borders),
@@ -387,10 +326,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeWidget FromApi(BrandingThemeWidget source) => new()
+        internal static V1alpha1BrandingThemeWidget? FromApi(BrandingThemeWidget? source) => source is null ? null : new()
         {
             HeaderTextAlignment = FromApi(source.HeaderTextAlignment),
-            LogoHeight = source.LogoHeight,
+            LogoHeight = (float)source.LogoHeight,
             LogoPosition = FromApi(source.LogoPosition),
             LogoUrl = source.LogoUrl,
             SocialButtonsLayout = FromApi(source.SocialButtonsLayout)
@@ -402,10 +341,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemeSocialButtonsLayout? FromApi(SocialButtonsLayout source) => source switch
+        internal static V1alpha1BrandingThemeSocialButtonsLayout? FromApi(BrandingThemeWidgetSocialButtonsLayoutEnum source) => source.Value switch
         {
-            SocialButtonsLayout.Top => V1alpha1BrandingThemeSocialButtonsLayout.Top,
-            SocialButtonsLayout.Bottom => V1alpha1BrandingThemeSocialButtonsLayout.Bottom,
+            BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Top => V1alpha1BrandingThemeSocialButtonsLayout.Top,
+            BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom => V1alpha1BrandingThemeSocialButtonsLayout.Bottom,
             _ => throw new InvalidOperationException()
         };
 
@@ -415,12 +354,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemeLogoPosition? FromApi(LogoPosition source) => source switch
+        internal static V1alpha1BrandingThemeLogoPosition? FromApi(BrandingThemeWidgetLogoPositionEnum source) => source.Value switch
         {
-            LogoPosition.Center => V1alpha1BrandingThemeLogoPosition.Center,
-            LogoPosition.Left => V1alpha1BrandingThemeLogoPosition.Left,
-            LogoPosition.Right => V1alpha1BrandingThemeLogoPosition.Right,
-            LogoPosition.None => V1alpha1BrandingThemeLogoPosition.None,
+            BrandingThemeWidgetLogoPositionEnum.Values.Center => V1alpha1BrandingThemeLogoPosition.Center,
+            BrandingThemeWidgetLogoPositionEnum.Values.Left => V1alpha1BrandingThemeLogoPosition.Left,
+            BrandingThemeWidgetLogoPositionEnum.Values.Right => V1alpha1BrandingThemeLogoPosition.Right,
+            BrandingThemeWidgetLogoPositionEnum.Values.None => V1alpha1BrandingThemeLogoPosition.None,
             _ => throw new InvalidOperationException()
         };
 
@@ -430,11 +369,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemeHeaderTextAlignment? FromApi(HeaderTextAlignment source) => source switch
+        internal static V1alpha1BrandingThemeHeaderTextAlignment? FromApi(BrandingThemeWidgetHeaderTextAlignmentEnum source) => source.Value switch
         {
-            HeaderTextAlignment.Center => V1alpha1BrandingThemeHeaderTextAlignment.Center,
-            HeaderTextAlignment.Left => V1alpha1BrandingThemeHeaderTextAlignment.Left,
-            HeaderTextAlignment.Right => V1alpha1BrandingThemeHeaderTextAlignment.Right,
+            BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center => V1alpha1BrandingThemeHeaderTextAlignment.Center,
+            BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Left => V1alpha1BrandingThemeHeaderTextAlignment.Left,
+            BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Right => V1alpha1BrandingThemeHeaderTextAlignment.Right,
             _ => throw new InvalidOperationException()
         };
 
@@ -443,7 +382,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemePageBackground FromApi(BrandingThemePageBackground source) => new()
+        internal static V1alpha1BrandingThemePageBackground? FromApi(BrandingThemePageBackground? source) => source is null ? null : new()
         {
             BackgroundColor = source.BackgroundColor,
             BackgroundImageUrl = source.BackgroundImageUrl,
@@ -456,11 +395,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemePageLayout? FromApi(PageLayout source) => source switch
+        internal static V1alpha1BrandingThemePageLayout? FromApi(BrandingThemePageBackgroundPageLayoutEnum source) => source.Value switch
         {
-            PageLayout.Center => V1alpha1BrandingThemePageLayout.Center,
-            PageLayout.Left => V1alpha1BrandingThemePageLayout.Left,
-            PageLayout.Right => V1alpha1BrandingThemePageLayout.Right,
+            BrandingThemePageBackgroundPageLayoutEnum.Values.Center => V1alpha1BrandingThemePageLayout.Center,
+            BrandingThemePageBackgroundPageLayoutEnum.Values.Left => V1alpha1BrandingThemePageLayout.Left,
+            BrandingThemePageBackgroundPageLayoutEnum.Values.Right => V1alpha1BrandingThemePageLayout.Right,
             _ => throw new InvalidOperationException(),
         };
 
@@ -469,7 +408,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFonts FromApi(BrandingThemeFonts source) => new()
+        internal static V1alpha1BrandingThemeFonts? FromApi(BrandingThemeFonts? source) => source is null ? null : new()
         {
             BodyText = FromApi(source.BodyText),
             ButtonsText = FromApi(source.ButtonsText),
@@ -477,7 +416,7 @@ namespace Alethic.Auth0.Operator.Controllers
             InputLabels = FromApi(source.InputLabels),
             Links = FromApi(source.Links),
             LinksStyle = FromApi(source.LinksStyle),
-            ReferenceTextSize = source.ReferenceTextSize,
+            ReferenceTextSize = (float)source.ReferenceTextSize,
             Subtitle = FromApi(source.Subtitle),
             Title = FromApi(source.Title)
         };
@@ -487,10 +426,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(Title source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontTitle? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -498,10 +437,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(Links source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontLinks? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -509,10 +448,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(Subtitle source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontSubtitle? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -521,10 +460,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemeLinksStyle? FromApi(LinksStyle source) => source switch
+        internal static V1alpha1BrandingThemeLinksStyle? FromApi(BrandingThemeFontLinksStyleEnum source) => source.Value switch
         {
-            LinksStyle.Normal => V1alpha1BrandingThemeLinksStyle.Normal,
-            LinksStyle.Underlined => V1alpha1BrandingThemeLinksStyle.Underlined,
+            BrandingThemeFontLinksStyleEnum.Values.Normal => V1alpha1BrandingThemeLinksStyle.Normal,
+            BrandingThemeFontLinksStyleEnum.Values.Underlined => V1alpha1BrandingThemeLinksStyle.Underlined,
             _ => throw new InvalidOperationException()
         };
 
@@ -533,10 +472,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(InputLabels source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontInputLabels? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -544,10 +483,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(ButtonsText source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontButtonsText? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -555,10 +494,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeFont FromApi(BodyText source) => new()
+        internal static V1alpha1BrandingThemeFont? FromApi(BrandingThemeFontBodyText? source) => source is null ? null : new()
         {
             Bold = source.Bold,
-            Size = source.Size
+            Size = (float)source.Size
         };
 
         /// <summary>
@@ -566,12 +505,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeColors FromApi(BrandingThemeColors source) => new()
+        internal static V1alpha1BrandingThemeColors? FromApi(BrandingThemeColors? source) => source is null ? null : new()
         {
             BaseFocusColor = source.BaseFocusColor,
             BaseHoverColor = source.BaseHoverColor,
             BodyText = source.BodyText,
-            CaptchaWidgetTheme = FromApi(source.CaptchaWidgetTheme),
+            CaptchaWidgetTheme = source.CaptchaWidgetTheme is { } cwt ? FromApi(cwt) : null,
             Error = source.Error,
             Header = source.Header,
             Icons = source.Icons,
@@ -595,11 +534,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static V1alpha1BrandingThemeCaptchaWidgetTheme? FromApi(CaptchaWidgetTheme source) => source switch
+        internal static V1alpha1BrandingThemeCaptchaWidgetTheme? FromApi(BrandingThemeColorsCaptchaWidgetThemeEnum source) => source.Value switch
         {
-            CaptchaWidgetTheme.Light => V1alpha1BrandingThemeCaptchaWidgetTheme.Light,
-            CaptchaWidgetTheme.Dark => V1alpha1BrandingThemeCaptchaWidgetTheme.Dark,
-            CaptchaWidgetTheme.Auto => V1alpha1BrandingThemeCaptchaWidgetTheme.Auto,
+            BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Light => V1alpha1BrandingThemeCaptchaWidgetTheme.Light,
+            BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Dark => V1alpha1BrandingThemeCaptchaWidgetTheme.Dark,
+            BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Auto => V1alpha1BrandingThemeCaptchaWidgetTheme.Auto,
             _ => throw new InvalidOperationException()
         };
 
@@ -608,15 +547,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1alpha1BrandingThemeBorders? FromApi(BrandingThemeBorder source) => new()
+        internal static V1alpha1BrandingThemeBorders? FromApi(BrandingThemeBorders? source) => source is null ? null : new()
         {
-            ButtonBorderRadius = source.ButtonBorderRadius,
-            ButtonBorderWeight = source.ButtonBorderWeight,
-            InputBorderRadius = source.InputBorderRadius,
-            InputBorderWeight = source.InputBorderWeight,
+            ButtonBorderRadius = (float)source.ButtonBorderRadius,
+            ButtonBorderWeight = (float)source.ButtonBorderWeight,
+            InputBorderRadius = (float)source.InputBorderRadius,
+            InputBorderWeight = (float)source.InputBorderWeight,
             ShowWidgetShadow = source.ShowWidgetShadow,
-            WidgetBorderWeight = source.WidgetBorderWeight,
-            WidgetCornerRadius = source.WidgetCornerRadius,
+            WidgetBorderWeight = (float)source.WidgetBorderWeight,
+            WidgetCornerRadius = (float)source.WidgetCornerRadius,
             ButtonsStyle = FromApi(source.ButtonsStyle),
             InputsStyle = FromApi(source.InputsStyle),
         };
@@ -624,14 +563,28 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Transforms the specified source from the API type.
         /// </summary>
-        /// <param name="inputsStyle"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static V1alpha1BrandingThemeButtonsStyle FromApi(ButtonsStyle inputsStyle) => inputsStyle switch
+        internal static V1alpha1BrandingThemeButtonsStyle FromApi(BrandingThemeBordersButtonsStyleEnum source) => source.Value switch
         {
-            ButtonsStyle.Pill => V1alpha1BrandingThemeButtonsStyle.Pill,
-            ButtonsStyle.Rounded => V1alpha1BrandingThemeButtonsStyle.Rounded,
-            ButtonsStyle.Sharp => V1alpha1BrandingThemeButtonsStyle.Sharp,
+            BrandingThemeBordersButtonsStyleEnum.Values.Pill => V1alpha1BrandingThemeButtonsStyle.Pill,
+            BrandingThemeBordersButtonsStyleEnum.Values.Rounded => V1alpha1BrandingThemeButtonsStyle.Rounded,
+            BrandingThemeBordersButtonsStyleEnum.Values.Sharp => V1alpha1BrandingThemeButtonsStyle.Sharp,
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal static V1alpha1BrandingThemeButtonsStyle FromApi(BrandingThemeBordersInputsStyleEnum source) => source.Value switch
+        {
+            BrandingThemeBordersInputsStyleEnum.Values.Pill => V1alpha1BrandingThemeButtonsStyle.Pill,
+            BrandingThemeBordersInputsStyleEnum.Values.Rounded => V1alpha1BrandingThemeButtonsStyle.Rounded,
+            BrandingThemeBordersInputsStyleEnum.Values.Sharp => V1alpha1BrandingThemeButtonsStyle.Sharp,
             _ => throw new NotImplementedException(),
         };
 
@@ -656,7 +609,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return FromApi(await api.Branding.GetBrandingThemeAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.Branding.Themes.GetAsync(id, cancellationToken: cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -673,7 +626,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 {
                     try
                     {
-                        var theme = await api.Branding.GetBrandingThemeAsync(id, cancellationToken);
+                        var theme = await api.Branding.Themes.GetAsync(id, cancellationToken: cancellationToken);
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing theme: {DisplayName}", EntityTypeName, entity.Namespace(), entity.Name(), theme.DisplayName);
                         return theme.ThemeId;
                     }
@@ -703,10 +656,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} creating theme in Auth0 with name: {ThemeName}", EntityTypeName, conf.DisplayName);
 
-            var req = new BrandingThemeCreateRequest();
-            ApplyToApi(conf, req);
-
-            var self = await api.Branding.CreateBrandingThemeAsync(req, cancellationToken);
+            var self = await api.Branding.Themes.CreateAsync(ToCreateRequest(conf), cancellationToken: cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created theme in Auth0 with ID: {ThemeId} and name: {ThemeName}", EntityTypeName, self.ThemeId, conf.DisplayName);
             return self.ThemeId;
         }
@@ -716,12 +666,9 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} updating theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
 
-            // apply last conf to request to ensure we don't overwrite any properties not managed by us
-            var req = new BrandingThemeUpdateRequest();
-            ApplyToApi(last, req);
-            ApplyToApi(conf, req);
-
-            await api.Branding.UpdateBrandingThemeAsync(id, req, cancellationToken);
+            // fetch the current state so unmanaged fields are preserved
+            var self = await api.Branding.Themes.GetAsync(id, cancellationToken: cancellationToken);
+            await api.Branding.Themes.UpdateAsync(id, ToUpdateRequest(conf, self), cancellationToken: cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated theme in Auth0 with id: {ThemeId} and name: {ThemeName}", EntityTypeName, id, conf.DisplayName);
         }
 
@@ -735,7 +682,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting theme from Auth0 with ID: {ThemeId} (reason: Kubernetes entity deleted)", EntityTypeName, id);
-            await api.Branding.DeleteBrandingThemeAsync(id, cancellationToken);
+            await api.Branding.Themes.DeleteAsync(id, cancellationToken: cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully deleted theme from Auth0 with ID: {ThemeId}", EntityTypeName, id);
         }
 
