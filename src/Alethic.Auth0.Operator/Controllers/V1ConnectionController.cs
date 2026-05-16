@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +13,7 @@ using Alethic.Auth0.Operator.Options;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.Models.Connections;
 using Auth0.ManagementApi.Paging;
 
 using k8s.Models;
@@ -27,6 +26,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Newtonsoft.Json.Linq;
+
 namespace Alethic.Auth0.Operator.Controllers
 {
 
@@ -35,7 +36,7 @@ namespace Alethic.Auth0.Operator.Controllers
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V1ConnectionController :
-        V1TenantEntityInstanceController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>,
+        V1TenantEntityInstanceController<V1Connection, V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, V1ConnectionConf>,
         IEntityController<V1Connection>
     {
 
@@ -56,7 +57,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override string EntityTypeName => "Connection";
 
         /// <summary>
-        /// Gets the list of enabled client IDs for the specified connection. This populates the legacy field using the newer API.
+        /// Gets the list of enabled client IDs for the specified connection.
         /// </summary>
         /// <param name="api"></param>
         /// <param name="connectionId"></param>
@@ -64,7 +65,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         async Task<string[]> GetEnabledClientsAsync(IManagementApiClient api, string connectionId, CancellationToken cancellationToken)
         {
-            var clients = await api.Connections.GetEnabledClientsAsync(new global::Auth0.ManagementApi.Models.Connections.EnabledClientsGetRequest() { ConnectionId = connectionId }, cancellationToken: cancellationToken);
+            var clients = await api.Connections.GetEnabledClientsAsync(new EnabledClientsGetRequest() { ConnectionId = connectionId }, cancellationToken: cancellationToken);
 
             var l = new List<string>(clients.Count);
             foreach (var client in clients)
@@ -75,7 +76,7 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task<Hashtable?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<V1ConnectionConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
             try
             {
@@ -83,19 +84,21 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (self == null)
                     return null;
 
-                var dict = new Hashtable();
-                dict["id"] = self.Id;
-                dict["name"] = self.Name;
-                dict["display_name"] = self.DisplayName;
-                dict["strategy"] = self.Strategy;
-                dict["realms"] = self.Realms;
-                dict["is_domain_connection"] = self.IsDomainConnection;
-                dict["show_as_button"] = self.ShowAsButton;
-                dict["provisioning_ticket_url"] = self.ProvisioningTicketUrl;
-                dict["enabled_clients"] = await GetEnabledClientsAsync(api, self.Id, cancellationToken);
-                dict["options"] = TransformToSystemTextJson<Hashtable?>(self.Options);
-                dict["metadata"] = TransformToSystemTextJson<Hashtable?>(self.Metadata);
-                return dict;
+                return new V1ConnectionConf()
+                {
+                    Name = self.Name,
+                    DisplayName = self.DisplayName,
+                    Strategy = self.Strategy,
+                    Realms = self.Realms,
+                    IsDomainConnection = self.IsDomainConnection,
+                    ShowAsButton = self.ShowAsButton,
+                    ProvisioningTicketUrl = self.ProvisioningTicketUrl,
+                    EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken))
+                        .Select(i => new V1ClientReference() { Id = i })
+                        .ToArray(),
+                    Options = TransformToSystemTextJson<System.Collections.Hashtable>(self.Options),
+                    Metadata = TransformToSystemTextJson<System.Collections.Hashtable>(self.Metadata),
+                };
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -149,6 +152,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Attempts to resolve the list of client references to client IDs.
         /// </summary>
+        /// <param name="api"></param>
         /// <param name="refs"></param>
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
@@ -171,20 +175,21 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task<string> Create(IManagementApiClient api, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} creating connection in Auth0 with name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, conf.Name, conf.Strategy);
-            var req = new ConnectionCreateRequest();
-            await ApplyConfToRequest(api, req, conf, defaultNamespace, cancellationToken);
 
             if (conf.Strategy is null)
                 throw new InvalidOperationException("Missing connection strategy.");
 
-            // calculate options, depends on strategy
-            var options = conf.Strategy == "auth0" ? (dynamic?)TransformToNewtonsoftJson<V1ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
-            if (options is null)
+            if (conf.Options is null)
                 throw new InvalidOperationException("Missing connection options.");
 
-            // configure strategy and options
+            var req = new ConnectionCreateRequest();
+            ApplyToApi(conf, req);
+
             req.Strategy = conf.Strategy;
-            req.Options = options;
+
+            //req.Options = conf.Strategy == "auth0"
+            //    ? TransformToNewtonsoftJson<System.Collections.Hashtable, ConnectionOptions>(conf.Options)
+            //    : conf.Options;
 
             var self = await api.Connections.CreateAsync(req, cancellationToken);
             if (self is null)
@@ -195,20 +200,33 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, Hashtable? last, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task Update(IManagementApiClient api, string id, V1ConnectionConf? last, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, id, conf.Name, conf.Strategy);
+
             var req = new ConnectionUpdateRequest();
-            await ApplyConfToRequest(api, req, conf, defaultNamespace, cancellationToken);
+            ApplyToApi(conf, req);
 
             // name has to be cleared for an update
             req.Name = null!;
 
-            // calculate options: depends on current strategy, possibly null, which means no apply
-            var strategy = last?["strategy"] as string ?? conf.Strategy;
-            var options = strategy == "auth0" && conf.Options is not null ? (dynamic?)TransformToNewtonsoftJson<V1ConnectionOptions, global::Auth0.ManagementApi.Models.Connections.ConnectionOptions>(JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(conf.Options))) : conf.Options;
-            if (options is not null)
-                req.Options = options;
+            // calculate options: depends on current strategy, but we need to potentially patch the existing resource
+            if (conf.Options is not null)
+            {
+                var current = await api.Connections.GetAsync(id, cancellationToken: cancellationToken);
+                if (current.Strategy == "auth0")
+                {
+                    var options = (ConnectionOptions)current.Options;
+                    req.Options = options;
+                    ApplyToApi(conf.Options, options);
+                }
+                else
+                {
+                    var options = current.Options;
+                    req.Options = options;
+                    ApplyToApi(conf.Options, ref options);
+                }
+            }
 
             await api.Connections.UpdateAsync(id, req, cancellationToken);
             await UpdateEnabledClientsAsync(api, id, conf, defaultNamespace, cancellationToken);
@@ -219,28 +237,423 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Applies the specified configuration to the request object.
         /// </summary>
-        /// <param name="api"></param>
-        /// <param name="req"></param>
-        /// <param name="conf"></param>
-        /// <param name="defaultNamespace"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        async Task ApplyConfToRequest(IManagementApiClient api, ConnectionBase req, V1ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        /// <param name="target"></param>
+        /// <param name="source"></param>
+        static void ApplyToApi(V1ConnectionConf source, ConnectionBase target)
         {
-            if (conf.Name is null)
-                throw new InvalidOperationException("Missing name.");
+            if (source.Name is { } name)
+                target.Name = name;
 
-            req.Name = conf.Name;
-            if (conf.DisplayName is not null)
-                req.DisplayName = conf.DisplayName;
-            req.Metadata = conf.Metadata ?? null!;
-            req.Realms = conf.Realms ?? [];
-            req.IsDomainConnection = conf.IsDomainConnection ?? false;
-            req.ShowAsButton = conf.ShowAsButton;
+            if (source.DisplayName is { } displayName)
+                target.DisplayName = displayName;
+
+            if (source.Metadata is { } metadata)
+                target.Metadata = metadata;
+
+            if (source.Realms is { } realms)
+                target.Realms = realms;
+
+            if (source.IsDomainConnection is not null)
+                target.IsDomainConnection = source.IsDomainConnection ?? false;
+
+            if (source.ShowAsButton is { } showAsButton)
+                target.ShowAsButton = showAsButton;
+        }
+
+        void ApplyToApi(V1ConnectionOptions source, ConnectionOptions target)
+        {
+            if (source.Validation is { } validation)
+            {
+                target.Validation ??= new ConnectionOptionsValidation();
+                ApplyToApi(validation, target.Validation);
+            }
+
+            if (source.NonPersistentAttributes is { } nonPersistentAttributes)
+                target.NonPersistentAttributes = nonPersistentAttributes;
+
+            if (source.Precedence is { } precedence)
+                target.Precedence = Array.ConvertAll(precedence, p => (ConnectionOptionsPrecedence)(int)p);
+
+            if (source.Attributes is { } attributes)
+            {
+                target.Attributes ??= new ConnectionOptionsAttributes();
+                ApplyToApi(attributes, target.Attributes);
+            }
+
+            if (source.EnableScriptContext is { } enableScriptContext)
+                target.EnableScriptContext = enableScriptContext;
+
+            if (source.EnableDatabaseCustomization is { } enableDatabaseCustomization)
+                target.EnableDatabaseCustomization = enableDatabaseCustomization;
+
+            if (source.ImportMode is { } importMode)
+                target.ImportMode = importMode;
+
+            if (source.CustomScripts is { } customScripts)
+            {
+                target.CustomScripts ??= new ConnectionOptionsCustomScripts();
+                ApplyToApi(customScripts, target.CustomScripts);
+            }
+
+            if (source.AuthenticationMethods is { } authenticationMethods)
+            {
+                target.AuthenticationMethods ??= new ConnectionOptionsAuthenticationMethods();
+                ApplyToApi(authenticationMethods, target.AuthenticationMethods);
+            }
+
+            if (source.PasskeyOptions is { } passkeyOptions)
+            {
+                target.PasskeyOptions ??= new ConnectionOptionsPasskeyOptions();
+                ApplyToApi(passkeyOptions, target.PasskeyOptions);
+            }
+
+            if (source.PasswordPolicy is { } passwordPolicy)
+                target.PasswordPolicy = (ConnectionOptionsPasswordPolicy)(int)passwordPolicy;
+
+            if (source.PasswordComplexityOptions is { } passwordComplexityOptions)
+            {
+                target.PasswordComplexityOptions ??= new ConnectionOptionsPasswordComplexityOptions();
+                ApplyToApi(passwordComplexityOptions, target.PasswordComplexityOptions);
+            }
+
+            if (source.PasswordHistory is { } passwordHistory)
+            {
+                target.PasswordHistory ??= new ConnectionOptionsPasswordHistory();
+                ApplyToApi(passwordHistory, target.PasswordHistory);
+            }
+
+            if (source.PasswordNoPersonalInfo is { } passwordNoPersonalInfo)
+            {
+                target.PasswordNoPersonalInfo ??= new ConnectionOptionsPasswordNoPersonalInfo();
+                ApplyToApi(passwordNoPersonalInfo, target.PasswordNoPersonalInfo);
+            }
+
+            if (source.PasswordDictionary is { } passwordDictionary)
+            {
+                target.PasswordDictionary ??= new ConnectionOptionsPasswordDictionary();
+                ApplyToApi(passwordDictionary, target.PasswordDictionary);
+            }
+
+            if (source.ApiEnableUsers is { } apiEnableUsers)
+                target.ApiEnableUsers = apiEnableUsers;
+
+            if (source.BasicProfile is { } basicProfile)
+                target.BasicProfile = basicProfile;
+
+            if (source.ExtAdmin is { } extAdmin)
+                target.ExtAdmin = extAdmin;
+
+            if (source.ExtIsSuspended is { } extIsSuspended)
+                target.ExtIsSuspended = extIsSuspended;
+
+            if (source.ExtAgreedTerms is { } extAgreedTerms)
+                target.ExtAgreedTerms = extAgreedTerms;
+
+            if (source.ExtGroups is { } extGroups)
+                target.ExtGroups = extGroups;
+
+            if (source.ExtAssignedPlans is { } extAssignedPlans)
+                target.ExtAssignedPlans = extAssignedPlans;
+
+            if (source.ExtProfile is { } extProfile)
+                target.ExtProfile = extProfile;
+
+            if (source.DisableSelfServiceChangePassword is { } disableSelfServiceChangePassword)
+                target.DisableSelfServiceChangePassword = disableSelfServiceChangePassword;
+
+            if (source.UpstreamParams is { } upstreamParams)
+                target.UpstreamParams = upstreamParams;
+
+            if (source.SetUserRootAttributes is { } setUserRootAttributes)
+                target.SetUserRootAttributes = (SetUserRootAttributes)(int)setUserRootAttributes;
+
+            if (source.GatewayAuthentication is { } gatewayAuthentication)
+            {
+                target.GatewayAuthentication ??= new GatewayAuthentication();
+                ApplyToApi(gatewayAuthentication, target.GatewayAuthentication);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsValidation source, ConnectionOptionsValidation target)
+        {
+            if (source.UserName is { } userName)
+            {
+                target.UserName ??= new ConnectionOptionsUserName();
+                ApplyToApi(userName, target.UserName);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsUserName source, ConnectionOptionsUserName target)
+        {
+            if (source.Min is { } min)
+                target.Min = min;
+
+            if (source.Max is { } max)
+                target.Max = max;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsAttributes source, ConnectionOptionsAttributes target)
+        {
+            if (source.Email is { } email)
+            {
+                target.Email ??= new ConnectionOptionsEmailAttribute();
+                ApplyToApi(email, target.Email);
+            }
+
+            if (source.PhoneNumber is { } phoneNumber)
+            {
+                target.PhoneNumber ??= new ConnectionOptionsPhoneNumberAttribute();
+                ApplyToApi(phoneNumber, target.PhoneNumber);
+            }
+
+            if (source.Username is { } username)
+            {
+                target.Username ??= new ConnectionOptionsUsernameAttribute();
+                ApplyToApi(username, target.Username);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsEmailAttribute source, ConnectionOptionsEmailAttribute target)
+        {
+            if (source.Identifier is { } identifier)
+            {
+                target.Identifier ??= new ConnectionOptionsAttributeIdentifier();
+                ApplyToApi(identifier, target.Identifier);
+            }
+
+            if (source.ProfileRequired is { } profileRequired)
+                target.ProfileRequired = profileRequired;
+
+            if (source.Signup is { } signup)
+            {
+                target.Signup ??= new ConnectionOptionsEmailSignup();
+                ApplyToApi(signup, target.Signup);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsEmailSignup source, ConnectionOptionsEmailSignup target)
+        {
+            if (source.Status is { } status)
+                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+
+            if (source.Verification is { } verification)
+            {
+                target.Verification ??= new ConnectionOptionsVerification();
+                ApplyToApi(verification, target.Verification);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPhoneNumberAttribute source, ConnectionOptionsPhoneNumberAttribute target)
+        {
+            if (source.Signup is { } signup)
+            {
+                target.Signup ??= new ConnectionOptionsPhoneNumberSignup();
+                ApplyToApi(signup, target.Signup);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPhoneNumberSignup source, ConnectionOptionsPhoneNumberSignup target)
+        {
+            if (source.Status is { } status)
+                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+
+            if (source.Verification is { } verification)
+            {
+                target.Verification ??= new ConnectionOptionsVerification();
+                ApplyToApi(verification, target.Verification);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsUsernameAttribute source, ConnectionOptionsUsernameAttribute target)
+        {
+            if (source.Identifier is { } identifier)
+            {
+                target.Identifier ??= new ConnectionOptionsAttributeIdentifier();
+                ApplyToApi(identifier, target.Identifier);
+            }
+
+            if (source.ProfileRequired is { } profileRequired)
+                target.ProfileRequired = profileRequired;
+
+            if (source.Signup is { } signup)
+            {
+                target.Signup ??= new ConnectionOptionsUsernameSignup();
+                ApplyToApi(signup, target.Signup);
+            }
+
+            if (source.Validation is { } validation)
+            {
+                target.Validation ??= new ConnectionOptionsAttributeValidation();
+                ApplyToApi(validation, target.Validation);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsUsernameSignup source, ConnectionOptionsUsernameSignup target)
+        {
+            if (source.Status is { } status)
+                target.Status = (ConnectionOptionsAttributeStatus)(int)status;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsAttributeIdentifier source, ConnectionOptionsAttributeIdentifier target)
+        {
+            if (source.Active is { } active)
+                target.Active = active;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsAttributeValidation source, ConnectionOptionsAttributeValidation target)
+        {
+            if (source.MinLength is { } minLength)
+                target.MinLength = minLength;
+
+            if (source.MaxLength is { } maxLength)
+                target.MaxLength = maxLength;
+
+            if (source.AllowedTypes is { } allowedTypes)
+            {
+                target.AllowedTypes ??= new ConnectionOptionsAttributeAllowedTypes();
+                ApplyToApi(allowedTypes, target.AllowedTypes);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsAttributeAllowedTypes source, ConnectionOptionsAttributeAllowedTypes target)
+        {
+            if (source.Email is { } email)
+                target.Email = email;
+
+            if (source.PhoneNumber is { } phoneNumber)
+                target.PhoneNumber = phoneNumber;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsVerification source, ConnectionOptionsVerification target)
+        {
+            if (source.Active is { } active)
+                target.Active = active;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsCustomScripts source, ConnectionOptionsCustomScripts target)
+        {
+            if (source.Login is { } login)
+                target.Login = login;
+
+            if (source.GetUser is { } getUser)
+                target.GetUser = getUser;
+
+            if (source.Delete is { } delete)
+                target.Delete = delete;
+
+            if (source.ChangePassword is { } changePassword)
+                target.ChangePassword = changePassword;
+
+            if (source.Verify is { } verify)
+                target.Verify = verify;
+
+            if (source.Create is { } create)
+                target.Create = create;
+
+            if (source.ChangeUsername is { } changeUsername)
+                target.ChangeUsername = changeUsername;
+
+            if (source.ChangeEmail is { } changeEmail)
+                target.ChangeEmail = changeEmail;
+
+            if (source.ChangePhoneNumber is { } changePhoneNumber)
+                target.ChangePhoneNumber = changePhoneNumber;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsAuthenticationMethods source, ConnectionOptionsAuthenticationMethods target)
+        {
+            if (source.Password is { } password)
+            {
+                target.Password ??= new ConnectionOptionsPasswordAuthenticationMethod();
+                ApplyToApi(password, target.Password);
+            }
+
+            if (source.Passkey is { } passkey)
+            {
+                target.Passkey ??= new ConnectionOptionsPasskeyAuthenticationMethod();
+                ApplyToApi(passkey, target.Passkey);
+            }
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasswordAuthenticationMethod source, ConnectionOptionsPasswordAuthenticationMethod target)
+        {
+            if (source.Enabled is { } enabled)
+                target.Enabled = enabled;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasskeyAuthenticationMethod source, ConnectionOptionsPasskeyAuthenticationMethod target)
+        {
+            if (source.Enabled is { } enabled)
+                target.Enabled = enabled;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasskeyOptions source, ConnectionOptionsPasskeyOptions target)
+        {
+            if (source.ChallengeUi is { } challengeUi)
+                target.ChallengeUi = (ChallengeUi)(int)challengeUi;
+
+            if (source.ProgressiveEnrollmentEnabled is { } progressiveEnrollmentEnabled)
+                target.ProgressiveEnrollmentEnabled = progressiveEnrollmentEnabled;
+
+            if (source.LocalEnrollmentEnabled is { } localEnrollmentEnabled)
+                target.LocalEnrollmentEnabled = localEnrollmentEnabled;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasswordComplexityOptions source, ConnectionOptionsPasswordComplexityOptions target)
+        {
+            if (source.MinLength is { } minLength)
+                target.MinLength = minLength;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasswordHistory source, ConnectionOptionsPasswordHistory target)
+        {
+            if (source.Enable is { } enable)
+                target.Enable = enable;
+
+            if (source.Size is { } size)
+                target.Size = size;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasswordNoPersonalInfo source, ConnectionOptionsPasswordNoPersonalInfo target)
+        {
+            if (source.Enable is { } enable)
+                target.Enable = enable;
+        }
+
+        static void ApplyToApi(V1ConnectionOptionsPasswordDictionary source, ConnectionOptionsPasswordDictionary target)
+        {
+            if (source.Enable is { } enable)
+                target.Enable = enable;
+
+            if (source.Dictionary is { } dictionary)
+                target.Dictionary = dictionary;
+        }
+
+        static void ApplyToApi(V1ConnectionGatewayAuthentication source, GatewayAuthentication target)
+        {
+            if (source.Method is { } method)
+                target.Method = method;
+
+            if (source.Subject is { } subject)
+                target.Subject = subject;
+
+            if (source.Audience is { } audience)
+                target.Audience = audience;
+
+            if (source.Secret is { } secret)
+                target.Secret = secret;
+
+            if (source.SecretBase64Encoded is { } secretBase64Encoded)
+                target.SecretBase64Encoded = secretBase64Encoded;
+        }
+
+        void ApplyToApi(V1ConnectionOptions source, ref dynamic target)
+        {
+            target = TransformToNewtonsoftJson<V1ConnectionOptions, JObject>(source);
         }
 
         /// <summary>
-        /// Applies the update of enabled clients. This is a separate call in the API, so we need to handle it separately.
+        /// Applies the update of enabled clients.
         /// </summary>
         /// <param name="api"></param>
         /// <param name="id"></param>
@@ -252,7 +665,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (conf.EnabledClients is not null)
             {
-                var req = new List<global::Auth0.ManagementApi.Models.Connections.EnabledClientsToUpdate>();
+                var req = new List<EnabledClientsToUpdate>();
 
                 // apply existing clients, disabled by default
                 foreach (var current in await api.Connections.GetEnabledClientsAsync(new() { ConnectionId = id }, cancellationToken: cancellationToken))

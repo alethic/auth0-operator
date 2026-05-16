@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Core.Models.Connection.V1;
 
@@ -18,7 +16,7 @@ namespace Alethic.Auth0.Operator.Models
     [KubernetesEntityShortNames("a0con")]
     public partial class V1Connection :
         CustomKubernetesEntity<V1Connection.SpecDef, V1Connection.StatusDef>,
-        V1TenantEntityInstance<V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, Hashtable>
+        V1TenantEntityInstance<V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, V1ConnectionConf>
     {
 
         public class SpecDef : V1TenantEntityInstanceSpec<V1ConnectionConf>
@@ -43,15 +41,14 @@ namespace Alethic.Auth0.Operator.Models
 
         }
 
-        public class StatusDef : V1TenantEntityInstanceStatus<Hashtable>
+        public class StatusDef : V1TenantEntityInstanceStatus<V1ConnectionConf>
         {
 
             [JsonPropertyName("id")]
             public string? Id { get; set; }
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-            public Hashtable? LastConf { get; set; }
+            public V1ConnectionConf? LastConf { get; set; }
 
         }
 

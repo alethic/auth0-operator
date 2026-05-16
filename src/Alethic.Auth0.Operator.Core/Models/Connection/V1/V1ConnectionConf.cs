@@ -24,7 +24,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonPropertyName("options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-        public Hashtable? Options { get; set; }
+        public V1ConnectionOptions? Options { get; set; }
 
         [JsonPropertyName("provisioning_ticket_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

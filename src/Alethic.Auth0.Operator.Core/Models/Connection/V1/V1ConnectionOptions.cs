@@ -1,9 +1,13 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+
+using KubeOps.Abstractions.Entities.Attributes;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    [PreserveUnknownFields]
     public record V1ConnectionOptions
     {
 
@@ -114,6 +118,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonPropertyName("gateway_authentication")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V1ConnectionGatewayAuthentication? GatewayAuthentication { get; set; }
+
+        [JsonExtensionData]
+        [Ignore]
+        public Dictionary<string, object?>? AdditionalProperties { get; set; }
 
     }
 
