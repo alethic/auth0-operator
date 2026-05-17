@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Auth0.ManagementApi</id>
+    <version>8.3.0</version>
+    <authors>Auth0.ManagementApi</authors>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/auth0/auth0.net</projectUrl>
+    <description>Package Description</description>
+    <repository type="git" commit="5476b23344d84486cb22343198af19aef0a7c6b8" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2">
+        <dependency id="Auth0.AuthenticationApi" version="7.45.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="9.0.14" exclude="Build,Analyzers" />
+        <dependency id="Portable.System.DateTimeOnly" version="9.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http" version="4.3.4" exclude="Build,Analyzers" />
+        <dependency id="System.Net.ServerSentEvents" version="9.0.14" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="9.0.9" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Auth0.AuthenticationApi" version="7.45.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="9.0.14" exclude="Build,Analyzers" />
+        <dependency id="Portable.System.DateTimeOnly" version="9.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http" version="4.3.4" exclude="Build,Analyzers" />
+        <dependency id="System.Net.ServerSentEvents" version="9.0.14" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="9.0.9" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>
