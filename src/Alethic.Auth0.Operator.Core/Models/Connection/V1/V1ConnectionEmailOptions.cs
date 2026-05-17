@@ -4,64 +4,6 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
     /// <summary>
-    /// Email message template configuration (subject, body, from address, and syntax).
-    /// </summary>
-    public record V1ConnectionEmailMessage
-    {
-
-        /// <summary>
-        /// The sender address for the magic-link email.
-        /// </summary>
-        [JsonPropertyName("from")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? From { get; set; }
-
-        /// <summary>
-        /// Subject line of the magic-link email.
-        /// </summary>
-        [JsonPropertyName("subject")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Subject { get; set; }
-
-        /// <summary>
-        /// Body of the magic-link email (may contain Liquid template syntax).
-        /// </summary>
-        [JsonPropertyName("body")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Body { get; set; }
-
-        /// <summary>
-        /// Template syntax used in the body. Use <c>"liquid"</c> for Liquid templates.
-        /// </summary>
-        [JsonPropertyName("syntax")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Syntax { get; set; }
-
-    }
-
-    /// <summary>
-    /// TOTP (time-based one-time password) configuration for the email connection.
-    /// </summary>
-    public record V1ConnectionEmailTotp
-    {
-
-        /// <summary>
-        /// Length of the one-time password.
-        /// </summary>
-        [JsonPropertyName("length")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public int? Length { get; set; }
-
-        /// <summary>
-        /// Time step in seconds for TOTP code generation.
-        /// </summary>
-        [JsonPropertyName("time_step")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public int? TimeStep { get; set; }
-
-    }
-
-    /// <summary>
     /// Configuration options for the <c>email</c> (passwordless email) connection strategy.
     /// </summary>
     public record V1ConnectionEmailOptions
@@ -80,6 +22,13 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonPropertyName("email")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V1ConnectionEmailMessage? Email { get; set; }
+
+        /// <summary>
+        /// Authentication parameters appended to the magic link.
+        /// </summary>
+        [JsonPropertyName("authParams")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionEmailAuthParams? AuthParams { get; set; }
 
         /// <summary>
         /// TOTP (time-based one-time password) configuration for the connection.

@@ -298,6 +298,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserIdAttribute = source.UserIdAttribute,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -738,6 +739,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 SignatureMethod = source.SignatureMethod?.ToString(),
                 UserAuthorizationUrl = source.UserAuthorizationUrl,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -831,6 +833,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1088,6 +1091,35 @@ namespace Alethic.Auth0.Operator.Controllers
                 ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin => V1ConnectionSetUserRootAttributes.NeverOnLogin,
                 _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
+        }
+
+        internal static Dictionary<string, V1ConnectionUpstreamParam?>? FromApi(Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?> source)
+        {
+            if (!source.IsDefined || source.Value is not { } dict)
+                return null;
+
+            var result = new Dictionary<string, V1ConnectionUpstreamParam?>(dict.Count);
+            foreach (var (key, value) in dict)
+            {
+                string? alias = null;
+                if (value is { } v && v.IsConnectionUpstreamAlias())
+                    alias = v.AsConnectionUpstreamAlias().Alias?.Value;
+                result[key] = alias is not null ? new V1ConnectionUpstreamParam { Alias = alias } : null;
+            }
+            return result;
+        }
+
+        internal static Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?> ToApiUpstreamParams(Dictionary<string, V1ConnectionUpstreamParam?>? source)
+        {
+            if (source is null)
+                return default;
+
+            var result = new Dictionary<string, ConnectionUpstreamAdditionalProperties?>(source.Count);
+            foreach (var (key, value) in source)
+                result[key] = value?.Alias is { } alias
+                    ? ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias { Alias = new ConnectionUpstreamAliasEnum(alias) })
+                    : null;
+            return Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(result);
         }
 
         internal static V1ConnectionOptionsValidation FromApi(ConnectionValidationOptions source)
@@ -1459,6 +1491,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserIdAttribute = source.UserIdAttribute;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1724,6 +1757,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FederatedConnectionsAccessTokens is { } fcat)
                 target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(
                     new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1834,6 +1868,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.RequestTokenUrl = source.RequestTokenUrl;
             target.UserAuthorizationUrl = source.UserAuthorizationUrl;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1896,6 +1931,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 

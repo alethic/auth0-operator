@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -92,7 +91,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("totp")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Totp { get; set; }
+        public V1ConnectionEmailTotp? Totp { get; set; }
 
         /// <summary>
         /// When <c>true</c>, new user sign-ups are disabled on this connection.

@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -25,23 +25,23 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("authParams")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? AuthParams { get; set; }
+        public Dictionary<string, string?>? AuthParams { get; set; }
 
         [JsonPropertyName("authParamsMap")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? AuthParamsMap { get; set; }
+        public Dictionary<string, string?>? AuthParamsMap { get; set; }
 
         [JsonPropertyName("scripts")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Scripts { get; set; }
+        public V1ConnectionOptionsScripts? Scripts { get; set; }
 
         [JsonPropertyName("fieldsMap")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? FieldsMap { get; set; }
+        public Dictionary<string, string?>? FieldsMap { get; set; }
 
         [JsonPropertyName("customHeaders")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? CustomHeaders { get; set; }
+        public Dictionary<string, string?>? CustomHeaders { get; set; }
 
         [JsonPropertyName("icon_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -65,7 +65,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("upstream_params")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? UpstreamParams { get; set; }
+        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
 
     }
 

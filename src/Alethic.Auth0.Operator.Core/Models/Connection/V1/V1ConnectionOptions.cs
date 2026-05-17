@@ -187,7 +187,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("upstream_params")]
-        public IDictionary? UpstreamParams { get; set; }
+        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
 
         /// <summary>
         /// Controls when root profile attributes (<c>name</c>, <c>given_name</c>, etc.) are updated from the identity provider.

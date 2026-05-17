@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -134,7 +134,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("idpinitiated")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Idpinitiated { get; set; }
+        public V1ConnectionOptionsIdpinitiated? Idpinitiated { get; set; }
 
         /// <summary>
         /// PEM-encoded certificate used to sign outgoing SAML requests.
@@ -148,28 +148,28 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("signing_key")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? SigningKey { get; set; }
+        public V1ConnectionOptionsKeyPair? SigningKey { get; set; }
 
         /// <summary>
         /// Private key used to decrypt incoming SAML assertions.
         /// </summary>
         [JsonPropertyName("decryptionKey")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? DecryptionKey { get; set; }
+        public V1ConnectionOptionsKeyPair? DecryptionKey { get; set; }
 
         /// <summary>
         /// Settings for decryption of SAML assertion content.
         /// </summary>
         [JsonPropertyName("assertion_decryption_settings")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? AssertionDecryptionSettings { get; set; }
+        public V1ConnectionOptionsAssertionDecryptionSettings? AssertionDecryptionSettings { get; set; }
 
         /// <summary>
         /// Mapping of SAML attribute names to Auth0 user profile fields.
         /// </summary>
         [JsonPropertyName("fieldsMap")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? FieldsMap { get; set; }
+        public Dictionary<string, string?>? FieldsMap { get; set; }
 
         /// <summary>
         /// SAML attribute that will be mapped to the Auth0 user ID.
@@ -218,7 +218,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("upstream_params")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? UpstreamParams { get; set; }
+        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
 
         /// <summary>
         /// JWT issuer claim used for global token revocation.

@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -22,35 +22,35 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("password_history")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? PasswordHistory { get; set; }
+        public V1ConnectionOptionsPasswordHistory? PasswordHistory { get; set; }
 
         /// <summary>
         /// Configuration for blocking passwords that contain personal information.
         /// </summary>
         [JsonPropertyName("password_no_personal_info")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? PasswordNoPersonalInfo { get; set; }
+        public V1ConnectionOptionsPasswordNoPersonalInfo? PasswordNoPersonalInfo { get; set; }
 
         /// <summary>
         /// Configuration for blocking passwords from a dictionary of common passwords.
         /// </summary>
         [JsonPropertyName("password_dictionary")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? PasswordDictionary { get; set; }
+        public V1ConnectionOptionsPasswordDictionary? PasswordDictionary { get; set; }
 
         /// <summary>
         /// Configuration for additional password complexity requirements (e.g. minimum length).
         /// </summary>
         [JsonPropertyName("password_complexity_options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? PasswordComplexityOptions { get; set; }
+        public V1ConnectionOptionsPasswordComplexityOptions? PasswordComplexityOptions { get; set; }
 
         /// <summary>
         /// Validation rules applied to the username field (e.g. min/max length).
         /// </summary>
         [JsonPropertyName("validation")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Validation { get; set; }
+        public V1ConnectionOptionsValidation? Validation { get; set; }
 
         /// <summary>
         /// When <c>true</c>, the context of the current authentication transaction is passed to custom database action scripts.
@@ -71,7 +71,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("customScripts")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? CustomScripts { get; set; }
+        public V1ConnectionOptionsCustomScripts? CustomScripts { get; set; }
 
         /// <summary>
         /// When <c>true</c>, the connection uses a lazy migration mode: users are imported from an external database on first login.
@@ -106,7 +106,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("mfa")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Mfa { get; set; }
+        public V1ConnectionOptionsMfa? Mfa { get; set; }
 
         /// <summary>
         /// List of user attributes that will not be persisted in the Auth0 user store after each login.
@@ -127,7 +127,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("upstream_params")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? UpstreamParams { get; set; }
+        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
 
     }
 

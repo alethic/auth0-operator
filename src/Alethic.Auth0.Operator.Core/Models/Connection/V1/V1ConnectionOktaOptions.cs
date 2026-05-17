@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -134,28 +134,28 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("oidc_metadata")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? OidcMetadata { get; set; }
+        public Dictionary<string, string?>? OidcMetadata { get; set; }
 
         /// <summary>
         /// Mapping of Okta claims to Auth0 user profile attributes.
         /// </summary>
         [JsonPropertyName("attribute_map")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? AttributeMap { get; set; }
+        public V1ConnectionOptionsAttributeMap? AttributeMap { get; set; }
 
         /// <summary>
         /// Additional connection settings passed to Okta.
         /// </summary>
         [JsonPropertyName("connection_settings")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? ConnectionSettings { get; set; }
+        public V1ConnectionOptionsConnectionSettings? ConnectionSettings { get; set; }
 
         /// <summary>
         /// Configuration for federated connection access tokens.
         /// </summary>
         [JsonPropertyName("federated_connections_access_tokens")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? FederatedConnectionsAccessTokens { get; set; }
+        public V1ConnectionOptionsFederatedConnectionsAccessTokens? FederatedConnectionsAccessTokens { get; set; }
 
         /// <summary>
         /// List of user attributes that will not be persisted in the Auth0 user store after each login.
@@ -176,7 +176,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("upstream_params")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? UpstreamParams { get; set; }
+        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
 
     }
 
