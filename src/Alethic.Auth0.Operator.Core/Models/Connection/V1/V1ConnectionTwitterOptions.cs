@@ -10,37 +10,25 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
     public record V1ConnectionTwitterOptions : V1ConnectionSocialOptions
     {
 
-        [JsonPropertyName("tweet_updates")]
+        [JsonPropertyName("protocol")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? TweetUpdates { get; set; }
+        public string? Protocol { get; set; }
 
-        [JsonPropertyName("retweet_others_tweets")]
+        [JsonPropertyName("offline_access")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? RetweetOthersTweets { get; set; }
+        public bool? OfflineAccess { get; set; }
 
-        [JsonPropertyName("like_tweets")]
+        [JsonPropertyName("profile")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? LikeTweets { get; set; }
+        public bool? Profile { get; set; }
 
-        [JsonPropertyName("create_or_delete_lists")]
+        [JsonPropertyName("tweet_read")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? CreateOrDeleteLists { get; set; }
+        public bool? TweetRead { get; set; }
 
-        [JsonPropertyName("write_dm")]
+        [JsonPropertyName("users_read")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? WriteDm { get; set; }
-
-        [JsonPropertyName("follow_friends")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? FollowFriends { get; set; }
-
-        [JsonPropertyName("email")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? Email { get; set; }
-
-        [JsonPropertyName("icon_url")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? IconUrl { get; set; }
+        public bool? UsersRead { get; set; }
 
     }
 

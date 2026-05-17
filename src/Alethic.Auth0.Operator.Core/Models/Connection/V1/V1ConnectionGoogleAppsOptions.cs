@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Text.Json.Serialization;
 
@@ -90,6 +91,63 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonPropertyName("idpinitiated")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public IDictionary? Idpinitiated { get; set; }
+
+        [JsonPropertyName("admin_access_token")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? AdminAccessToken { get; set; }
+
+        [JsonPropertyName("admin_access_token_expiresin")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DateTime? AdminAccessTokenExpiresin { get; set; }
+
+        [JsonPropertyName("admin_refresh_token")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? AdminRefreshToken { get; set; }
+
+        [JsonPropertyName("allow_setting_login_scopes")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? AllowSettingLoginScopes { get; set; }
+
+        [JsonPropertyName("api_enable_groups")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ApiEnableGroups { get; set; }
+
+        [JsonPropertyName("ext_agreed_terms")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ExtAgreedTerms { get; set; }
+
+        [JsonPropertyName("ext_groups")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ExtGroups { get; set; }
+
+        [JsonPropertyName("ext_groups_extended")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ExtGroupsExtended { get; set; }
+
+        [JsonPropertyName("ext_is_admin")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ExtIsAdmin { get; set; }
+
+        [JsonPropertyName("ext_is_suspended")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ExtIsSuspended { get; set; }
+
+        [JsonPropertyName("federated_connections_access_tokens")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionGoogleAppsFederatedConnectionsAccessTokens? FederatedConnectionsAccessTokens { get; set; }
+
+        [JsonPropertyName("handle_login_from_social")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? HandleLoginFromSocial { get; set; }
+
+    }
+
+    public record V1ConnectionGoogleAppsFederatedConnectionsAccessTokens
+    {
+
+        [JsonPropertyName("active")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Active { get; set; }
 
     }
 

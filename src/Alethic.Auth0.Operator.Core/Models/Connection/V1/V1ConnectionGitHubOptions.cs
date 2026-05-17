@@ -114,6 +114,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? Project { get; set; }
 
+        [JsonPropertyName("profile")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Profile { get; set; }
+
         [JsonPropertyName("icon_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? IconUrl { get; set; }

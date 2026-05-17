@@ -402,6 +402,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Profile = source.Profile,
             };
         }
 
@@ -503,6 +504,32 @@ namespace Alethic.Auth0.Operator.Controllers
                 ReadAudienceNetworkInsights = source.ReadAudienceNetworkInsights,
                 ReadInsights = source.ReadInsights,
                 ReadPageMailboxes = source.ReadPageMailboxes,
+                PublicProfile = source.PublicProfile,
+                UserBirthday = source.UserBirthday,
+                UserLikes = source.UserLikes,
+                UserGender = source.UserGender,
+                UserAgeRange = source.UserAgeRange,
+                UserLocation = source.UserLocation,
+                UserHometown = source.UserHometown,
+                UserFriends = source.UserFriends,
+                UserLink = source.UserLink,
+                UserPhotos = source.UserPhotos,
+                UserVideos = source.UserVideos,
+                UserPosts = source.UserPosts,
+                UserStatus = source.UserStatus,
+                UserTaggedPlaces = source.UserTaggedPlaces,
+                UserEvents = source.UserEvents,
+                UserGroups = source.UserGroups,
+                UserManagedGroups = source.UserManagedGroups,
+                ManageNotifications = source.ManageNotifications,
+                PublishActions = source.PublishActions,
+                PublishPages = source.PublishPages,
+                PublishVideo = source.PublishVideo,
+                ReadMailbox = source.ReadMailbox,
+                ReadStream = source.ReadStream,
+                AllowContextProfileField = source.AllowContextProfileField,
+                PagesManageCta = source.PagesManageCta,
+                PagesManageInstantArticles = source.PagesManageInstantArticles,
             };
         }
 
@@ -538,6 +565,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 WriteOrg = source.WriteOrg,
                 WritePublicKey = source.WritePublicKey,
                 WriteRepoHook = source.WriteRepoHook,
+                Profile = source.Profile,
             };
         }
 
@@ -561,6 +589,20 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 ApiEnableUsers = source.ApiEnableUsers,
                 MapUserIdToId = source.MapUserIdToId,
+                AdminAccessToken = source.AdminAccessToken,
+                AdminAccessTokenExpiresin = source.AdminAccessTokenExpiresin,
+                AdminRefreshToken = source.AdminRefreshToken,
+                AllowSettingLoginScopes = source.AllowSettingLoginScopes,
+                ApiEnableGroups = source.ApiEnableGroups,
+                ExtAgreedTerms = source.ExtAgreedTerms,
+                ExtGroups = source.ExtGroups,
+                ExtGroupsExtended = source.ExtGroupsExtended,
+                ExtIsAdmin = source.ExtIsAdmin,
+                ExtIsSuspended = source.ExtIsSuspended,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat
+                    ? new V1ConnectionGoogleAppsFederatedConnectionsAccessTokens { Active = fcat.Active }
+                    : null,
+                HandleLoginFromSocial = source.HandleLoginFromSocial,
             };
         }
 
@@ -663,6 +705,10 @@ namespace Alethic.Auth0.Operator.Controllers
                 BasicProfile = source.BasicProfile,
                 EmailAddress = source.Email,
                 Openid = source.Openid,
+                FullProfile = source.FullProfile,
+                StrategyVersion = source.StrategyVersion,
+                Network = source.Network,
+                Profile = source.Profile,
             };
         }
 
@@ -828,6 +874,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
                 FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
             };
@@ -845,6 +892,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 CommunityBaseUrl = source.CommunityBaseUrl,
                 Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
                 FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
             };
@@ -922,6 +970,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Protocol = source.Protocol?.ToString(),
+                OfflineAccess = source.OfflineAccess,
+                Profile = source.Profile,
+                TweetRead = source.TweetRead,
+                UsersRead = source.UsersRead,
             };
         }
 
@@ -961,6 +1014,42 @@ namespace Alethic.Auth0.Operator.Controllers
                 WorkProfile = source.WorkProfile,
                 Applications = source.Applications,
                 ApplicationsCreate = source.ApplicationsCreate,
+                StrategyVersion = source.StrategyVersion,
+                DirectoryAccessasuserAll = source.DirectoryAccessasuserAll,
+                DirectoryReadAll = source.DirectoryReadAll,
+                DirectoryReadwriteAll = source.DirectoryReadwriteAll,
+                GraphCalendars = source.GraphCalendars,
+                GraphCalendarsUpdate = source.GraphCalendarsUpdate,
+                GraphContacts = source.GraphContacts,
+                GraphContactsUpdate = source.GraphContactsUpdate,
+                GraphDevice = source.GraphDevice,
+                GraphDeviceCommand = source.GraphDeviceCommand,
+                GraphEmails = source.GraphEmails,
+                GraphEmailsUpdate = source.GraphEmailsUpdate,
+                GraphFiles = source.GraphFiles,
+                GraphFilesAll = source.GraphFilesAll,
+                GraphFilesAllUpdate = source.GraphFilesAllUpdate,
+                GraphFilesUpdate = source.GraphFilesUpdate,
+                GraphNotes = source.GraphNotes,
+                GraphNotesCreate = source.GraphNotesCreate,
+                GraphNotesUpdate = source.GraphNotesUpdate,
+                GraphTasks = source.GraphTasks,
+                GraphTasksUpdate = source.GraphTasksUpdate,
+                GraphUser = source.GraphUser,
+                GraphUserActivity = source.GraphUserActivity,
+                GraphUserUpdate = source.GraphUserUpdate,
+                GroupReadAll = source.GroupReadAll,
+                GroupReadwriteAll = source.GroupReadwriteAll,
+                MailReadwriteAll = source.MailReadwriteAll,
+                MailSend = source.MailSend,
+                RolemanagementReadAll = source.RolemanagementReadAll,
+                RolemanagementReadwriteDirectory = source.RolemanagementReadwriteDirectory,
+                SitesReadAll = source.SitesReadAll,
+                SitesReadwriteAll = source.SitesReadwriteAll,
+                TeamReadbasicAll = source.TeamReadbasicAll,
+                TeamReadwriteAll = source.TeamReadwriteAll,
+                UserReadAll = source.UserReadAll,
+                UserReadbasicAll = source.UserReadbasicAll,
             };
         }
 

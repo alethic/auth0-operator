@@ -142,6 +142,110 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? IconUrl { get; set; }
 
+        [JsonPropertyName("public_profile")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PublicProfile { get; set; }
+
+        [JsonPropertyName("user_birthday")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserBirthday { get; set; }
+
+        [JsonPropertyName("user_likes")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserLikes { get; set; }
+
+        [JsonPropertyName("user_gender")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserGender { get; set; }
+
+        [JsonPropertyName("user_age_range")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserAgeRange { get; set; }
+
+        [JsonPropertyName("user_location")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserLocation { get; set; }
+
+        [JsonPropertyName("user_hometown")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserHometown { get; set; }
+
+        [JsonPropertyName("user_friends")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserFriends { get; set; }
+
+        [JsonPropertyName("user_link")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserLink { get; set; }
+
+        [JsonPropertyName("user_photos")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserPhotos { get; set; }
+
+        [JsonPropertyName("user_videos")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserVideos { get; set; }
+
+        [JsonPropertyName("user_posts")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserPosts { get; set; }
+
+        [JsonPropertyName("user_status")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserStatus { get; set; }
+
+        [JsonPropertyName("user_tagged_places")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserTaggedPlaces { get; set; }
+
+        [JsonPropertyName("user_events")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserEvents { get; set; }
+
+        [JsonPropertyName("user_groups")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserGroups { get; set; }
+
+        [JsonPropertyName("user_managed_groups")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UserManagedGroups { get; set; }
+
+        [JsonPropertyName("manage_notifications")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ManageNotifications { get; set; }
+
+        [JsonPropertyName("publish_actions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PublishActions { get; set; }
+
+        [JsonPropertyName("publish_pages")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PublishPages { get; set; }
+
+        [JsonPropertyName("publish_video")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PublishVideo { get; set; }
+
+        [JsonPropertyName("read_mailbox")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ReadMailbox { get; set; }
+
+        [JsonPropertyName("read_stream")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? ReadStream { get; set; }
+
+        [JsonPropertyName("allow_context_profile_field")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? AllowContextProfileField { get; set; }
+
+        [JsonPropertyName("pages_manage_cta")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PagesManageCta { get; set; }
+
+        [JsonPropertyName("pages_manage_instant_articles")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PagesManageInstantArticles { get; set; }
+
     }
 
 }

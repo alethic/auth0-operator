@@ -50,6 +50,14 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? Openid { get; set; }
 
+        [JsonPropertyName("full_profile")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? FullProfile { get; set; }
+
+        [JsonPropertyName("strategy_version")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? StrategyVersion { get; set; }
+
         [JsonPropertyName("icon_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? IconUrl { get; set; }
