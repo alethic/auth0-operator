@@ -53,84 +53,13 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
-        public void FromApi_Connection_NullOptionsAndMetadata_MapsNull()
+        public void FromApi_Connection_NullStrategyOptions_AllStrategySpecificPropertiesNull()
         {
             var result = V1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
             Assert.IsNotNull(result);
-            Assert.IsNull(result.Options);
+            Assert.IsNull(result.Auth0Options);
+            Assert.IsNull(result.OidcOptions);
             Assert.IsNull(result.Metadata);
-        }
-
-        [TestMethod]
-        public void FromApiOptions_Null_ReturnsNull()
-        {
-            Assert.IsNull(V1ConnectionController.FromApiOptions(null, "auth0"));
-            Assert.IsNull(V1ConnectionController.FromApiOptions(null, "oidc"));
-            Assert.IsNull(V1ConnectionController.FromApiOptions(null, null));
-        }
-
-        [TestMethod]
-        public void FromApiOptions_Auth0Strategy_MapsTypedProperties()
-        {
-            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["passwordPolicy"] = "good" }, "auth0");
-            Assert.IsNotNull(result);
-            Assert.AreEqual(V1ConnectionOptionsPasswordPolicy.Good, result.PasswordPolicy);
-            Assert.IsNull(result.AdditionalProperties);
-        }
-
-        [TestMethod]
-        public void FromApiOptions_OtherStrategy_CapturesAsAdditionalProperties()
-        {
-            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["clientId"] = "abc", ["tenant"] = "mytenant" }, "oidc");
-            Assert.IsNotNull(result);
-            Assert.IsNull(result.PasswordPolicy);
-            Assert.IsNotNull(result.AdditionalProperties);
-            Assert.AreEqual("abc", result.AdditionalProperties["clientId"]?.ToString());
-            Assert.AreEqual("mytenant", result.AdditionalProperties["tenant"]?.ToString());
-        }
-
-        [TestMethod]
-        public void FromApiOptions_NullStrategy_CapturesAsAdditionalProperties()
-        {
-            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["foo"] = "bar" }, null);
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.AdditionalProperties);
-            Assert.AreEqual("bar", result.AdditionalProperties["foo"]?.ToString());
-        }
-
-        [TestMethod]
-        public void FromApi_Connection_Auth0Strategy_MapsOptionsTyped()
-        {
-            var source = new GetConnectionResponseContent
-            {
-                Name = "x",
-                Strategy = "auth0",
-                Options = new System.Collections.Generic.Dictionary<string, object> { ["passwordPolicy"] = "good" },
-            };
-
-            var result = V1ConnectionController.FromApi(source);
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Options);
-            Assert.AreEqual(V1ConnectionOptionsPasswordPolicy.Good, result.Options.PasswordPolicy);
-            Assert.IsNull(result.Options.AdditionalProperties);
-        }
-
-        [TestMethod]
-        public void FromApi_Connection_OtherStrategy_MapsOptionsAsAdditionalProperties()
-        {
-            var source = new GetConnectionResponseContent
-            {
-                Name = "x",
-                Strategy = "oidc",
-                Options = new System.Collections.Generic.Dictionary<string, object> { ["clientId"] = "abc" },
-            };
-
-            var result = V1ConnectionController.FromApi(source);
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Options);
-            Assert.IsNull(result.Options.PasswordPolicy);
-            Assert.IsNotNull(result.Options.AdditionalProperties);
-            Assert.AreEqual("abc", result.Options.AdditionalProperties["clientId"]?.ToString());
         }
 
         [TestMethod]

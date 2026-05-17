@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,13 +65,6 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         internal static TTo ConvertTo<TTo>(GetConnectionResponseContent source)
         {
-            return System.Text.Json.JsonSerializer.Deserialize<TTo>(System.Text.Json.JsonSerializer.Serialize(source));
-        }
-
-        internal static TTo? ConvertOptions<TTo>(object? source) where TTo : class
-        {
-            if (source is null)
-                return null;
             return System.Text.Json.JsonSerializer.Deserialize<TTo>(System.Text.Json.JsonSerializer.Serialize(source));
         }
 
@@ -243,152 +237,756 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static V1ConnectionAuth0Options? FromApi(ConnectionOptionsAuth0? source)
         {
-            return ConvertOptions<V1ConnectionAuth0Options>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionAuth0Options
+            {
+                BruteForceProtection = source.BruteForceProtection,
+                DisableSignup = source.DisableSignup,
+                EnableScriptContext = source.EnableScriptContext,
+                EnabledDatabaseCustomization = source.EnabledDatabaseCustomization,
+                ImportMode = source.ImportMode,
+                RequiresUsername = source.RequiresUsername,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
         }
 
         internal static V1ConnectionAdOptions? FromApi(ConnectionOptionsAd? source)
         {
-            return ConvertOptions<V1ConnectionAdOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionAdOptions
+            {
+                AgentIp = source.AgentIp,
+                AgentMode = source.AgentMode?.ToString(),
+                AgentVersion = source.AgentVersion,
+                BruteForceProtection = source.BruteForceProtection,
+                CertAuth = source.CertAuth,
+                Certs = source.Certs?.ToArray(),
+                DisableCache = source.DisableCache,
+                DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                IconUrl = source.IconUrl,
+                Ips = source.Ips?.ToArray(),
+                SignInEndpoint = source.SignInEndpoint,
+                TenantDomain = source.TenantDomain,
+                Thumbprints = source.Thumbprints?.ToArray(),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionAdfsOptions? FromApi(ConnectionOptionsAdfs? source)
         {
-            return ConvertOptions<V1ConnectionAdfsOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionAdfsOptions
+            {
+                AdfsServer = source.AdfsServer,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                EntityId = source.EntityId,
+                FedMetadataXml = source.FedMetadataXml,
+                IconUrl = source.IconUrl,
+                PrevThumbprints = source.PrevThumbprints?.ToArray(),
+                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection?.ToString(),
+                SignInEndpoint = source.SignInEndpoint,
+                TenantDomain = source.TenantDomain,
+                Thumbprints = source.Thumbprints?.ToArray(),
+                UserIdAttribute = source.UserIdAttribute,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionAuth0OidcOptions? FromApi(ConnectionOptionsAuth0Oidc? source)
         {
-            return ConvertOptions<V1ConnectionAuth0OidcOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionAuth0OidcOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+            };
         }
 
         internal static V1ConnectionAzureAdOptions? FromApi(ConnectionOptionsAzureAd? source)
         {
-            return ConvertOptions<V1ConnectionAzureAdOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionAzureAdOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                ApiEnableUsers = source.ApiEnableUsers,
+                AppDomain = source.AppDomain,
+                AppId = source.AppId,
+                BasicProfile = source.BasicProfile,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                ExtAccessToken = source.ExtAccessToken,
+                ExtAccountEnabled = source.ExtAccountEnabled,
+                ExtAdmin = source.ExtAdmin,
+                ExtAgreedTerms = source.ExtAgreedTerms,
+                ExtAssignedLicenses = source.ExtAssignedLicenses,
+                ExtAssignedPlans = source.ExtAssignedPlans,
+                ExtAzureId = source.ExtAzureId,
+                ExtCity = source.ExtCity,
+                ExtCountry = source.ExtCountry,
+                ExtDepartment = source.ExtDepartment,
+                ExtDirSyncEnabled = source.ExtDirSyncEnabled,
+                ExtEmail = source.ExtEmail,
+                ExtExpiresIn = source.ExtExpiresIn,
+                ExtFamilyName = source.ExtFamilyName,
+                ExtFax = source.ExtFax,
+                ExtGivenName = source.ExtGivenName,
+                ExtGroupIds = source.ExtGroupIds,
+                ExtGroups = source.ExtGroups,
+                ExtIsSuspended = source.ExtIsSuspended,
+                ExtJobTitle = source.ExtJobTitle,
+                ExtLastSync = source.ExtLastSync,
+                ExtMobile = source.ExtMobile,
+                ExtName = source.ExtName,
+                ExtNestedGroups = source.ExtNestedGroups,
+                ExtNickname = source.ExtNickname,
+                ExtOid = source.ExtOid,
+                ExtPhone = source.ExtPhone,
+                ExtPhysicalDeliveryOfficeName = source.ExtPhysicalDeliveryOfficeName,
+                ExtPostalCode = source.ExtPostalCode,
+                ExtPreferredLanguage = source.ExtPreferredLanguage,
+                ExtProfile = source.ExtProfile,
+                ExtProvisionedPlans = source.ExtProvisionedPlans,
+                ExtProvisioningErrors = source.ExtProvisioningErrors,
+                ExtProxyAddresses = source.ExtProxyAddresses,
+                ExtPuid = source.ExtPuid,
+                ExtRefreshToken = source.ExtRefreshToken,
+                ExtRoles = source.ExtRoles,
+                ExtState = source.ExtState,
+                ExtStreet = source.ExtStreet,
+                ExtTelephoneNumber = source.ExtTelephoneNumber,
+                ExtTenantid = source.ExtTenantid,
+                ExtUpn = source.ExtUpn,
+                ExtUsageLocation = source.ExtUsageLocation,
+                ExtUserId = source.ExtUserId,
+                Granted = source.Granted,
+                IconUrl = source.IconUrl,
+                IdentityApi = source.IdentityApi?.ToString(),
+                MaxGroupsToRetrieve = source.MaxGroupsToRetrieve,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection?.ToString(),
+                TenantDomain = source.TenantDomain,
+                TenantId = source.TenantId,
+                Thumbprints = source.Thumbprints?.ToArray(),
+                UseCommonEndpoint = source.UseCommonEndpoint,
+                UseWsfed = source.UseWsfed,
+                UseridAttribute = source.UseridAttribute?.ToString(),
+                WaadProtocol = source.WaadProtocol?.ToString(),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionBitbucketOptions? FromApi(ConnectionOptionsBitbucket? source)
         {
-            return ConvertOptions<V1ConnectionBitbucketOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionBitbucketOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionBoxOptions? FromApi(ConnectionOptionsBox? source)
         {
-            return ConvertOptions<V1ConnectionBoxOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionBoxOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionDropboxOptions? FromApi(ConnectionOptionsDropbox? source)
         {
-            return ConvertOptions<V1ConnectionDropboxOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionDropboxOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionEmailOptions? FromApi(ConnectionOptionsEmail? source)
         {
-            return ConvertOptions<V1ConnectionEmailOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionEmailOptions
+            {
+                Name = source.Name,
+                BruteForceProtection = source.BruteForceProtection,
+                DisableSignup = source.DisableSignup,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
         }
 
         internal static V1ConnectionEvernoteOptions? FromApi(ConnectionOptionsEvernote? source)
         {
-            return ConvertOptions<V1ConnectionEvernoteOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionEvernoteOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionExactOptions? FromApi(ConnectionOptionsExact? source)
         {
-            return ConvertOptions<V1ConnectionExactOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionExactOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionFacebookOptions? FromApi(ConnectionOptionsFacebook? source)
         {
-            return ConvertOptions<V1ConnectionFacebookOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionFacebookOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Email = source.Email,
+                AdsManagement = source.AdsManagement,
+                AdsRead = source.AdsRead,
+                BusinessManagement = source.BusinessManagement,
+                GroupsAccessMemberInfo = source.GroupsAccessMemberInfo,
+                LeadsRetrieval = source.LeadsRetrieval,
+                ManagePages = source.ManagePages,
+                PagesMessaging = source.PagesMessaging,
+                PagesMessagingPhoneNumber = source.PagesMessagingPhoneNumber,
+                PagesMessagingSubscriptions = source.PagesMessagingSubscriptions,
+                PagesShowList = source.PagesShowList,
+                PublishToGroups = source.PublishToGroups,
+                ReadAudienceNetworkInsights = source.ReadAudienceNetworkInsights,
+                ReadInsights = source.ReadInsights,
+                ReadPageMailboxes = source.ReadPageMailboxes,
+            };
         }
 
         internal static V1ConnectionGitHubOptions? FromApi(ConnectionOptionsGitHub? source)
         {
-            return ConvertOptions<V1ConnectionGitHubOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionGitHubOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                AdminOrg = source.AdminOrg,
+                AdminPublicKey = source.AdminPublicKey,
+                AdminRepoHook = source.AdminRepoHook,
+                DeleteRepo = source.DeleteRepo,
+                Email = source.Email,
+                Follow = source.Follow,
+                Gist = source.Gist,
+                Notifications = source.Notifications,
+                PublicRepo = source.PublicRepo,
+                ReadOrg = source.ReadOrg,
+                ReadPublicKey = source.ReadPublicKey,
+                ReadRepoHook = source.ReadRepoHook,
+                ReadUser = source.ReadUser,
+                Repo = source.Repo,
+                RepoDeployment = source.RepoDeployment,
+                RepoStatus = source.RepoStatus,
+                WriteOrg = source.WriteOrg,
+                WritePublicKey = source.WritePublicKey,
+                WriteRepoHook = source.WriteRepoHook,
+            };
         }
 
         internal static V1ConnectionGoogleAppsOptions? FromApi(ConnectionOptionsGoogleApps? source)
         {
-            return ConvertOptions<V1ConnectionGoogleAppsOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionGoogleAppsOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Domain = source.Domain,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                TenantDomain = source.TenantDomain,
+                IconUrl = source.IconUrl,
+                Email = source.Email,
+                Profile = source.Profile,
+                ApiEnableUsers = source.ApiEnableUsers,
+                MapUserIdToId = source.MapUserIdToId,
+            };
         }
 
         internal static V1ConnectionGoogleOAuth2Options? FromApi(ConnectionOptionsGoogleOAuth2? source)
         {
-            return ConvertOptions<V1ConnectionGoogleOAuth2Options>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionGoogleOAuth2Options
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                IconUrl = source.IconUrl,
+                AllowedAudiences = source.AllowedAudiences?.ToArray(),
+                Email = source.Email,
+                Profile = source.Profile,
+                OfflineAccess = source.OfflineAccess,
+                AdsenseManagement = source.AdsenseManagement,
+                Analytics = source.Analytics,
+                Blogger = source.Blogger,
+                Calendar = source.Calendar,
+                CalendarAddonsExecute = source.CalendarAddonsExecute,
+                CalendarEvents = source.CalendarEvents,
+                CalendarEventsReadonly = source.CalendarEventsReadonly,
+                CalendarSettingsReadonly = source.CalendarSettingsReadonly,
+                ChromeWebStore = source.ChromeWebStore,
+                Contacts = source.Contacts,
+                ContactsNew = source.ContactsNew,
+                ContactsOtherReadonly = source.ContactsOtherReadonly,
+                ContactsReadonly = source.ContactsReadonly,
+                ContentApiForShopping = source.ContentApiForShopping,
+                Coordinate = source.Coordinate,
+                CoordinateReadonly = source.CoordinateReadonly,
+                DirectoryReadonly = source.DirectoryReadonly,
+                DocumentList = source.DocumentList,
+                Drive = source.Drive,
+                DriveActivity = source.DriveActivity,
+                DriveActivityReadonly = source.DriveActivityReadonly,
+                DriveAppdata = source.DriveAppdata,
+                DriveAppsReadonly = source.DriveAppsReadonly,
+                DriveFile = source.DriveFile,
+                DriveMetadata = source.DriveMetadata,
+                DriveMetadataReadonly = source.DriveMetadataReadonly,
+                DrivePhotosReadonly = source.DrivePhotosReadonly,
+                DriveReadonly = source.DriveReadonly,
+                DriveScripts = source.DriveScripts,
+                Gmail = source.Gmail,
+                GmailCompose = source.GmailCompose,
+                GmailInsert = source.GmailInsert,
+                GmailLabels = source.GmailLabels,
+                GmailMetadata = source.GmailMetadata,
+                GmailModify = source.GmailModify,
+                GmailNew = source.GmailNew,
+                GmailReadonly = source.GmailReadonly,
+                GmailSend = source.GmailSend,
+                GmailSettingsBasic = source.GmailSettingsBasic,
+                GmailSettingsSharing = source.GmailSettingsSharing,
+                GoogleAffiliateNetwork = source.GoogleAffiliateNetwork,
+                GoogleBooks = source.GoogleBooks,
+                GoogleCloudStorage = source.GoogleCloudStorage,
+                GoogleDrive = source.GoogleDrive,
+                GoogleDriveFiles = source.GoogleDriveFiles,
+                GooglePlus = source.GooglePlus,
+                LatitudeBest = source.LatitudeBest,
+                LatitudeCity = source.LatitudeCity,
+                Moderator = source.Moderator,
+                Orkut = source.Orkut,
+                PicasaWeb = source.PicasaWeb,
+                Sites = source.Sites,
+                Tasks = source.Tasks,
+                TasksReadonly = source.TasksReadonly,
+                UrlShortener = source.UrlShortener,
+                WebmasterTools = source.WebmasterTools,
+                Youtube = source.Youtube,
+                YoutubeChannelmembershipsCreator = source.YoutubeChannelmembershipsCreator,
+                YoutubeNew = source.YoutubeNew,
+                YoutubeReadonly = source.YoutubeReadonly,
+                YoutubeUpload = source.YoutubeUpload,
+                Youtubepartner = source.Youtubepartner,
+            };
         }
 
         internal static V1ConnectionLinkedinOptions? FromApi(ConnectionOptionsLinkedin? source)
         {
-            return ConvertOptions<V1ConnectionLinkedinOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionLinkedinOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                BasicProfile = source.BasicProfile,
+                EmailAddress = source.Email,
+                Openid = source.Openid,
+            };
         }
 
         internal static V1ConnectionOAuth1Options? FromApi(ConnectionOptionsOAuth1? source)
         {
-            return ConvertOptions<V1ConnectionOAuth1Options>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionOAuth1Options
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                AccessTokenUrl = source.AccessTokenUrl,
+                RequestTokenUrl = source.RequestTokenUrl,
+                SignatureMethod = source.SignatureMethod?.ToString(),
+                UserAuthorizationUrl = source.UserAuthorizationUrl,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
         }
 
         internal static V1ConnectionOAuth2Options? FromApi(ConnectionOptionsOAuth2? source)
         {
-            return ConvertOptions<V1ConnectionOAuth2Options>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionOAuth2Options
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                AuthorizationUrl = source.AuthorizationUrl,
+                TokenUrl = source.TokenUrl,
+                LogoutUrl = source.LogoutUrl,
+                Scope = source.Scope?.ToString(),
+                IconUrl = source.IconUrl,
+                PkceEnabled = source.PkceEnabled,
+                UseOauthSpecScope = source.UseOauthSpecScope,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionOffice365Options? FromApi(ConnectionOptionsOffice365? source)
         {
-            return ConvertOptions<V1ConnectionOffice365Options>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionOffice365Options
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+            };
         }
 
         internal static V1ConnectionOidcOptions? FromApi(ConnectionOptionsOidc? source)
         {
-            return ConvertOptions<V1ConnectionOidcOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionOidcOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                DiscoveryUrl = source.DiscoveryUrl,
+                AuthorizationEndpoint = source.AuthorizationEndpoint,
+                TokenEndpoint = source.TokenEndpoint,
+                UserinfoEndpoint = source.UserinfoEndpoint,
+                JwksUri = source.JwksUri,
+                Issuer = source.Issuer,
+                Scope = source.Scope,
+                IconUrl = source.IconUrl,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                TenantDomain = source.TenantDomain,
+                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? source.TokenEndpointAuthMethod.Value?.ToString() : null,
+                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
+                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
+                DpopSigningAlg = source.DpopSigningAlg?.ToString(),
+                SendBackChannelNonce = source.SendBackChannelNonce,
+                Type = source.Type?.ToString(),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionOktaOptions? FromApi(ConnectionOptionsOkta? source)
         {
-            return ConvertOptions<V1ConnectionOktaOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionOktaOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                AuthorizationEndpoint = source.AuthorizationEndpoint,
+                TokenEndpoint = source.TokenEndpoint,
+                UserinfoEndpoint = source.UserinfoEndpoint,
+                JwksUri = source.JwksUri,
+                Issuer = source.Issuer,
+                Scope = source.Scope,
+                IconUrl = source.IconUrl,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                TenantDomain = source.TenantDomain,
+                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? source.TokenEndpointAuthMethod.Value?.ToString() : null,
+                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
+                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
+                DpopSigningAlg = source.DpopSigningAlg?.ToString(),
+                SendBackChannelNonce = source.SendBackChannelNonce,
+                Type = source.Type?.ToString(),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Domain = source.Domain,
+            };
         }
 
         internal static V1ConnectionPaypalOptions? FromApi(ConnectionOptionsPaypal? source)
         {
-            return ConvertOptions<V1ConnectionPaypalOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionPaypalOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionPingFederateOptions? FromApi(ConnectionOptionsPingFederate? source)
         {
-            return ConvertOptions<V1ConnectionPingFederateOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionPingFederateOptions
+            {
+                PingFederateBaseUrl = source.PingFederateBaseUrl,
+                SignInEndpoint = source.SignInEndpoint,
+                EntityId = source.EntityId,
+                Cert = source.Cert,
+                SigningCert = source.SigningCert,
+                Thumbprints = source.Thumbprints?.ToArray(),
+                SignatureAlgorithm = source.SignatureAlgorithm?.ToString(),
+                DigestAlgorithm = source.DigestAlgorithm?.ToString(),
+                SignSamlRequest = source.SignSamlRequest,
+                ProtocolBinding = source.ProtocolBinding?.ToString(),
+                IconUrl = source.IconUrl,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                TenantDomain = source.TenantDomain,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionSalesforceOptions? FromApi(ConnectionOptionsSalesforce? source)
         {
-            return ConvertOptions<V1ConnectionSalesforceOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionSalesforceOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionSalesforceCommunityOptions? FromApi(ConnectionOptionsSalesforceCommunity? source)
         {
-            return ConvertOptions<V1ConnectionSalesforceCommunityOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionSalesforceCommunityOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                CommunityBaseUrl = source.CommunityBaseUrl,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionSamlOptions? FromApi(ConnectionOptionsSaml? source)
         {
-            return ConvertOptions<V1ConnectionSamlOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionSamlOptions
+            {
+                SignInEndpoint = source.SignInEndpoint,
+                SignOutEndpoint = source.SignOutEndpoint,
+                DisableSignout = source.DisableSignout,
+                DestinationUrl = source.DestinationUrl,
+                RecipientUrl = source.RecipientUrl,
+                Cert = source.Cert,
+                Thumbprints = source.Thumbprints?.ToArray(),
+                MetadataUrl = source.MetadataUrl,
+                MetadataXml = source.MetadataXml,
+                EntityId = source.EntityId,
+                SignatureAlgorithm = source.SignatureAlgorithm?.ToString(),
+                DigestAlgorithm = source.DigestAlgorithm?.ToString(),
+                SignSamlRequest = source.SignSamlRequest,
+                ProtocolBinding = source.ProtocolBinding?.ToString(),
+                RequestTemplate = source.RequestTemplate,
+                Debug = source.Debug,
+                Deflate = source.Deflate,
+                SigningCert = source.SigningCert,
+                UserIdAttribute = source.UserIdAttribute,
+                IconUrl = source.IconUrl,
+                DomainAliases = source.DomainAliases?.ToArray(),
+                TenantDomain = source.TenantDomain,
+                GlobalTokenRevocationJwtIss = source.GlobalTokenRevocationJwtIss,
+                GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionSmsOptions? FromApi(ConnectionOptionsSms? source)
         {
-            return ConvertOptions<V1ConnectionSmsOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionSmsOptions
+            {
+                Name = source.Name,
+                From = source.From,
+                Template = source.Template,
+                Syntax = source.Syntax?.ToString(),
+                Provider = source.Provider?.ToString(),
+                TwilioSid = source.TwilioSid,
+                TwilioToken = source.TwilioToken,
+                MessagingServiceSid = source.MessagingServiceSid,
+                GatewayUrl = source.GatewayUrl,
+                ForwardReqInfo = source.ForwardReqInfo,
+                DisableSignup = source.DisableSignup,
+                BruteForceProtection = source.BruteForceProtection,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
         }
 
         internal static V1ConnectionTwitterOptions? FromApi(ConnectionOptionsTwitter? source)
         {
-            return ConvertOptions<V1ConnectionTwitterOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionTwitterOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
         }
 
         internal static V1ConnectionWindowsLiveOptions? FromApi(ConnectionOptionsWindowsLive? source)
         {
-            return ConvertOptions<V1ConnectionWindowsLiveOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionWindowsLiveOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                BasicProfile = source.Basic,
+                OfflineAccess = source.OfflineAccess,
+                Signin = source.Signin,
+                Birthday = source.Birthday,
+                Calendars = source.Calendars,
+                CalendarsUpdate = source.CalendarsUpdate,
+                ContactsBirthday = source.ContactsBirthday,
+                ContactsCreate = source.ContactsCreate,
+                ContactsCalendar = source.ContactsCalendars,
+                ContactsPhotos = source.ContactsPhotos,
+                ContactsSkydrive = source.ContactsSkydrive,
+                Emails = source.Emails,
+                EventsCreate = source.EventsCreate,
+                Messenger = source.Messenger,
+                PhoneNumbers = source.PhoneNumbers,
+                Photos = source.Photos,
+                PostalAddresses = source.PostalAddresses,
+                Share = source.Share,
+                Skydrive = source.Skydrive,
+                SkydriveUpdate = source.SkydriveUpdate,
+                WorkProfile = source.WorkProfile,
+                Applications = source.Applications,
+                ApplicationsCreate = source.ApplicationsCreate,
+            };
         }
 
         internal static V1ConnectionYahooOptions? FromApi(ConnectionOptionsYahoo? source)
         {
-            return ConvertOptions<V1ConnectionYahooOptions>(source);
+            if (source is null)
+                return null;
+
+            return new V1ConnectionYahooOptions
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+            };
+        }
+
+        internal static V1ConnectionSetUserRootAttributes FromApi(ConnectionSetUserRootAttributesEnum source)
+        {
+            return source.Value switch
+            {
+                ConnectionSetUserRootAttributesEnum.Values.OnEachLogin => V1ConnectionSetUserRootAttributes.OnEachLogin,
+                ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin => V1ConnectionSetUserRootAttributes.OnFirstLogin,
+                ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin => V1ConnectionSetUserRootAttributes.NeverOnLogin,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
         }
 
         internal static V1ConnectionOptionsValidation FromApi(ConnectionValidationOptions source)
@@ -728,7 +1326,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     return null;
 
                 var conf = FromApi(self);
-                conf.EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken)).Select(i => new V1ClientReference() { Id = i }).ToArray();
+                conf.EnabledClients = (await GetEnabledClientsAsync(api, id, cancellationToken)).Select(i => new V1ClientReference() { Id = i }).ToArray();
                 return conf;
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
@@ -765,7 +1363,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf is null || string.IsNullOrEmpty(conf.Name))
                     return null;
 
-                var pager = await api.Connections.ListAsync(new ListConnectionsQueryParameters { Name = Optional<string?>.Of(conf.Name) }, null, cancellationToken);
+                var pager = await api.Connections.ListAsync(new ListConnectionsQueryParameters { Name = conf.Name }, null, cancellationToken);
                 var self = pager.CurrentPage.Items?.FirstOrDefault(i => i.Name == conf.Name);
                 if (self is not null)
                     Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection by name: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), conf.Name);
@@ -815,24 +1413,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 Name = conf.Name ?? throw new InvalidOperationException("Missing connection name."),
                 Strategy = ConnectionIdentityProviderEnum.FromCustom(conf.Strategy),
             };
-            ApplyToApi(conf, req);
 
-            // calculate options: depends on current strategy, but we need to potentially patch the existing resource
-            if (conf.Options is not null)
-            {
-                if (conf.Strategy == "auth0")
-                {
-                    var options = new ConnectionPropertiesOptions();
-                    req.Options = options;
-                    ApplyToApi(conf.Options, options);
-                }
-                else
-                {
-                    var options = (dynamic)new JObject();
-                    req.Options = options;
-                    ApplyToApi(conf.Options, ref options);
-                }
-            }
+            ApplyToApi(conf, req);
 
             var self = await api.Connections.CreateAsync(req, null, cancellationToken);
             if (self is null)
@@ -849,24 +1431,6 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var req = new UpdateConnectionRequestContent();
             ApplyToApi(conf, req);
-
-            // calculate options: depends on current strategy, but we need to potentially patch the existing resource
-            if (conf.Options is not null)
-            {
-                var current = await api.Connections.GetAsync(id, new GetConnectionRequestParameters(), null, cancellationToken);
-                if (current.Strategy == "auth0")
-                {
-                    var options = new UpdateConnectionOptions();
-                    req.Options = Optional<UpdateConnectionOptions?>.Of(options);
-                    ApplyToApi(conf.Options, options);
-                }
-                else
-                {
-                    var options = (dynamic)(current.Options is not null ? JObject.FromObject(current.Options) : new JObject());
-                    req.Options = Optional<UpdateConnectionOptions?>.Of(options);
-                    ApplyToApi(conf.Options, ref options);
-                }
-            }
 
             await api.Connections.UpdateAsync(id, req, null, cancellationToken);
             await UpdateEnabledClientsAsync(api, id, conf, defaultNamespace, cancellationToken);
@@ -898,6 +1462,47 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
+
+            object? options = source.Strategy switch
+            {
+                "auth0" => source.Auth0Options,
+                "ad" => source.AdOptions,
+                "adfs" => source.AdfsOptions,
+                "auth0-oidc" => source.Auth0OidcOptions,
+                "waad" => source.AzureAdOptions,
+                "bitbucket" => source.BitbucketOptions,
+                "box" => source.BoxOptions,
+                "dropbox" => source.DropboxOptions,
+                "email" => source.EmailOptions,
+                "evernote" => source.EvernoteOptions,
+                "evernote-sandbox" => source.EvernoteSandboxOptions,
+                "exact" => source.ExactOptions,
+                "facebook" => source.FacebookOptions,
+                "github" => source.GitHubOptions,
+                "google-apps" => source.GoogleAppsOptions,
+                "google-oauth2" => source.GoogleOAuth2Options,
+                "linkedin" => source.LinkedinOptions,
+                "oauth1" => source.OAuth1Options,
+                "oauth2" => source.OAuth2Options,
+                "office365" => source.Office365Options,
+                "oidc" => source.OidcOptions,
+                "okta" => source.OktaOptions,
+                "paypal" => source.PaypalOptions,
+                "paypal-sandbox" => source.PaypalSandboxOptions,
+                "pingfederate" => source.PingFederateOptions,
+                "salesforce" => source.SalesforceOptions,
+                "salesforce-community" => source.SalesforceCommunityOptions,
+                "salesforce-sandbox" => source.SalesforceSandboxOptions,
+                "samlp" => source.SamlOptions,
+                "sms" => source.SmsOptions,
+                "twitter" => source.TwitterOptions,
+                "windowslive" => source.WindowsLiveOptions,
+                "yahoo" => source.YahooOptions,
+                _ => null,
+            };
+
+            if (options is not null)
+                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options));
         }
 
         internal static void ApplyToApi(V1ConnectionConf source, UpdateConnectionRequestContent target)
@@ -916,6 +1521,47 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
+
+            object? options = source.Strategy switch
+            {
+                "auth0" => source.Auth0Options,
+                "ad" => source.AdOptions,
+                "adfs" => source.AdfsOptions,
+                "auth0-oidc" => source.Auth0OidcOptions,
+                "waad" => source.AzureAdOptions,
+                "bitbucket" => source.BitbucketOptions,
+                "box" => source.BoxOptions,
+                "dropbox" => source.DropboxOptions,
+                "email" => source.EmailOptions,
+                "evernote" => source.EvernoteOptions,
+                "evernote-sandbox" => source.EvernoteSandboxOptions,
+                "exact" => source.ExactOptions,
+                "facebook" => source.FacebookOptions,
+                "github" => source.GitHubOptions,
+                "google-apps" => source.GoogleAppsOptions,
+                "google-oauth2" => source.GoogleOAuth2Options,
+                "linkedin" => source.LinkedinOptions,
+                "oauth1" => source.OAuth1Options,
+                "oauth2" => source.OAuth2Options,
+                "office365" => source.Office365Options,
+                "oidc" => source.OidcOptions,
+                "okta" => source.OktaOptions,
+                "paypal" => source.PaypalOptions,
+                "paypal-sandbox" => source.PaypalSandboxOptions,
+                "pingfederate" => source.PingFederateOptions,
+                "salesforce" => source.SalesforceOptions,
+                "salesforce-community" => source.SalesforceCommunityOptions,
+                "salesforce-sandbox" => source.SalesforceSandboxOptions,
+                "samlp" => source.SamlOptions,
+                "sms" => source.SmsOptions,
+                "twitter" => source.TwitterOptions,
+                "windowslive" => source.WindowsLiveOptions,
+                "yahoo" => source.YahooOptions,
+                _ => null,
+            };
+
+            if (options is not null)
+                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options));
         }
 
         void ApplyToApi(V1ConnectionOptions source, ConnectionOptionsAuth0 target)

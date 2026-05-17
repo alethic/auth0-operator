@@ -3,8 +3,6 @@ using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Extensions;
 
-using KubeOps.Abstractions.Entities.Attributes;
-
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
@@ -51,12 +49,6 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? IsDomainConnection { get; set; } = false;
 
-        // ── Strategy-specific options (discriminated union) ────────────────────
-
-        /// <summary>
-        /// Options for the <c>auth0</c> database connection strategy. Also used as the fallback
-        /// for unknown strategies via <see cref="V1ConnectionOptions.AdditionalProperties"/>.
-        /// </summary>
         [JsonPropertyName("auth0Options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V1ConnectionAuth0Options? Auth0Options { get; set; }
