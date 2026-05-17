@@ -99,7 +99,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("evernoteSandboxOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionEvernoteSandboxOptions? EvernoteSandboxOptions { get; set; }
+        public V1ConnectionEvernoteOptions? EvernoteSandboxOptions { get; set; }
 
         [JsonPropertyName("exactOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -151,7 +151,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("paypalSandboxOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionPaypalSandboxOptions? PaypalSandboxOptions { get; set; }
+        public V1ConnectionPaypalOptions? PaypalSandboxOptions { get; set; }
 
         [JsonPropertyName("pingFederateOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -167,7 +167,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("salesforceSandboxOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionSalesforceSandboxOptions? SalesforceSandboxOptions { get; set; }
+        public V1ConnectionSalesforceOptions? SalesforceSandboxOptions { get; set; }
 
         [JsonPropertyName("samlOptions")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

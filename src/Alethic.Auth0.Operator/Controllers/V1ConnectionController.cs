@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -66,928 +67,328 @@ namespace Alethic.Auth0.Operator.Controllers
             return System.Text.Json.JsonSerializer.Deserialize<TTo>(System.Text.Json.JsonSerializer.Serialize(source));
         }
 
+        internal static TTo? ConvertOptions<TTo>(object? source) where TTo : class
+        {
+            if (source is null)
+                return null;
+            return System.Text.Json.JsonSerializer.Deserialize<TTo>(System.Text.Json.JsonSerializer.Serialize(source));
+        }
+
         /// <summary>
         /// Converts a <see cref="GetConnectionResponseContent"/> API response to a <see cref="V1ConnectionConf"/>.
         /// Note: <see cref="V1ConnectionConf.EnabledClients"/> is populated separately and left null here.
         /// </summary>
+        [return: NotNullIfNotNull(nameof(source))]
         internal static V1ConnectionConf? FromApi(GetConnectionResponseContent? source)
         {
             if (source is null)
                 return null;
 
-            return source.Strategy switch
-            {
-                ConnectionResponseContentAuth0Strategy.Values.Auth0 => FromApi(ConvertTo<ConnectionResponseContentAuth0>(source)),
-                ConnectionResponseContentAdStrategy.Values.Ad => FromApi(ConvertTo<ConnectionResponseContentAd>(source)),
-                ConnectionResponseContentAdfsStrategy.Values.Adfs => FromApi(ConvertTo<ConnectionResponseContentAdfs>(source)),
-                ConnectionResponseContentAmazonStrategy.Values.Amazon => FromApi(ConvertTo<ConnectionResponseContentAmazon>(source)),
-                ConnectionResponseContentAppleStrategy.Values.Apple => FromApi(ConvertTo<ConnectionResponseContentApple>(source)),
-                ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc => FromApi(ConvertTo<ConnectionResponseContentAuth0Oidc>(source)),
-                ConnectionResponseContentBaiduStrategy.Values.Baidu => FromApi(ConvertTo<ConnectionResponseContentBaidu>(source)),
-                ConnectionResponseContentBitbucketStrategy.Values.Bitbucket => FromApi(ConvertTo<ConnectionResponseContentBitbucket>(source)),
-                ConnectionResponseContentBitlyStrategy.Values.Bitly => FromApi(ConvertTo<ConnectionResponseContentBitly>(source)),
-                ConnectionResponseContentBoxStrategy.Values.Box => FromApi(ConvertTo<ConnectionResponseContentBox>(source)),
-                ConnectionResponseContentDaccountStrategy.Values.Daccount => FromApi(ConvertTo<ConnectionResponseContentDaccount>(source)),
-                ConnectionResponseContentDropboxStrategy.Values.Dropbox => FromApi(ConvertTo<ConnectionResponseContentDropbox>(source)),
-                ConnectionResponseContentDwollaStrategy.Values.Dwolla => FromApi(ConvertTo<ConnectionResponseContentDwolla>(source)),
-                ConnectionResponseContentEmailStrategy.Values.Email => FromApi(ConvertTo<ConnectionResponseContentEmail>(source)),
-                ConnectionResponseContentEvernoteStrategy.Values.Evernote => FromApi(ConvertTo<ConnectionResponseContentEvernote>(source)),
-                ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox => FromApi(ConvertTo<ConnectionResponseContentEvernoteSandbox>(source)),
-                ConnectionResponseContentExactStrategy.Values.Exact => FromApi(ConvertTo<ConnectionResponseContentExact>(source)),
-                ConnectionResponseContentFacebookStrategy.Values.Facebook => FromApi(ConvertTo<ConnectionResponseContentFacebook>(source)),
-                ConnectionResponseContentFitbitStrategy.Values.Fitbit => FromApi(ConvertTo<ConnectionResponseContentFitbit>(source)),
-                ConnectionResponseContentGitHubStrategy.Values.Github => FromApi(ConvertTo<ConnectionResponseContentGitHub>(source)),
-                ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps => FromApi(ConvertTo<ConnectionResponseContentGoogleApps>(source)),
-                ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2 => FromApi(ConvertTo<ConnectionResponseContentGoogleOAuth2>(source)),
-                ConnectionResponseContentInstagramStrategy.Values.Instagram => FromApi(ConvertTo<ConnectionResponseContentInstagram>(source)),
-                ConnectionResponseContentLineStrategy.Values.Line => FromApi(ConvertTo<ConnectionResponseContentLine>(source)),
-                ConnectionResponseContentLinkedinStrategy.Values.Linkedin => FromApi(ConvertTo<ConnectionResponseContentLinkedin>(source)),
-                ConnectionResponseContentOAuth1Strategy.Values.Oauth1 => FromApi(ConvertTo<ConnectionResponseContentOAuth1>(source)),
-                ConnectionResponseContentOAuth2Strategy.Values.Oauth2 => FromApi(ConvertTo<ConnectionResponseContentOAuth2>(source)),
-                ConnectionResponseContentOffice365Strategy.Values.Office365 => FromApi(ConvertTo<ConnectionResponseContentOffice365>(source)),
-                ConnectionResponseContentOidcStrategy.Values.Oidc => FromApi(ConvertTo<ConnectionResponseContentOidc>(source)),
-                ConnectionResponseContentOktaStrategy.Values.Okta => FromApi(ConvertTo<ConnectionResponseContentOkta>(source)),
-                ConnectionResponseContentPaypalStrategy.Values.Paypal => FromApi(ConvertTo<ConnectionResponseContentPaypal>(source)),
-                ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox => FromApi(ConvertTo<ConnectionResponseContentPaypalSandbox>(source)),
-                ConnectionResponseContentPingFederateStrategy.Values.Pingfederate => FromApi(ConvertTo<ConnectionResponseContentPingFederate>(source)),
-                ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter => FromApi(ConvertTo<ConnectionResponseContentPlanningCenter>(source)),
-                ConnectionResponseContentSalesforceStrategy.Values.Salesforce => FromApi(ConvertTo<ConnectionResponseContentSalesforce>(source)),
-                ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity => FromApi(ConvertTo<ConnectionResponseContentSalesforceCommunity>(source)),
-                ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox => FromApi(ConvertTo<ConnectionResponseContentSalesforceSandbox>(source)),
-                ConnectionResponseContentSamlStrategy.Values.Samlp => FromApi(ConvertTo<ConnectionResponseContentSaml>(source)),
-                ConnectionResponseContentSharepointStrategy.Values.Sharepoint => FromApi(ConvertTo<ConnectionResponseContentSharepoint>(source)),
-                ConnectionResponseContentShopifyStrategy.Values.Shopify => FromApi(ConvertTo<ConnectionResponseContentShopify>(source)),
-                ConnectionResponseContentShopStrategy.Values.Shop => FromApi(ConvertTo<ConnectionResponseContentShop>(source)),
-                ConnectionResponseContentSmsStrategy.Values.Sms => FromApi(ConvertTo<ConnectionResponseContentSms>(source)),
-                ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud => FromApi(ConvertTo<ConnectionResponseContentSoundcloud>(source)),
-                ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals => FromApi(ConvertTo<ConnectionResponseContentThirtySevenSignals>(source)),
-                ConnectionResponseContentTwitterStrategy.Values.Twitter => FromApi(ConvertTo<ConnectionResponseContentTwitter>(source)),
-                ConnectionResponseContentUntappdStrategy.Values.Untappd => FromApi(ConvertTo<ConnectionResponseContentUntappd>(source)),
-                ConnectionResponseContentVkontakteStrategy.Values.Vkontakte => FromApi(ConvertTo<ConnectionResponseContentVkontakte>(source)),
-                ConnectionResponseContentAzureAdStrategy.Values.Waad => FromApi(ConvertTo<ConnectionResponseContentAzureAd>(source)),
-                ConnectionResponseContentWeiboStrategy.Values.Weibo => FromApi(ConvertTo<ConnectionResponseContentWeibo>(source)),
-                ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive => FromApi(ConvertTo<ConnectionResponseContentWindowsLive>(source)),
-                ConnectionResponseContentWordpressStrategy.Values.Wordpress => FromApi(ConvertTo<ConnectionResponseContentWordpress>(source)),
-                ConnectionResponseContentYahooStrategy.Values.Yahoo => FromApi(ConvertTo<ConnectionResponseContentYahoo>(source)),
-                ConnectionResponseContentYandexStrategy.Values.Yandex => FromApi(ConvertTo<ConnectionResponseContentYandex>(source)),
-                _ => throw new InvalidOperationException(),
-            };
-        }
-
-        /// <summary>
-        /// Builds a <see cref="V1ConnectionConf"/> from a strategy-specific response-content type that carries
-        /// a typed <see cref="ConnectionOptionsAuth0"/> on its <c>Options</c> property.
-        /// </summary>
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAuth0 source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
+            var conf = new V1ConnectionConf()
             {
                 Name = source.Name,
                 DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Options = source.Options is { } opts ? FromApi(opts) : null,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAd source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAdStrategy.Values.Ad,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Ad = new V1ConnectionAdConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAdfs source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAdfsStrategy.Values.Adfs,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Adfs = new V1ConnectionAdfsConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAmazon source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAmazonStrategy.Values.Amazon,
+                Strategy = source.Strategy,
                 Realms = source.Realms?.ToArray(),
                 IsDomainConnection = source.IsDomainConnection,
             };
+
+            switch (source.Strategy)
+            {
+                case ConnectionResponseContentAuth0Strategy.Values.Auth0:
+                    conf.Auth0Options = FromApi(ConvertTo<ConnectionResponseContentAuth0>(source).Options);
+                    break;
+                case ConnectionResponseContentAdStrategy.Values.Ad:
+                    conf.AdOptions = FromApi(ConvertTo<ConnectionResponseContentAd>(source).Options);
+                    break;
+                case ConnectionResponseContentAdfsStrategy.Values.Adfs:
+                    conf.AdfsOptions = FromApi(ConvertTo<ConnectionResponseContentAdfs>(source).Options);
+                    break;
+                case ConnectionResponseContentAmazonStrategy.Values.Amazon:
+                    break;
+                case ConnectionResponseContentAppleStrategy.Values.Apple:
+                    break;
+                case ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc:
+                    conf.Auth0OidcOptions = FromApi(ConvertTo<ConnectionResponseContentAuth0Oidc>(source).Options);
+                    break;
+                case ConnectionResponseContentBaiduStrategy.Values.Baidu:
+                    break;
+                case ConnectionResponseContentBitbucketStrategy.Values.Bitbucket:
+                    conf.BitbucketOptions = FromApi(ConvertTo<ConnectionResponseContentBitbucket>(source).Options);
+                    break;
+                case ConnectionResponseContentBitlyStrategy.Values.Bitly:
+                    break;
+                case ConnectionResponseContentBoxStrategy.Values.Box:
+                    conf.BoxOptions = FromApi(ConvertTo<ConnectionResponseContentBox>(source).Options);
+                    break;
+                case ConnectionResponseContentDaccountStrategy.Values.Daccount:
+                    break;
+                case ConnectionResponseContentDropboxStrategy.Values.Dropbox:
+                    conf.DropboxOptions = FromApi(ConvertTo<ConnectionResponseContentDropbox>(source).Options);
+                    break;
+                case ConnectionResponseContentDwollaStrategy.Values.Dwolla:
+                    break;
+                case ConnectionResponseContentEmailStrategy.Values.Email:
+                    conf.EmailOptions = FromApi(ConvertTo<ConnectionResponseContentEmail>(source).Options);
+                    break;
+                case ConnectionResponseContentEvernoteStrategy.Values.Evernote:
+                    conf.EvernoteOptions = FromApi(ConvertTo<ConnectionResponseContentEvernote>(source).Options);
+                    break;
+                case ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox:
+                    conf.EvernoteSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentEvernoteSandbox>(source).Options);
+                    break;
+                case ConnectionResponseContentExactStrategy.Values.Exact:
+                    conf.ExactOptions = FromApi(ConvertTo<ConnectionResponseContentExact>(source).Options);
+                    break;
+                case ConnectionResponseContentFacebookStrategy.Values.Facebook:
+                    conf.FacebookOptions = FromApi(ConvertTo<ConnectionResponseContentFacebook>(source).Options);
+                    break;
+                case ConnectionResponseContentFitbitStrategy.Values.Fitbit:
+                    break;
+                case ConnectionResponseContentGitHubStrategy.Values.Github:
+                    conf.GitHubOptions = FromApi(ConvertTo<ConnectionResponseContentGitHub>(source).Options);
+                    break;
+                case ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps:
+                    conf.GoogleAppsOptions = FromApi(ConvertTo<ConnectionResponseContentGoogleApps>(source).Options);
+                    break;
+                case ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2:
+                    conf.GoogleOAuth2Options = FromApi(ConvertTo<ConnectionResponseContentGoogleOAuth2>(source).Options);
+                    break;
+                case ConnectionResponseContentInstagramStrategy.Values.Instagram:
+                    break;
+                case ConnectionResponseContentLineStrategy.Values.Line:
+                    break;
+                case ConnectionResponseContentLinkedinStrategy.Values.Linkedin:
+                    conf.LinkedinOptions = FromApi(ConvertTo<ConnectionResponseContentLinkedin>(source).Options);
+                    break;
+                case ConnectionResponseContentOAuth1Strategy.Values.Oauth1:
+                    conf.OAuth1Options = FromApi(ConvertTo<ConnectionResponseContentOAuth1>(source).Options);
+                    break;
+                case ConnectionResponseContentOAuth2Strategy.Values.Oauth2:
+                    conf.OAuth2Options = FromApi(ConvertTo<ConnectionResponseContentOAuth2>(source).Options);
+                    break;
+                case ConnectionResponseContentOffice365Strategy.Values.Office365:
+                    conf.Office365Options = FromApi(ConvertTo<ConnectionResponseContentOffice365>(source).Options);
+                    break;
+                case ConnectionResponseContentOidcStrategy.Values.Oidc:
+                    conf.OidcOptions = FromApi(ConvertTo<ConnectionResponseContentOidc>(source).Options);
+                    break;
+                case ConnectionResponseContentOktaStrategy.Values.Okta:
+                    conf.OktaOptions = FromApi(ConvertTo<ConnectionResponseContentOkta>(source).Options);
+                    break;
+                case ConnectionResponseContentPaypalStrategy.Values.Paypal:
+                    conf.PaypalOptions = FromApi(ConvertTo<ConnectionResponseContentPaypal>(source).Options);
+                    break;
+                case ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox:
+                    conf.PaypalSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentPaypalSandbox>(source).Options);
+                    break;
+                case ConnectionResponseContentPingFederateStrategy.Values.Pingfederate:
+                    conf.PingFederateOptions = FromApi(ConvertTo<ConnectionResponseContentPingFederate>(source).Options);
+                    break;
+                case ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter:
+                    break;
+                case ConnectionResponseContentSalesforceStrategy.Values.Salesforce:
+                    conf.SalesforceOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforce>(source).Options);
+                    break;
+                case ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity:
+                    conf.SalesforceCommunityOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforceCommunity>(source).Options);
+                    break;
+                case ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox:
+                    conf.SalesforceSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforceSandbox>(source).Options);
+                    break;
+                case ConnectionResponseContentSamlStrategy.Values.Samlp:
+                    conf.SamlOptions = FromApi(ConvertTo<ConnectionResponseContentSaml>(source).Options);
+                    break;
+                case ConnectionResponseContentSharepointStrategy.Values.Sharepoint:
+                    break;
+                case ConnectionResponseContentShopifyStrategy.Values.Shopify:
+                    break;
+                case ConnectionResponseContentShopStrategy.Values.Shop:
+                    break;
+                case ConnectionResponseContentSmsStrategy.Values.Sms:
+                    conf.SmsOptions = FromApi(ConvertTo<ConnectionResponseContentSms>(source).Options);
+                    break;
+                case ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud:
+                    break;
+                case ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals:
+                    break;
+                case ConnectionResponseContentTwitterStrategy.Values.Twitter:
+                    conf.TwitterOptions = FromApi(ConvertTo<ConnectionResponseContentTwitter>(source).Options);
+                    break;
+                case ConnectionResponseContentUntappdStrategy.Values.Untappd:
+                    break;
+                case ConnectionResponseContentVkontakteStrategy.Values.Vkontakte:
+                    break;
+                case ConnectionResponseContentAzureAdStrategy.Values.Waad:
+                    conf.AzureAdOptions = FromApi(ConvertTo<ConnectionResponseContentAzureAd>(source).Options);
+                    break;
+                case ConnectionResponseContentWeiboStrategy.Values.Weibo:
+                    break;
+                case ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive:
+                    conf.WindowsLiveOptions = FromApi(ConvertTo<ConnectionResponseContentWindowsLive>(source).Options);
+                    break;
+                case ConnectionResponseContentWordpressStrategy.Values.Wordpress:
+                    break;
+                case ConnectionResponseContentYahooStrategy.Values.Yahoo:
+                    conf.YahooOptions = FromApi(ConvertTo<ConnectionResponseContentYahoo>(source).Options);
+                    break;
+                case ConnectionResponseContentYandexStrategy.Values.Yandex:
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            return conf;
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentApple source)
+        internal static V1ConnectionAuth0Options? FromApi(ConnectionOptionsAuth0? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAppleStrategy.Values.Apple,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionAuth0Options>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAuth0Oidc source)
+        internal static V1ConnectionAdOptions? FromApi(ConnectionOptionsAd? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Auth0Oidc = new V1ConnectionAuth0OidcConf(),
-            };
+            return ConvertOptions<V1ConnectionAdOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentBaidu source)
+        internal static V1ConnectionAdfsOptions? FromApi(ConnectionOptionsAdfs? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentBaiduStrategy.Values.Baidu,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionAdfsOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentBitbucket source)
+        internal static V1ConnectionAuth0OidcOptions? FromApi(ConnectionOptionsAuth0Oidc? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentBitbucketStrategy.Values.Bitbucket,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Bitbucket = new V1ConnectionBitbucketConf(),
-            };
+            return ConvertOptions<V1ConnectionAuth0OidcOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentBitly source)
+        internal static V1ConnectionAzureAdOptions? FromApi(ConnectionOptionsAzureAd? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentBitlyStrategy.Values.Bitly,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionAzureAdOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentBox source)
+        internal static V1ConnectionBitbucketOptions? FromApi(ConnectionOptionsBitbucket? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentBoxStrategy.Values.Box,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Box = new V1ConnectionBoxConf(),
-            };
+            return ConvertOptions<V1ConnectionBitbucketOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentDaccount source)
+        internal static V1ConnectionBoxOptions? FromApi(ConnectionOptionsBox? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentDaccountStrategy.Values.Daccount,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionBoxOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentDropbox source)
+        internal static V1ConnectionDropboxOptions? FromApi(ConnectionOptionsDropbox? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentDropboxStrategy.Values.Dropbox,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Dropbox = new V1ConnectionDropboxConf(),
-            };
+            return ConvertOptions<V1ConnectionDropboxOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentDwolla source)
+        internal static V1ConnectionEmailOptions? FromApi(ConnectionOptionsEmail? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentDwollaStrategy.Values.Dwolla,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionEmailOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentEmail source)
+        internal static V1ConnectionEvernoteOptions? FromApi(ConnectionOptionsEvernote? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentEmailStrategy.Values.Email,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Email = new V1ConnectionEmailConf(),
-            };
+            return ConvertOptions<V1ConnectionEvernoteOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentEvernote source)
+        internal static V1ConnectionExactOptions? FromApi(ConnectionOptionsExact? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentEvernoteStrategy.Values.Evernote,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Evernote = new V1ConnectionEvernoteConf(),
-            };
+            return ConvertOptions<V1ConnectionExactOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentEvernoteSandbox source)
+        internal static V1ConnectionFacebookOptions? FromApi(ConnectionOptionsFacebook? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                EvernoteSandbox = new V1ConnectionEvernoteSandboxConf(),
-            };
+            return ConvertOptions<V1ConnectionFacebookOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentExact source)
+        internal static V1ConnectionGitHubOptions? FromApi(ConnectionOptionsGitHub? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentExactStrategy.Values.Exact,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Exact = new V1ConnectionExactConf(),
-            };
+            return ConvertOptions<V1ConnectionGitHubOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentFacebook source)
+        internal static V1ConnectionGoogleAppsOptions? FromApi(ConnectionOptionsGoogleApps? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentFacebookStrategy.Values.Facebook,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Facebook = new V1ConnectionFacebookConf(),
-            };
+            return ConvertOptions<V1ConnectionGoogleAppsOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentFitbit source)
+        internal static V1ConnectionGoogleOAuth2Options? FromApi(ConnectionOptionsGoogleOAuth2? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentFitbitStrategy.Values.Fitbit,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionGoogleOAuth2Options>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentGitHub source)
+        internal static V1ConnectionLinkedinOptions? FromApi(ConnectionOptionsLinkedin? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentGitHubStrategy.Values.Github,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                GitHub = new V1ConnectionGitHubConf(),
-            };
+            return ConvertOptions<V1ConnectionLinkedinOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentGoogleApps source)
+        internal static V1ConnectionOAuth1Options? FromApi(ConnectionOptionsOAuth1? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                GoogleApps = new V1ConnectionGoogleAppsConf(),
-            };
+            return ConvertOptions<V1ConnectionOAuth1Options>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentGoogleOAuth2 source)
+        internal static V1ConnectionOAuth2Options? FromApi(ConnectionOptionsOAuth2? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                GoogleOAuth2 = new V1ConnectionGoogleOAuth2Conf(),
-            };
+            return ConvertOptions<V1ConnectionOAuth2Options>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentInstagram source)
+        internal static V1ConnectionOffice365Options? FromApi(ConnectionOptionsOffice365? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentInstagramStrategy.Values.Instagram,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionOffice365Options>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentLine source)
+        internal static V1ConnectionOidcOptions? FromApi(ConnectionOptionsOidc? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentLineStrategy.Values.Line,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
+            return ConvertOptions<V1ConnectionOidcOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentLinkedin source)
+        internal static V1ConnectionOktaOptions? FromApi(ConnectionOptionsOkta? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentLinkedinStrategy.Values.Linkedin,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Linkedin = new V1ConnectionLinkedinConf(),
-            };
+            return ConvertOptions<V1ConnectionOktaOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentOAuth1 source)
+        internal static V1ConnectionPaypalOptions? FromApi(ConnectionOptionsPaypal? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentOAuth1Strategy.Values.Oauth1,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                OAuth1 = new V1ConnectionOAuth1Conf(),
-            };
+            return ConvertOptions<V1ConnectionPaypalOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentOAuth2 source)
+        internal static V1ConnectionPingFederateOptions? FromApi(ConnectionOptionsPingFederate? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentOAuth2Strategy.Values.Oauth2,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                OAuth2 = new V1ConnectionOAuth2Conf(),
-            };
+            return ConvertOptions<V1ConnectionPingFederateOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentOffice365 source)
+        internal static V1ConnectionSalesforceOptions? FromApi(ConnectionOptionsSalesforce? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentOffice365Strategy.Values.Office365,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Office365 = new V1ConnectionOffice365Conf(),
-            };
+            return ConvertOptions<V1ConnectionSalesforceOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentOidc source)
+        internal static V1ConnectionSalesforceCommunityOptions? FromApi(ConnectionOptionsSalesforceCommunity? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentOidcStrategy.Values.Oidc,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Oidc = new V1ConnectionOidcConf(),
-            };
+            return ConvertOptions<V1ConnectionSalesforceCommunityOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentOkta source)
+        internal static V1ConnectionSamlOptions? FromApi(ConnectionOptionsSaml? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentOktaStrategy.Values.Okta,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Okta = new V1ConnectionOktaConf(),
-            };
+            return ConvertOptions<V1ConnectionSamlOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentPaypal source)
+        internal static V1ConnectionSmsOptions? FromApi(ConnectionOptionsSms? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentPaypalStrategy.Values.Paypal,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Paypal = new V1ConnectionPaypalConf(),
-            };
+            return ConvertOptions<V1ConnectionSmsOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentPaypalSandbox source)
+        internal static V1ConnectionTwitterOptions? FromApi(ConnectionOptionsTwitter? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                PaypalSandbox = new V1ConnectionPaypalSandboxConf(),
-            };
+            return ConvertOptions<V1ConnectionTwitterOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentPingFederate source)
+        internal static V1ConnectionWindowsLiveOptions? FromApi(ConnectionOptionsWindowsLive? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentPingFederateStrategy.Values.Pingfederate,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                PingFederate = new V1ConnectionPingFederateConf(),
-            };
+            return ConvertOptions<V1ConnectionWindowsLiveOptions>(source);
         }
 
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentPlanningCenter source)
+        internal static V1ConnectionYahooOptions? FromApi(ConnectionOptionsYahoo? source)
         {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSalesforce source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSalesforceStrategy.Values.Salesforce,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Salesforce = new V1ConnectionSalesforceConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSalesforceCommunity source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                SalesforceCommunity = new V1ConnectionSalesforceCommunityConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSalesforceSandbox source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                SalesforceSandbox = new V1ConnectionSalesforceSandboxConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSaml source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSamlStrategy.Values.Samlp,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Saml = new V1ConnectionSamlConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSharepoint source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSharepointStrategy.Values.Sharepoint,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentShopify source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentShopifyStrategy.Values.Shopify,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentShop source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentShopStrategy.Values.Shop,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSms source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSmsStrategy.Values.Sms,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Sms = new V1ConnectionSmsConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentSoundcloud source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentThirtySevenSignals source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentTwitter source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentTwitterStrategy.Values.Twitter,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Twitter = new V1ConnectionTwitterConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentUntappd source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentUntappdStrategy.Values.Untappd,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentVkontakte source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentVkontakteStrategy.Values.Vkontakte,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentAzureAd source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentAzureAdStrategy.Values.Waad,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                AzureAd = new V1ConnectionAzureAdConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentWeibo source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentWeiboStrategy.Values.Weibo,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentWindowsLive source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                WindowsLive = new V1ConnectionWindowsLiveConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentWordpress source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentWordpressStrategy.Values.Wordpress,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentYahoo source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentYahooStrategy.Values.Yahoo,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-                Yahoo = new V1ConnectionYahooConf(),
-            };
-        }
-
-        internal static V1ConnectionConf? FromApi(ConnectionResponseContentYandex source)
-        {
-            if (source is null)
-                return null;
-
-            return new V1ConnectionConf()
-            {
-                Name = source.Name,
-                DisplayName = source.DisplayName,
-                Strategy = ConnectionResponseContentYandexStrategy.Values.Yandex,
-                Realms = source.Realms?.ToArray(),
-                IsDomainConnection = source.IsDomainConnection,
-            };
-        }
-
-        internal static V1ConnectionOptions FromApi(ConnectionOptionsAuth0 source)
-        {
-            return new V1ConnectionOptions()
-            {
-                Validation = source.Validation.IsDefined && source.Validation.Value is { } v ? FromApi(v) : null,
-                NonPersistentAttributes = source.NonPersistentAttrs?.ToArray(),
-                Precedence = source.Precedence is { } prec ? prec.Select(FromApi).ToArray() : null,
-                Attributes = source.Attributes is { } attr ? FromApi(attr) : null,
-                EnableScriptContext = source.EnableScriptContext,
-                EnableDatabaseCustomization = source.EnabledDatabaseCustomization,
-                ImportMode = source.ImportMode,
-                CustomScripts = source.CustomScripts is { } cs ? FromApi(cs) : null,
-                AuthenticationMethods = source.AuthenticationMethods.IsDefined && source.AuthenticationMethods.Value is { } am ? FromApi(am) : null,
-                PasskeyOptions = source.PasskeyOptions.IsDefined && source.PasskeyOptions.Value is { } po ? FromApi(po) : null,
-                PasswordPolicy = source.PasswordPolicy.IsDefined && source.PasswordPolicy.Value is { } pp ? FromApi(pp) : null,
-                PasswordComplexityOptions = source.PasswordComplexityOptions.IsDefined && source.PasswordComplexityOptions.Value is { } pco ? FromApi(pco) : null,
-                PasswordHistory = source.PasswordHistory.IsDefined && source.PasswordHistory.Value is { } ph ? FromApi(ph) : null,
-                PasswordNoPersonalInfo = source.PasswordNoPersonalInfo.IsDefined && source.PasswordNoPersonalInfo.Value is { } pnpi ? FromApi(pnpi) : null,
-                PasswordDictionary = source.PasswordDictionary.IsDefined && source.PasswordDictionary.Value is { } pd ? FromApi(pd) : null,
-                DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword,
-            };
+            return ConvertOptions<V1ConnectionYahooOptions>(source);
         }
 
         internal static V1ConnectionOptionsValidation FromApi(ConnectionValidationOptions source)
@@ -1204,75 +605,99 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V1ConnectionOptionsPrecedence FromApi(ConnectionIdentifierPrecedenceEnum source) => source.Value switch
+        internal static V1ConnectionOptionsPrecedence FromApi(ConnectionIdentifierPrecedenceEnum source)
         {
-            ConnectionIdentifierPrecedenceEnum.Values.Email => V1ConnectionOptionsPrecedence.Email,
-            ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber => V1ConnectionOptionsPrecedence.PhoneNumber,
-            ConnectionIdentifierPrecedenceEnum.Values.Username => V1ConnectionOptionsPrecedence.UserName,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source.Value switch
+            {
+                ConnectionIdentifierPrecedenceEnum.Values.Email => V1ConnectionOptionsPrecedence.Email,
+                ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber => V1ConnectionOptionsPrecedence.PhoneNumber,
+                ConnectionIdentifierPrecedenceEnum.Values.Username => V1ConnectionOptionsPrecedence.UserName,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static ConnectionIdentifierPrecedenceEnum ToApi(V1ConnectionOptionsPrecedence source) => source switch
+        internal static ConnectionIdentifierPrecedenceEnum ToApi(V1ConnectionOptionsPrecedence source)
         {
-            V1ConnectionOptionsPrecedence.Email => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Email),
-            V1ConnectionOptionsPrecedence.PhoneNumber => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber),
-            V1ConnectionOptionsPrecedence.UserName => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Username),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source switch
+            {
+                V1ConnectionOptionsPrecedence.Email => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Email),
+                V1ConnectionOptionsPrecedence.PhoneNumber => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber),
+                V1ConnectionOptionsPrecedence.UserName => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Username),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static V1ConnectionOptionsAttributeStatus? FromApi(SignupStatusEnum? source) => source?.Value switch
+        internal static V1ConnectionOptionsAttributeStatus? FromApi(SignupStatusEnum? source)
         {
-            SignupStatusEnum.Values.Required => V1ConnectionOptionsAttributeStatus.Required,
-            SignupStatusEnum.Values.Optional => V1ConnectionOptionsAttributeStatus.Optional,
-            SignupStatusEnum.Values.Inactive => V1ConnectionOptionsAttributeStatus.Inactive,
-            null => null,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source?.Value switch
+            {
+                SignupStatusEnum.Values.Required => V1ConnectionOptionsAttributeStatus.Required,
+                SignupStatusEnum.Values.Optional => V1ConnectionOptionsAttributeStatus.Optional,
+                SignupStatusEnum.Values.Inactive => V1ConnectionOptionsAttributeStatus.Inactive,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static SignupStatusEnum ToApi(V1ConnectionOptionsAttributeStatus source) => source switch
+        internal static SignupStatusEnum ToApi(V1ConnectionOptionsAttributeStatus source)
         {
-            V1ConnectionOptionsAttributeStatus.Required => new SignupStatusEnum(SignupStatusEnum.Values.Required),
-            V1ConnectionOptionsAttributeStatus.Optional => new SignupStatusEnum(SignupStatusEnum.Values.Optional),
-            V1ConnectionOptionsAttributeStatus.Inactive => new SignupStatusEnum(SignupStatusEnum.Values.Inactive),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source switch
+            {
+                V1ConnectionOptionsAttributeStatus.Required => new SignupStatusEnum(SignupStatusEnum.Values.Required),
+                V1ConnectionOptionsAttributeStatus.Optional => new SignupStatusEnum(SignupStatusEnum.Values.Optional),
+                V1ConnectionOptionsAttributeStatus.Inactive => new SignupStatusEnum(SignupStatusEnum.Values.Inactive),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static V1ConnectionOptionsPasswordPolicy? FromApi(ConnectionPasswordPolicyEnum? source) => source?.Value switch
+        internal static V1ConnectionOptionsPasswordPolicy? FromApi(ConnectionPasswordPolicyEnum? source)
         {
-            ConnectionPasswordPolicyEnum.Values.None => V1ConnectionOptionsPasswordPolicy.None,
-            ConnectionPasswordPolicyEnum.Values.Low => V1ConnectionOptionsPasswordPolicy.Low,
-            ConnectionPasswordPolicyEnum.Values.Fair => V1ConnectionOptionsPasswordPolicy.Fair,
-            ConnectionPasswordPolicyEnum.Values.Good => V1ConnectionOptionsPasswordPolicy.Good,
-            ConnectionPasswordPolicyEnum.Values.Excellent => V1ConnectionOptionsPasswordPolicy.Excellent,
-            null => null,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source?.Value switch
+            {
+                ConnectionPasswordPolicyEnum.Values.None => V1ConnectionOptionsPasswordPolicy.None,
+                ConnectionPasswordPolicyEnum.Values.Low => V1ConnectionOptionsPasswordPolicy.Low,
+                ConnectionPasswordPolicyEnum.Values.Fair => V1ConnectionOptionsPasswordPolicy.Fair,
+                ConnectionPasswordPolicyEnum.Values.Good => V1ConnectionOptionsPasswordPolicy.Good,
+                ConnectionPasswordPolicyEnum.Values.Excellent => V1ConnectionOptionsPasswordPolicy.Excellent,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static ConnectionPasswordPolicyEnum ToApi(V1ConnectionOptionsPasswordPolicy source) => source switch
+        internal static ConnectionPasswordPolicyEnum ToApi(V1ConnectionOptionsPasswordPolicy source)
         {
-            V1ConnectionOptionsPasswordPolicy.None => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.None),
-            V1ConnectionOptionsPasswordPolicy.Low => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Low),
-            V1ConnectionOptionsPasswordPolicy.Fair => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Fair),
-            V1ConnectionOptionsPasswordPolicy.Good => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Good),
-            V1ConnectionOptionsPasswordPolicy.Excellent => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Excellent),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source switch
+            {
+                V1ConnectionOptionsPasswordPolicy.None => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.None),
+                V1ConnectionOptionsPasswordPolicy.Low => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Low),
+                V1ConnectionOptionsPasswordPolicy.Fair => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Fair),
+                V1ConnectionOptionsPasswordPolicy.Good => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Good),
+                V1ConnectionOptionsPasswordPolicy.Excellent => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Excellent),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static V1ConnectionChallengeUi FromApi(ConnectionPasskeyChallengeUiEnum source) => source.Value switch
+        internal static V1ConnectionChallengeUi FromApi(ConnectionPasskeyChallengeUiEnum source)
         {
-            ConnectionPasskeyChallengeUiEnum.Values.Both => V1ConnectionChallengeUi.Both,
-            ConnectionPasskeyChallengeUiEnum.Values.Autofill => V1ConnectionChallengeUi.AutoFill,
-            ConnectionPasskeyChallengeUiEnum.Values.Button => V1ConnectionChallengeUi.Button,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source.Value switch
+            {
+                ConnectionPasskeyChallengeUiEnum.Values.Both => V1ConnectionChallengeUi.Both,
+                ConnectionPasskeyChallengeUiEnum.Values.Autofill => V1ConnectionChallengeUi.AutoFill,
+                ConnectionPasskeyChallengeUiEnum.Values.Button => V1ConnectionChallengeUi.Button,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
-        internal static ConnectionPasskeyChallengeUiEnum ToApi(V1ConnectionChallengeUi source) => source switch
+        internal static ConnectionPasskeyChallengeUiEnum ToApi(V1ConnectionChallengeUi source)
         {
-            V1ConnectionChallengeUi.Both => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Both),
-            V1ConnectionChallengeUi.AutoFill => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Autofill),
-            V1ConnectionChallengeUi.Button => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Button),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-        };
+            return source switch
+            {
+                V1ConnectionChallengeUi.Both => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Both),
+                V1ConnectionChallengeUi.AutoFill => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Autofill),
+                V1ConnectionChallengeUi.Button => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Button),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
         /// <summary>
         /// Gets the list of enabled client IDs for the specified connection.
@@ -1302,10 +727,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (self == null)
                     return null;
 
-                var conf = FromApi(self)!;
-                conf.EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken))
-                    .Select(i => new V1ClientReference() { Id = i })
-                    .ToArray();
+                var conf = FromApi(self);
+                conf.EnabledClients = (await GetEnabledClientsAsync(api, self.Id, cancellationToken)).Select(i => new V1ClientReference() { Id = i }).ToArray();
                 return conf;
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
@@ -1386,9 +809,6 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.Strategy is null)
                 throw new InvalidOperationException("Missing connection strategy.");
-
-            if (conf.Options is null)
-                throw new InvalidOperationException("Missing connection options.");
 
             var req = new CreateConnectionRequestContent()
             {
