@@ -442,6 +442,18 @@ namespace Alethic.Auth0.Operator.Controllers
             return new V1ConnectionEmailOptions
             {
                 Name = source.Name,
+                Email = source.Email is { } e ? new V1ConnectionEmailMessage
+                {
+                    From = e.From,
+                    Subject = e.Subject,
+                    Body = e.Body,
+                    Syntax = e.Syntax?.Value,
+                } : null,
+                Totp = source.Totp is { } t ? new V1ConnectionEmailTotp
+                {
+                    Length = t.Length,
+                    TimeStep = t.TimeStep,
+                } : null,
                 BruteForceProtection = source.BruteForceProtection,
                 DisableSignup = source.DisableSignup,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
@@ -1386,6 +1398,718 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static ConnectionSetUserRootAttributesEnum? ToApi(V1ConnectionSetUserRootAttributes? source)
+        {
+            return source switch
+            {
+                V1ConnectionSetUserRootAttributes.OnEachLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.OnEachLogin),
+                V1ConnectionSetUserRootAttributes.OnFirstLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin),
+                V1ConnectionSetUserRootAttributes.NeverOnLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionOptionsAuth0 ToApi(V1ConnectionAuth0Options source)
+        {
+            var target = new ConnectionOptionsAuth0();
+            target.BruteForceProtection = source.BruteForceProtection;
+            target.DisableSignup = source.DisableSignup;
+            target.EnableScriptContext = source.EnableScriptContext;
+            target.EnabledDatabaseCustomization = source.EnabledDatabaseCustomization;
+            target.ImportMode = source.ImportMode;
+            target.RequiresUsername = source.RequiresUsername;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsAd ToApi(V1ConnectionAdOptions source)
+        {
+            var target = new ConnectionOptionsAd();
+            target.AgentIp = source.AgentIp;
+            target.AgentVersion = source.AgentVersion;
+            target.BruteForceProtection = source.BruteForceProtection;
+            target.CertAuth = source.CertAuth;
+            if (source.Certs is { } certs) target.Certs = certs;
+            target.DisableCache = source.DisableCache;
+            target.DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.IconUrl = source.IconUrl;
+            if (source.Ips is { } ips) target.Ips = ips;
+            target.SignInEndpoint = source.SignInEndpoint;
+            target.TenantDomain = source.TenantDomain;
+            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsAdfs ToApi(V1ConnectionAdfsOptions source)
+        {
+            var target = new ConnectionOptionsAdfs();
+            target.AdfsServer = source.AdfsServer;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.EntityId = source.EntityId;
+            target.FedMetadataXml = source.FedMetadataXml;
+            target.IconUrl = source.IconUrl;
+            if (source.PrevThumbprints is { } pt) target.PrevThumbprints = pt;
+            target.SignInEndpoint = source.SignInEndpoint;
+            target.TenantDomain = source.TenantDomain;
+            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            target.UserIdAttribute = source.UserIdAttribute;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsAuth0Oidc ToApi(V1ConnectionAuth0OidcOptions source)
+        {
+            var target = new ConnectionOptionsAuth0Oidc();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            return target;
+        }
+
+        internal static ConnectionOptionsAzureAd ToApi(V1ConnectionAzureAdOptions source)
+        {
+            var target = new ConnectionOptionsAzureAd { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            target.ApiEnableUsers = source.ApiEnableUsers;
+            target.AppDomain = source.AppDomain;
+            target.AppId = source.AppId;
+            target.BasicProfile = source.BasicProfile;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.ExtAccessToken = source.ExtAccessToken;
+            target.ExtAccountEnabled = source.ExtAccountEnabled;
+            target.ExtAdmin = source.ExtAdmin;
+            target.ExtAgreedTerms = source.ExtAgreedTerms;
+            target.ExtAssignedLicenses = source.ExtAssignedLicenses;
+            target.ExtAssignedPlans = source.ExtAssignedPlans;
+            target.ExtAzureId = source.ExtAzureId;
+            target.ExtCity = source.ExtCity;
+            target.ExtCountry = source.ExtCountry;
+            target.ExtDepartment = source.ExtDepartment;
+            target.ExtDirSyncEnabled = source.ExtDirSyncEnabled;
+            target.ExtEmail = source.ExtEmail;
+            target.ExtExpiresIn = source.ExtExpiresIn;
+            target.ExtFamilyName = source.ExtFamilyName;
+            target.ExtFax = source.ExtFax;
+            target.ExtGivenName = source.ExtGivenName;
+            target.ExtGroupIds = source.ExtGroupIds;
+            target.ExtGroups = source.ExtGroups;
+            target.ExtIsSuspended = source.ExtIsSuspended;
+            target.ExtJobTitle = source.ExtJobTitle;
+            target.ExtLastSync = source.ExtLastSync;
+            target.ExtMobile = source.ExtMobile;
+            target.ExtName = source.ExtName;
+            target.ExtNestedGroups = source.ExtNestedGroups;
+            target.ExtNickname = source.ExtNickname;
+            target.ExtOid = source.ExtOid;
+            target.ExtPhone = source.ExtPhone;
+            target.ExtPhysicalDeliveryOfficeName = source.ExtPhysicalDeliveryOfficeName;
+            target.ExtPostalCode = source.ExtPostalCode;
+            target.ExtPreferredLanguage = source.ExtPreferredLanguage;
+            target.ExtProfile = source.ExtProfile;
+            target.ExtProvisionedPlans = source.ExtProvisionedPlans;
+            target.ExtProvisioningErrors = source.ExtProvisioningErrors;
+            target.ExtProxyAddresses = source.ExtProxyAddresses;
+            target.ExtPuid = source.ExtPuid;
+            target.ExtRefreshToken = source.ExtRefreshToken;
+            target.ExtRoles = source.ExtRoles;
+            target.ExtState = source.ExtState;
+            target.ExtStreet = source.ExtStreet;
+            target.ExtTelephoneNumber = source.ExtTelephoneNumber;
+            target.ExtTenantid = source.ExtTenantid;
+            target.ExtUpn = source.ExtUpn;
+            target.ExtUsageLocation = source.ExtUsageLocation;
+            target.ExtUserId = source.ExtUserId;
+            target.Granted = source.Granted;
+            target.IconUrl = source.IconUrl;
+            target.MaxGroupsToRetrieve = source.MaxGroupsToRetrieve;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            target.TenantDomain = source.TenantDomain;
+            target.TenantId = source.TenantId;
+            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            target.UseCommonEndpoint = source.UseCommonEndpoint;
+            target.UseWsfed = source.UseWsfed;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsBitbucket ToApi(V1ConnectionBitbucketOptions source)
+        {
+            var target = new ConnectionOptionsBitbucket();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            target.Profile = source.Profile;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsBox ToApi(V1ConnectionBoxOptions source)
+        {
+            var target = new ConnectionOptionsBox();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsDropbox ToApi(V1ConnectionDropboxOptions source)
+        {
+            var target = new ConnectionOptionsDropbox();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsEmail ToApi(V1ConnectionEmailOptions source)
+        {
+            return new ConnectionOptionsEmail
+            {
+                Name = source.Name ?? string.Empty,
+                BruteForceProtection = source.BruteForceProtection ?? false,
+                Email = source.Email is { } e ? new ConnectionEmailEmail
+                {
+                    From = e.From,
+                    Subject = e.Subject,
+                    Body = e.Body,
+                    Syntax = e.Syntax is { } s ? new ConnectionEmailEmailSyntax(s) : null,
+                } : new ConnectionEmailEmail(),
+                Totp = source.Totp is { } t ? new ConnectionTotpEmail
+                {
+                    Length = t.Length,
+                    TimeStep = t.TimeStep,
+                } : null,
+                DisableSignup = source.DisableSignup,
+                NonPersistentAttrs = source.NonPersistentAttrs,
+            };
+        }
+
+        internal static ConnectionOptionsEvernote ToApi(V1ConnectionEvernoteOptions source)
+        {
+            var target = new ConnectionOptionsEvernote();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsExact ToApi(V1ConnectionExactOptions source)
+        {
+            var target = new ConnectionOptionsExact();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsFacebook ToApi(V1ConnectionFacebookOptions source)
+        {
+            var target = new ConnectionOptionsFacebook();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.AdsManagement = source.AdsManagement;
+            target.AdsRead = source.AdsRead;
+            target.AllowContextProfileField = source.AllowContextProfileField;
+            target.BusinessManagement = source.BusinessManagement;
+            target.Email = source.Email;
+            target.GroupsAccessMemberInfo = source.GroupsAccessMemberInfo;
+            target.LeadsRetrieval = source.LeadsRetrieval;
+            target.ManageNotifications = source.ManageNotifications;
+            target.ManagePages = source.ManagePages;
+            target.PagesManageCta = source.PagesManageCta;
+            target.PagesManageInstantArticles = source.PagesManageInstantArticles;
+            target.PagesMessaging = source.PagesMessaging;
+            target.PagesMessagingPhoneNumber = source.PagesMessagingPhoneNumber;
+            target.PagesMessagingSubscriptions = source.PagesMessagingSubscriptions;
+            target.PagesShowList = source.PagesShowList;
+            target.PublicProfile = source.PublicProfile;
+            target.PublishActions = source.PublishActions;
+            target.PublishPages = source.PublishPages;
+            target.PublishToGroups = source.PublishToGroups;
+            target.PublishVideo = source.PublishVideo;
+            target.ReadAudienceNetworkInsights = source.ReadAudienceNetworkInsights;
+            target.ReadInsights = source.ReadInsights;
+            target.ReadMailbox = source.ReadMailbox;
+            target.ReadPageMailboxes = source.ReadPageMailboxes;
+            target.ReadStream = source.ReadStream;
+            target.UserAgeRange = source.UserAgeRange;
+            target.UserBirthday = source.UserBirthday;
+            target.UserEvents = source.UserEvents;
+            target.UserFriends = source.UserFriends;
+            target.UserGender = source.UserGender;
+            target.UserGroups = source.UserGroups;
+            target.UserHometown = source.UserHometown;
+            target.UserLikes = source.UserLikes;
+            target.UserLink = source.UserLink;
+            target.UserLocation = source.UserLocation;
+            target.UserManagedGroups = source.UserManagedGroups;
+            target.UserPhotos = source.UserPhotos;
+            target.UserPosts = source.UserPosts;
+            target.UserStatus = source.UserStatus;
+            target.UserTaggedPlaces = source.UserTaggedPlaces;
+            target.UserVideos = source.UserVideos;
+            return target;
+        }
+
+        internal static ConnectionOptionsGitHub ToApi(V1ConnectionGitHubOptions source)
+        {
+            var target = new ConnectionOptionsGitHub();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.AdminOrg = source.AdminOrg;
+            target.AdminPublicKey = source.AdminPublicKey;
+            target.AdminRepoHook = source.AdminRepoHook;
+            target.DeleteRepo = source.DeleteRepo;
+            target.Email = source.Email;
+            target.Follow = source.Follow;
+            target.Gist = source.Gist;
+            target.Notifications = source.Notifications;
+            target.Profile = source.Profile;
+            target.PublicRepo = source.PublicRepo;
+            target.ReadOrg = source.ReadOrg;
+            target.ReadPublicKey = source.ReadPublicKey;
+            target.ReadRepoHook = source.ReadRepoHook;
+            target.ReadUser = source.ReadUser;
+            target.Repo = source.Repo;
+            target.RepoDeployment = source.RepoDeployment;
+            target.RepoStatus = source.RepoStatus;
+            target.WriteOrg = source.WriteOrg;
+            target.WritePublicKey = source.WritePublicKey;
+            target.WriteRepoHook = source.WriteRepoHook;
+            return target;
+        }
+
+        internal static ConnectionOptionsGoogleApps ToApi(V1ConnectionGoogleAppsOptions source)
+        {
+            var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.Domain = source.Domain;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.TenantDomain = source.TenantDomain;
+            target.IconUrl = source.IconUrl;
+            target.Email = source.Email;
+            target.Profile = source.Profile;
+            target.ApiEnableUsers = source.ApiEnableUsers;
+            target.MapUserIdToId = source.MapUserIdToId;
+            target.AdminAccessToken = source.AdminAccessToken;
+            target.AdminRefreshToken = source.AdminRefreshToken;
+            target.AllowSettingLoginScopes = source.AllowSettingLoginScopes;
+            target.ApiEnableGroups = source.ApiEnableGroups;
+            target.ExtAgreedTerms = source.ExtAgreedTerms;
+            target.ExtGroups = source.ExtGroups;
+            target.ExtGroupsExtended = source.ExtGroupsExtended;
+            target.ExtIsAdmin = source.ExtIsAdmin;
+            target.ExtIsSuspended = source.ExtIsSuspended;
+            target.HandleLoginFromSocial = source.HandleLoginFromSocial;
+            if (source.FederatedConnectionsAccessTokens is { } fcat)
+                target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(
+                    new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+            return target;
+        }
+
+        internal static ConnectionOptionsGoogleOAuth2 ToApi(V1ConnectionGoogleOAuth2Options source)
+        {
+            var target = new ConnectionOptionsGoogleOAuth2();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.IconUrl = source.IconUrl;
+            if (source.AllowedAudiences is { } aa) target.AllowedAudiences = aa;
+            target.AdsenseManagement = source.AdsenseManagement;
+            target.Analytics = source.Analytics;
+            target.Blogger = source.Blogger;
+            target.Calendar = source.Calendar;
+            target.CalendarAddonsExecute = source.CalendarAddonsExecute;
+            target.CalendarEvents = source.CalendarEvents;
+            target.CalendarEventsReadonly = source.CalendarEventsReadonly;
+            target.CalendarSettingsReadonly = source.CalendarSettingsReadonly;
+            target.ChromeWebStore = source.ChromeWebStore;
+            target.Contacts = source.Contacts;
+            target.ContactsNew = source.ContactsNew;
+            target.ContactsOtherReadonly = source.ContactsOtherReadonly;
+            target.ContactsReadonly = source.ContactsReadonly;
+            target.ContentApiForShopping = source.ContentApiForShopping;
+            target.Coordinate = source.Coordinate;
+            target.CoordinateReadonly = source.CoordinateReadonly;
+            target.DirectoryReadonly = source.DirectoryReadonly;
+            target.DocumentList = source.DocumentList;
+            target.Drive = source.Drive;
+            target.DriveActivity = source.DriveActivity;
+            target.DriveActivityReadonly = source.DriveActivityReadonly;
+            target.DriveAppdata = source.DriveAppdata;
+            target.DriveAppsReadonly = source.DriveAppsReadonly;
+            target.DriveFile = source.DriveFile;
+            target.DriveMetadata = source.DriveMetadata;
+            target.DriveMetadataReadonly = source.DriveMetadataReadonly;
+            target.DrivePhotosReadonly = source.DrivePhotosReadonly;
+            target.DriveReadonly = source.DriveReadonly;
+            target.DriveScripts = source.DriveScripts;
+            target.Email = source.Email;
+            target.Gmail = source.Gmail;
+            target.GmailCompose = source.GmailCompose;
+            target.GmailInsert = source.GmailInsert;
+            target.GmailLabels = source.GmailLabels;
+            target.GmailMetadata = source.GmailMetadata;
+            target.GmailModify = source.GmailModify;
+            target.GmailNew = source.GmailNew;
+            target.GmailReadonly = source.GmailReadonly;
+            target.GmailSend = source.GmailSend;
+            target.GmailSettingsBasic = source.GmailSettingsBasic;
+            target.GmailSettingsSharing = source.GmailSettingsSharing;
+            target.GoogleAffiliateNetwork = source.GoogleAffiliateNetwork;
+            target.GoogleBooks = source.GoogleBooks;
+            target.GoogleCloudStorage = source.GoogleCloudStorage;
+            target.GoogleDrive = source.GoogleDrive;
+            target.GoogleDriveFiles = source.GoogleDriveFiles;
+            target.GooglePlus = source.GooglePlus;
+            target.LatitudeBest = source.LatitudeBest;
+            target.LatitudeCity = source.LatitudeCity;
+            target.Moderator = source.Moderator;
+            target.OfflineAccess = source.OfflineAccess;
+            target.Orkut = source.Orkut;
+            target.PicasaWeb = source.PicasaWeb;
+            target.Profile = source.Profile;
+            target.Sites = source.Sites;
+            target.Tasks = source.Tasks;
+            target.TasksReadonly = source.TasksReadonly;
+            target.UrlShortener = source.UrlShortener;
+            target.WebmasterTools = source.WebmasterTools;
+            target.Youtube = source.Youtube;
+            target.YoutubeChannelmembershipsCreator = source.YoutubeChannelmembershipsCreator;
+            target.YoutubeNew = source.YoutubeNew;
+            target.YoutubeReadonly = source.YoutubeReadonly;
+            target.YoutubeUpload = source.YoutubeUpload;
+            target.Youtubepartner = source.Youtubepartner;
+            return target;
+        }
+
+        internal static ConnectionOptionsLinkedin ToApi(V1ConnectionLinkedinOptions source)
+        {
+            var target = new ConnectionOptionsLinkedin();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.BasicProfile = source.BasicProfile;
+            target.Email = source.EmailAddress;
+            target.FullProfile = source.FullProfile;
+            target.Network = source.Network;
+            target.Openid = source.Openid;
+            target.Profile = source.Profile;
+            target.StrategyVersion = source.StrategyVersion;
+            return target;
+        }
+
+        internal static ConnectionOptionsOAuth1 ToApi(V1ConnectionOAuth1Options source)
+        {
+            var target = new ConnectionOptionsOAuth1();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            target.AccessTokenUrl = source.AccessTokenUrl;
+            target.RequestTokenUrl = source.RequestTokenUrl;
+            target.UserAuthorizationUrl = source.UserAuthorizationUrl;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsOAuth2 ToApi(V1ConnectionOAuth2Options source)
+        {
+            var target = new ConnectionOptionsOAuth2();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            target.AuthorizationUrl = source.AuthorizationUrl;
+            target.TokenUrl = source.TokenUrl;
+            target.LogoutUrl = source.LogoutUrl;
+            target.IconUrl = source.IconUrl;
+            target.PkceEnabled = source.PkceEnabled;
+            target.UseOauthSpecScope = source.UseOauthSpecScope;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsOffice365 ToApi(V1ConnectionOffice365Options source)
+        {
+            var target = new ConnectionOptionsOffice365();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            return target;
+        }
+
+        internal static ConnectionOptionsOidc ToApi(V1ConnectionOidcOptions source)
+        {
+            var target = new ConnectionOptionsOidc { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            target.DiscoveryUrl = source.DiscoveryUrl;
+            target.AuthorizationEndpoint = source.AuthorizationEndpoint;
+            target.TokenEndpoint = source.TokenEndpoint;
+            target.UserinfoEndpoint = source.UserinfoEndpoint;
+            target.JwksUri = source.JwksUri;
+            target.Issuer = source.Issuer;
+            target.Scope = source.Scope;
+            target.IconUrl = source.IconUrl;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.TenantDomain = source.TenantDomain;
+            target.SendBackChannelNonce = source.SendBackChannelNonce;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsOkta ToApi(V1ConnectionOktaOptions source)
+        {
+            var target = new ConnectionOptionsOkta { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            target.Domain = source.Domain;
+            target.AuthorizationEndpoint = source.AuthorizationEndpoint;
+            target.TokenEndpoint = source.TokenEndpoint;
+            target.UserinfoEndpoint = source.UserinfoEndpoint;
+            target.JwksUri = source.JwksUri;
+            target.Issuer = source.Issuer;
+            target.Scope = source.Scope;
+            target.IconUrl = source.IconUrl;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.TenantDomain = source.TenantDomain;
+            target.SendBackChannelNonce = source.SendBackChannelNonce;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsPaypal ToApi(V1ConnectionPaypalOptions source)
+        {
+            var target = new ConnectionOptionsPaypal();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsPingFederate ToApi(V1ConnectionPingFederateOptions source)
+        {
+            var target = new ConnectionOptionsPingFederate { PingFederateBaseUrl = source.PingFederateBaseUrl };
+            target.SignInEndpoint = source.SignInEndpoint;
+            target.EntityId = source.EntityId;
+            target.Cert = source.Cert;
+            target.SigningCert = source.SigningCert;
+            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            target.SignSamlRequest = source.SignSamlRequest;
+            target.IconUrl = source.IconUrl;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.TenantDomain = source.TenantDomain;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsSalesforce ToApi(V1ConnectionSalesforceOptions source)
+        {
+            var target = new ConnectionOptionsSalesforce();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            target.Profile = source.Profile;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsSalesforceCommunity ToApi(V1ConnectionSalesforceCommunityOptions source)
+        {
+            var target = new ConnectionOptionsSalesforceCommunity();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            target.CommunityBaseUrl = source.CommunityBaseUrl;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            target.Profile = source.Profile;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsSaml ToApi(V1ConnectionSamlOptions source)
+        {
+            var target = new ConnectionOptionsSaml();
+            target.SignInEndpoint = source.SignInEndpoint;
+            target.SignOutEndpoint = source.SignOutEndpoint;
+            target.DisableSignout = source.DisableSignout;
+            target.DestinationUrl = source.DestinationUrl;
+            target.RecipientUrl = source.RecipientUrl;
+            target.Cert = source.Cert;
+            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            target.MetadataUrl = source.MetadataUrl;
+            target.MetadataXml = source.MetadataXml;
+            target.EntityId = source.EntityId;
+            target.SignSamlRequest = source.SignSamlRequest;
+            target.RequestTemplate = source.RequestTemplate;
+            target.Debug = source.Debug;
+            target.Deflate = source.Deflate;
+            target.SigningCert = source.SigningCert;
+            target.UserIdAttribute = source.UserIdAttribute;
+            target.IconUrl = source.IconUrl;
+            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            target.TenantDomain = source.TenantDomain;
+            target.GlobalTokenRevocationJwtIss = source.GlobalTokenRevocationJwtIss;
+            target.GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
+        internal static ConnectionOptionsSms ToApi(V1ConnectionSmsOptions source)
+        {
+            var target = new ConnectionOptionsSms();
+            target.Name = source.Name;
+            target.From = source.From;
+            target.Template = source.Template;
+            target.TwilioSid = source.TwilioSid;
+            target.TwilioToken = source.TwilioToken;
+            target.MessagingServiceSid = source.MessagingServiceSid;
+            target.GatewayUrl = source.GatewayUrl;
+            target.ForwardReqInfo = source.ForwardReqInfo;
+            target.DisableSignup = source.DisableSignup;
+            target.BruteForceProtection = source.BruteForceProtection;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.GatewayAuthentication is { } ga)
+            {
+                var gatewayAuth = new ConnectionGatewayAuthenticationSms
+                {
+                    Method = ga.Method ?? string.Empty,
+                    Audience = ga.Audience ?? string.Empty,
+                    Secret = ga.Secret ?? string.Empty,
+                };
+                if (ga.Subject is { } subject) gatewayAuth.Subject = subject;
+                if (ga.SecretBase64Encoded is { } sbe) gatewayAuth.SecretBase64Encoded = sbe;
+                target.GatewayAuthentication = Optional<ConnectionGatewayAuthenticationSms?>.Of(gatewayAuth);
+            }
+            return target;
+        }
+
+        internal static ConnectionOptionsTwitter ToApi(V1ConnectionTwitterOptions source)
+        {
+            var target = new ConnectionOptionsTwitter();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.OfflineAccess = source.OfflineAccess;
+            target.Profile = source.Profile;
+            target.TweetRead = source.TweetRead;
+            target.UsersRead = source.UsersRead;
+            return target;
+        }
+
+        internal static ConnectionOptionsWindowsLive ToApi(V1ConnectionWindowsLiveOptions source)
+        {
+            var target = new ConnectionOptionsWindowsLive();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.Basic = source.BasicProfile;
+            target.OfflineAccess = source.OfflineAccess;
+            target.Signin = source.Signin;
+            target.Birthday = source.Birthday;
+            target.Calendars = source.Calendars;
+            target.CalendarsUpdate = source.CalendarsUpdate;
+            target.ContactsBirthday = source.ContactsBirthday;
+            target.ContactsCreate = source.ContactsCreate;
+            target.ContactsCalendars = source.ContactsCalendar;
+            target.ContactsPhotos = source.ContactsPhotos;
+            target.ContactsSkydrive = source.ContactsSkydrive;
+            target.Emails = source.Emails;
+            target.EventsCreate = source.EventsCreate;
+            target.Messenger = source.Messenger;
+            target.PhoneNumbers = source.PhoneNumbers;
+            target.Photos = source.Photos;
+            target.PostalAddresses = source.PostalAddresses;
+            target.Share = source.Share;
+            target.Skydrive = source.Skydrive;
+            target.SkydriveUpdate = source.SkydriveUpdate;
+            target.WorkProfile = source.WorkProfile;
+            target.Applications = source.Applications;
+            target.ApplicationsCreate = source.ApplicationsCreate;
+            target.StrategyVersion = source.StrategyVersion;
+            target.DirectoryAccessasuserAll = source.DirectoryAccessasuserAll;
+            target.DirectoryReadAll = source.DirectoryReadAll;
+            target.DirectoryReadwriteAll = source.DirectoryReadwriteAll;
+            target.GraphCalendars = source.GraphCalendars;
+            target.GraphCalendarsUpdate = source.GraphCalendarsUpdate;
+            target.GraphContacts = source.GraphContacts;
+            target.GraphContactsUpdate = source.GraphContactsUpdate;
+            target.GraphDevice = source.GraphDevice;
+            target.GraphDeviceCommand = source.GraphDeviceCommand;
+            target.GraphEmails = source.GraphEmails;
+            target.GraphEmailsUpdate = source.GraphEmailsUpdate;
+            target.GraphFiles = source.GraphFiles;
+            target.GraphFilesAll = source.GraphFilesAll;
+            target.GraphFilesAllUpdate = source.GraphFilesAllUpdate;
+            target.GraphFilesUpdate = source.GraphFilesUpdate;
+            target.GraphNotes = source.GraphNotes;
+            target.GraphNotesCreate = source.GraphNotesCreate;
+            target.GraphNotesUpdate = source.GraphNotesUpdate;
+            target.GraphTasks = source.GraphTasks;
+            target.GraphTasksUpdate = source.GraphTasksUpdate;
+            target.GraphUser = source.GraphUser;
+            target.GraphUserActivity = source.GraphUserActivity;
+            target.GraphUserUpdate = source.GraphUserUpdate;
+            target.GroupReadAll = source.GroupReadAll;
+            target.GroupReadwriteAll = source.GroupReadwriteAll;
+            target.MailReadwriteAll = source.MailReadwriteAll;
+            target.MailSend = source.MailSend;
+            target.RolemanagementReadAll = source.RolemanagementReadAll;
+            target.RolemanagementReadwriteDirectory = source.RolemanagementReadwriteDirectory;
+            target.SitesReadAll = source.SitesReadAll;
+            target.SitesReadwriteAll = source.SitesReadwriteAll;
+            target.TeamReadbasicAll = source.TeamReadbasicAll;
+            target.TeamReadwriteAll = source.TeamReadwriteAll;
+            target.UserReadAll = source.UserReadAll;
+            target.UserReadbasicAll = source.UserReadbasicAll;
+            return target;
+        }
+
+        internal static ConnectionOptionsYahoo ToApi(V1ConnectionYahooOptions source)
+        {
+            var target = new ConnectionOptionsYahoo();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            return target;
+        }
+
         /// <summary>
         /// Gets the list of enabled client IDs for the specified connection.
         /// </summary>
@@ -1552,46 +2276,46 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
-            object? options = source.Strategy switch
+            object? apiOptions = source.Strategy switch
             {
-                "auth0" => source.Auth0Options,
-                "ad" => source.AdOptions,
-                "adfs" => source.AdfsOptions,
-                "auth0-oidc" => source.Auth0OidcOptions,
-                "waad" => source.AzureAdOptions,
-                "bitbucket" => source.BitbucketOptions,
-                "box" => source.BoxOptions,
-                "dropbox" => source.DropboxOptions,
-                "email" => source.EmailOptions,
-                "evernote" => source.EvernoteOptions,
-                "evernote-sandbox" => source.EvernoteSandboxOptions,
-                "exact" => source.ExactOptions,
-                "facebook" => source.FacebookOptions,
-                "github" => source.GitHubOptions,
-                "google-apps" => source.GoogleAppsOptions,
-                "google-oauth2" => source.GoogleOAuth2Options,
-                "linkedin" => source.LinkedinOptions,
-                "oauth1" => source.OAuth1Options,
-                "oauth2" => source.OAuth2Options,
-                "office365" => source.Office365Options,
-                "oidc" => source.OidcOptions,
-                "okta" => source.OktaOptions,
-                "paypal" => source.PaypalOptions,
-                "paypal-sandbox" => source.PaypalSandboxOptions,
-                "pingfederate" => source.PingFederateOptions,
-                "salesforce" => source.SalesforceOptions,
-                "salesforce-community" => source.SalesforceCommunityOptions,
-                "salesforce-sandbox" => source.SalesforceSandboxOptions,
-                "samlp" => source.SamlOptions,
-                "sms" => source.SmsOptions,
-                "twitter" => source.TwitterOptions,
-                "windowslive" => source.WindowsLiveOptions,
-                "yahoo" => source.YahooOptions,
+                "auth0" when source.Auth0Options is { } o => ToApi(o),
+                "ad" when source.AdOptions is { } o => ToApi(o),
+                "adfs" when source.AdfsOptions is { } o => ToApi(o),
+                "auth0-oidc" when source.Auth0OidcOptions is { } o => ToApi(o),
+                "waad" when source.AzureAdOptions is { } o => ToApi(o),
+                "bitbucket" when source.BitbucketOptions is { } o => ToApi(o),
+                "box" when source.BoxOptions is { } o => ToApi(o),
+                "dropbox" when source.DropboxOptions is { } o => ToApi(o),
+                "email" when source.EmailOptions is { } o => ToApi(o),
+                "evernote" when source.EvernoteOptions is { } o => ToApi(o),
+                "evernote-sandbox" when source.EvernoteSandboxOptions is { } o => ToApi(o),
+                "exact" when source.ExactOptions is { } o => ToApi(o),
+                "facebook" when source.FacebookOptions is { } o => ToApi(o),
+                "github" when source.GitHubOptions is { } o => ToApi(o),
+                "google-apps" when source.GoogleAppsOptions is { } o => ToApi(o),
+                "google-oauth2" when source.GoogleOAuth2Options is { } o => ToApi(o),
+                "linkedin" when source.LinkedinOptions is { } o => ToApi(o),
+                "oauth1" when source.OAuth1Options is { } o => ToApi(o),
+                "oauth2" when source.OAuth2Options is { } o => ToApi(o),
+                "office365" when source.Office365Options is { } o => ToApi(o),
+                "oidc" when source.OidcOptions is { } o => ToApi(o),
+                "okta" when source.OktaOptions is { } o => ToApi(o),
+                "paypal" when source.PaypalOptions is { } o => ToApi(o),
+                "paypal-sandbox" when source.PaypalSandboxOptions is { } o => ToApi(o),
+                "pingfederate" when source.PingFederateOptions is { } o => ToApi(o),
+                "salesforce" when source.SalesforceOptions is { } o => ToApi(o),
+                "salesforce-community" when source.SalesforceCommunityOptions is { } o => ToApi(o),
+                "salesforce-sandbox" when source.SalesforceSandboxOptions is { } o => ToApi(o),
+                "samlp" when source.SamlOptions is { } o => ToApi(o),
+                "sms" when source.SmsOptions is { } o => ToApi(o),
+                "twitter" when source.TwitterOptions is { } o => ToApi(o),
+                "windowslive" when source.WindowsLiveOptions is { } o => ToApi(o),
+                "yahoo" when source.YahooOptions is { } o => ToApi(o),
                 _ => null,
             };
 
-            if (options is not null)
-                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options));
+            if (apiOptions is not null)
+                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(apiOptions));
         }
 
         internal static void ApplyToApi(V1ConnectionConf source, UpdateConnectionRequestContent target)
@@ -1611,46 +2335,46 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
-            object? options = source.Strategy switch
+            object? apiOptions = source.Strategy switch
             {
-                "auth0" => source.Auth0Options,
-                "ad" => source.AdOptions,
-                "adfs" => source.AdfsOptions,
-                "auth0-oidc" => source.Auth0OidcOptions,
-                "waad" => source.AzureAdOptions,
-                "bitbucket" => source.BitbucketOptions,
-                "box" => source.BoxOptions,
-                "dropbox" => source.DropboxOptions,
-                "email" => source.EmailOptions,
-                "evernote" => source.EvernoteOptions,
-                "evernote-sandbox" => source.EvernoteSandboxOptions,
-                "exact" => source.ExactOptions,
-                "facebook" => source.FacebookOptions,
-                "github" => source.GitHubOptions,
-                "google-apps" => source.GoogleAppsOptions,
-                "google-oauth2" => source.GoogleOAuth2Options,
-                "linkedin" => source.LinkedinOptions,
-                "oauth1" => source.OAuth1Options,
-                "oauth2" => source.OAuth2Options,
-                "office365" => source.Office365Options,
-                "oidc" => source.OidcOptions,
-                "okta" => source.OktaOptions,
-                "paypal" => source.PaypalOptions,
-                "paypal-sandbox" => source.PaypalSandboxOptions,
-                "pingfederate" => source.PingFederateOptions,
-                "salesforce" => source.SalesforceOptions,
-                "salesforce-community" => source.SalesforceCommunityOptions,
-                "salesforce-sandbox" => source.SalesforceSandboxOptions,
-                "samlp" => source.SamlOptions,
-                "sms" => source.SmsOptions,
-                "twitter" => source.TwitterOptions,
-                "windowslive" => source.WindowsLiveOptions,
-                "yahoo" => source.YahooOptions,
+                "auth0" when source.Auth0Options is { } o => ToApi(o),
+                "ad" when source.AdOptions is { } o => ToApi(o),
+                "adfs" when source.AdfsOptions is { } o => ToApi(o),
+                "auth0-oidc" when source.Auth0OidcOptions is { } o => ToApi(o),
+                "waad" when source.AzureAdOptions is { } o => ToApi(o),
+                "bitbucket" when source.BitbucketOptions is { } o => ToApi(o),
+                "box" when source.BoxOptions is { } o => ToApi(o),
+                "dropbox" when source.DropboxOptions is { } o => ToApi(o),
+                "email" when source.EmailOptions is { } o => ToApi(o),
+                "evernote" when source.EvernoteOptions is { } o => ToApi(o),
+                "evernote-sandbox" when source.EvernoteSandboxOptions is { } o => ToApi(o),
+                "exact" when source.ExactOptions is { } o => ToApi(o),
+                "facebook" when source.FacebookOptions is { } o => ToApi(o),
+                "github" when source.GitHubOptions is { } o => ToApi(o),
+                "google-apps" when source.GoogleAppsOptions is { } o => ToApi(o),
+                "google-oauth2" when source.GoogleOAuth2Options is { } o => ToApi(o),
+                "linkedin" when source.LinkedinOptions is { } o => ToApi(o),
+                "oauth1" when source.OAuth1Options is { } o => ToApi(o),
+                "oauth2" when source.OAuth2Options is { } o => ToApi(o),
+                "office365" when source.Office365Options is { } o => ToApi(o),
+                "oidc" when source.OidcOptions is { } o => ToApi(o),
+                "okta" when source.OktaOptions is { } o => ToApi(o),
+                "paypal" when source.PaypalOptions is { } o => ToApi(o),
+                "paypal-sandbox" when source.PaypalSandboxOptions is { } o => ToApi(o),
+                "pingfederate" when source.PingFederateOptions is { } o => ToApi(o),
+                "salesforce" when source.SalesforceOptions is { } o => ToApi(o),
+                "salesforce-community" when source.SalesforceCommunityOptions is { } o => ToApi(o),
+                "salesforce-sandbox" when source.SalesforceSandboxOptions is { } o => ToApi(o),
+                "samlp" when source.SamlOptions is { } o => ToApi(o),
+                "sms" when source.SmsOptions is { } o => ToApi(o),
+                "twitter" when source.TwitterOptions is { } o => ToApi(o),
+                "windowslive" when source.WindowsLiveOptions is { } o => ToApi(o),
+                "yahoo" when source.YahooOptions is { } o => ToApi(o),
                 _ => null,
             };
 
-            if (options is not null)
-                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options));
+            if (apiOptions is not null)
+                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(apiOptions));
         }
 
         void ApplyToApi(V1ConnectionOptions source, ConnectionOptionsAuth0 target)
