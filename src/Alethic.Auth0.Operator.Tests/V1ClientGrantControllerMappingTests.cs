@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 
+using System.Linq;
+
 using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.ClientGrant.V1;
 
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -17,18 +19,24 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── FromApi OrganizationUsage ──────────────────────
 
         [TestMethod]
-        [DataRow(OrganizationUsage.Deny, V1ClientGrantOrganizationUsage.Deny)]
-        [DataRow(OrganizationUsage.Allow, V1ClientGrantOrganizationUsage.Allow)]
-        [DataRow(OrganizationUsage.Require, V1ClientGrantOrganizationUsage.Require)]
-        public void FromApi_OrganizationUsage_MapsCorrectly(OrganizationUsage input, V1ClientGrantOrganizationUsage expected)
+        public void FromApi_OrganizationUsage_Deny()
         {
-            Assert.AreEqual(expected, V1ClientGrantController.FromApi((OrganizationUsage?)input));
+            Assert.AreEqual(V1ClientGrantOrganizationUsage.Deny, V1ClientGrantController.FromApi(new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Deny)));
         }
+
+        [TestMethod]
+        public void FromApi_OrganizationUsage_Allow()
+        {
+            Assert.AreEqual(V1ClientGrantOrganizationUsage.Allow, V1ClientGrantController.FromApi(new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Allow)));
+        }
+
+        [TestMethod]
+        public void FromApi_OrganizationUsage_Require() => Assert.AreEqual(V1ClientGrantOrganizationUsage.Require, V1ClientGrantController.FromApi(new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Require)));
 
         [TestMethod]
         public void FromApi_OrganizationUsage_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientGrantController.FromApi((OrganizationUsage?)null));
+            Assert.IsNull(V1ClientGrantController.FromApi((ClientGrantOrganizationUsageEnum?)null));
         }
 
         // ──────────────────────── FromApi ClientGrant ────────────────────────────
@@ -36,16 +44,16 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_ClientGrant_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientGrantController.FromApi((ClientGrant?)null));
+            Assert.IsNull(V1ClientGrantController.FromApi((GetClientGrantResponseContent?)null));
         }
 
         [TestMethod]
         public void FromApi_ClientGrant_MapsScalarProperties()
         {
-            var source = new ClientGrant
+            var source = new GetClientGrantResponseContent
             {
                 AllowAnyOrganization = true,
-                OrganizationUsage = OrganizationUsage.Allow,
+                OrganizationUsage = new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Allow),
                 Scope = new List<string> { "read:users", "write:users" },
             };
 
@@ -60,7 +68,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_ClientGrant_NullScope_ProducesNullScope()
         {
-            var source = new ClientGrant { Scope = null };
+            var source = new GetClientGrantResponseContent { Scope = null };
             var result = V1ClientGrantController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.IsNull(result.Scope);
@@ -69,7 +77,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_ClientGrant_ClientRef_IsNull()
         {
-            var source = new ClientGrant { ClientId = "some-client-id" };
+            var source = new GetClientGrantResponseContent { ClientId = "some-client-id" };
             var result = V1ClientGrantController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.IsNull(result.ClientRef);
@@ -78,7 +86,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_ClientGrant_Audience_IsNull()
         {
-            var source = new ClientGrant { Audience = "https://api.example.com/" };
+            var source = new GetClientGrantResponseContent { Audience = "https://api.example.com/" };
             var result = V1ClientGrantController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.IsNull(result.Audience);
@@ -87,13 +95,11 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── ToApi OrganizationUsage ────────────────────────
 
         [TestMethod]
-        [DataRow(V1ClientGrantOrganizationUsage.Deny, OrganizationUsage.Deny)]
-        [DataRow(V1ClientGrantOrganizationUsage.Allow, OrganizationUsage.Allow)]
-        [DataRow(V1ClientGrantOrganizationUsage.Require, OrganizationUsage.Require)]
-        public void ToApi_OrganizationUsage_MapsCorrectly(V1ClientGrantOrganizationUsage input, OrganizationUsage expected)
-        {
-            Assert.AreEqual(expected, V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)input));
-        }
+        public void ToApi_OrganizationUsage_Deny() => Assert.AreEqual(ClientGrantOrganizationUsageEnum.Values.Deny, V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Deny)?.Value);
+        [TestMethod]
+        public void ToApi_OrganizationUsage_Allow() => Assert.AreEqual(ClientGrantOrganizationUsageEnum.Values.Allow, V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Allow)?.Value);
+        [TestMethod]
+        public void ToApi_OrganizationUsage_Require() => Assert.AreEqual(ClientGrantOrganizationUsageEnum.Values.Require, V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Require)?.Value);
 
         [TestMethod]
         public void ToApi_OrganizationUsage_Null_Returns_Null()
@@ -104,14 +110,19 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── Roundtrip OrganizationUsage ────────────────────
 
         [TestMethod]
-        [DataRow(V1ClientGrantOrganizationUsage.Deny)]
-        [DataRow(V1ClientGrantOrganizationUsage.Allow)]
-        [DataRow(V1ClientGrantOrganizationUsage.Require)]
-        public void Roundtrip_OrganizationUsage(V1ClientGrantOrganizationUsage value)
+        public void Roundtrip_OrganizationUsage_Deny()
         {
-            var api = V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)value);
-            var back = V1ClientGrantController.FromApi(api);
-            Assert.AreEqual(value, back);
+            var api = V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Deny); var back = V1ClientGrantController.FromApi(api); Assert.AreEqual(V1ClientGrantOrganizationUsage.Deny, back);
+        }
+        [TestMethod]
+        public void Roundtrip_OrganizationUsage_Allow()
+        {
+            var api = V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Allow); var back = V1ClientGrantController.FromApi(api); Assert.AreEqual(V1ClientGrantOrganizationUsage.Allow, back);
+        }
+        [TestMethod]
+        public void Roundtrip_OrganizationUsage_Require()
+        {
+            var api = V1ClientGrantController.ToApi((V1ClientGrantOrganizationUsage?)V1ClientGrantOrganizationUsage.Require); var back = V1ClientGrantController.FromApi(api); Assert.AreEqual(V1ClientGrantOrganizationUsage.Require, back);
         }
 
         // ──────────────────────── ApplyToApi ─────────────────────────────────────
@@ -126,12 +137,12 @@ namespace Alethic.Auth0.Operator.Tests
                 OrganizationUsage = V1ClientGrantOrganizationUsage.Deny,
             };
 
-            var req = new ClientGrantCreateRequest();
+            var req = new CreateClientGrantRequestContent { ClientId = "client-id", Audience = "https://api.example.com" };
             V1ClientGrantController.ApplyToApi(conf, req);
 
-            CollectionAssert.AreEqual(new[] { "read:users", "write:users" }, req.Scope);
+            CollectionAssert.AreEqual(new[] { "read:users", "write:users" }, req.Scope?.ToArray());
             Assert.AreEqual(false, req.AllowAnyOrganization);
-            Assert.AreEqual(OrganizationUsage.Deny, req.OrganizationUsage);
+            Assert.AreEqual(ClientGrantOrganizationUsageEnum.Values.Deny, req.OrganizationUsage?.Value);
         }
 
         [TestMethod]
@@ -144,21 +155,21 @@ namespace Alethic.Auth0.Operator.Tests
                 OrganizationUsage = V1ClientGrantOrganizationUsage.Require,
             };
 
-            var req = new ClientGrantUpdateRequest();
+            var req = new UpdateClientGrantRequestContent();
             V1ClientGrantController.ApplyToApi(conf, req);
 
-            CollectionAssert.AreEqual(new[] { "openid" }, req.Scope);
-            Assert.AreEqual(true, req.AllowAnyOrganization);
-            Assert.AreEqual(OrganizationUsage.Require, req.OrganizationUsage);
+            CollectionAssert.AreEqual(new[] { "openid" }, req.Scope.Value?.ToArray());
+            Assert.AreEqual(true, req.AllowAnyOrganization.Value);
+            Assert.AreEqual(ClientGrantOrganizationNullableUsageEnum.Values.Require, req.OrganizationUsage.Value?.Value);
         }
 
         [TestMethod]
         public void ApplyToApi_NullOrganizationUsage_LeavesNull()
         {
             var conf = new V1ClientGrantConf { OrganizationUsage = null };
-            var req = new ClientGrantUpdateRequest();
+            var req = new UpdateClientGrantRequestContent();
             V1ClientGrantController.ApplyToApi(conf, req);
-            Assert.IsNull(req.OrganizationUsage);
+            Assert.IsFalse(req.OrganizationUsage.IsDefined);
         }
 
     }

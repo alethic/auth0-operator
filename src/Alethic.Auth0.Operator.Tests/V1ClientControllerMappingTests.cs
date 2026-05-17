@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.Client.V1;
 
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,207 +19,185 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Client_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((Client?)null));
+            Assert.IsNull(V1ClientController.FromApi((GetClientResponseContent?)null));
         }
 
         [TestMethod]
         public void FromApi_SigningKey_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((SigningKey?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_ClientResourceServerAssociation_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ClientController.FromApi((ClientResourceServerAssociation?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientSigningKey?)null));
         }
 
         [TestMethod]
         public void FromApi_RefreshToken_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((RefreshToken?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientRefreshTokenConfiguration?)null));
         }
 
         [TestMethod]
         public void FromApi_OidcLogoutConfig_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((OidcLogoutConfig?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientOidcBackchannelLogoutSettings?)null));
         }
 
         [TestMethod]
         public void FromApi_BackchannelLogoutInitiators_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((BackchannelLogoutInitiators?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientOidcBackchannelLogoutInitiators?)null));
         }
 
         [TestMethod]
         public void FromApi_JwtConfiguration_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((JwtConfiguration?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_Scopes_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ClientController.FromApi((Scopes?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_ScopeEntry_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ClientController.FromApi((ScopeEntry?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientJwtConfiguration?)null));
         }
 
         [TestMethod]
         public void FromApi_EncryptionKey_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((EncryptionKey?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientEncryptionKey?)null));
         }
 
         [TestMethod]
         public void FromApi_DefaultOrganization_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((DefaultOrganization?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientDefaultOrganization?)null));
         }
 
         [TestMethod]
         public void FromApi_Mobile_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((Mobile?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientMobile?)null));
         }
 
         [TestMethod]
         public void FromApi_Addons_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((Addons?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientAddons?)null));
         }
 
         // ──────────────────────── FromApi TokenEndpointAuthMethod ─────────────────
 
         [TestMethod]
-        [DataRow(TokenEndpointAuthMethod.None, V1ClientTokenEndpointAuthMethod.None)]
-        [DataRow(TokenEndpointAuthMethod.ClientSecretPost, V1ClientTokenEndpointAuthMethod.ClientSecretPost)]
-        [DataRow(TokenEndpointAuthMethod.ClientSecretBasic, V1ClientTokenEndpointAuthMethod.ClientSecretBasic)]
-        public void FromApi_TokenEndpointAuthMethod_MapsCorrectly(TokenEndpointAuthMethod input, V1ClientTokenEndpointAuthMethod expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((TokenEndpointAuthMethod?)input));
-        }
+        public void FromApi_TokenEndpointAuthMethod_None() => Assert.AreEqual(V1ClientTokenEndpointAuthMethod.None, V1ClientController.FromApi(new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.None)));
+
+        [TestMethod]
+        public void FromApi_TokenEndpointAuthMethod_ClientSecretPost() => Assert.AreEqual(V1ClientTokenEndpointAuthMethod.ClientSecretPost, V1ClientController.FromApi(new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost)));
+
+        [TestMethod]
+        public void FromApi_TokenEndpointAuthMethod_ClientSecretBasic() => Assert.AreEqual(V1ClientTokenEndpointAuthMethod.ClientSecretBasic, V1ClientController.FromApi(new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic)));
 
         [TestMethod]
         public void FromApi_TokenEndpointAuthMethod_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((TokenEndpointAuthMethod?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientTokenEndpointAuthMethodEnum?)null));
         }
 
         // ──────────────────────── FromApi RefreshTokenRotationType ────────────────
 
         [TestMethod]
-        [DataRow(RefreshTokenRotationType.Rotating, V1ClientRefreshTokenRotationType.Rotating)]
-        [DataRow(RefreshTokenRotationType.NonRotating, V1ClientRefreshTokenRotationType.NonRotating)]
-        public void FromApi_RefreshTokenRotationType_MapsCorrectly(RefreshTokenRotationType input, V1ClientRefreshTokenRotationType expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((RefreshTokenRotationType?)input));
-        }
+        public void FromApi_RefreshTokenRotationType_Rotating() => Assert.AreEqual(V1ClientRefreshTokenRotationType.Rotating, V1ClientController.FromApi(new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.Rotating)));
+
+        [TestMethod]
+        public void FromApi_RefreshTokenRotationType_NonRotating() => Assert.AreEqual(V1ClientRefreshTokenRotationType.NonRotating, V1ClientController.FromApi(new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.NonRotating)));
 
         [TestMethod]
         public void FromApi_RefreshTokenRotationType_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((RefreshTokenRotationType?)null));
+            Assert.IsNull(V1ClientController.FromApi((RefreshTokenRotationTypeEnum?)null));
         }
 
         // ──────────────────────── FromApi RefreshTokenExpirationType ──────────────
 
         [TestMethod]
-        [DataRow(RefreshTokenExpirationType.Expiring, V1ClientRefreshTokenExpirationType.Expiring)]
-        [DataRow(RefreshTokenExpirationType.NonExpiring, V1ClientRefreshTokenExpirationType.NonExpiring)]
-        public void FromApi_RefreshTokenExpirationType_MapsCorrectly(RefreshTokenExpirationType input, V1ClientRefreshTokenExpirationType expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((RefreshTokenExpirationType?)input));
-        }
+        public void FromApi_RefreshTokenExpirationType_Expiring() => Assert.AreEqual(V1ClientRefreshTokenExpirationType.Expiring, V1ClientController.FromApi(new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.Expiring)));
+
+        [TestMethod]
+        public void FromApi_RefreshTokenExpirationType_NonExpiring() => Assert.AreEqual(V1ClientRefreshTokenExpirationType.NonExpiring, V1ClientController.FromApi(new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.NonExpiring)));
 
         [TestMethod]
         public void FromApi_RefreshTokenExpirationType_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((RefreshTokenExpirationType?)null));
+            Assert.IsNull(V1ClientController.FromApi((RefreshTokenExpirationTypeEnum?)null));
         }
 
         // ──────────────────────── FromApi OrganizationUsage ───────────────────────
 
         [TestMethod]
-        [DataRow(OrganizationUsage.Deny, V1ClientOrganizationUsage.Deny)]
-        [DataRow(OrganizationUsage.Allow, V1ClientOrganizationUsage.Allow)]
-        [DataRow(OrganizationUsage.Require, V1ClientOrganizationUsage.Require)]
-        public void FromApi_OrganizationUsage_MapsCorrectly(OrganizationUsage input, V1ClientOrganizationUsage expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((OrganizationUsage?)input));
-        }
+        public void FromApi_OrganizationUsage_Deny() => Assert.AreEqual(V1ClientOrganizationUsage.Deny, V1ClientController.FromApi(new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Deny)));
+
+        [TestMethod]
+        public void FromApi_OrganizationUsage_Allow() => Assert.AreEqual(V1ClientOrganizationUsage.Allow, V1ClientController.FromApi(new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Allow)));
+
+        [TestMethod]
+        public void FromApi_OrganizationUsage_Require() => Assert.AreEqual(V1ClientOrganizationUsage.Require, V1ClientController.FromApi(new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Require)));
 
         [TestMethod]
         public void FromApi_OrganizationUsage_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((OrganizationUsage?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientOrganizationUsageEnum?)null));
         }
 
         // ──────────────────────── FromApi OrganizationRequireBehavior ─────────────
 
         [TestMethod]
-        [DataRow(OrganizationRequireBehavior.NoPrompt, V1ClientOrganizationRequireBehavior.NoPrompt)]
-        [DataRow(OrganizationRequireBehavior.PreLoginPrompt, V1ClientOrganizationRequireBehavior.PreLoginPrompt)]
-        [DataRow(OrganizationRequireBehavior.PostLoginPrompt, V1ClientOrganizationRequireBehavior.PostLoginPrompt)]
-        public void FromApi_OrganizationRequireBehavior_MapsCorrectly(OrganizationRequireBehavior input, V1ClientOrganizationRequireBehavior expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((OrganizationRequireBehavior?)input));
-        }
+        public void FromApi_OrganizationRequireBehavior_NoPrompt() => Assert.AreEqual(V1ClientOrganizationRequireBehavior.NoPrompt, V1ClientController.FromApi(new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.NoPrompt)));
+
+        [TestMethod]
+        public void FromApi_OrganizationRequireBehavior_PreLoginPrompt() => Assert.AreEqual(V1ClientOrganizationRequireBehavior.PreLoginPrompt, V1ClientController.FromApi(new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PreLoginPrompt)));
+
+        [TestMethod]
+        public void FromApi_OrganizationRequireBehavior_PostLoginPrompt() => Assert.AreEqual(V1ClientOrganizationRequireBehavior.PostLoginPrompt, V1ClientController.FromApi(new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PostLoginPrompt)));
 
         [TestMethod]
         public void FromApi_OrganizationRequireBehavior_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((OrganizationRequireBehavior?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientOrganizationRequireBehaviorEnum?)null));
         }
 
         // ──────────────────────── FromApi LogoutInitiators ────────────────────────
 
         [TestMethod]
-        [DataRow(LogoutInitiators.RpLogout, V1ClientLogoutInitiators.RpLogout)]
-        [DataRow(LogoutInitiators.IdpLogout, V1ClientLogoutInitiators.IdpLogout)]
-        [DataRow(LogoutInitiators.PasswordChanged, V1ClientLogoutInitiators.PasswordChanged)]
-        [DataRow(LogoutInitiators.SessionExpired, V1ClientLogoutInitiators.SessionExpired)]
-        public void FromApi_LogoutInitiators_MapsCorrectly(LogoutInitiators input, V1ClientLogoutInitiators expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi(input));
-        }
+        public void FromApi_LogoutInitiators_RpLogout() => Assert.AreEqual(V1ClientLogoutInitiators.RpLogout, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout)));
+
+        [TestMethod]
+        public void FromApi_LogoutInitiators_IdpLogout() => Assert.AreEqual(V1ClientLogoutInitiators.IdpLogout, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout)));
+
+        [TestMethod]
+        public void FromApi_LogoutInitiators_PasswordChanged() => Assert.AreEqual(V1ClientLogoutInitiators.PasswordChanged, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.PasswordChanged)));
+
+        [TestMethod]
+        public void FromApi_LogoutInitiators_SessionExpired() => Assert.AreEqual(V1ClientLogoutInitiators.SessionExpired, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.SessionExpired)));
 
         // ──────────────────────── FromApi LogoutInitiatorModes ────────────────────
 
         [TestMethod]
-        [DataRow(LogoutInitiatorModes.All, V1ClientLogoutInitiatorModes.All)]
-        [DataRow(LogoutInitiatorModes.Custom, V1ClientLogoutInitiatorModes.Custom)]
-        public void FromApi_LogoutInitiatorModes_MapsCorrectly(LogoutInitiatorModes input, V1ClientLogoutInitiatorModes expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((LogoutInitiatorModes?)input));
-        }
+        public void FromApi_LogoutInitiatorModes_All() => Assert.AreEqual(V1ClientLogoutInitiatorModes.All, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.All)));
+
+        [TestMethod]
+        public void FromApi_LogoutInitiatorModes_Custom() => Assert.AreEqual(V1ClientLogoutInitiatorModes.Custom, V1ClientController.FromApi(new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom)));
 
         [TestMethod]
         public void FromApi_LogoutInitiatorModes_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((LogoutInitiatorModes?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientOidcBackchannelLogoutInitiatorsModeEnum?)null));
         }
 
         // ──────────────────────── FromApi ComplianceLevel ────────────────────────
 
         [TestMethod]
-        [DataRow(ComplianceLevel.NONE, V1ClientComplianceLevel.NONE)]
-        [DataRow(ComplianceLevel.FAPI1_ADV_PKJ_PAR, V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR)]
-        [DataRow(ComplianceLevel.FAPI1_ADV_MTLS_PAR, V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR)]
-        public void FromApi_ComplianceLevel_MapsCorrectly(ComplianceLevel input, V1ClientComplianceLevel expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.FromApi((ComplianceLevel?)input));
-        }
+        public void FromApi_ComplianceLevel_None() => Assert.AreEqual(V1ClientComplianceLevel.NONE, V1ClientController.FromApi(new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.None)));
+
+        [TestMethod]
+        public void FromApi_ComplianceLevel_Fapi1AdvPkjPar() => Assert.AreEqual(V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR, V1ClientController.FromApi(new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar)));
+
+        [TestMethod]
+        public void FromApi_ComplianceLevel_Fapi1AdvMtlsPar() => Assert.AreEqual(V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR, V1ClientController.FromApi(new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvMtlsPar)));
 
         [TestMethod]
         public void FromApi_ComplianceLevel_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((ComplianceLevel?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientComplianceLevelEnum?)null));
         }
 
         // ──────────────────────── FromApi Flows ───────────────────────────────────
@@ -227,46 +205,129 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Flows_ClientCredentials_MapsCorrectly()
         {
-            Assert.AreEqual(V1ClientFlows.ClientCredentials, V1ClientController.FromApi(Flows.ClientCredentials));
+            Assert.AreEqual(V1ClientFlows.ClientCredentials, V1ClientController.FromApi(new ClientDefaultOrganizationFlowsEnum(ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials)));
         }
 
         // ──────────────────────── FromApi ClientApplicationType ──────────────────
 
         [TestMethod]
-        [DataRow(ClientApplicationType.Native, V1ClientApplicationType.Native)]
-        [DataRow(ClientApplicationType.NonInteractive, V1ClientApplicationType.NonInteractive)]
-        [DataRow(ClientApplicationType.Spa, V1ClientApplicationType.Spa)]
-        [DataRow(ClientApplicationType.RegularWeb, V1ClientApplicationType.RegularWeb)]
-        [DataRow(ClientApplicationType.Box, V1ClientApplicationType.Box)]
-        [DataRow(ClientApplicationType.Cloudbees, V1ClientApplicationType.Cloudbees)]
-        [DataRow(ClientApplicationType.Concur, V1ClientApplicationType.Concur)]
-        [DataRow(ClientApplicationType.Dropbox, V1ClientApplicationType.Dropbox)]
-        [DataRow(ClientApplicationType.Echosign, V1ClientApplicationType.Echosign)]
-        [DataRow(ClientApplicationType.Egnyte, V1ClientApplicationType.Egnyte)]
-        [DataRow(ClientApplicationType.MsCrm, V1ClientApplicationType.MsCrm)]
-        [DataRow(ClientApplicationType.NewRelic, V1ClientApplicationType.NewRelic)]
-        [DataRow(ClientApplicationType.Office365, V1ClientApplicationType.Office365)]
-        [DataRow(ClientApplicationType.Rms, V1ClientApplicationType.Rms)]
-        [DataRow(ClientApplicationType.Salesforce, V1ClientApplicationType.Salesforce)]
-        [DataRow(ClientApplicationType.Sentry, V1ClientApplicationType.Sentry)]
-        [DataRow(ClientApplicationType.SharePoint, V1ClientApplicationType.SharePoint)]
-        [DataRow(ClientApplicationType.Slack, V1ClientApplicationType.Slack)]
-        [DataRow(ClientApplicationType.SpringCm, V1ClientApplicationType.SpringCm)]
-        [DataRow(ClientApplicationType.Zendesk, V1ClientApplicationType.Zendesk)]
-        [DataRow(ClientApplicationType.Zoom, V1ClientApplicationType.Zoom)]
-        [DataRow(ClientApplicationType.ResourceServer, V1ClientApplicationType.ResourceServer)]
-        [DataRow(ClientApplicationType.ExpressConfiguration, V1ClientApplicationType.ExpressConfiguration)]
-        [DataRow(ClientApplicationType.SsoIntegration, V1ClientApplicationType.SsoIntegration)]
-        [DataRow(ClientApplicationType.Oag, V1ClientApplicationType.Oag)]
-        public void FromApi_ClientApplicationType_MapsCorrectly(ClientApplicationType input, V1ClientApplicationType expected)
+        public void FromApi_ClientApplicationType_Native() => Assert.AreEqual(V1ClientApplicationType.Native, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Native)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_NonInteractive() => Assert.AreEqual(V1ClientApplicationType.NonInteractive, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.NonInteractive)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Spa() => Assert.AreEqual(V1ClientApplicationType.Spa, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Spa)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_RegularWeb() => Assert.AreEqual(V1ClientApplicationType.RegularWeb, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.RegularWeb)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Box() => Assert.AreEqual(V1ClientApplicationType.Box, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Box)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Cloudbees() => Assert.AreEqual(V1ClientApplicationType.Cloudbees, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Cloudbees)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Concur() => Assert.AreEqual(V1ClientApplicationType.Concur, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Concur)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Dropbox() => Assert.AreEqual(V1ClientApplicationType.Dropbox, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Dropbox)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Echosign() => Assert.AreEqual(V1ClientApplicationType.Echosign, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Echosign)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Egnyte() => Assert.AreEqual(V1ClientApplicationType.Egnyte, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Egnyte)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_MsCrm() => Assert.AreEqual(V1ClientApplicationType.MsCrm, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Mscrm)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_NewRelic() => Assert.AreEqual(V1ClientApplicationType.NewRelic, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Newrelic)));
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Office365()
         {
-            Assert.AreEqual(expected, V1ClientController.FromApi((ClientApplicationType?)input));
+            Assert.AreEqual(V1ClientApplicationType.Office365, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Office365)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Rms()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Rms, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Rms)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Salesforce()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Salesforce, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Salesforce)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Sentry()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Sentry, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Sentry)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_SharePoint()
+        {
+            Assert.AreEqual(V1ClientApplicationType.SharePoint, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Sharepoint)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Slack()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Slack, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Slack)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_SpringCm()
+        {
+            Assert.AreEqual(V1ClientApplicationType.SpringCm, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Springcm)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Zendesk()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Zendesk, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Zendesk)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Zoom()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Zoom, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Zoom)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_ResourceServer()
+        {
+            Assert.AreEqual(V1ClientApplicationType.ResourceServer, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.ResourceServer)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_ExpressConfiguration()
+        {
+            Assert.AreEqual(V1ClientApplicationType.ExpressConfiguration, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.ExpressConfiguration)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_SsoIntegration()
+        {
+            Assert.AreEqual(V1ClientApplicationType.SsoIntegration, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.SsoIntegration)));
+        }
+
+        [TestMethod]
+        public void FromApi_ClientApplicationType_Oag()
+        {
+            Assert.AreEqual(V1ClientApplicationType.Oag, V1ClientController.FromApi(new ClientAppTypeEnum(ClientAppTypeEnum.Values.Oag)));
         }
 
         [TestMethod]
         public void FromApi_ClientApplicationType_Null_Returns_Null()
         {
-            Assert.IsNull(V1ClientController.FromApi((ClientApplicationType?)null));
+            Assert.IsNull(V1ClientController.FromApi((ClientAppTypeEnum?)null));
         }
 
         // ──────────────────────── FromApi value objects ───────────────────────────
@@ -274,28 +335,17 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_SigningKey_MapsProperties()
         {
-            var source = new SigningKey { Cert = "cert", Key = "key", Pkcs7 = "pkcs7" };
+            var source = new ClientSigningKey { Cert = "cert", Pkcs7 = "pkcs7" };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.AreEqual("cert", result.Cert);
-            Assert.AreEqual("key", result.Key);
             Assert.AreEqual("pkcs7", result.Pkcs7);
-        }
-
-        [TestMethod]
-        public void FromApi_ClientResourceServerAssociation_MapsProperties()
-        {
-            var source = new ClientResourceServerAssociation { Identifier = "https://api.example.com", Scopes = ["read:data"] };
-            var result = V1ClientController.FromApi(source);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("https://api.example.com", result.Identifier);
-            CollectionAssert.AreEqual(new[] { "read:data" }, result.Scopes);
         }
 
         [TestMethod]
         public void FromApi_EncryptionKey_MapsProperties()
         {
-            var source = new EncryptionKey { Certificate = "cert", PublicKey = "pub", Subject = "sub" };
+            var source = new ClientEncryptionKey { Cert = "cert", Pub = "pub", Subject = "sub" };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.AreEqual("cert", result.Certificate);
@@ -304,18 +354,9 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
-        public void FromApi_ScopeEntry_MapsActions()
-        {
-            var source = new ScopeEntry { Actions = ["read", "write"] };
-            var result = V1ClientController.FromApi(source);
-            Assert.IsNotNull(result);
-            CollectionAssert.AreEqual(new[] { "read", "write" }, result.Actions);
-        }
-
-        [TestMethod]
         public void FromApi_JwtConfiguration_MapsProperties()
         {
-            var source = new JwtConfiguration { IsSecretEncoded = true, LifetimeInSeconds = 3600, SigningAlgorithm = "RS256" };
+            var source = new ClientJwtConfiguration { SecretEncoded = true, LifetimeInSeconds = 3600, Alg = new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Rs256) };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.AreEqual(true, result.IsSecretEncoded);
@@ -326,10 +367,10 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_RefreshToken_MapsProperties()
         {
-            var source = new RefreshToken
+            var source = new ClientRefreshTokenConfiguration
             {
-                RotationType = RefreshTokenRotationType.Rotating,
-                ExpirationType = RefreshTokenExpirationType.Expiring,
+                RotationType = new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.Rotating),
+                ExpirationType = new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.Expiring),
                 Leeway = 10,
                 TokenLifetime = 86400,
                 InfiniteTokenLifetime = false,
@@ -348,7 +389,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_OidcLogoutConfig_MapsBackchannelLogoutUrls()
         {
-            var source = new OidcLogoutConfig { BackchannelLogoutUrls = ["https://example.com/logout"] };
+            var source = new ClientOidcBackchannelLogoutSettings { BackchannelLogoutUrls = ["https://example.com/logout"] };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             CollectionAssert.AreEqual(new[] { "https://example.com/logout" }, result.BackchannelLogoutUrls);
@@ -357,10 +398,10 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_BackchannelLogoutInitiators_MapsProperties()
         {
-            var source = new BackchannelLogoutInitiators
+            var source = new ClientOidcBackchannelLogoutInitiators
             {
-                Mode = LogoutInitiatorModes.Custom,
-                SelectedInitiators = [LogoutInitiators.RpLogout, LogoutInitiators.IdpLogout],
+                Mode = new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom),
+                SelectedInitiators = [new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout), new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout)],
             };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
@@ -374,7 +415,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_DefaultOrganization_MapsProperties()
         {
-            var source = new DefaultOrganization { OrganizationId = "org_123", Flows = [Flows.ClientCredentials] };
+            var source = new ClientDefaultOrganization { OrganizationId = "org_123", Flows = [new ClientDefaultOrganizationFlowsEnum(ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials)] };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.AreEqual("org_123", result.OrganizationId);
@@ -386,10 +427,10 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Mobile_WithIosAndAndroid_MapsProperties()
         {
-            var source = new Mobile
+            var source = new ClientMobile
             {
-                Ios = new Mobile.MobileIos { AppBundleIdentifier = "com.example.app", TeamId = "TEAM123" },
-                Android = new Mobile.MobileAndroid { AppPackageName = "com.example.app", KeystoreHash = "hash" },
+                Ios = new ClientMobileiOs { AppBundleIdentifier = "com.example.app", TeamId = "TEAM123" },
+                Android = new ClientMobileAndroid { AppPackageName = "com.example.app" },
             };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
@@ -398,13 +439,12 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("TEAM123", result.Ios.TeamId);
             Assert.IsNotNull(result.Android);
             Assert.AreEqual("com.example.app", result.Android.AppPackageName);
-            Assert.AreEqual("hash", result.Android.KeystoreHash);
         }
 
         [TestMethod]
         public void FromApi_Mobile_WithEmptyIos_Returns_NullIos()
         {
-            var source = new Mobile { Ios = new Mobile.MobileIos { AppBundleIdentifier = null, TeamId = null } };
+            var source = new ClientMobile { Ios = new ClientMobileiOs { AppBundleIdentifier = null, TeamId = null } };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.IsNull(result.Ios);
@@ -413,7 +453,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Mobile_WithEmptyAndroid_Returns_NullAndroid()
         {
-            var source = new Mobile { Android = new Mobile.MobileAndroid { AppPackageName = null, KeystoreHash = null } };
+            var source = new ClientMobile { Android = new ClientMobileAndroid { AppPackageName = null } };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
             Assert.IsNull(result.Android);
@@ -422,7 +462,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Client_MapsScalarProperties()
         {
-            var source = new Client
+            var source = new GetClientResponseContent
             {
                 Name = "My App",
                 Description = "Test app",
@@ -431,8 +471,8 @@ namespace Alethic.Auth0.Operator.Tests
                 Sso = false,
                 CrossOriginAuthentication = true,
                 IsFirstParty = true,
-                ApplicationType = ClientApplicationType.RegularWeb,
-                TokenEndpointAuthMethod = TokenEndpointAuthMethod.ClientSecretPost,
+                AppType = new ClientAppTypeEnum(ClientAppTypeEnum.Values.RegularWeb),
+                TokenEndpointAuthMethod = new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost),
             };
             var result = V1ClientController.FromApi(source);
             Assert.IsNotNull(result);
@@ -450,7 +490,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Client_MapsArrayProperties()
         {
-            var source = new Client
+            var source = new GetClientResponseContent
             {
                 Name = "My App",
                 AllowedClients = ["client1", "client2"],
@@ -475,180 +515,258 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── ToApi ───────────────────────────────────────────
 
         [TestMethod]
-        [DataRow(V1ClientComplianceLevel.NONE, ComplianceLevel.NONE)]
-        [DataRow(V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR, ComplianceLevel.FAPI1_ADV_PKJ_PAR)]
-        [DataRow(V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR, ComplianceLevel.FAPI1_ADV_MTLS_PAR)]
-        public void ToApi_ComplianceLevel_MapsCorrectly(V1ClientComplianceLevel input, ComplianceLevel expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_ComplianceLevel_None() => Assert.AreEqual(ClientComplianceLevelEnum.Values.None, V1ClientController.ToApi(V1ClientComplianceLevel.NONE).Value);
 
         [TestMethod]
-        [DataRow(V1ClientOrganizationRequireBehavior.NoPrompt, OrganizationRequireBehavior.NoPrompt)]
-        [DataRow(V1ClientOrganizationRequireBehavior.PreLoginPrompt, OrganizationRequireBehavior.PreLoginPrompt)]
-        [DataRow(V1ClientOrganizationRequireBehavior.PostLoginPrompt, OrganizationRequireBehavior.PostLoginPrompt)]
-        public void ToApi_OrganizationRequireBehavior_MapsCorrectly(V1ClientOrganizationRequireBehavior input, OrganizationRequireBehavior expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_ComplianceLevel_Fapi1AdvPkjPar() => Assert.AreEqual(ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar, V1ClientController.ToApi(V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR).Value);
 
         [TestMethod]
-        [DataRow(V1ClientOrganizationUsage.Deny, OrganizationUsage.Deny)]
-        [DataRow(V1ClientOrganizationUsage.Allow, OrganizationUsage.Allow)]
-        [DataRow(V1ClientOrganizationUsage.Require, OrganizationUsage.Require)]
-        public void ToApi_OrganizationUsage_MapsCorrectly(V1ClientOrganizationUsage input, OrganizationUsage expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_ComplianceLevel_Fapi1AdvMtlsPar() => Assert.AreEqual(ClientComplianceLevelEnum.Values.Fapi1AdvMtlsPar, V1ClientController.ToApi(V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR).Value);
 
         [TestMethod]
-        [DataRow(V1ClientRefreshTokenRotationType.Rotating, RefreshTokenRotationType.Rotating)]
-        [DataRow(V1ClientRefreshTokenRotationType.NonRotating, RefreshTokenRotationType.NonRotating)]
-        public void ToApi_RefreshTokenRotationType_MapsCorrectly(V1ClientRefreshTokenRotationType input, RefreshTokenRotationType expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_OrganizationRequireBehavior_NoPrompt() => Assert.AreEqual(ClientOrganizationRequireBehaviorEnum.Values.NoPrompt, V1ClientController.ToApi(V1ClientOrganizationRequireBehavior.NoPrompt).Value);
+        [TestMethod]
+        public void ToApi_OrganizationRequireBehavior_PreLoginPrompt() => Assert.AreEqual(ClientOrganizationRequireBehaviorEnum.Values.PreLoginPrompt, V1ClientController.ToApi(V1ClientOrganizationRequireBehavior.PreLoginPrompt).Value);
+        [TestMethod]
+        public void ToApi_OrganizationRequireBehavior_PostLoginPrompt() => Assert.AreEqual(ClientOrganizationRequireBehaviorEnum.Values.PostLoginPrompt, V1ClientController.ToApi(V1ClientOrganizationRequireBehavior.PostLoginPrompt).Value);
 
         [TestMethod]
-        [DataRow(V1ClientRefreshTokenExpirationType.Expiring, RefreshTokenExpirationType.Expiring)]
-        [DataRow(V1ClientRefreshTokenExpirationType.NonExpiring, RefreshTokenExpirationType.NonExpiring)]
-        public void ToApi_RefreshTokenExpirationType_MapsCorrectly(V1ClientRefreshTokenExpirationType input, RefreshTokenExpirationType expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_OrganizationUsage_Deny() => Assert.AreEqual(ClientOrganizationUsageEnum.Values.Deny, V1ClientController.ToApi(V1ClientOrganizationUsage.Deny).Value);
+        [TestMethod]
+        public void ToApi_OrganizationUsage_Allow() => Assert.AreEqual(ClientOrganizationUsageEnum.Values.Allow, V1ClientController.ToApi(V1ClientOrganizationUsage.Allow).Value);
+        [TestMethod]
+        public void ToApi_OrganizationUsage_Require() => Assert.AreEqual(ClientOrganizationUsageEnum.Values.Require, V1ClientController.ToApi(V1ClientOrganizationUsage.Require).Value);
 
         [TestMethod]
-        [DataRow(V1ClientLogoutInitiatorModes.All, LogoutInitiatorModes.All)]
-        [DataRow(V1ClientLogoutInitiatorModes.Custom, LogoutInitiatorModes.Custom)]
-        public void ToApi_LogoutInitiatorModes_MapsCorrectly(V1ClientLogoutInitiatorModes input, LogoutInitiatorModes expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_RefreshTokenRotationType_Rotating() => Assert.AreEqual(RefreshTokenRotationTypeEnum.Values.Rotating, V1ClientController.ToApi(V1ClientRefreshTokenRotationType.Rotating).Value);
+        [TestMethod]
+        public void ToApi_RefreshTokenRotationType_NonRotating() => Assert.AreEqual(RefreshTokenRotationTypeEnum.Values.NonRotating, V1ClientController.ToApi(V1ClientRefreshTokenRotationType.NonRotating).Value);
 
         [TestMethod]
-        [DataRow(V1ClientLogoutInitiators.RpLogout, LogoutInitiators.RpLogout)]
-        [DataRow(V1ClientLogoutInitiators.IdpLogout, LogoutInitiators.IdpLogout)]
-        [DataRow(V1ClientLogoutInitiators.PasswordChanged, LogoutInitiators.PasswordChanged)]
-        [DataRow(V1ClientLogoutInitiators.SessionExpired, LogoutInitiators.SessionExpired)]
-        public void ToApi_LogoutInitiators_MapsCorrectly(V1ClientLogoutInitiators input, LogoutInitiators expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_RefreshTokenExpirationType_Expiring() => Assert.AreEqual(RefreshTokenExpirationTypeEnum.Values.Expiring, V1ClientController.ToApi(V1ClientRefreshTokenExpirationType.Expiring).Value);
+        [TestMethod]
+        public void ToApi_RefreshTokenExpirationType_NonExpiring() => Assert.AreEqual(RefreshTokenExpirationTypeEnum.Values.NonExpiring, V1ClientController.ToApi(V1ClientRefreshTokenExpirationType.NonExpiring).Value);
 
         [TestMethod]
-        [DataRow(V1ClientApplicationType.Box, ClientApplicationType.Box)]
-        [DataRow(V1ClientApplicationType.Cloudbees, ClientApplicationType.Cloudbees)]
-        [DataRow(V1ClientApplicationType.Concur, ClientApplicationType.Concur)]
-        [DataRow(V1ClientApplicationType.Dropbox, ClientApplicationType.Dropbox)]
-        [DataRow(V1ClientApplicationType.Echosign, ClientApplicationType.Echosign)]
-        [DataRow(V1ClientApplicationType.Egnyte, ClientApplicationType.Egnyte)]
-        [DataRow(V1ClientApplicationType.MsCrm, ClientApplicationType.MsCrm)]
-        [DataRow(V1ClientApplicationType.Native, ClientApplicationType.Native)]
-        [DataRow(V1ClientApplicationType.NewRelic, ClientApplicationType.NewRelic)]
-        [DataRow(V1ClientApplicationType.NonInteractive, ClientApplicationType.NonInteractive)]
-        [DataRow(V1ClientApplicationType.Office365, ClientApplicationType.Office365)]
-        [DataRow(V1ClientApplicationType.RegularWeb, ClientApplicationType.RegularWeb)]
-        [DataRow(V1ClientApplicationType.Rms, ClientApplicationType.Rms)]
-        [DataRow(V1ClientApplicationType.Salesforce, ClientApplicationType.Salesforce)]
-        [DataRow(V1ClientApplicationType.Sentry, ClientApplicationType.Sentry)]
-        [DataRow(V1ClientApplicationType.SharePoint, ClientApplicationType.SharePoint)]
-        [DataRow(V1ClientApplicationType.Slack, ClientApplicationType.Slack)]
-        [DataRow(V1ClientApplicationType.SpringCm, ClientApplicationType.SpringCm)]
-        [DataRow(V1ClientApplicationType.Spa, ClientApplicationType.Spa)]
-        [DataRow(V1ClientApplicationType.Zendesk, ClientApplicationType.Zendesk)]
-        [DataRow(V1ClientApplicationType.Zoom, ClientApplicationType.Zoom)]
-        public void ToApi_ClientApplicationType_MapsCorrectly(V1ClientApplicationType input, ClientApplicationType expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_LogoutInitiatorModes_All() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.All, V1ClientController.ToApi(V1ClientLogoutInitiatorModes.All).Value);
+        [TestMethod]
+        public void ToApi_LogoutInitiatorModes_Custom() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom, V1ClientController.ToApi(V1ClientLogoutInitiatorModes.Custom).Value);
 
         [TestMethod]
-        [DataRow(V1ClientTokenEndpointAuthMethod.None, TokenEndpointAuthMethod.None)]
-        [DataRow(V1ClientTokenEndpointAuthMethod.ClientSecretPost, TokenEndpointAuthMethod.ClientSecretPost)]
-        [DataRow(V1ClientTokenEndpointAuthMethod.ClientSecretBasic, TokenEndpointAuthMethod.ClientSecretBasic)]
-        public void ToApi_TokenEndpointAuthMethod_MapsCorrectly(V1ClientTokenEndpointAuthMethod input, TokenEndpointAuthMethod expected)
-        {
-            Assert.AreEqual(expected, V1ClientController.ToApi(input));
-        }
+        public void ToApi_LogoutInitiators_RpLogout() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout, V1ClientController.ToApi(V1ClientLogoutInitiators.RpLogout).Value);
+        [TestMethod]
+        public void ToApi_LogoutInitiators_IdpLogout() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout, V1ClientController.ToApi(V1ClientLogoutInitiators.IdpLogout).Value);
+        [TestMethod]
+        public void ToApi_LogoutInitiators_PasswordChanged() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsEnum.Values.PasswordChanged, V1ClientController.ToApi(V1ClientLogoutInitiators.PasswordChanged).Value);
+        [TestMethod]
+        public void ToApi_LogoutInitiators_SessionExpired() => Assert.AreEqual(ClientOidcBackchannelLogoutInitiatorsEnum.Values.SessionExpired, V1ClientController.ToApi(V1ClientLogoutInitiators.SessionExpired).Value);
+
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Box() => Assert.AreEqual(ClientAppTypeEnum.Values.Box, V1ClientController.ToApi(V1ClientApplicationType.Box).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Cloudbees() => Assert.AreEqual(ClientAppTypeEnum.Values.Cloudbees, V1ClientController.ToApi(V1ClientApplicationType.Cloudbees).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Concur() => Assert.AreEqual(ClientAppTypeEnum.Values.Concur, V1ClientController.ToApi(V1ClientApplicationType.Concur).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Dropbox() => Assert.AreEqual(ClientAppTypeEnum.Values.Dropbox, V1ClientController.ToApi(V1ClientApplicationType.Dropbox).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Echosign() => Assert.AreEqual(ClientAppTypeEnum.Values.Echosign, V1ClientController.ToApi(V1ClientApplicationType.Echosign).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Egnyte() => Assert.AreEqual(ClientAppTypeEnum.Values.Egnyte, V1ClientController.ToApi(V1ClientApplicationType.Egnyte).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_MsCrm() => Assert.AreEqual(ClientAppTypeEnum.Values.Mscrm, V1ClientController.ToApi(V1ClientApplicationType.MsCrm).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Native() => Assert.AreEqual(ClientAppTypeEnum.Values.Native, V1ClientController.ToApi(V1ClientApplicationType.Native).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_NewRelic() => Assert.AreEqual(ClientAppTypeEnum.Values.Newrelic, V1ClientController.ToApi(V1ClientApplicationType.NewRelic).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_NonInteractive() => Assert.AreEqual(ClientAppTypeEnum.Values.NonInteractive, V1ClientController.ToApi(V1ClientApplicationType.NonInteractive).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Office365() => Assert.AreEqual(ClientAppTypeEnum.Values.Office365, V1ClientController.ToApi(V1ClientApplicationType.Office365).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_RegularWeb() => Assert.AreEqual(ClientAppTypeEnum.Values.RegularWeb, V1ClientController.ToApi(V1ClientApplicationType.RegularWeb).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Rms() => Assert.AreEqual(ClientAppTypeEnum.Values.Rms, V1ClientController.ToApi(V1ClientApplicationType.Rms).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Salesforce() => Assert.AreEqual(ClientAppTypeEnum.Values.Salesforce, V1ClientController.ToApi(V1ClientApplicationType.Salesforce).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Sentry() => Assert.AreEqual(ClientAppTypeEnum.Values.Sentry, V1ClientController.ToApi(V1ClientApplicationType.Sentry).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_SharePoint() => Assert.AreEqual(ClientAppTypeEnum.Values.Sharepoint, V1ClientController.ToApi(V1ClientApplicationType.SharePoint).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Slack() => Assert.AreEqual(ClientAppTypeEnum.Values.Slack, V1ClientController.ToApi(V1ClientApplicationType.Slack).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_SpringCm() => Assert.AreEqual(ClientAppTypeEnum.Values.Springcm, V1ClientController.ToApi(V1ClientApplicationType.SpringCm).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Spa() => Assert.AreEqual(ClientAppTypeEnum.Values.Spa, V1ClientController.ToApi(V1ClientApplicationType.Spa).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Zendesk() => Assert.AreEqual(ClientAppTypeEnum.Values.Zendesk, V1ClientController.ToApi(V1ClientApplicationType.Zendesk).Value);
+        [TestMethod]
+        public void ToApi_ClientApplicationType_Zoom() => Assert.AreEqual(ClientAppTypeEnum.Values.Zoom, V1ClientController.ToApi(V1ClientApplicationType.Zoom).Value);
+
+        [TestMethod]
+        public void ToApi_TokenEndpointAuthMethod_None() => Assert.AreEqual(ClientTokenEndpointAuthMethodEnum.Values.None, V1ClientController.ToApi(V1ClientTokenEndpointAuthMethod.None).Value);
+
+        [TestMethod]
+        public void ToApi_TokenEndpointAuthMethod_ClientSecretPost() => Assert.AreEqual(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost, V1ClientController.ToApi(V1ClientTokenEndpointAuthMethod.ClientSecretPost).Value);
+
+        [TestMethod]
+        public void ToApi_TokenEndpointAuthMethod_ClientSecretBasic() => Assert.AreEqual(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic, V1ClientController.ToApi(V1ClientTokenEndpointAuthMethod.ClientSecretBasic).Value);
 
         // ──────────────────────── Roundtrip tests ─────────────────────────────────
 
         [TestMethod]
-        [DataRow(TokenEndpointAuthMethod.None)]
-        [DataRow(TokenEndpointAuthMethod.ClientSecretPost)]
-        [DataRow(TokenEndpointAuthMethod.ClientSecretBasic)]
-        public void TokenEndpointAuthMethod_Roundtrip(TokenEndpointAuthMethod input)
+        public void TokenEndpointAuthMethod_Roundtrip_None()
         {
-            var op = V1ClientController.FromApi((TokenEndpointAuthMethod?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.None);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(RefreshTokenRotationType.Rotating)]
-        [DataRow(RefreshTokenRotationType.NonRotating)]
-        public void RefreshTokenRotationType_Roundtrip(RefreshTokenRotationType input)
+        public void TokenEndpointAuthMethod_Roundtrip_ClientSecretPost()
         {
-            var op = V1ClientController.FromApi((RefreshTokenRotationType?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(RefreshTokenExpirationType.Expiring)]
-        [DataRow(RefreshTokenExpirationType.NonExpiring)]
-        public void RefreshTokenExpirationType_Roundtrip(RefreshTokenExpirationType input)
+        public void TokenEndpointAuthMethod_Roundtrip_ClientSecretBasic()
         {
-            var op = V1ClientController.FromApi((RefreshTokenExpirationType?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(OrganizationUsage.Deny)]
-        [DataRow(OrganizationUsage.Allow)]
-        [DataRow(OrganizationUsage.Require)]
-        public void OrganizationUsage_Roundtrip(OrganizationUsage input)
+        public void RefreshTokenRotationType_Roundtrip_Rotating()
         {
-            var op = V1ClientController.FromApi((OrganizationUsage?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.Rotating);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(OrganizationRequireBehavior.NoPrompt)]
-        [DataRow(OrganizationRequireBehavior.PreLoginPrompt)]
-        [DataRow(OrganizationRequireBehavior.PostLoginPrompt)]
-        public void OrganizationRequireBehavior_Roundtrip(OrganizationRequireBehavior input)
+        public void RefreshTokenRotationType_Roundtrip_NonRotating()
         {
-            var op = V1ClientController.FromApi((OrganizationRequireBehavior?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.NonRotating);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(ComplianceLevel.NONE)]
-        [DataRow(ComplianceLevel.FAPI1_ADV_PKJ_PAR)]
-        [DataRow(ComplianceLevel.FAPI1_ADV_MTLS_PAR)]
-        public void ComplianceLevel_Roundtrip(ComplianceLevel input)
+        public void RefreshTokenExpirationType_Roundtrip_Expiring()
         {
-            var op = V1ClientController.FromApi((ComplianceLevel?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.Expiring);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(LogoutInitiators.RpLogout)]
-        [DataRow(LogoutInitiators.IdpLogout)]
-        [DataRow(LogoutInitiators.PasswordChanged)]
-        [DataRow(LogoutInitiators.SessionExpired)]
-        public void LogoutInitiators_Roundtrip(LogoutInitiators input)
+        public void RefreshTokenExpirationType_Roundtrip_NonExpiring()
         {
-            var op = V1ClientController.FromApi(input);
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.NonExpiring);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
         [TestMethod]
-        [DataRow(LogoutInitiatorModes.All)]
-        [DataRow(LogoutInitiatorModes.Custom)]
-        public void LogoutInitiatorModes_Roundtrip(LogoutInitiatorModes input)
+        public void OrganizationUsage_Roundtrip_Deny()
         {
-            var op = V1ClientController.FromApi((LogoutInitiatorModes?)input)!.Value;
-            Assert.AreEqual(input, V1ClientController.ToApi(op));
+            var input = new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Deny);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void OrganizationUsage_Roundtrip_Allow()
+        {
+            var input = new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Allow);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void OrganizationUsage_Roundtrip_Require()
+        {
+            var input = new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Require);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void OrganizationRequireBehavior_Roundtrip_NoPrompt()
+        {
+            var input = new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.NoPrompt);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void OrganizationRequireBehavior_Roundtrip_PreLoginPrompt()
+        {
+            var input = new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PreLoginPrompt);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void OrganizationRequireBehavior_Roundtrip_PostLoginPrompt()
+        {
+            var input = new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PostLoginPrompt);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void ComplianceLevel_Roundtrip_None()
+        {
+            var input = new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.None);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void ComplianceLevel_Roundtrip_Fapi1AdvPkjPar()
+        {
+            var input = new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void ComplianceLevel_Roundtrip_Fapi1AdvMtlsPar()
+        {
+            var input = new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvMtlsPar);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiators_Roundtrip_RpLogout()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiators_Roundtrip_IdpLogout()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiators_Roundtrip_PasswordChanged()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.PasswordChanged);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiators_Roundtrip_SessionExpired()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.SessionExpired);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiatorModes_Roundtrip_All()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.All);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
+        }
+
+        [TestMethod]
+        public void LogoutInitiatorModes_Roundtrip_Custom()
+        {
+            var input = new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom);
+            Assert.AreEqual(input.Value, V1ClientController.ToApi(V1ClientController.FromApi(input)!.Value).Value);
         }
 
     }

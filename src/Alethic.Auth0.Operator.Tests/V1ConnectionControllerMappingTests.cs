@@ -1,7 +1,9 @@
+using System.Linq;
+
 using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.Connection.V1;
 
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,13 +17,13 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Null_ReturnsNull()
         {
-            Assert.IsNull(V1ConnectionController.FromApi((Connection?)null));
+            Assert.IsNull(V1ConnectionController.FromApi((GetConnectionResponseContent?)null));
         }
 
         [TestMethod]
         public void FromApi_Connection_MapsScalarProperties()
         {
-            var source = new Connection
+            var source = new GetConnectionResponseContent
             {
                 Name = "test-conn",
                 DisplayName = "Test Connection",
@@ -29,7 +31,6 @@ namespace Alethic.Auth0.Operator.Tests
                 Realms = ["realm1", "realm2"],
                 IsDomainConnection = true,
                 ShowAsButton = false,
-                ProvisioningTicketUrl = "https://example.com/ticket",
             };
 
             var result = V1ConnectionController.FromApi(source);
@@ -41,13 +42,12 @@ namespace Alethic.Auth0.Operator.Tests
             CollectionAssert.AreEqual(new[] { "realm1", "realm2" }, result.Realms);
             Assert.AreEqual(true, result.IsDomainConnection);
             Assert.AreEqual(false, result.ShowAsButton);
-            Assert.AreEqual("https://example.com/ticket", result.ProvisioningTicketUrl);
         }
 
         [TestMethod]
         public void FromApi_Connection_EnabledClientsIsNull()
         {
-            var result = V1ConnectionController.FromApi(new Connection { Name = "x", Strategy = "auth0" });
+            var result = V1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
             Assert.IsNotNull(result);
             Assert.IsNull(result.EnabledClients);
         }
@@ -55,7 +55,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_NullOptionsAndMetadata_MapsNull()
         {
-            var result = V1ConnectionController.FromApi(new Connection { Name = "x", Strategy = "auth0" });
+            var result = V1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
             Assert.IsNotNull(result);
             Assert.IsNull(result.Options);
             Assert.IsNull(result.Metadata);
@@ -72,7 +72,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApiOptions_Auth0Strategy_MapsTypedProperties()
         {
-            var result = V1ConnectionController.FromApiOptions(new { passwordPolicy = "good" }, "auth0");
+            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["passwordPolicy"] = "good" }, "auth0");
             Assert.IsNotNull(result);
             Assert.AreEqual(V1ConnectionOptionsPasswordPolicy.Good, result.PasswordPolicy);
             Assert.IsNull(result.AdditionalProperties);
@@ -81,7 +81,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApiOptions_OtherStrategy_CapturesAsAdditionalProperties()
         {
-            var result = V1ConnectionController.FromApiOptions(new { clientId = "abc", tenant = "mytenant" }, "oidc");
+            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["clientId"] = "abc", ["tenant"] = "mytenant" }, "oidc");
             Assert.IsNotNull(result);
             Assert.IsNull(result.PasswordPolicy);
             Assert.IsNotNull(result.AdditionalProperties);
@@ -92,7 +92,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApiOptions_NullStrategy_CapturesAsAdditionalProperties()
         {
-            var result = V1ConnectionController.FromApiOptions(new { foo = "bar" }, null);
+            var result = V1ConnectionController.FromApiOptions(new System.Collections.Generic.Dictionary<string, object> { ["foo"] = "bar" }, null);
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AdditionalProperties);
             Assert.AreEqual("bar", result.AdditionalProperties["foo"]?.ToString());
@@ -101,11 +101,11 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_Auth0Strategy_MapsOptionsTyped()
         {
-            var source = new Connection
+            var source = new GetConnectionResponseContent
             {
                 Name = "x",
                 Strategy = "auth0",
-                Options = new { passwordPolicy = "good" },
+                Options = new System.Collections.Generic.Dictionary<string, object> { ["passwordPolicy"] = "good" },
             };
 
             var result = V1ConnectionController.FromApi(source);
@@ -118,11 +118,11 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_OtherStrategy_MapsOptionsAsAdditionalProperties()
         {
-            var source = new Connection
+            var source = new GetConnectionResponseContent
             {
                 Name = "x",
                 Strategy = "oidc",
-                Options = new { clientId = "abc" },
+                Options = new System.Collections.Generic.Dictionary<string, object> { ["clientId"] = "abc" },
             };
 
             var result = V1ConnectionController.FromApi(source);
@@ -136,11 +136,11 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_MapsMetadata()
         {
-            var source = new Connection
+            var source = new GetConnectionResponseContent
             {
                 Name = "x",
                 Strategy = "auth0",
-                Metadata = new { env = "prod" },
+                Metadata = new System.Collections.Generic.Dictionary<string, string> { ["env"] = "prod" },
             };
 
             var result = V1ConnectionController.FromApi(source);
@@ -152,7 +152,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_NullStrategy_MapsNull()
         {
-            var result = V1ConnectionController.FromApi(new Connection { Name = "no-strat" });
+            var result = V1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "no-strat" });
             Assert.IsNotNull(result);
             Assert.IsNull(result.Strategy);
         }
@@ -161,7 +161,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsName()
         {
             var conf = new V1ConnectionConf { Name = "my-conn" };
-            var req = new ConnectionCreateRequest { Strategy = "auth0" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "placeholder" };
             V1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("my-conn", req.Name);
         }
@@ -170,7 +170,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsDisplayName()
         {
             var conf = new V1ConnectionConf { DisplayName = "My Conn" };
-            var req = new ConnectionCreateRequest { Strategy = "auth0" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
             V1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("My Conn", req.DisplayName);
         }
@@ -179,16 +179,16 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsRealms()
         {
             var conf = new V1ConnectionConf { Realms = ["r1"] };
-            var req = new ConnectionCreateRequest { Strategy = "auth0" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
             V1ConnectionController.ApplyToApi(conf, req);
-            CollectionAssert.AreEqual(new[] { "r1" }, req.Realms);
+            CollectionAssert.AreEqual(new[] { "r1" }, req.Realms?.ToList());
         }
 
         [TestMethod]
         public void ApplyToApi_ConnectionBase_MapsIsDomainConnection()
         {
             var conf = new V1ConnectionConf { IsDomainConnection = true };
-            var req = new ConnectionCreateRequest { Strategy = "auth0" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
             V1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual(true, req.IsDomainConnection);
         }
@@ -197,7 +197,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsShowAsButton()
         {
             var conf = new V1ConnectionConf { ShowAsButton = true };
-            var req = new ConnectionCreateRequest { Strategy = "auth0" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
             V1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual(true, req.ShowAsButton);
         }
@@ -206,7 +206,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_NullFieldsLeaveTargetUnchanged()
         {
             var conf = new V1ConnectionConf();
-            var req = new ConnectionCreateRequest { Strategy = "auth0", Name = "original" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "original" };
             V1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("original", req.Name);
         }
@@ -214,18 +214,17 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void Roundtrip_ScalarProperties()
         {
-            var source = new Connection
+            var source = new GetConnectionResponseContent
             {
                 Name = "roundtrip",
                 DisplayName = "Roundtrip",
                 Strategy = "auth0",
                 IsDomainConnection = false,
                 ShowAsButton = true,
-                ProvisioningTicketUrl = "https://ticket",
             };
 
             var conf = V1ConnectionController.FromApi(source)!;
-            var req = new ConnectionCreateRequest { Strategy = conf.Strategy! };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(conf.Strategy!), Name = conf.Name! };
             V1ConnectionController.ApplyToApi(conf, req);
 
             Assert.AreEqual(source.Name, req.Name);

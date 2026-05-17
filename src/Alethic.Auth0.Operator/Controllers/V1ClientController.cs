@@ -12,9 +12,7 @@ using Alethic.Auth0.Operator.Options;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Models;
-
-using Newtonsoft.Json.Linq;
+using Auth0.ManagementApi.Core;
 
 using k8s.Models;
 
@@ -46,7 +44,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientConf? FromApi(Client? source) => source is null ? null : new()
+        internal static V1ClientConf? FromApi(GetClientResponseContent? source) => source is null ? null : new()
         {
             AllowedClients = source.AllowedClients?.ToArray(),
             AllowedLogoutUrls = source.AllowedLogoutUrls?.ToArray(),
@@ -55,8 +53,8 @@ namespace Alethic.Auth0.Operator.Controllers
             InitiateLoginUri = source.InitiateLoginUri,
             Callbacks = source.Callbacks?.ToArray(),
             ClientAliases = source.ClientAliases?.ToArray(),
-            ClientMetaData = source.ClientMetaData,
-            IsCustomLoginPageOn = source.IsCustomLoginPageOn,
+            ClientMetaData = source.ClientMetadata,
+            IsCustomLoginPageOn = source.CustomLoginPageOn,
             IsFirstParty = source.IsFirstParty,
             CustomLoginPage = source.CustomLoginPage,
             CustomLoginPagePreview = source.CustomLoginPagePreview,
@@ -70,19 +68,18 @@ namespace Alethic.Auth0.Operator.Controllers
             CrossOriginAuthentication = source.CrossOriginAuthentication,
             RequirePushedAuthorizationRequests = source.RequirePushedAuthorizationRequests,
             RequireProofOfPossession = source.RequireProofOfPossession,
-            AddOns = FromApi(source.AddOns),
-            ApplicationType = FromApi(source.ApplicationType),
-            ComplianceLevel = FromApi(source.ComplianceLevel),
-            DefaultOrganization = FromApi(source.DefaultOrganization),
-            EncryptionKey = FromApi(source.EncryptionKey),
+            AddOns = FromApi(source.Addons),
+            ApplicationType = FromApi(source.AppType),
+            ComplianceLevel = source.ComplianceLevel.IsDefined ? FromApi(source.ComplianceLevel.Value) : null,
+            DefaultOrganization = source.DefaultOrganization.IsDefined ? FromApi(source.DefaultOrganization.Value) : null,
+            EncryptionKey = source.EncryptionKey.IsDefined ? FromApi(source.EncryptionKey.Value) : null,
             JwtConfiguration = FromApi(source.JwtConfiguration),
             Mobile = FromApi(source.Mobile),
             OidcLogout = FromApi(source.OidcLogout),
             OrganizationRequireBehavior = FromApi(source.OrganizationRequireBehavior),
             OrganizationUsage = FromApi(source.OrganizationUsage),
-            RefreshToken = FromApi(source.RefreshToken),
-            ResourceServers = source.ResourceServers?.Select(i => FromApi(i)).ToArray(),
-            SigningKeys = source.SigningKeys?.Select(i => FromApi(i)).ToArray(),
+            RefreshToken = source.RefreshToken.IsDefined ? FromApi(source.RefreshToken.Value) : null,
+            SigningKeys = source.SigningKeys.IsDefined ? source.SigningKeys.Value?.Select(i => FromApi(i)).ToArray() : null,
             TokenEndpointAuthMethod = FromApi(source.TokenEndpointAuthMethod),
         };
 
@@ -92,11 +89,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientTokenEndpointAuthMethod? FromApi(TokenEndpointAuthMethod? source) => source switch
+        internal static V1ClientTokenEndpointAuthMethod? FromApi(ClientTokenEndpointAuthMethodEnum? source) => source?.Value switch
         {
-            TokenEndpointAuthMethod.None => V1ClientTokenEndpointAuthMethod.None,
-            TokenEndpointAuthMethod.ClientSecretPost => V1ClientTokenEndpointAuthMethod.ClientSecretPost,
-            TokenEndpointAuthMethod.ClientSecretBasic => V1ClientTokenEndpointAuthMethod.ClientSecretBasic,
+            ClientTokenEndpointAuthMethodEnum.Values.None => V1ClientTokenEndpointAuthMethod.None,
+            ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost => V1ClientTokenEndpointAuthMethod.ClientSecretPost,
+            ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic => V1ClientTokenEndpointAuthMethod.ClientSecretBasic,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -108,23 +105,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientSigningKey? FromApi(SigningKey? source) => source is null ? null : new()
+        internal static V1ClientSigningKey? FromApi(ClientSigningKey? source) => source is null ? null : new()
         {
             Cert = source.Cert,
-            Key = source.Key,
             Pkcs7 = source.Pkcs7,
-        };
-
-        /// <summary>
-        /// Transforms the client resource server association from the API model to the operator model.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientResourceServerAssociation? FromApi(ClientResourceServerAssociation? source) => source is null ? null : new()
-        {
-            Identifier = source.Identifier,
-            Scopes = source.Scopes,
         };
 
         /// <summary>
@@ -133,7 +117,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientRefreshToken? FromApi(RefreshToken? source) => source is null ? null : new()
+        internal static V1ClientRefreshToken? FromApi(ClientRefreshTokenConfiguration? source) => source is null ? null : new()
         {
             ExpirationType = FromApi(source.ExpirationType),
             InfiniteIdleTokenLifetime = source.InfiniteIdleTokenLifetime,
@@ -141,6 +125,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Leeway = source.Leeway,
             RotationType = FromApi(source.RotationType),
             TokenLifetime = source.TokenLifetime,
+            IdleTokenLifetime = source.IdleTokenLifetime,
         };
 
         /// <summary>
@@ -150,10 +135,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientRefreshTokenRotationType? FromApi(RefreshTokenRotationType? source) => source switch
+        internal static V1ClientRefreshTokenRotationType? FromApi(RefreshTokenRotationTypeEnum? source) => source?.Value switch
         {
-            RefreshTokenRotationType.Rotating => V1ClientRefreshTokenRotationType.Rotating,
-            RefreshTokenRotationType.NonRotating => V1ClientRefreshTokenRotationType.NonRotating,
+            RefreshTokenRotationTypeEnum.Values.Rotating => V1ClientRefreshTokenRotationType.Rotating,
+            RefreshTokenRotationTypeEnum.Values.NonRotating => V1ClientRefreshTokenRotationType.NonRotating,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -165,10 +150,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientRefreshTokenExpirationType? FromApi(RefreshTokenExpirationType? source) => source switch
+        internal static V1ClientRefreshTokenExpirationType? FromApi(RefreshTokenExpirationTypeEnum? source) => source?.Value switch
         {
-            RefreshTokenExpirationType.Expiring => V1ClientRefreshTokenExpirationType.Expiring,
-            RefreshTokenExpirationType.NonExpiring => V1ClientRefreshTokenExpirationType.NonExpiring,
+            RefreshTokenExpirationTypeEnum.Values.Expiring => V1ClientRefreshTokenExpirationType.Expiring,
+            RefreshTokenExpirationTypeEnum.Values.NonExpiring => V1ClientRefreshTokenExpirationType.NonExpiring,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -180,11 +165,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
+        internal static V1ClientOrganizationUsage? FromApi(ClientOrganizationUsageEnum? source) => source?.Value switch
         {
-            OrganizationUsage.Deny => V1ClientOrganizationUsage.Deny,
-            OrganizationUsage.Allow => V1ClientOrganizationUsage.Allow,
-            OrganizationUsage.Require => V1ClientOrganizationUsage.Require,
+            ClientOrganizationUsageEnum.Values.Deny => V1ClientOrganizationUsage.Deny,
+            ClientOrganizationUsageEnum.Values.Allow => V1ClientOrganizationUsage.Allow,
+            ClientOrganizationUsageEnum.Values.Require => V1ClientOrganizationUsage.Require,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -196,11 +181,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientOrganizationRequireBehavior? FromApi(OrganizationRequireBehavior? source) => source switch
+        internal static V1ClientOrganizationRequireBehavior? FromApi(ClientOrganizationRequireBehaviorEnum? source) => source?.Value switch
         {
-            OrganizationRequireBehavior.NoPrompt => V1ClientOrganizationRequireBehavior.NoPrompt,
-            OrganizationRequireBehavior.PreLoginPrompt => V1ClientOrganizationRequireBehavior.PreLoginPrompt,
-            OrganizationRequireBehavior.PostLoginPrompt => V1ClientOrganizationRequireBehavior.PostLoginPrompt,
+            ClientOrganizationRequireBehaviorEnum.Values.NoPrompt => V1ClientOrganizationRequireBehavior.NoPrompt,
+            ClientOrganizationRequireBehaviorEnum.Values.PreLoginPrompt => V1ClientOrganizationRequireBehavior.PreLoginPrompt,
+            ClientOrganizationRequireBehaviorEnum.Values.PostLoginPrompt => V1ClientOrganizationRequireBehavior.PostLoginPrompt,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -211,9 +196,9 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientOidcLogoutConfig? FromApi(OidcLogoutConfig? source) => source is null ? null : new()
+        internal static V1ClientOidcLogoutConfig? FromApi(ClientOidcBackchannelLogoutSettings? source) => source is null ? null : new()
         {
-            BackchannelLogoutUrls = source.BackchannelLogoutUrls,
+            BackchannelLogoutUrls = source.BackchannelLogoutUrls?.ToArray(),
             BackchannelLogoutInitiators = FromApi(source.BackchannelLogoutInitiators),
         };
 
@@ -223,7 +208,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientBackchannelLogoutInitiators? FromApi(BackchannelLogoutInitiators? source) => source is null ? null : new()
+        internal static V1ClientBackchannelLogoutInitiators? FromApi(ClientOidcBackchannelLogoutInitiators? source) => source is null ? null : new()
         {
             Mode = FromApi(source.Mode),
             SelectedInitiators = source.SelectedInitiators?.Select(FromApi).ToArray(),
@@ -235,12 +220,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static V1ClientLogoutInitiators FromApi(LogoutInitiators source) => source switch
+        internal static V1ClientLogoutInitiators FromApi(ClientOidcBackchannelLogoutInitiatorsEnum source) => source.Value switch
         {
-            LogoutInitiators.RpLogout => V1ClientLogoutInitiators.RpLogout,
-            LogoutInitiators.IdpLogout => V1ClientLogoutInitiators.IdpLogout,
-            LogoutInitiators.PasswordChanged => V1ClientLogoutInitiators.PasswordChanged,
-            LogoutInitiators.SessionExpired => V1ClientLogoutInitiators.SessionExpired,
+            ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout => V1ClientLogoutInitiators.RpLogout,
+            ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout => V1ClientLogoutInitiators.IdpLogout,
+            ClientOidcBackchannelLogoutInitiatorsEnum.Values.PasswordChanged => V1ClientLogoutInitiators.PasswordChanged,
+            ClientOidcBackchannelLogoutInitiatorsEnum.Values.SessionExpired => V1ClientLogoutInitiators.SessionExpired,
             _ => throw new NotImplementedException(),
         };
 
@@ -251,10 +236,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientLogoutInitiatorModes? FromApi(LogoutInitiatorModes? source) => source switch
+        internal static V1ClientLogoutInitiatorModes? FromApi(ClientOidcBackchannelLogoutInitiatorsModeEnum? source) => source?.Value switch
         {
-            LogoutInitiatorModes.All => V1ClientLogoutInitiatorModes.All,
-            LogoutInitiatorModes.Custom => V1ClientLogoutInitiatorModes.Custom,
+            ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.All => V1ClientLogoutInitiatorModes.All,
+            ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom => V1ClientLogoutInitiatorModes.Custom,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -265,7 +250,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientMobile? FromApi(Mobile? source) => source is null ? null : new()
+        internal static V1ClientMobile? FromApi(ClientMobile? source) => source is null ? null : new()
         {
             Android = FromApi(source.Android),
             Ios = FromApi(source.Ios),
@@ -276,7 +261,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1ClientMobile.MobileIos? FromApi(Mobile.MobileIos? source)
+        internal static V1ClientMobile.MobileIos? FromApi(ClientMobileiOs? source)
         {
             if (source is null)
                 return null;
@@ -295,17 +280,16 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static V1ClientMobile.MobileAndroid? FromApi(Mobile.MobileAndroid? source)
+        internal static V1ClientMobile.MobileAndroid? FromApi(ClientMobileAndroid? source)
         {
             if (source is null)
                 return null;
-            if (source.AppPackageName is null && source.KeystoreHash is null)
+            if (source.AppPackageName is null)
                 return null;
 
             return new()
             {
                 AppPackageName = source.AppPackageName,
-                KeystoreHash = source.KeystoreHash,
             };
         }
 
@@ -315,39 +299,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientJwtConfiguration? FromApi(JwtConfiguration? source) => source is null ? null : new()
+        internal static V1ClientJwtConfiguration? FromApi(ClientJwtConfiguration? source) => source is null ? null : new()
         {
-            IsSecretEncoded = source.IsSecretEncoded,
+            IsSecretEncoded = source.SecretEncoded,
             LifetimeInSeconds = source.LifetimeInSeconds,
-            Scopes = FromApi(source.Scopes),
-            SigningAlgorithm = source.SigningAlgorithm,
-        };
-
-        /// <summary>
-        /// Transforms the client scopes from the API model to the operator model.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientScopes? FromApi(Scopes? source) => source is null ? null : new()
-        {
-            Users = FromApi(source.Users),
-            UsersAppMetadata = FromApi(source.UsersAppMetadata),
-            Clients = FromApi(source.Clients),
-            ClientKeys = FromApi(source.ClientKeys),
-            Tokens = FromApi(source.Tokens),
-            Stats = FromApi(source.Stats),
-        };
-
-        /// <summary>
-        /// Transforms the client scope entry from the API model to the operator model.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientScopeEntry? FromApi(ScopeEntry? source) => source is null ? null : new()
-        {
-            Actions = source.Actions,
+            SigningAlgorithm = source.Alg?.Value,
         };
 
         /// <summary>
@@ -356,10 +312,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientEncryptionKey? FromApi(EncryptionKey? source) => source is null ? null : new()
+        internal static V1ClientEncryptionKey? FromApi(ClientEncryptionKey? source) => source is null ? null : new()
         {
-            Certificate = source.Certificate,
-            PublicKey = source.PublicKey,
+            Certificate = source.Cert,
+            PublicKey = source.Pub,
             Subject = source.Subject,
         };
 
@@ -369,7 +325,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientDefaultOrganization? FromApi(DefaultOrganization? source) => source is null ? null : new()
+        internal static V1ClientDefaultOrganization? FromApi(ClientDefaultOrganization? source) => source is null ? null : new()
         {
             OrganizationId = source.OrganizationId,
             Flows = source.Flows?.Select(FromApi).ToArray(),
@@ -381,10 +337,9 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientFlows FromApi(Flows source) => source switch
+        internal static V1ClientFlows FromApi(ClientDefaultOrganizationFlowsEnum source) => source.Value switch
         {
-            Flows.ClientCredentials => V1ClientFlows.ClientCredentials,
+            ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials => V1ClientFlows.ClientCredentials,
             _ => throw new NotImplementedException(),
         };
 
@@ -395,11 +350,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientComplianceLevel? FromApi(ComplianceLevel? source) => source switch
+        internal static V1ClientComplianceLevel? FromApi(ClientComplianceLevelEnum? source) => source?.Value switch
         {
-            ComplianceLevel.NONE => V1ClientComplianceLevel.NONE,
-            ComplianceLevel.FAPI1_ADV_PKJ_PAR => V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR,
-            ComplianceLevel.FAPI1_ADV_MTLS_PAR => V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR,
+            ClientComplianceLevelEnum.Values.None => V1ClientComplianceLevel.NONE,
+            ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar => V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR,
+            ClientComplianceLevelEnum.Values.Fapi1AdvMtlsPar => V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -411,33 +366,33 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientApplicationType? FromApi(ClientApplicationType? source) => source switch
+        internal static V1ClientApplicationType? FromApi(ClientAppTypeEnum? source) => source?.Value switch
         {
-            ClientApplicationType.Box => V1ClientApplicationType.Box,
-            ClientApplicationType.Cloudbees => V1ClientApplicationType.Cloudbees,
-            ClientApplicationType.Concur => V1ClientApplicationType.Concur,
-            ClientApplicationType.Dropbox => V1ClientApplicationType.Dropbox,
-            ClientApplicationType.Echosign => V1ClientApplicationType.Echosign,
-            ClientApplicationType.Egnyte => V1ClientApplicationType.Egnyte,
-            ClientApplicationType.MsCrm => V1ClientApplicationType.MsCrm,
-            ClientApplicationType.Native => V1ClientApplicationType.Native,
-            ClientApplicationType.NewRelic => V1ClientApplicationType.NewRelic,
-            ClientApplicationType.NonInteractive => V1ClientApplicationType.NonInteractive,
-            ClientApplicationType.Office365 => V1ClientApplicationType.Office365,
-            ClientApplicationType.RegularWeb => V1ClientApplicationType.RegularWeb,
-            ClientApplicationType.Rms => V1ClientApplicationType.Rms,
-            ClientApplicationType.Salesforce => V1ClientApplicationType.Salesforce,
-            ClientApplicationType.Sentry => V1ClientApplicationType.Sentry,
-            ClientApplicationType.SharePoint => V1ClientApplicationType.SharePoint,
-            ClientApplicationType.Slack => V1ClientApplicationType.Slack,
-            ClientApplicationType.SpringCm => V1ClientApplicationType.SpringCm,
-            ClientApplicationType.Spa => V1ClientApplicationType.Spa,
-            ClientApplicationType.Zendesk => V1ClientApplicationType.Zendesk,
-            ClientApplicationType.Zoom => V1ClientApplicationType.Zoom,
-            ClientApplicationType.ResourceServer => V1ClientApplicationType.ResourceServer,
-            ClientApplicationType.ExpressConfiguration => V1ClientApplicationType.ExpressConfiguration,
-            ClientApplicationType.SsoIntegration => V1ClientApplicationType.SsoIntegration,
-            ClientApplicationType.Oag => V1ClientApplicationType.Oag,
+            ClientAppTypeEnum.Values.Box => V1ClientApplicationType.Box,
+            ClientAppTypeEnum.Values.Cloudbees => V1ClientApplicationType.Cloudbees,
+            ClientAppTypeEnum.Values.Concur => V1ClientApplicationType.Concur,
+            ClientAppTypeEnum.Values.Dropbox => V1ClientApplicationType.Dropbox,
+            ClientAppTypeEnum.Values.Echosign => V1ClientApplicationType.Echosign,
+            ClientAppTypeEnum.Values.Egnyte => V1ClientApplicationType.Egnyte,
+            ClientAppTypeEnum.Values.Mscrm => V1ClientApplicationType.MsCrm,
+            ClientAppTypeEnum.Values.Native => V1ClientApplicationType.Native,
+            ClientAppTypeEnum.Values.Newrelic => V1ClientApplicationType.NewRelic,
+            ClientAppTypeEnum.Values.NonInteractive => V1ClientApplicationType.NonInteractive,
+            ClientAppTypeEnum.Values.Office365 => V1ClientApplicationType.Office365,
+            ClientAppTypeEnum.Values.RegularWeb => V1ClientApplicationType.RegularWeb,
+            ClientAppTypeEnum.Values.Rms => V1ClientApplicationType.Rms,
+            ClientAppTypeEnum.Values.Salesforce => V1ClientApplicationType.Salesforce,
+            ClientAppTypeEnum.Values.Sentry => V1ClientApplicationType.Sentry,
+            ClientAppTypeEnum.Values.Sharepoint => V1ClientApplicationType.SharePoint,
+            ClientAppTypeEnum.Values.Slack => V1ClientApplicationType.Slack,
+            ClientAppTypeEnum.Values.Springcm => V1ClientApplicationType.SpringCm,
+            ClientAppTypeEnum.Values.Spa => V1ClientApplicationType.Spa,
+            ClientAppTypeEnum.Values.Zendesk => V1ClientApplicationType.Zendesk,
+            ClientAppTypeEnum.Values.Zoom => V1ClientApplicationType.Zoom,
+            ClientAppTypeEnum.Values.ResourceServer => V1ClientApplicationType.ResourceServer,
+            ClientAppTypeEnum.Values.ExpressConfiguration => V1ClientApplicationType.ExpressConfiguration,
+            ClientAppTypeEnum.Values.SsoIntegration => V1ClientApplicationType.SsoIntegration,
+            ClientAppTypeEnum.Values.Oag => V1ClientApplicationType.Oag,
             null => null,
             _ => throw new NotImplementedException(),
         };
@@ -448,151 +403,146 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ClientAddons? FromApi(Addons? source) => source is { } addOns ? new V1ClientAddons()
+        internal static V1ClientAddons? FromApi(ClientAddons? source) => source is { } addOns ? new V1ClientAddons()
         {
-            Aws = FromApiAddonAws(addOns.AmazonWebServices as JObject),
-            AzureSb = FromApiAddonAzureSb(addOns.AzureServiceBus as JObject),
-            Box = FromApiAddonDictionary(addOns.Box as JObject),
-            Cloudbees = FromApiAddonDictionary(addOns.CloudBees as JObject),
-            Concur = FromApiAddonDictionary(addOns.Concur as JObject),
-            Dropbox = FromApiAddonDictionary(addOns.DropBox as JObject),
-            Echosign = FromApiAddonEchoSign(addOns.EchoSign as JObject),
-            Egnyte = FromApiAddonEgnyte(addOns.Egnyte as JObject),
-            Firebase = FromApiAddonFirebase(addOns.FireBase as JObject),
-            Newrelic = FromApiAddonNewRelic(addOns.NewRelic as JObject),
-            Office365 = FromApiAddonOffice365(addOns.Office365 as JObject),
-            Salesforce = FromApiAddonSalesforce(addOns.SalesForce as JObject),
-            SalesforceApi = FromApiAddonSalesforceApi(addOns.SalesForceApi as JObject),
-            SalesforceSandboxApi = FromApiAddonSalesforceSandboxApi(addOns.SalesForceSandboxApi as JObject),
-            Samlp = FromApiAddonSaml(addOns.SamlP as JObject),
-            SapApi = FromApiAddonSapApi(addOns.SapApi as JObject),
-            Sharepoint = FromApiAddonSharePoint(addOns.SharePoint as JObject),
-            Springcm = FromApiAddonSpringCm(addOns.SpringCM as JObject),
-            Wsfed = FromApiAddonDictionary(addOns.WsFed as JObject),
-            Zendesk = FromApiAddonZendesk(addOns.Zendesk as JObject),
-            Zoom = FromApiAddonZoom(addOns.Zoom as JObject),
+            Aws = FromApiAddonAws(addOns.Aws),
+            AzureSb = FromApiAddonAzureSb(addOns.AzureSb),
+            Box = addOns.Box,
+            Cloudbees = addOns.Cloudbees,
+            Concur = addOns.Concur,
+            Dropbox = addOns.Dropbox,
+            Echosign = FromApiAddonEchoSign(addOns.Echosign),
+            Egnyte = FromApiAddonEgnyte(addOns.Egnyte),
+            Firebase = FromApiAddonFirebase(addOns.Firebase),
+            Newrelic = FromApiAddonNewRelic(addOns.Newrelic),
+            Office365 = FromApiAddonOffice365(addOns.Office365),
+            Salesforce = FromApiAddonSalesforce(addOns.Salesforce),
+            SalesforceApi = FromApiAddonSalesforceApi(addOns.SalesforceApi),
+            SalesforceSandboxApi = FromApiAddonSalesforceSandboxApi(addOns.SalesforceSandboxApi),
+            Samlp = FromApiAddonSaml(addOns.Samlp),
+            SapApi = FromApiAddonSapApi(addOns.SapApi),
+            Sharepoint = FromApiAddonSharePoint(addOns.Sharepoint),
+            Springcm = FromApiAddonSpringCm(addOns.Springcm),
+            Wsfed = addOns.Wsfed,
+            Zendesk = FromApiAddonZendesk(addOns.Zendesk),
+            Zoom = FromApiAddonZoom(addOns.Zoom),
         } : null;
 
-        internal static V1ClientAddonAws? FromApiAddonAws(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonAws? FromApiAddonAws(ClientAddonAws? o) => o is null ? null : new()
         {
-            Principal = (string?)o["principal"],
-            Role = (string?)o["role"],
-            LifetimeInSeconds = (int?)o["lifetime_in_seconds"],
+            Principal = o.Principal,
+            Role = o.Role,
+            LifetimeInSeconds = o.LifetimeInSeconds,
         };
 
-        internal static V1ClientAddonAzureSb? FromApiAddonAzureSb(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonAzureSb? FromApiAddonAzureSb(ClientAddonAzureSb? o) => o is null ? null : new()
         {
-            Namespace = (string?)o["namespace"],
-            SasKeyName = (string?)o["sasKeyName"],
-            SasKey = (string?)o["sasKey"],
-            EntityPath = (string?)o["entityPath"],
+            Namespace = o.Namespace,
+            SasKeyName = o.SasKeyName,
+            SasKey = o.SasKey,
+            EntityPath = o.EntityPath,
         };
 
-        internal static Dictionary<string, object?>? FromApiAddonDictionary(JObject? o)
+        internal static V1ClientAddonEchoSign? FromApiAddonEchoSign(ClientAddonEchoSign? o) => o is null ? null : new()
         {
-            return o?.ToObject<Dictionary<string, object?>>();
-        }
-
-        internal static V1ClientAddonEchoSign? FromApiAddonEchoSign(JObject? o) => o is null ? null : new()
-        {
-            Domain = (string?)o["domain"],
+            Domain = o.Domain,
         };
 
-        internal static V1ClientAddonEgnyte? FromApiAddonEgnyte(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonEgnyte? FromApiAddonEgnyte(ClientAddonEgnyte? o) => o is null ? null : new()
         {
-            Domain = (string?)o["domain"],
+            Domain = o.Domain,
         };
 
-        internal static V1ClientAddonFirebase? FromApiAddonFirebase(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonFirebase? FromApiAddonFirebase(ClientAddonFirebase? o) => o is null ? null : new()
         {
-            Secret = (string?)o["secret"],
-            PrivateKeyId = (string?)o["private_key_id"],
-            PrivateKey = (string?)o["private_key"],
-            ClientEmail = (string?)o["client_email"],
-            LifetimeInSeconds = (int?)o["lifetime_in_seconds"],
+            Secret = o.Secret,
+            PrivateKeyId = o.PrivateKeyId,
+            PrivateKey = o.PrivateKey,
+            ClientEmail = o.ClientEmail,
+            LifetimeInSeconds = o.LifetimeInSeconds,
         };
 
-        internal static V1ClientAddonNewRelic? FromApiAddonNewRelic(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonNewRelic? FromApiAddonNewRelic(ClientAddonNewRelic? o) => o is null ? null : new()
         {
-            Account = (string?)o["account"],
+            Account = o.Account,
         };
 
-        internal static V1ClientAddonOffice365? FromApiAddonOffice365(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonOffice365? FromApiAddonOffice365(ClientAddonOffice365? o) => o is null ? null : new()
         {
-            Domain = (string?)o["domain"],
-            Connection = (string?)o["connection"],
+            Domain = o.Domain,
+            Connection = o.Connection,
         };
 
-        internal static V1ClientAddonSalesforce? FromApiAddonSalesforce(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSalesforce? FromApiAddonSalesforce(ClientAddonSalesforce? o) => o is null ? null : new()
         {
-            EntityId = (string?)o["entity_id"],
+            EntityId = o.EntityId,
         };
 
-        internal static V1ClientAddonSalesforceApi? FromApiAddonSalesforceApi(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSalesforceApi? FromApiAddonSalesforceApi(ClientAddonSalesforceApi? o) => o is null ? null : new()
         {
-            Clientid = (string?)o["clientid"],
-            Principal = (string?)o["principal"],
-            CommunityName = (string?)o["communityName"],
-            CommunityUrlSection = (string?)o["community_url_section"],
+            Clientid = o.Clientid,
+            Principal = o.Principal,
+            CommunityName = o.CommunityName,
+            CommunityUrlSection = o.CommunityUrlSection,
         };
 
-        internal static V1ClientAddonSalesforceSandboxApi? FromApiAddonSalesforceSandboxApi(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSalesforceSandboxApi? FromApiAddonSalesforceSandboxApi(ClientAddonSalesforceSandboxApi? o) => o is null ? null : new()
         {
-            Clientid = (string?)o["clientid"],
-            Principal = (string?)o["principal"],
-            CommunityName = (string?)o["communityName"],
-            CommunityUrlSection = (string?)o["community_url_section"],
+            Clientid = o.Clientid,
+            Principal = o.Principal,
+            CommunityName = o.CommunityName,
+            CommunityUrlSection = o.CommunityUrlSection,
         };
 
-        internal static V1ClientAddonSaml? FromApiAddonSaml(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSaml? FromApiAddonSaml(ClientAddonSaml? o) => o is null ? null : new()
         {
-            Mappings = o["mappings"]?.ToObject<Dictionary<string, object?>>(),
-            Audience = (string?)o["audience"],
-            Recipient = (string?)o["recipient"],
-            CreateUpnClaim = (bool?)o["createUpnClaim"],
-            MapUnknownClaimsAsIs = (bool?)o["mapUnknownClaimsAsIs"],
-            PassthroughClaimsWithNoMapping = (bool?)o["passthroughClaimsWithNoMapping"],
-            MapIdentities = (bool?)o["mapIdentities"],
-            SignatureAlgorithm = (string?)o["signatureAlgorithm"],
-            DigestAlgorithm = (string?)o["digestAlgorithm"],
-            Issuer = (string?)o["issuer"],
-            Destination = (string?)o["destination"],
-            LifetimeInSeconds = (int?)o["lifetimeInSeconds"],
-            SignResponse = (bool?)o["signResponse"],
-            NameIdentifierFormat = (string?)o["nameIdentifierFormat"],
-            NameIdentifierProbes = o["nameIdentifierProbes"]?.ToObject<List<string>>(),
-            AuthnContextClassRef = (string?)o["authnContextClassRef"],
+            Mappings = o.Mappings,
+            Audience = o.Audience,
+            Recipient = o.Recipient,
+            CreateUpnClaim = o.CreateUpnClaim,
+            MapUnknownClaimsAsIs = o.MapUnknownClaimsAsIs,
+            PassthroughClaimsWithNoMapping = o.PassthroughClaimsWithNoMapping,
+            MapIdentities = o.MapIdentities,
+            SignatureAlgorithm = o.SignatureAlgorithm,
+            DigestAlgorithm = o.DigestAlgorithm,
+            Issuer = o.Issuer,
+            Destination = o.Destination,
+            LifetimeInSeconds = o.LifetimeInSeconds,
+            SignResponse = o.SignResponse,
+            NameIdentifierFormat = o.NameIdentifierFormat,
+            NameIdentifierProbes = o.NameIdentifierProbes?.ToList(),
+            AuthnContextClassRef = o.AuthnContextClassRef,
         };
 
-        internal static V1ClientAddonSapapi? FromApiAddonSapApi(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSapapi? FromApiAddonSapApi(ClientAddonSapapi? o) => o is null ? null : new()
         {
-            Clientid = (string?)o["clientid"],
-            UsernameAttribute = (string?)o["usernameAttribute"],
-            TokenEndpointUrl = (string?)o["tokenEndpointUrl"],
-            Scope = (string?)o["scope"],
-            ServicePassword = (string?)o["servicePassword"],
-            NameIdentifierFormat = (string?)o["nameIdentifierFormat"],
+            Clientid = o.Clientid,
+            UsernameAttribute = o.UsernameAttribute,
+            TokenEndpointUrl = o.TokenEndpointUrl,
+            Scope = o.Scope,
+            ServicePassword = o.ServicePassword,
+            NameIdentifierFormat = o.NameIdentifierFormat,
         };
 
-        internal static V1ClientAddonSharePoint? FromApiAddonSharePoint(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSharePoint? FromApiAddonSharePoint(ClientAddonSharePoint? o) => o is null ? null : new()
         {
-            Url = (string?)o["url"],
-            ExternalUrl = (o["external_url"] as JObject)?.ToObject<V1ClientAddonSharePointExternalUrl>(),
+            Url = o.Url,
+            ExternalUrl = o.ExternalUrl is { } eu ? new V1ClientAddonSharePointExternalUrl { Type = eu.Type, Value = eu.Value?.ToString() } : null,
         };
 
-        internal static V1ClientAddonSpringCm? FromApiAddonSpringCm(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonSpringCm? FromApiAddonSpringCm(ClientAddonSpringCm? o) => o is null ? null : new()
         {
-            Acsurl = (string?)o["acsurl"],
+            Acsurl = o.Acsurl,
         };
 
-        internal static V1ClientAddonZendesk? FromApiAddonZendesk(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonZendesk? FromApiAddonZendesk(ClientAddonZendesk? o) => o is null ? null : new()
         {
-            AccountName = (string?)o["accountName"],
+            AccountName = o.AccountName,
         };
 
-        internal static V1ClientAddonZoom? FromApiAddonZoom(JObject? o) => o is null ? null : new()
+        internal static V1ClientAddonZoom? FromApiAddonZoom(ClientAddonZoom? o) => o is null ? null : new()
         {
-            Account = (string?)o["account"],
+            Account = o.Account,
         };
 
         /// <summary>
@@ -600,70 +550,154 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientAddons source, Addons target)
+        internal static void ApplyToApi(V1ClientAddons source, ClientAddons target)
         {
             if (source.Aws is { } aws)
-                target.AmazonWebServices = aws;
+            {
+                target.Aws ??= new ClientAddonAws();
+                target.Aws.Principal = aws.Principal;
+                target.Aws.Role = aws.Role;
+                target.Aws.LifetimeInSeconds = aws.LifetimeInSeconds;
+            }
 
-            if (source.AzureSb is { } azure_sb)
-                target.AzureServiceBus = azure_sb;
+            if (source.AzureSb is { } azureSb)
+            {
+                target.AzureSb ??= new ClientAddonAzureSb();
+                target.AzureSb.Namespace = azureSb.Namespace;
+                target.AzureSb.SasKeyName = azureSb.SasKeyName;
+                target.AzureSb.SasKey = azureSb.SasKey;
+                target.AzureSb.EntityPath = azureSb.EntityPath;
+            }
 
             if (source.Box is { } box)
                 target.Box = box;
 
             if (source.Cloudbees is { } cloudbees)
-                target.CloudBees = cloudbees;
+                target.Cloudbees = cloudbees;
 
             if (source.Concur is { } concur)
                 target.Concur = concur;
 
             if (source.Dropbox is { } dropbox)
-                target.DropBox = dropbox;
+                target.Dropbox = dropbox;
 
             if (source.Echosign is { } echosign)
-                target.EchoSign = echosign;
+            {
+                target.Echosign ??= new ClientAddonEchoSign();
+                target.Echosign.Domain = echosign.Domain;
+            }
 
             if (source.Egnyte is { } egnyte)
-                target.Egnyte = egnyte;
+            {
+                target.Egnyte ??= new ClientAddonEgnyte();
+                target.Egnyte.Domain = egnyte.Domain;
+            }
 
             if (source.Firebase is { } firebase)
-                target.FireBase = firebase;
+            {
+                target.Firebase ??= new ClientAddonFirebase();
+                target.Firebase.Secret = firebase.Secret;
+                target.Firebase.PrivateKeyId = firebase.PrivateKeyId;
+                target.Firebase.PrivateKey = firebase.PrivateKey;
+                target.Firebase.ClientEmail = firebase.ClientEmail;
+                target.Firebase.LifetimeInSeconds = firebase.LifetimeInSeconds;
+            }
 
             if (source.Newrelic is { } newrelic)
-                target.NewRelic = newrelic;
+            {
+                target.Newrelic ??= new ClientAddonNewRelic();
+                target.Newrelic.Account = newrelic.Account;
+            }
 
             if (source.Office365 is { } office365)
-                target.Office365 = office365;
+            {
+                target.Office365 ??= new ClientAddonOffice365();
+                target.Office365.Domain = office365.Domain;
+                target.Office365.Connection = office365.Connection;
+            }
 
             if (source.Salesforce is { } salesforce)
-                target.SalesForce = salesforce;
+            {
+                target.Salesforce ??= new ClientAddonSalesforce();
+                target.Salesforce.EntityId = salesforce.EntityId;
+            }
 
-            if (source.SalesforceApi is { } salesforce_api)
-                target.SalesForceApi = salesforce_api;
+            if (source.SalesforceApi is { } salesforceApi)
+            {
+                target.SalesforceApi ??= new ClientAddonSalesforceApi();
+                target.SalesforceApi.Clientid = salesforceApi.Clientid;
+                target.SalesforceApi.Principal = salesforceApi.Principal;
+                target.SalesforceApi.CommunityName = salesforceApi.CommunityName;
+                target.SalesforceApi.CommunityUrlSection = salesforceApi.CommunityUrlSection;
+            }
 
-            if (source.SalesforceSandboxApi is { } salesforce_sandbox_api)
-                target.SalesForceSandboxApi = salesforce_sandbox_api;
+            if (source.SalesforceSandboxApi is { } salesforceSandboxApi)
+            {
+                target.SalesforceSandboxApi ??= new ClientAddonSalesforceSandboxApi();
+                target.SalesforceSandboxApi.Clientid = salesforceSandboxApi.Clientid;
+                target.SalesforceSandboxApi.Principal = salesforceSandboxApi.Principal;
+                target.SalesforceSandboxApi.CommunityName = salesforceSandboxApi.CommunityName;
+                target.SalesforceSandboxApi.CommunityUrlSection = salesforceSandboxApi.CommunityUrlSection;
+            }
 
             if (source.Samlp is { } samlp)
-                target.SamlP = samlp;
+            {
+                target.Samlp ??= new ClientAddonSaml();
+                target.Samlp.Mappings = samlp.Mappings;
+                target.Samlp.Audience = samlp.Audience;
+                target.Samlp.Recipient = samlp.Recipient;
+                target.Samlp.CreateUpnClaim = samlp.CreateUpnClaim;
+                target.Samlp.MapUnknownClaimsAsIs = samlp.MapUnknownClaimsAsIs;
+                target.Samlp.PassthroughClaimsWithNoMapping = samlp.PassthroughClaimsWithNoMapping;
+                target.Samlp.MapIdentities = samlp.MapIdentities;
+                target.Samlp.SignatureAlgorithm = samlp.SignatureAlgorithm;
+                target.Samlp.DigestAlgorithm = samlp.DigestAlgorithm;
+                target.Samlp.Issuer = samlp.Issuer;
+                target.Samlp.Destination = samlp.Destination;
+                target.Samlp.LifetimeInSeconds = samlp.LifetimeInSeconds;
+                target.Samlp.SignResponse = samlp.SignResponse;
+                target.Samlp.NameIdentifierFormat = samlp.NameIdentifierFormat;
+                target.Samlp.NameIdentifierProbes = samlp.NameIdentifierProbes;
+                target.Samlp.AuthnContextClassRef = samlp.AuthnContextClassRef;
+            }
 
-            if (source.SapApi is { } sap_api)
-                target.SapApi = sap_api;
+            if (source.SapApi is { } sapApi)
+            {
+                target.SapApi ??= new ClientAddonSapapi();
+                target.SapApi.Clientid = sapApi.Clientid;
+                target.SapApi.UsernameAttribute = sapApi.UsernameAttribute;
+                target.SapApi.TokenEndpointUrl = sapApi.TokenEndpointUrl;
+                target.SapApi.Scope = sapApi.Scope;
+                target.SapApi.ServicePassword = sapApi.ServicePassword;
+                target.SapApi.NameIdentifierFormat = sapApi.NameIdentifierFormat;
+            }
 
             if (source.Sharepoint is { } sharepoint)
-                target.SharePoint = sharepoint;
+            {
+                target.Sharepoint ??= new ClientAddonSharePoint();
+                target.Sharepoint.Url = sharepoint.Url;
+            }
 
             if (source.Springcm is { } springcm)
-                target.SpringCM = springcm;
+            {
+                target.Springcm ??= new ClientAddonSpringCm();
+                target.Springcm.Acsurl = springcm.Acsurl;
+            }
 
             if (source.Wsfed is { } wsfed)
-                target.WsFed = wsfed;
+                target.Wsfed = wsfed;
 
             if (source.Zendesk is { } zendesk)
-                target.Zendesk = zendesk;
+            {
+                target.Zendesk ??= new ClientAddonZendesk();
+                target.Zendesk.AccountName = zendesk.AccountName;
+            }
 
             if (source.Zoom is { } zoom)
-                target.Zoom = zoom;
+            {
+                target.Zoom ??= new ClientAddonZoom();
+                target.Zoom.Account = zoom.Account;
+            }
         }
 
         /// <summary>
@@ -671,53 +705,16 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientEncryptionKey source, EncryptionKey target)
+        internal static void ApplyToApi(V1ClientEncryptionKey source, ClientEncryptionKey target)
         {
             if (source.Certificate is { } cert)
-                target.Certificate = cert;
+                target.Cert = cert;
 
             if (source.PublicKey is { } pub)
-                target.PublicKey = pub;
+                target.Pub = pub;
 
             if (source.Subject is { } subject)
                 target.Subject = subject;
-        }
-
-        /// <summary>
-        /// Applies the scope entry configuration to the API request.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientScopeEntry source, ScopeEntry target)
-        {
-            if (source.Actions is { } actions)
-                target.Actions = actions;
-        }
-
-        /// <summary>
-        /// Applies the scopes configuration to the API request.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientScopes source, Scopes target)
-        {
-            if (source.Users is { } users)
-                ApplyToApi(users, target.Users ??= new ScopeEntry());
-
-            if (source.UsersAppMetadata is { } users_app_metadata)
-                ApplyToApi(users_app_metadata, target.UsersAppMetadata ??= new ScopeEntry());   
-
-            if (source.Clients is { } clients)
-                ApplyToApi(clients, target.Clients ??= new ScopeEntry());
-
-            if (source.ClientKeys is { } client_keys)
-                ApplyToApi(client_keys, target.ClientKeys ??= new ScopeEntry());
-
-            if (source.Tokens is { } tokens)
-                ApplyToApi(tokens, target.Tokens ??= new ScopeEntry());
-
-            if (source.Stats is { } stats)
-                ApplyToApi(stats, target.Stats ??= new ScopeEntry());
         }
 
         /// <summary>
@@ -725,33 +722,27 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientJwtConfiguration source, JwtConfiguration target)
+        internal static void ApplyToApi(V1ClientJwtConfiguration source, ClientJwtConfiguration target)
         {
             if (source.IsSecretEncoded is { } secret_encoded)
-                target.IsSecretEncoded = secret_encoded;
+                target.SecretEncoded = secret_encoded;
 
             if (source.LifetimeInSeconds is { } lifetime_in_seconds)
                 target.LifetimeInSeconds = lifetime_in_seconds;
 
-            if (source.Scopes is { } scopes)
-                ApplyToApi(scopes, target.Scopes ??= new Scopes());
-
             if (source.SigningAlgorithm is { } alg)
-                target.SigningAlgorithm = alg;
+                target.Alg = new SigningAlgorithmEnum(alg);
         }
 
         /// <summary>
-        /// Applies the mobile configuration to the API request.
+        /// Applies the Android mobile configuration to the API request.
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientMobile.MobileAndroid source, Mobile.MobileAndroid target)
+        internal static void ApplyToApi(V1ClientMobile.MobileAndroid source, ClientMobileAndroid target)
         {
             if (source.AppPackageName is { } app_package_name)
                 target.AppPackageName = app_package_name;
-
-            if (source.KeystoreHash is { } keystore_hash)
-                target.KeystoreHash = keystore_hash;
         }
 
         /// <summary>
@@ -759,7 +750,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientMobile.MobileIos source, Mobile.MobileIos target)
+        internal static void ApplyToApi(V1ClientMobile.MobileIos source, ClientMobileiOs target)
         {
             if (source.AppBundleIdentifier is { } app_bundle_identifier)
                 target.AppBundleIdentifier = app_bundle_identifier;
@@ -773,15 +764,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientMobile source, Mobile target)
+        internal static void ApplyToApi(V1ClientMobile source, ClientMobile target)
         {
             if (source.Android is { } android)
-                if (source.Android.AppPackageName is not null || source.Android.KeystoreHash is not null)
-                    ApplyToApi(android, target.Android ??= new Mobile.MobileAndroid());
+                if (source.Android.AppPackageName is not null)
+                    ApplyToApi(android, target.Android ??= new ClientMobileAndroid());
 
             if (source.Ios is { } ios)
                 if (source.Ios.AppBundleIdentifier is not null || source.Ios.TeamId is not null)
-                    ApplyToApi(ios, target.Ios ??= new Mobile.MobileIos());
+                    ApplyToApi(ios, target.Ios ??= new ClientMobileiOs());
         }
 
         /// <summary>
@@ -790,11 +781,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static ComplianceLevel ToApi(V1ClientComplianceLevel source) => source switch
+        internal static ClientComplianceLevelEnum ToApi(V1ClientComplianceLevel source) => source switch
         {
-            V1ClientComplianceLevel.NONE => ComplianceLevel.NONE,
-            V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR => ComplianceLevel.FAPI1_ADV_PKJ_PAR,
-            V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR => ComplianceLevel.FAPI1_ADV_MTLS_PAR,
+            V1ClientComplianceLevel.NONE => new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.None),
+            V1ClientComplianceLevel.FAPI1_ADV_PKJ_PAR => new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar),
+            V1ClientComplianceLevel.FAPI1_ADV_MTLS_PAR => new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvMtlsPar),
             _ => throw new NotImplementedException(),
         };
 
@@ -804,11 +795,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static OrganizationRequireBehavior ToApi(V1ClientOrganizationRequireBehavior source) => source switch
+        internal static ClientOrganizationRequireBehaviorEnum ToApi(V1ClientOrganizationRequireBehavior source) => source switch
         {
-            V1ClientOrganizationRequireBehavior.NoPrompt => OrganizationRequireBehavior.NoPrompt,
-            V1ClientOrganizationRequireBehavior.PreLoginPrompt => OrganizationRequireBehavior.PreLoginPrompt,
-            V1ClientOrganizationRequireBehavior.PostLoginPrompt => OrganizationRequireBehavior.PostLoginPrompt,
+            V1ClientOrganizationRequireBehavior.NoPrompt => new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.NoPrompt),
+            V1ClientOrganizationRequireBehavior.PreLoginPrompt => new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PreLoginPrompt),
+            V1ClientOrganizationRequireBehavior.PostLoginPrompt => new ClientOrganizationRequireBehaviorEnum(ClientOrganizationRequireBehaviorEnum.Values.PostLoginPrompt),
             _ => throw new NotImplementedException(),
         };
 
@@ -818,11 +809,27 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static OrganizationUsage ToApi(V1ClientOrganizationUsage source) => source switch
+        internal static ClientOrganizationUsageEnum ToApi(V1ClientOrganizationUsage source) => source switch
         {
-            V1ClientOrganizationUsage.Deny => OrganizationUsage.Deny,
-            V1ClientOrganizationUsage.Allow => OrganizationUsage.Allow,
-            V1ClientOrganizationUsage.Require => OrganizationUsage.Require,
+            V1ClientOrganizationUsage.Deny => new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Deny),
+            V1ClientOrganizationUsage.Allow => new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Allow),
+            V1ClientOrganizationUsage.Require => new ClientOrganizationUsageEnum(ClientOrganizationUsageEnum.Values.Require),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ClientOrganizationUsagePatchEnum ToApiPatch(V1ClientOrganizationUsage source) => source switch
+        {
+            V1ClientOrganizationUsage.Deny => new ClientOrganizationUsagePatchEnum(ClientOrganizationUsagePatchEnum.Values.Deny),
+            V1ClientOrganizationUsage.Allow => new ClientOrganizationUsagePatchEnum(ClientOrganizationUsagePatchEnum.Values.Allow),
+            V1ClientOrganizationUsage.Require => new ClientOrganizationUsagePatchEnum(ClientOrganizationUsagePatchEnum.Values.Require),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ClientOrganizationRequireBehaviorPatchEnum ToApiPatch(V1ClientOrganizationRequireBehavior source) => source switch
+        {
+            V1ClientOrganizationRequireBehavior.NoPrompt => new ClientOrganizationRequireBehaviorPatchEnum(ClientOrganizationRequireBehaviorPatchEnum.Values.NoPrompt),
+            V1ClientOrganizationRequireBehavior.PreLoginPrompt => new ClientOrganizationRequireBehaviorPatchEnum(ClientOrganizationRequireBehaviorPatchEnum.Values.PreLoginPrompt),
+            V1ClientOrganizationRequireBehavior.PostLoginPrompt => new ClientOrganizationRequireBehaviorPatchEnum(ClientOrganizationRequireBehaviorPatchEnum.Values.PostLoginPrompt),
             _ => throw new NotImplementedException(),
         };
 
@@ -832,10 +839,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static RefreshTokenRotationType ToApi(V1ClientRefreshTokenRotationType source) => source switch
+        internal static RefreshTokenRotationTypeEnum ToApi(V1ClientRefreshTokenRotationType source) => source switch
         {
-            V1ClientRefreshTokenRotationType.Rotating => RefreshTokenRotationType.Rotating,
-            V1ClientRefreshTokenRotationType.NonRotating => RefreshTokenRotationType.NonRotating,
+            V1ClientRefreshTokenRotationType.Rotating => new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.Rotating),
+            V1ClientRefreshTokenRotationType.NonRotating => new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.NonRotating),
             _ => throw new NotImplementedException(),
         };
 
@@ -845,10 +852,10 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static RefreshTokenExpirationType ToApi(V1ClientRefreshTokenExpirationType source) => source switch
+        internal static RefreshTokenExpirationTypeEnum ToApi(V1ClientRefreshTokenExpirationType source) => source switch
         {
-            V1ClientRefreshTokenExpirationType.Expiring => RefreshTokenExpirationType.Expiring,
-            V1ClientRefreshTokenExpirationType.NonExpiring => RefreshTokenExpirationType.NonExpiring,
+            V1ClientRefreshTokenExpirationType.Expiring => new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.Expiring),
+            V1ClientRefreshTokenExpirationType.NonExpiring => new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.NonExpiring),
             _ => throw new NotImplementedException(),
         };
 
@@ -857,7 +864,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientRefreshToken source, RefreshToken target)
+        internal static void ApplyToApi(V1ClientRefreshToken source, ClientRefreshTokenConfiguration target)
         {
             if (source.RotationType is { } rotation_type)
                 target.RotationType = ToApi(rotation_type);
@@ -887,15 +894,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static LogoutInitiatorModes ToApi(V1ClientLogoutInitiatorModes source)
+        internal static ClientOidcBackchannelLogoutInitiatorsModeEnum ToApi(V1ClientLogoutInitiatorModes source) => source switch
         {
-            return source switch
-            {
-                V1ClientLogoutInitiatorModes.All => LogoutInitiatorModes.All,
-                V1ClientLogoutInitiatorModes.Custom => LogoutInitiatorModes.Custom,
-                _ => throw new NotImplementedException(),
-            };
-        }
+            V1ClientLogoutInitiatorModes.All => new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.All),
+            V1ClientLogoutInitiatorModes.Custom => new ClientOidcBackchannelLogoutInitiatorsModeEnum(ClientOidcBackchannelLogoutInitiatorsModeEnum.Values.Custom),
+            _ => throw new NotImplementedException(),
+        };
 
         /// <summary>
         /// Transforms the logout initiators from the operator model to the API model.
@@ -903,12 +907,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal static LogoutInitiators ToApi(V1ClientLogoutInitiators source) => source switch
+        internal static ClientOidcBackchannelLogoutInitiatorsEnum ToApi(V1ClientLogoutInitiators source) => source switch
         {
-            V1ClientLogoutInitiators.RpLogout => LogoutInitiators.RpLogout,
-            V1ClientLogoutInitiators.IdpLogout => LogoutInitiators.IdpLogout,
-            V1ClientLogoutInitiators.PasswordChanged => LogoutInitiators.PasswordChanged,
-            V1ClientLogoutInitiators.SessionExpired => LogoutInitiators.SessionExpired,
+            V1ClientLogoutInitiators.RpLogout => new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.RpLogout),
+            V1ClientLogoutInitiators.IdpLogout => new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.IdpLogout),
+            V1ClientLogoutInitiators.PasswordChanged => new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.PasswordChanged),
+            V1ClientLogoutInitiators.SessionExpired => new ClientOidcBackchannelLogoutInitiatorsEnum(ClientOidcBackchannelLogoutInitiatorsEnum.Values.SessionExpired),
             _ => throw new NotImplementedException(),
         };
 
@@ -917,13 +921,13 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientBackchannelLogoutInitiators source, BackchannelLogoutInitiators target)
+        internal static void ApplyToApi(V1ClientBackchannelLogoutInitiators source, ClientOidcBackchannelLogoutInitiators target)
         {
-            if (source.Mode is { } backchannel_logout_urls)
-                target.Mode = ToApi(backchannel_logout_urls);
+            if (source.Mode is { } mode)
+                target.Mode = ToApi(mode);
 
-            if (source.SelectedInitiators is { } backchannel_logout_initiators)
-                target.SelectedInitiators = [.. backchannel_logout_initiators.Select(ToApi)];
+            if (source.SelectedInitiators is { } selected)
+                target.SelectedInitiators = [.. selected.Select(ToApi)];
         }
 
         /// <summary>
@@ -931,7 +935,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        internal static void ApplyToApi(V1ClientOidcLogoutConfig source, OidcLogoutConfig target)
+        internal static void ApplyToApi(V1ClientOidcLogoutConfig source, ClientOidcBackchannelLogoutSettings target)
         {
             if (source.BackchannelLogoutUrls is { } backchannel_logout_urls)
                 target.BackchannelLogoutUrls = backchannel_logout_urls;
@@ -941,14 +945,72 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Applies the configuration to the API request.
+        /// Transforms the application type from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal static ClientAppTypeEnum ToApi(V1ClientApplicationType source) => source switch
+        {
+            V1ClientApplicationType.Box => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Box),
+            V1ClientApplicationType.Cloudbees => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Cloudbees),
+            V1ClientApplicationType.Concur => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Concur),
+            V1ClientApplicationType.Dropbox => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Dropbox),
+            V1ClientApplicationType.Echosign => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Echosign),
+            V1ClientApplicationType.Egnyte => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Egnyte),
+            V1ClientApplicationType.MsCrm => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Mscrm),
+            V1ClientApplicationType.Native => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Native),
+            V1ClientApplicationType.NewRelic => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Newrelic),
+            V1ClientApplicationType.NonInteractive => new ClientAppTypeEnum(ClientAppTypeEnum.Values.NonInteractive),
+            V1ClientApplicationType.Office365 => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Office365),
+            V1ClientApplicationType.RegularWeb => new ClientAppTypeEnum(ClientAppTypeEnum.Values.RegularWeb),
+            V1ClientApplicationType.Rms => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Rms),
+            V1ClientApplicationType.Salesforce => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Salesforce),
+            V1ClientApplicationType.Sentry => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Sentry),
+            V1ClientApplicationType.SharePoint => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Sharepoint),
+            V1ClientApplicationType.Slack => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Slack),
+            V1ClientApplicationType.SpringCm => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Springcm),
+            V1ClientApplicationType.Spa => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Spa),
+            V1ClientApplicationType.Zendesk => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Zendesk),
+            V1ClientApplicationType.Zoom => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Zoom),
+            V1ClientApplicationType.ResourceServer => new ClientAppTypeEnum(ClientAppTypeEnum.Values.ResourceServer),
+            V1ClientApplicationType.ExpressConfiguration => new ClientAppTypeEnum(ClientAppTypeEnum.Values.ExpressConfiguration),
+            V1ClientApplicationType.SsoIntegration => new ClientAppTypeEnum(ClientAppTypeEnum.Values.SsoIntegration),
+            V1ClientApplicationType.Oag => new ClientAppTypeEnum(ClientAppTypeEnum.Values.Oag),
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Transforms the token endpoint authentication method from the operator model to the API model.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal static ClientTokenEndpointAuthMethodEnum ToApi(V1ClientTokenEndpointAuthMethod source) => source switch
+        {
+            V1ClientTokenEndpointAuthMethod.None => new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.None),
+            V1ClientTokenEndpointAuthMethod.ClientSecretPost => new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost),
+            V1ClientTokenEndpointAuthMethod.ClientSecretBasic => new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ClientTokenEndpointAuthMethodOrNullEnum ToApiOrNull(V1ClientTokenEndpointAuthMethod source) => source switch
+        {
+            V1ClientTokenEndpointAuthMethod.None => new ClientTokenEndpointAuthMethodOrNullEnum(ClientTokenEndpointAuthMethodOrNullEnum.Values.None),
+            V1ClientTokenEndpointAuthMethod.ClientSecretPost => new ClientTokenEndpointAuthMethodOrNullEnum(ClientTokenEndpointAuthMethodOrNullEnum.Values.ClientSecretPost),
+            V1ClientTokenEndpointAuthMethod.ClientSecretBasic => new ClientTokenEndpointAuthMethodOrNullEnum(ClientTokenEndpointAuthMethodOrNullEnum.Values.ClientSecretBasic),
+            _ => throw new NotImplementedException(),
+        };
+
+        /// <summary>
+        /// Applies the common configuration to either a create or update request.
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        internal static void ApplyToApi(V1ClientConf conf, ClientBase request)
+        internal static void ApplyToApiBase(V1ClientConf conf, CreateClientRequestContent request)
         {
             if (conf.AddOns is { } addons)
-                ApplyToApi(addons, request.AddOns ??= new());
+                ApplyToApi(addons, request.Addons ??= new());
 
             if (conf.AllowedClients is not null)
                 request.AllowedClients = conf.AllowedClients;
@@ -972,10 +1034,10 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.ClientAliases = conf.ClientAliases;
 
             if (conf.ClientMetaData is not null)
-                request.ClientMetaData = conf.ClientMetaData;
+                request.ClientMetadata = conf.ClientMetaData;
 
             if (conf.IsCustomLoginPageOn is not null)
-                request.IsCustomLoginPageOn = conf.IsCustomLoginPageOn;
+                request.CustomLoginPageOn = conf.IsCustomLoginPageOn;
 
             if (conf.IsFirstParty is not null)
                 request.IsFirstParty = conf.IsFirstParty;
@@ -987,7 +1049,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.CustomLoginPagePreview = conf.CustomLoginPagePreview;
 
             if (conf.EncryptionKey is { } encryption_key)
-                ApplyToApi(encryption_key, request.EncryptionKey ??= new());
+            {
+                var ek = new ClientEncryptionKey();
+                ApplyToApi(encryption_key, ek);
+                request.EncryptionKey = ek;
+            }
 
             if (conf.FormTemplate is not null)
                 request.FormTemplate = conf.FormTemplate;
@@ -1000,10 +1066,8 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.Mobile is { } mobile)
             {
-                var target = new Mobile();
+                var target = new ClientMobile();
                 ApplyToApi(mobile, target);
-
-                // only set on request if at least one of the mobile configurations is set, as the API will reject an empty mobile object
                 if (target.Android is not null || target.Ios is not null)
                     request.Mobile = target;
             }
@@ -1027,7 +1091,15 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.Sso = conf.Sso;
 
             if (conf.RefreshToken is { } refresh_token)
-                ApplyToApi(refresh_token, request.RefreshToken ??= new());
+            {
+                var rt = new ClientRefreshTokenConfiguration
+                {
+                    RotationType = refresh_token.RotationType is { } rtype ? ToApi(rtype) : new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.NonRotating),
+                    ExpirationType = refresh_token.ExpirationType is { } etype ? ToApi(etype) : new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.NonExpiring),
+                };
+                ApplyToApi(refresh_token, rt);
+                request.RefreshToken = rt;
+            }
 
             if (conf.OrganizationUsage is { } organization_usage)
                 request.OrganizationUsage = ToApi(organization_usage);
@@ -1049,65 +1121,137 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Transforms the application type from the operator model to the API model.
+        /// Applies the common configuration to an update request.
         /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        internal static ClientApplicationType ToApi(V1ClientApplicationType source) => source switch
+        /// <param name="conf"></param>
+        /// <param name="request"></param>
+        internal static void ApplyToApiBase(V1ClientConf conf, UpdateClientRequestContent request)
         {
-            V1ClientApplicationType.Box => ClientApplicationType.Box,
-            V1ClientApplicationType.Cloudbees => ClientApplicationType.Cloudbees,
-            V1ClientApplicationType.Concur => ClientApplicationType.Concur,
-            V1ClientApplicationType.Dropbox => ClientApplicationType.Dropbox,
-            V1ClientApplicationType.Echosign => ClientApplicationType.Echosign,
-            V1ClientApplicationType.Egnyte => ClientApplicationType.Egnyte,
-            V1ClientApplicationType.MsCrm => ClientApplicationType.MsCrm,
-            V1ClientApplicationType.Native => ClientApplicationType.Native,
-            V1ClientApplicationType.NewRelic => ClientApplicationType.NewRelic,
-            V1ClientApplicationType.NonInteractive => ClientApplicationType.NonInteractive,
-            V1ClientApplicationType.Office365 => ClientApplicationType.Office365,
-            V1ClientApplicationType.RegularWeb => ClientApplicationType.RegularWeb,
-            V1ClientApplicationType.Rms => ClientApplicationType.Rms,
-            V1ClientApplicationType.Salesforce => ClientApplicationType.Salesforce,
-            V1ClientApplicationType.Sentry => ClientApplicationType.Sentry,
-            V1ClientApplicationType.SharePoint => ClientApplicationType.SharePoint,
-            V1ClientApplicationType.Slack => ClientApplicationType.Slack,
-            V1ClientApplicationType.SpringCm => ClientApplicationType.SpringCm,
-            V1ClientApplicationType.Spa => ClientApplicationType.Spa,
-            V1ClientApplicationType.Zendesk => ClientApplicationType.Zendesk,
-            V1ClientApplicationType.Zoom => ClientApplicationType.Zoom,
-            _ => throw new NotImplementedException(),
-        };
+            if (conf.AddOns is { } addons)
+                ApplyToApi(addons, request.Addons ??= new());
 
-        /// <summary>
-        /// Transforms the token endpoint authentication method from the operator model to the API model.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        internal static TokenEndpointAuthMethod ToApi(V1ClientTokenEndpointAuthMethod source) => source switch
-        {
-            V1ClientTokenEndpointAuthMethod.None => TokenEndpointAuthMethod.None,
-            V1ClientTokenEndpointAuthMethod.ClientSecretPost => TokenEndpointAuthMethod.ClientSecretPost,
-            V1ClientTokenEndpointAuthMethod.ClientSecretBasic => TokenEndpointAuthMethod.ClientSecretBasic,
-            _ => throw new NotImplementedException(),
-        };
+            if (conf.AllowedClients is not null)
+                request.AllowedClients = conf.AllowedClients;
+
+            if (conf.AllowedLogoutUrls is not null)
+                request.AllowedLogoutUrls = conf.AllowedLogoutUrls;
+
+            if (conf.AllowedOrigins is not null)
+                request.AllowedOrigins = conf.AllowedOrigins;
+
+            if (conf.WebOrigins is not null)
+                request.WebOrigins = conf.WebOrigins;
+
+            if (conf.InitiateLoginUri is not null)
+                request.InitiateLoginUri = conf.InitiateLoginUri;
+
+            if (conf.Callbacks is not null)
+                request.Callbacks = conf.Callbacks;
+
+            if (conf.ClientAliases is not null)
+                request.ClientAliases = conf.ClientAliases;
+
+            if (conf.ClientMetaData is not null)
+                request.ClientMetadata = conf.ClientMetaData;
+
+            if (conf.IsCustomLoginPageOn is not null)
+                request.CustomLoginPageOn = conf.IsCustomLoginPageOn;
+
+            if (conf.IsFirstParty is not null)
+                request.IsFirstParty = conf.IsFirstParty;
+
+            if (conf.CustomLoginPage is not null)
+                request.CustomLoginPage = conf.CustomLoginPage;
+
+            if (conf.CustomLoginPagePreview is not null)
+                request.CustomLoginPagePreview = conf.CustomLoginPagePreview;
+
+            if (conf.EncryptionKey is { } encryption_key)
+            {
+                var ek = new ClientEncryptionKey();
+                ApplyToApi(encryption_key, ek);
+                request.EncryptionKey = ek;
+            }
+
+            if (conf.FormTemplate is not null)
+                request.FormTemplate = conf.FormTemplate;
+
+            if (conf.GrantTypes is not null)
+                request.GrantTypes = conf.GrantTypes.Distinct().ToArray();
+
+            if (conf.JwtConfiguration is { } jwt_configuration)
+                ApplyToApi(jwt_configuration, request.JwtConfiguration ??= new());
+
+            if (conf.Mobile is { } mobile)
+            {
+                var target = new ClientMobile();
+                ApplyToApi(mobile, target);
+                if (target.Android is not null || target.Ios is not null)
+                    request.Mobile = target;
+            }
+
+            if (conf.Name is not null)
+                request.Name = conf.Name;
+
+            if (conf.Description is not null)
+                request.Description = conf.Description;
+
+            if (conf.LogoUri is not null)
+                request.LogoUri = conf.LogoUri;
+
+            if (conf.OidcConformant is not null)
+                request.OidcConformant = conf.OidcConformant;
+
+            if (conf.OidcLogout is { } oidc_logout)
+                ApplyToApi(oidc_logout, request.OidcLogout ??= new());
+
+            if (conf.Sso is not null)
+                request.Sso = conf.Sso;
+
+            if (conf.RefreshToken is { } refresh_token)
+            {
+                var rt = new ClientRefreshTokenConfiguration
+                {
+                    RotationType = refresh_token.RotationType is { } rtype ? ToApi(rtype) : new RefreshTokenRotationTypeEnum(RefreshTokenRotationTypeEnum.Values.NonRotating),
+                    ExpirationType = refresh_token.ExpirationType is { } etype ? ToApi(etype) : new RefreshTokenExpirationTypeEnum(RefreshTokenExpirationTypeEnum.Values.NonExpiring),
+                };
+                ApplyToApi(refresh_token, rt);
+                request.RefreshToken = rt;
+            }
+
+            if (conf.OrganizationUsage is { } organization_usage)
+                request.OrganizationUsage = ToApiPatch(organization_usage);
+
+            if (conf.OrganizationRequireBehavior is { } organization_require_behavior)
+                request.OrganizationRequireBehavior = ToApiPatch(organization_require_behavior);
+
+            if (conf.CrossOriginAuthentication is not null)
+                request.CrossOriginAuthentication = conf.CrossOriginAuthentication;
+
+            if (conf.RequirePushedAuthorizationRequests is not null)
+                request.RequirePushedAuthorizationRequests = conf.RequirePushedAuthorizationRequests;
+
+            if (conf.ComplianceLevel is { } compliance_level)
+                request.ComplianceLevel = ToApi(compliance_level);
+
+            if (conf.RequireProofOfPossession is not null)
+                request.RequireProofOfPossession = conf.RequireProofOfPossession;
+        }
 
         /// <summary>
         /// Applies client configuration settings to the specified API client creation request.
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        internal static void ApplyToApi(V1ClientConf conf, ClientCreateRequest request)
+        internal static void ApplyToApi(V1ClientConf conf, CreateClientRequestContent request)
         {
             if (conf.ApplicationType is { } app_type)
-                request.ApplicationType = ToApi(app_type);
+                request.AppType = ToApi(app_type);
 
             if (conf.TokenEndpointAuthMethod is { } token_endpoint_auth_method)
                 request.TokenEndpointAuthMethod = ToApi(token_endpoint_auth_method);
 
-            ApplyToApi(conf, (ClientBase)request);
+            ApplyToApiBase(conf, request);
         }
 
         /// <summary>
@@ -1115,15 +1259,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="request"></param>
-        internal static void ApplyToApi(V1ClientConf conf, ClientUpdateRequest request)
+        internal static void ApplyToApi(V1ClientConf conf, UpdateClientRequestContent request)
         {
             if (conf.ApplicationType is { } app_type)
-                request.ApplicationType = ToApi(app_type);
+                request.AppType = ToApi(app_type);
 
             if (conf.TokenEndpointAuthMethod is { } token_endpoint_auth_method)
-                request.TokenEndpointAuthMethod = ToApi(token_endpoint_auth_method);
+                request.TokenEndpointAuthMethod = ToApiOrNull(token_endpoint_auth_method);
 
-            ApplyToApi(conf, (ClientBase)request);
+            ApplyToApiBase(conf, request);
         }
 
         /// <summary>
@@ -1147,7 +1291,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return FromApi(await api.Clients.GetAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.Clients.GetAsync(id, new GetClientRequestParameters(), null, cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -1165,7 +1309,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 {
                     try
                     {
-                        var client = await api.Clients.GetAsync(clientId, "client_id,name", cancellationToken: cancellationToken);
+                        var client = await api.Clients.GetAsync(clientId, new GetClientRequestParameters { Fields = "client_id,name" }, null, cancellationToken);
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing client: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), client.Name);
                         return client.ClientId;
                     }
@@ -1178,8 +1322,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 // attempt to search by name
                 if (spec.Find.Name is string name)
                 {
-                    var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
-                    var self = list.FirstOrDefault(i => i.Name == name);
+                    var pager = await api.Clients.ListAsync(new ListClientsRequestParameters { Fields = "client_id,name" }, null, cancellationToken);
+                    var self = pager.CurrentPage.Items.FirstOrDefault(i => i.Name == name);
                     return self?.ClientId;
                 }
             }
@@ -1188,8 +1332,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 var conf = spec.Init ?? spec.Conf;
                 if (conf is { Name: string name })
                 {
-                    var list = await api.Clients.GetAllAsync(new GetClientsRequest() { Fields = "client_id,name" }, cancellationToken: cancellationToken);
-                    var self = list.FirstOrDefault(i => i.Name == name);
+                    var pager = await api.Clients.ListAsync(new ListClientsRequestParameters { Fields = "client_id,name" }, null, cancellationToken);
+                    var self = pager.CurrentPage.Items.FirstOrDefault(i => i.Name == name);
                     return self?.ClientId;
                 }
             }
@@ -1211,11 +1355,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} creating client in Auth0 with name: {ClientName}", EntityTypeName, conf.Name);
 
-            // transform request
-            var req = new ClientCreateRequest();
+            var req = new CreateClientRequestContent() { Name = conf.Name ?? throw new InvalidOperationException("Missing client name.") };
             ApplyToApi(conf, req);
 
-            var self = await api.Clients.CreateAsync(req, cancellationToken);
+            var self = await api.Clients.CreateAsync(req, null, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created client in Auth0 with ID: {ClientId} and name: {ClientName}", EntityTypeName, self.ClientId, conf.Name);
             return self.ClientId;
         }
@@ -1225,17 +1368,16 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             Logger.LogInformation("{EntityTypeName} updating client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);
 
-            // transform request
-            var req = new ClientUpdateRequest();
+            var req = new UpdateClientRequestContent();
             ApplyToApi(conf, req);
 
-            // explicitely null out missing metadata if previously present
+            // explicitly null out missing metadata if previously present
             if (last is not null && last.ClientMetaData != null && conf.ClientMetaData != null)
                 foreach (string key in last.ClientMetaData.Keys)
                     if (conf.ClientMetaData.ContainsKey(key) == false)
-                        req.ClientMetaData[key] = null;
+                        (req.ClientMetadata ??= new Dictionary<string, object?>())[key] = null;
 
-            await api.Clients.UpdateAsync(id, req, cancellationToken);
+            await api.Clients.UpdateAsync(id, req, null, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully updated client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);
         }
 
@@ -1246,7 +1388,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // This ensures secret resources are created for existing clients even when Auth0 API doesn't return the secret
             if (entity.Spec.SecretRef is not null && entity.Status.Id is not null)
             {
-                var client = await api.Clients.GetAsync(entity.Status.Id, "client_id,client_secret", cancellationToken: cancellationToken);
+                var client = await api.Clients.GetAsync(entity.Status.Id, new GetClientRequestParameters { Fields = "client_id,client_secret" }, null, cancellationToken);
                 await ApplySecret(entity, client.ClientId, client.ClientSecret, defaultNamespace, cancellationToken);
             }
 
@@ -1324,7 +1466,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} deleting client from Auth0 with ID: {ClientId} (reason: Kubernetes entity deleted)", EntityTypeName, id);
-            await api.Clients.DeleteAsync(id, cancellationToken);
+            await api.Clients.DeleteAsync(id, null, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully deleted client from Auth0 with ID: {ClientId}", EntityTypeName, id);
         }
 
