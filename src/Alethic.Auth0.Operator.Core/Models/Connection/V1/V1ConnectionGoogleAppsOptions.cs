@@ -4,6 +4,10 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    /// <summary>
+    /// Configuration options for the <c>google-apps</c> (Google Workspace) enterprise connection strategy.
+    /// Each boolean property enables the corresponding Google API OAuth scope.
+    /// </summary>
     public record V1ConnectionGoogleAppsOptions : V1ConnectionSocialOptions
     {
 

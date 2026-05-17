@@ -3,6 +3,9 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    /// <summary>
+    /// Configuration options for the <c>exact</c> social connection strategy.
+    /// </summary>
     public record V1ConnectionExactOptions : V1ConnectionSocialOptions
     {
 

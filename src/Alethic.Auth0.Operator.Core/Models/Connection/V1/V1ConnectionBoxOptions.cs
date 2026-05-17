@@ -3,6 +3,10 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    /// <summary>
+    /// Configuration options for the <c>box</c> social connection strategy.
+    /// Each boolean property enables the corresponding Box API permission scope.
+    /// </summary>
     public record V1ConnectionBoxOptions : V1ConnectionSocialOptions
     {
 

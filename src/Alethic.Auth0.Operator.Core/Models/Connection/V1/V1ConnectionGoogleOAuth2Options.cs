@@ -3,6 +3,10 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    /// <summary>
+    /// Configuration options for the <c>google-oauth2</c> social connection strategy.
+    /// Each boolean property enables the corresponding Google API OAuth scope.
+    /// </summary>
     public record V1ConnectionGoogleOAuth2Options : V1ConnectionSocialOptions
     {
 

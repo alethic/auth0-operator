@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
+    /// <summary>
+    /// Configuration options for the <c>office365</c> enterprise connection strategy.
+    /// </summary>
     public record V1ConnectionOffice365Options : V1ConnectionSocialOptions
     {
 
