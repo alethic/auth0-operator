@@ -1,0 +1,57 @@
+﻿using System.Text.Json.Serialization;
+
+using Alethic.Auth0.Operator.Core.Models;
+using Alethic.Auth0.Operator.Core.Models.Connection.V1;
+
+using k8s.Models;
+
+using KubeOps.Abstractions.Entities;
+using KubeOps.Abstractions.Entities.Attributes;
+
+namespace Alethic.Auth0.Operator.Models
+{
+
+    [EntityScope(EntityScope.Namespaced)]
+    [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "Connection")]
+    [KubernetesEntityShortNames("a0con")]
+    public partial class V1Connection :
+        CustomKubernetesEntity<V1Connection.SpecDef, V1Connection.StatusDef>,
+        V1TenantEntityInstance<V1Connection.SpecDef, V1Connection.StatusDef, V1ConnectionConf, V1ConnectionConf>
+    {
+
+        public class SpecDef : V1TenantEntityInstanceSpec<V1ConnectionConf>
+        {
+
+            [JsonPropertyName("policy")]
+            public V1EntityPolicyType[]? Policy { get; set; }
+
+            [JsonPropertyName("tenantRef")]
+            [Required]
+            public V1TenantReference? TenantRef { get; set; }
+
+            [JsonPropertyName("find")]
+            public V1ConnectionFind? Find { get; set; }
+
+            [JsonPropertyName("init")]
+            public V1ConnectionConf? Init { get; set; }
+
+            [JsonPropertyName("conf")]
+            [Required]
+            public V1ConnectionConf? Conf { get; set; }
+
+        }
+
+        public class StatusDef : V1TenantEntityInstanceStatus<V1ConnectionConf>
+        {
+
+            [JsonPropertyName("id")]
+            public string? Id { get; set; }
+
+            [JsonPropertyName("lastConf")]
+            public V1ConnectionConf? LastConf { get; set; }
+
+        }
+
+    }
+
+}
