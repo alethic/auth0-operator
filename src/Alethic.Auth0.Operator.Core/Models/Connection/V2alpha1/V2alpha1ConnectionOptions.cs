@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+
+using KubeOps.Abstractions.Entities.Attributes;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
 {
@@ -239,6 +242,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonPropertyName("yahoo")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha1ConnectionYahooOptions? Yahoo { get; set; }
+
+        [JsonExtensionData]
+        [Ignore]
+        public Dictionary<string, object?>? AdditionalProperties { get; set; }
 
     }
 
