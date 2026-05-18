@@ -53,18 +53,18 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         public string[]? Thumbprints { get; set; }
 
         /// <summary>
-        /// Algorithm used to verify SAML assertion signatures (e.g. <c>rsa-sha256</c>).
+        /// Algorithm used to verify SAML assertion signatures.
         /// </summary>
         [JsonPropertyName("signatureAlgorithm")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? SignatureAlgorithm { get; set; }
+        public V1ConnectionSamlSignatureAlgorithm? SignatureAlgorithm { get; set; }
 
         /// <summary>
-        /// Digest algorithm used when signing SAML requests (e.g. <c>sha256</c>).
+        /// Digest algorithm used when signing SAML requests.
         /// </summary>
         [JsonPropertyName("digestAlgorithm")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? DigestAlgorithm { get; set; }
+        public V1ConnectionSamlDigestAlgorithm? DigestAlgorithm { get; set; }
 
         /// <summary>
         /// When <c>true</c>, Auth0 will sign outgoing SAML authentication requests.
@@ -78,7 +78,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("protocolBinding")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ProtocolBinding { get; set; }
+        public V1ConnectionSamlProtocolBinding? ProtocolBinding { get; set; }
 
         /// <summary>
         /// Configuration for IdP-initiated SSO login flow.

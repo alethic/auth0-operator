@@ -388,7 +388,7 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsFalse(req.TokenEncryption.IsDefined);
             Assert.IsFalse(req.ProofOfPossession.IsDefined);
             Assert.IsNull(req.Scopes);
-            Assert.IsNull(req.AuthorizationDetails);
+            Assert.IsFalse(req.AuthorizationDetails.IsDefined);
         }
 
     }

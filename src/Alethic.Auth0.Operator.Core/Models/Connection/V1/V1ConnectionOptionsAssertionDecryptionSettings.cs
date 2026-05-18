@@ -17,11 +17,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         public bool? DecryptAssertion { get; set; }
 
         /// <summary>
-        /// Symmetric algorithm used to decrypt the assertion content (e.g. <c>aes128-cbc</c>, <c>aes256-cbc</c>).
+        /// Algorithm profile used to decrypt the assertion content.
         /// </summary>
         [JsonPropertyName("decryptionAlgorithm")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? DecryptionAlgorithm { get; set; }
+        public V1ConnectionAssertionDecryptionAlgorithmProfile? DecryptionAlgorithm { get; set; }
 
         /// <summary>
         /// Algorithm used to decrypt the encrypted key in the assertion (e.g. <c>rsa-oaep-mgf1p</c>, <c>rsa1_5</c>).

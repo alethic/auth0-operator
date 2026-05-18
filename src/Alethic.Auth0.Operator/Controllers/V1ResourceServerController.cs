@@ -115,7 +115,7 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerTokenEncryption? FromApi(ResourceServerTokenEncryption source) => new()
+        internal static V1ResourceServerTokenEncryption? FromApi(ResourceServerTokenEncryption? source) => source is null ? null : new()
         {
             Format = FromApi(source.Format),
             EncryptionKey = FromApi(source.EncryptionKey),
@@ -138,7 +138,7 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerProofOfPossession? FromApi(ResourceServerProofOfPossession source) => new()
+        internal static V1ResourceServerProofOfPossession? FromApi(ResourceServerProofOfPossession? source) => source is null ? null : new()
         {
             Required = source.Required,
             Mechanism = FromApi(source.Mechanism),

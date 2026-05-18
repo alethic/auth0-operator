@@ -1,0 +1,115 @@
+=== ConnectionOptionsIdpinitiatedSaml ===
+  String ClientAuthorizequery
+  String ClientId
+  Nullable`1 ClientProtocol
+  Nullable`1 Enabled
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionSigningKeySaml ===
+  String Cert
+  String Key
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionDecryptionKeySaml ===
+  String Type
+  Object Value
+
+=== ConnectionAssertionDecryptionSettings ===
+  ConnectionAssertionDecryptionAlgorithmProfileEnum AlgorithmProfile
+  IEnumerable`1 AlgorithmExceptions
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionOptionsOidcMetadata ===
+  IEnumerable`1 AcrValuesSupported
+  String AuthorizationEndpoint
+  IEnumerable`1 ClaimTypesSupported
+  IEnumerable`1 ClaimsLocalesSupported
+  Nullable`1 ClaimsParameterSupported
+  IEnumerable`1 ClaimsSupported
+  IEnumerable`1 DisplayValuesSupported
+  IEnumerable`1 DpopSigningAlgValuesSupported
+  String EndSessionEndpoint
+  IEnumerable`1 GrantTypesSupported
+  IEnumerable`1 IdTokenEncryptionAlgValuesSupported
+  IEnumerable`1 IdTokenEncryptionEncValuesSupported
+  IEnumerable`1 IdTokenSigningAlgValuesSupported
+  String Issuer
+  String JwksUri
+  String OpPolicyUri
+  String OpTosUri
+  String RegistrationEndpoint
+  IEnumerable`1 RequestObjectEncryptionAlgValuesSupported
+  IEnumerable`1 RequestObjectEncryptionEncValuesSupported
+  IEnumerable`1 RequestObjectSigningAlgValuesSupported
+  Nullable`1 RequestParameterSupported
+  Nullable`1 RequestUriParameterSupported
+  Nullable`1 RequireRequestUriRegistration
+  IEnumerable`1 ResponseModesSupported
+  IEnumerable`1 ResponseTypesSupported
+  Optional`1 ScopesSupported
+  String ServiceDocumentation
+  IEnumerable`1 SubjectTypesSupported
+  String TokenEndpoint
+  IEnumerable`1 TokenEndpointAuthMethodsSupported
+  IEnumerable`1 TokenEndpointAuthSigningAlgValuesSupported
+  IEnumerable`1 UiLocalesSupported
+  IEnumerable`1 UserinfoEncryptionAlgValuesSupported
+  IEnumerable`1 UserinfoEncryptionEncValuesSupported
+  String UserinfoEndpoint
+  IEnumerable`1 UserinfoSigningAlgValuesSupported
+  AdditionalProperties AdditionalProperties
+
+=== ConnectionAttributeMapOidc ===
+  Dictionary`2 Attributes
+  Nullable`1 MappingMode
+  String UserinfoScope
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionAttributeMapOkta ===
+  Dictionary`2 Attributes
+  Nullable`1 MappingMode
+  String UserinfoScope
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionConnectionSettings ===
+  Nullable`1 Pkce
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionScriptsOAuth1 ===
+  String FetchUserProfile
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionScriptsOAuth2 ===
+  String FetchUserProfile
+  String GetLogoutUrl
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionScopeOAuth2 ===
+  String Type
+  Object Value
+
+=== ConnectionTotpSms ===
+  Nullable`1 Length
+  Nullable`1 TimeStep
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionMfa ===
+  Nullable`1 Active
+  Nullable`1 ReturnEnrollSettings
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionEmailOtpAuthenticationMethod ===
+  Nullable`1 Enabled
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionPhoneOtpAuthenticationMethod ===
+  Nullable`1 Enabled
+  ReadOnlyAdditionalProperties AdditionalProperties
+
+=== ConnectionPasswordOptions ===
+  ConnectionPasswordOptionsComplexity Complexity
+  ConnectionPasswordOptionsDictionary Dictionary
+  ConnectionPasswordOptionsHistory History
+  ConnectionPasswordOptionsProfileData ProfileData
+  ReadOnlyAdditionalProperties AdditionalProperties
+

@@ -17,11 +17,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         public string? ClientId { get; set; }
 
         /// <summary>
-        /// Protocol to use for the IdP-initiated callback. Can be <c>oauth2</c> or <c>samlp</c>.
+        /// Protocol to use for the IdP-initiated callback.
         /// </summary>
         [JsonPropertyName("client_protocol")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ClientProtocol { get; set; }
+        public V1ConnectionIdpInitiatedClientProtocol? ClientProtocol { get; set; }
 
         /// <summary>
         /// Additional query string parameters to append to the IdP-initiated authorization request.

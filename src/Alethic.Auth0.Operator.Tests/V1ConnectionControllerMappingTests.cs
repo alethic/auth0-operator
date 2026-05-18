@@ -57,8 +57,8 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var result = V1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
             Assert.IsNotNull(result);
-            Assert.IsNull(result.Auth0Options);
-            Assert.IsNull(result.OidcOptions);
+            Assert.IsNull(result.Options?.Auth0);
+            Assert.IsNull(result.Options?.Oidc);
             Assert.IsNull(result.Metadata);
         }
 

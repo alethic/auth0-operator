@@ -1,0 +1,38 @@
+=== ConnectionOptionsKerberos ===
+
+=== ConnectionOptionsScripts ===
+
+=== ConnectionAuthenticationMethods ===
+  Password
+  Passkey
+  EmailOtp
+  PhoneOtp
+  AdditionalProperties
+
+=== ConnectionPasskeyOptions ===
+  ChallengeUi
+  ProgressiveEnrollmentEnabled
+  LocalEnrollmentEnabled
+  AdditionalProperties
+
+=== ConnectionCustomScripts ===
+  Login
+  GetUser
+  Delete
+  ChangePassword
+  Verify
+  Create
+  ChangeUsername
+  ChangeEmail
+  ChangePhoneNumber
+  AdditionalProperties
+
+=== ConnectionIdpInitiatedClientProtocolEnumSaml ===
+
+=== ConnectionOptionsIdpinitiatedSaml ===
+  ClientAuthorizequery
+  ClientId
+  ClientProtocol
+  Enabled
+  AdditionalProperties
+

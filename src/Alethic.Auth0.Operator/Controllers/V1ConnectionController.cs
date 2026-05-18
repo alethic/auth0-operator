@@ -63,9 +63,9 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <typeparam name="TTo"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static TTo ConvertTo<TTo>(GetConnectionResponseContent source)
+        internal static TTo? JsonConvertTo<TTo>(object? source)
         {
-            return System.Text.Json.JsonSerializer.Deserialize<TTo>(System.Text.Json.JsonSerializer.Serialize(source));
+            return JsonSerializer.Deserialize<TTo>(JsonSerializer.Serialize(source));
         }
 
         /// <summary>
@@ -85,114 +85,116 @@ namespace Alethic.Auth0.Operator.Controllers
                 Strategy = source.Strategy,
                 Realms = source.Realms?.ToArray(),
                 IsDomainConnection = source.IsDomainConnection,
+                ShowAsButton = source.ShowAsButton,
+                Metadata = source.Metadata is { } md ? new System.Collections.Hashtable(md) : null,
                 Options = new V1ConnectionOptions()
             };
 
             switch (source.Strategy)
             {
                 case ConnectionResponseContentAuth0Strategy.Values.Auth0:
-                    conf.Options.Auth0 = FromApi(ConvertTo<ConnectionResponseContentAuth0>(source).Options);
+                    conf.Options.Auth0 = FromApi(JsonConvertTo<ConnectionResponseContentAuth0>(source)?.Options);
                     break;
                 case ConnectionResponseContentAdStrategy.Values.Ad:
-                    conf.Options.Ad = FromApi(ConvertTo<ConnectionResponseContentAd>(source).Options);
+                    conf.Options.Ad = FromApi(JsonConvertTo<ConnectionResponseContentAd>(source)?.Options);
                     break;
                 case ConnectionResponseContentAdfsStrategy.Values.Adfs:
-                    conf.Options.Adfs = FromApi(ConvertTo<ConnectionResponseContentAdfs>(source).Options);
+                    conf.Options.Adfs = FromApi(JsonConvertTo<ConnectionResponseContentAdfs>(source)?.Options);
                     break;
                 case ConnectionResponseContentAmazonStrategy.Values.Amazon:
                     break;
                 case ConnectionResponseContentAppleStrategy.Values.Apple:
                     break;
                 case ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc:
-                    conf.Options.Auth0Oidc = FromApi(ConvertTo<ConnectionResponseContentAuth0Oidc>(source).Options);
+                    conf.Options.Auth0Oidc = FromApi(JsonConvertTo<ConnectionResponseContentAuth0Oidc>(source)?.Options);
                     break;
                 case ConnectionResponseContentBaiduStrategy.Values.Baidu:
                     break;
                 case ConnectionResponseContentBitbucketStrategy.Values.Bitbucket:
-                    conf.Options.Bitbucket = FromApi(ConvertTo<ConnectionResponseContentBitbucket>(source).Options);
+                    conf.Options.Bitbucket = FromApi(JsonConvertTo<ConnectionResponseContentBitbucket>(source)?.Options);
                     break;
                 case ConnectionResponseContentBitlyStrategy.Values.Bitly:
                     break;
                 case ConnectionResponseContentBoxStrategy.Values.Box:
-                    conf.Options.Box = FromApi(ConvertTo<ConnectionResponseContentBox>(source).Options);
+                    conf.Options.Box = FromApi(JsonConvertTo<ConnectionResponseContentBox>(source)?.Options);
                     break;
                 case ConnectionResponseContentDaccountStrategy.Values.Daccount:
                     break;
                 case ConnectionResponseContentDropboxStrategy.Values.Dropbox:
-                    conf.Options.Dropbox = FromApi(ConvertTo<ConnectionResponseContentDropbox>(source).Options);
+                    conf.Options.Dropbox = FromApi(JsonConvertTo<ConnectionResponseContentDropbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentDwollaStrategy.Values.Dwolla:
                     break;
                 case ConnectionResponseContentEmailStrategy.Values.Email:
-                    conf.Options.Email = FromApi(ConvertTo<ConnectionResponseContentEmail>(source).Options);
+                    conf.Options.Email = FromApi(JsonConvertTo<ConnectionResponseContentEmail>(source)?.Options);
                     break;
                 case ConnectionResponseContentEvernoteStrategy.Values.Evernote:
-                    conf.Options.Evernote = FromApi(ConvertTo<ConnectionResponseContentEvernote>(source).Options);
+                    conf.Options.Evernote = FromApi(JsonConvertTo<ConnectionResponseContentEvernote>(source)?.Options);
                     break;
                 case ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox:
-                    conf.Options.EvernoteSandbox = FromApi(ConvertTo<ConnectionResponseContentEvernoteSandbox>(source).Options);
+                    conf.Options.EvernoteSandbox = FromApi(JsonConvertTo<ConnectionResponseContentEvernoteSandbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentExactStrategy.Values.Exact:
-                    conf.Options.Exact = FromApi(ConvertTo<ConnectionResponseContentExact>(source).Options);
+                    conf.Options.Exact = FromApi(JsonConvertTo<ConnectionResponseContentExact>(source)?.Options);
                     break;
                 case ConnectionResponseContentFacebookStrategy.Values.Facebook:
-                    conf.Options.Facebook = FromApi(ConvertTo<ConnectionResponseContentFacebook>(source).Options);
+                    conf.Options.Facebook = FromApi(JsonConvertTo<ConnectionResponseContentFacebook>(source)?.Options);
                     break;
                 case ConnectionResponseContentFitbitStrategy.Values.Fitbit:
                     break;
                 case ConnectionResponseContentGitHubStrategy.Values.Github:
-                    conf.Options.GitHub = FromApi(ConvertTo<ConnectionResponseContentGitHub>(source).Options);
+                    conf.Options.GitHub = FromApi(JsonConvertTo<ConnectionResponseContentGitHub>(source)?.Options);
                     break;
                 case ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps:
-                    conf.Options.GoogleApps = FromApi(ConvertTo<ConnectionResponseContentGoogleApps>(source).Options);
+                    conf.Options.GoogleApps = FromApi(JsonConvertTo<ConnectionResponseContentGoogleApps>(source)?.Options);
                     break;
                 case ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2:
-                    conf.Options.GoogleOAuth2 = FromApi(ConvertTo<ConnectionResponseContentGoogleOAuth2>(source).Options);
+                    conf.Options.GoogleOAuth2 = FromApi(JsonConvertTo<ConnectionResponseContentGoogleOAuth2>(source)?.Options);
                     break;
                 case ConnectionResponseContentInstagramStrategy.Values.Instagram:
                     break;
                 case ConnectionResponseContentLineStrategy.Values.Line:
                     break;
                 case ConnectionResponseContentLinkedinStrategy.Values.Linkedin:
-                    conf.Options.Linkedin = FromApi(ConvertTo<ConnectionResponseContentLinkedin>(source).Options);
+                    conf.Options.Linkedin = FromApi(JsonConvertTo<ConnectionResponseContentLinkedin>(source)?.Options);
                     break;
                 case ConnectionResponseContentOAuth1Strategy.Values.Oauth1:
-                    conf.Options.OAuth1 = FromApi(ConvertTo<ConnectionResponseContentOAuth1>(source).Options);
+                    conf.Options.OAuth1 = FromApi(JsonConvertTo<ConnectionResponseContentOAuth1>(source)?.Options);
                     break;
                 case ConnectionResponseContentOAuth2Strategy.Values.Oauth2:
-                    conf.Options.OAuth2 = FromApi(ConvertTo<ConnectionResponseContentOAuth2>(source).Options);
+                    conf.Options.OAuth2 = FromApi(JsonConvertTo<ConnectionResponseContentOAuth2>(source)?.Options);
                     break;
                 case ConnectionResponseContentOffice365Strategy.Values.Office365:
-                    conf.Options.Office365 = FromApi(ConvertTo<ConnectionResponseContentOffice365>(source).Options);
+                    conf.Options.Office365 = FromApi(JsonConvertTo<ConnectionResponseContentOffice365>(source)?.Options);
                     break;
                 case ConnectionResponseContentOidcStrategy.Values.Oidc:
-                    conf.Options.Oidc = FromApi(ConvertTo<ConnectionResponseContentOidc>(source).Options);
+                    conf.Options.Oidc = FromApi(JsonConvertTo<ConnectionResponseContentOidc>(source)?.Options);
                     break;
                 case ConnectionResponseContentOktaStrategy.Values.Okta:
-                    conf.Options.Okta = FromApi(ConvertTo<ConnectionResponseContentOkta>(source).Options);
+                    conf.Options.Okta = FromApi(JsonConvertTo<ConnectionResponseContentOkta>(source)?.Options);
                     break;
                 case ConnectionResponseContentPaypalStrategy.Values.Paypal:
-                    conf.Options.Paypal = FromApi(ConvertTo<ConnectionResponseContentPaypal>(source).Options);
+                    conf.Options.Paypal = FromApi(JsonConvertTo<ConnectionResponseContentPaypal>(source)?.Options);
                     break;
                 case ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox:
-                    conf.Options.PaypalSandbox = FromApi(ConvertTo<ConnectionResponseContentPaypalSandbox>(source).Options);
+                    conf.Options.PaypalSandbox = FromApi(JsonConvertTo<ConnectionResponseContentPaypalSandbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentPingFederateStrategy.Values.Pingfederate:
-                    conf.Options.PingFederate = FromApi(ConvertTo<ConnectionResponseContentPingFederate>(source).Options);
+                    conf.Options.PingFederate = FromApi(JsonConvertTo<ConnectionResponseContentPingFederate>(source)?.Options);
                     break;
                 case ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter:
                     break;
                 case ConnectionResponseContentSalesforceStrategy.Values.Salesforce:
-                    conf.Options.Salesforce = FromApi(ConvertTo<ConnectionResponseContentSalesforce>(source).Options);
+                    conf.Options.Salesforce = FromApi(JsonConvertTo<ConnectionResponseContentSalesforce>(source)?.Options);
                     break;
                 case ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity:
-                    conf.Options.SalesforceCommunity = FromApi(ConvertTo<ConnectionResponseContentSalesforceCommunity>(source).Options);
+                    conf.Options.SalesforceCommunity = FromApi(JsonConvertTo<ConnectionResponseContentSalesforceCommunity>(source)?.Options);
                     break;
                 case ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox:
-                    conf.Options.SalesforceSandbox = FromApi(ConvertTo<ConnectionResponseContentSalesforceSandbox>(source).Options);
+                    conf.Options.SalesforceSandbox = FromApi(JsonConvertTo<ConnectionResponseContentSalesforceSandbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentSamlStrategy.Values.Samlp:
-                    conf.Options.Saml = FromApi(ConvertTo<ConnectionResponseContentSaml>(source).Options);
+                    conf.Options.Saml = FromApi(JsonConvertTo<ConnectionResponseContentSaml>(source)?.Options);
                     break;
                 case ConnectionResponseContentSharepointStrategy.Values.Sharepoint:
                     break;
@@ -201,36 +203,36 @@ namespace Alethic.Auth0.Operator.Controllers
                 case ConnectionResponseContentShopStrategy.Values.Shop:
                     break;
                 case ConnectionResponseContentSmsStrategy.Values.Sms:
-                    conf.Options.Sms = FromApi(ConvertTo<ConnectionResponseContentSms>(source).Options);
+                    conf.Options.Sms = FromApi(JsonConvertTo<ConnectionResponseContentSms>(source)?.Options);
                     break;
                 case ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud:
                     break;
                 case ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals:
                     break;
                 case ConnectionResponseContentTwitterStrategy.Values.Twitter:
-                    conf.Options.Twitter = FromApi(ConvertTo<ConnectionResponseContentTwitter>(source).Options);
+                    conf.Options.Twitter = FromApi(JsonConvertTo<ConnectionResponseContentTwitter>(source)?.Options);
                     break;
                 case ConnectionResponseContentUntappdStrategy.Values.Untappd:
                     break;
                 case ConnectionResponseContentVkontakteStrategy.Values.Vkontakte:
                     break;
                 case ConnectionResponseContentAzureAdStrategy.Values.Waad:
-                    conf.Options.AzureAd = FromApi(ConvertTo<ConnectionResponseContentAzureAd>(source).Options);
+                    conf.Options.AzureAd = FromApi(JsonConvertTo<ConnectionResponseContentAzureAd>(source)?.Options);
                     break;
                 case ConnectionResponseContentWeiboStrategy.Values.Weibo:
                     break;
                 case ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive:
-                    conf.Options.WindowsLive = FromApi(ConvertTo<ConnectionResponseContentWindowsLive>(source).Options);
+                    conf.Options.WindowsLive = FromApi(JsonConvertTo<ConnectionResponseContentWindowsLive>(source)?.Options);
                     break;
                 case ConnectionResponseContentWordpressStrategy.Values.Wordpress:
                     break;
                 case ConnectionResponseContentYahooStrategy.Values.Yahoo:
-                    conf.Options.Yahoo = FromApi(ConvertTo<ConnectionResponseContentYahoo>(source).Options);
+                    conf.Options.Yahoo = FromApi(JsonConvertTo<ConnectionResponseContentYahoo>(source)?.Options);
                     break;
                 case ConnectionResponseContentYandexStrategy.Values.Yandex:
                     break;
                 default:
-                    throw new InvalidOperationException();
+                    break;
             }
 
             return conf;
@@ -250,6 +252,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 ImportMode = source.ImportMode,
                 RequiresUsername = source.RequiresUsername,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                PasswordPolicy = source.PasswordPolicy.IsDefined ? FromApi(source.PasswordPolicy.Value)?.ToString()?.ToLowerInvariant() : null,
+                PasswordHistory = source.PasswordHistory.IsDefined && source.PasswordHistory.Value is { } ph ? FromApi(ph) : null,
+                PasswordNoPersonalInfo = source.PasswordNoPersonalInfo.IsDefined && source.PasswordNoPersonalInfo.Value is { } pnpi ? FromApi(pnpi) : null,
+                PasswordDictionary = source.PasswordDictionary.IsDefined && source.PasswordDictionary.Value is { } pd ? FromApi(pd) : null,
+                PasswordComplexityOptions = source.PasswordComplexityOptions.IsDefined && source.PasswordComplexityOptions.Value is { } pco ? FromApi(pco) : null,
+                Validation = source.Validation.IsDefined && source.Validation.Value is { } v ? FromApi(v) : null,
+                CustomScripts = source.CustomScripts is { } cs ? FromApi(cs) : null,
+                Mfa = source.Mfa is { } mfa ? FromApi(mfa) : null,
             };
         }
 
@@ -276,6 +286,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 Thumbprints = source.Thumbprints?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Kerberos = source.Kerberos is bool kb ? new V1ConnectionOptionsKerberos { Enabled = kb } : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -739,6 +751,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 RequestTokenUrl = source.RequestTokenUrl,
                 SignatureMethod = source.SignatureMethod?.ToString(),
                 UserAuthorizationUrl = source.UserAuthorizationUrl,
+                Scripts = source.Scripts is { } sc ? new V1ConnectionOptionsScripts { FetchUserProfile = sc.FetchUserProfile } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 UpstreamParams = FromApi(source.UpstreamParams),
             };
@@ -760,8 +773,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 IconUrl = source.IconUrl,
                 PkceEnabled = source.PkceEnabled,
                 UseOauthSpecScope = source.UseOauthSpecScope,
+                Scripts = source.Scripts is { } sc ? new V1ConnectionOptionsScripts { FetchUserProfile = sc.FetchUserProfile } : null,
+                AuthParams = source.AuthParams?.ToDictionary(kv => kv.Key, kv => kv.Value),
+                AuthParamsMap = source.AuthParamsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
+                FieldsMap = source.FieldsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
+                CustomHeaders = source.CustomHeaders?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -800,10 +819,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
                 TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
                 DpopSigningAlg = source.DpopSigningAlg?.ToString(),
+                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(a => a.Value).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
                 Type = source.Type?.ToString(),
+                OidcMetadata = source.OidcMetadata?.AdditionalProperties?.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString()),
+                AttributeMap = source.AttributeMap is { } am ? new V1ConnectionOptionsAttributeMap { MappingMode = am.MappingMode?.ToString(), UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (string?)kv.Value?.ToString()) } : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? new V1ConnectionOptionsConnectionSettings { Pkce = cs.Pkce?.ToString() } : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V1ConnectionOptionsFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -829,8 +854,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
                 TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
                 DpopSigningAlg = source.DpopSigningAlg?.ToString(),
+                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(a => a.Value).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
                 Type = source.Type?.ToString(),
+                OidcMetadata = source.OidcMetadata?.AdditionalProperties?.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString()),
+                AttributeMap = source.AttributeMap is { } am ? new V1ConnectionOptionsAttributeMap { MappingMode = am.MappingMode?.ToString(), UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (string?)kv.Value?.ToString()) } : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? new V1ConnectionOptionsConnectionSettings { Pkce = cs.Pkce?.ToString() } : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V1ConnectionOptionsFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
@@ -867,15 +897,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 Cert = source.Cert,
                 SigningCert = source.SigningCert,
                 Thumbprints = source.Thumbprints?.ToArray(),
-                SignatureAlgorithm = source.SignatureAlgorithm?.ToString(),
-                DigestAlgorithm = source.DigestAlgorithm?.ToString(),
+                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
+                DigestAlgorithm = FromApi(source.DigestAlgorithm),
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = source.ProtocolBinding?.ToString(),
+                ProtocolBinding = FromApi(source.ProtocolBinding),
+                Idpinitiated = source.Idpinitiated is { } idp ? new V1ConnectionOptionsIdpinitiated { ClientId = idp.ClientId, ClientProtocol = FromApi(idp.ClientProtocol), ClientAuthorizequery = idp.ClientAuthorizequery } : null,
+                DecryptionKey = source.DecryptionKey is { } dk ? new V1ConnectionOptionsKeyPair { Key = dk.Value?.ToString() } : null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V1ConnectionOptionsAssertionDecryptionSettings { DecryptionAlgorithm = FromApi(ads.AlgorithmProfile), KeyEncryptionAlgorithm = ads.AlgorithmExceptions is { } ae ? string.Join(",", ae) : null } : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -931,14 +965,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 MetadataUrl = source.MetadataUrl,
                 MetadataXml = source.MetadataXml,
                 EntityId = source.EntityId,
-                SignatureAlgorithm = source.SignatureAlgorithm?.ToString(),
-                DigestAlgorithm = source.DigestAlgorithm?.ToString(),
+                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
+                DigestAlgorithm = FromApi(source.DigestAlgorithm),
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = source.ProtocolBinding?.ToString(),
+                ProtocolBinding = FromApi(source.ProtocolBinding),
                 RequestTemplate = source.RequestTemplate,
                 Debug = source.Debug,
                 Deflate = source.Deflate,
+                Idpinitiated = source.Idpinitiated is { } idp ? new V1ConnectionOptionsIdpinitiated { ClientId = idp.ClientId, ClientProtocol = FromApi(idp.ClientProtocol), ClientAuthorizequery = idp.ClientAuthorizequery } : null,
                 SigningCert = source.SigningCert,
+                SigningKey = source.SigningKey is { } sk ? new V1ConnectionOptionsKeyPair { Key = sk.Key, Cert = sk.Cert } : null,
+                DecryptionKey = source.DecryptionKey is { } dk ? new V1ConnectionOptionsKeyPair { Key = dk.Value?.ToString() } : null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V1ConnectionOptionsAssertionDecryptionSettings { DecryptionAlgorithm = FromApi(ads.AlgorithmProfile), KeyEncryptionAlgorithm = ads.AlgorithmExceptions is { } ae ? string.Join(",", ae) : null } : null,
+                FieldsMap = source.FieldsMap?.ToDictionary(kv => kv.Key, kv => kv.Value?.Value?.ToString()),
                 UserIdAttribute = source.UserIdAttribute,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
@@ -947,6 +986,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -970,6 +1010,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 DisableSignup = source.DisableSignup,
                 BruteForceProtection = source.BruteForceProtection,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+                Totp = source.Totp is { } t ? new V1ConnectionEmailTotp { Length = t.Length, TimeStep = t.TimeStep } : null,
+                GatewayAuthentication = source.GatewayAuthentication.IsDefined && source.GatewayAuthentication.Value is { } ga ? new V1ConnectionGatewayAuthentication { Method = ga.Method, Subject = ga.Subject, Audience = ga.Audience, Secret = ga.Secret, SecretBase64Encoded = ga.SecretBase64Encoded } : null,
             };
         }
 
@@ -1240,6 +1282,15 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V1ConnectionOptionsMfa FromApi(ConnectionMfa source)
+        {
+            return new V1ConnectionOptionsMfa
+            {
+                Active = source.Active,
+                ReturnEnrollSettings = source.ReturnEnrollSettings,
+            };
+        }
+
         internal static V1ConnectionOptionsCustomScripts FromApi(ConnectionCustomScripts source)
         {
             return new V1ConnectionOptionsCustomScripts
@@ -1409,6 +1460,110 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V1ConnectionSamlSignatureAlgorithm? FromApi(ConnectionSignatureAlgorithmEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1 => V1ConnectionSamlSignatureAlgorithm.RsaSha1,
+                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256 => V1ConnectionSamlSignatureAlgorithm.RsaSha256,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionSignatureAlgorithmEnumSaml ToApiSamlSignatureAlgorithm(V1ConnectionSamlSignatureAlgorithm source)
+        {
+            return source switch
+            {
+                V1ConnectionSamlSignatureAlgorithm.RsaSha1 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1),
+                V1ConnectionSamlSignatureAlgorithm.RsaSha256 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V1ConnectionSamlDigestAlgorithm? FromApi(ConnectionDigestAlgorithmEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionDigestAlgorithmEnumSaml.Values.Sha1 => V1ConnectionSamlDigestAlgorithm.Sha1,
+                ConnectionDigestAlgorithmEnumSaml.Values.Sha256 => V1ConnectionSamlDigestAlgorithm.Sha256,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionDigestAlgorithmEnumSaml ToApiSamlDigestAlgorithm(V1ConnectionSamlDigestAlgorithm source)
+        {
+            return source switch
+            {
+                V1ConnectionSamlDigestAlgorithm.Sha1 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha1),
+                V1ConnectionSamlDigestAlgorithm.Sha256 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha256),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V1ConnectionSamlProtocolBinding? FromApi(ConnectionProtocolBindingEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost => V1ConnectionSamlProtocolBinding.HttpPost,
+                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect => V1ConnectionSamlProtocolBinding.HttpRedirect,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionProtocolBindingEnumSaml ToApiSamlProtocolBinding(V1ConnectionSamlProtocolBinding source)
+        {
+            return source switch
+            {
+                V1ConnectionSamlProtocolBinding.HttpPost => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost),
+                V1ConnectionSamlProtocolBinding.HttpRedirect => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V1ConnectionIdpInitiatedClientProtocol? FromApi(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc => V1ConnectionIdpInitiatedClientProtocol.Oidc,
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp => V1ConnectionIdpInitiatedClientProtocol.Samlp,
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed => V1ConnectionIdpInitiatedClientProtocol.WsFed,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionOptionsIdpInitiatedClientProtocolEnumSaml ToApiIdpInitiatedClientProtocol(V1ConnectionIdpInitiatedClientProtocol source)
+        {
+            return source switch
+            {
+                V1ConnectionIdpInitiatedClientProtocol.Oidc => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc),
+                V1ConnectionIdpInitiatedClientProtocol.Samlp => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp),
+                V1ConnectionIdpInitiatedClientProtocol.WsFed => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V1ConnectionAssertionDecryptionAlgorithmProfile? FromApi(ConnectionAssertionDecryptionAlgorithmProfileEnum source)
+        {
+            return source.Value switch
+            {
+                ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261 => V1ConnectionAssertionDecryptionAlgorithmProfile.V20261,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionAssertionDecryptionAlgorithmProfileEnum ToApiAssertionDecryptionAlgorithmProfile(V1ConnectionAssertionDecryptionAlgorithmProfile source)
+        {
+            return source switch
+            {
+                V1ConnectionAssertionDecryptionAlgorithmProfile.V20261 => new ConnectionAssertionDecryptionAlgorithmProfileEnum(ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
         internal static V1ConnectionChallengeUi FromApi(ConnectionPasskeyChallengeUiEnum source)
         {
             return source.Value switch
@@ -1453,6 +1608,14 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ImportMode = source.ImportMode;
             target.RequiresUsername = source.RequiresUsername;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.PasswordPolicy is { } pp) target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(new ConnectionPasswordPolicyEnum(pp));
+            if (source.PasswordHistory is { } ph) target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(new ConnectionPasswordHistoryOptions { Enable = ph.Enable ?? false, Size = ph.Size });
+            if (source.PasswordNoPersonalInfo is { } pnpi) target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(new ConnectionPasswordNoPersonalInfoOptions { Enable = pnpi.Enable ?? false });
+            if (source.PasswordDictionary is { } pd) target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(new ConnectionPasswordDictionaryOptions { Enable = pd.Enable ?? false, Dictionary = pd.Dictionary });
+            if (source.PasswordComplexityOptions is { } pco) target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(new ConnectionPasswordComplexityOptions { MinLength = pco.MinLength });
+            if (source.Validation is { } val) { var v = new ConnectionValidationOptions(); if (val.UserName is { } un) v.Username = Optional<ConnectionUsernameValidationOptions?>.Of(new ConnectionUsernameValidationOptions { Min = un.Min ?? 0, Max = un.Max ?? 0 }); target.Validation = Optional<ConnectionValidationOptions?>.Of(v); }
+            if (source.CustomScripts is { } cs) { target.CustomScripts ??= new ConnectionCustomScripts(); ApplyToApi(cs, target.CustomScripts); }
+            if (source.Mfa is { } mfa) target.Mfa = new ConnectionMfa { Active = mfa.Active, ReturnEnrollSettings = mfa.ReturnEnrollSettings };
             return target;
         }
 
@@ -1474,6 +1637,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.Kerberos is { } kb) target.Kerberos = kb.Enabled;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1868,6 +2033,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.AccessTokenUrl = source.AccessTokenUrl;
             target.RequestTokenUrl = source.RequestTokenUrl;
             target.UserAuthorizationUrl = source.UserAuthorizationUrl;
+            if (source.Scripts is { } sc) target.Scripts = new ConnectionScriptsOAuth1 { FetchUserProfile = sc.FetchUserProfile };
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
@@ -1884,8 +2050,14 @@ namespace Alethic.Auth0.Operator.Controllers
             target.IconUrl = source.IconUrl;
             target.PkceEnabled = source.PkceEnabled;
             target.UseOauthSpecScope = source.UseOauthSpecScope;
+            if (source.Scripts is { } sc) target.Scripts = new ConnectionScriptsOAuth2 { FetchUserProfile = sc.FetchUserProfile };
+            if (source.AuthParams is { } ap) target.AuthParams = ap.ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (source.AuthParamsMap is { } apm) target.AuthParamsMap = apm.ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (source.FieldsMap is { } fm) target.FieldsMap = fm.ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (source.CustomHeaders is { } ch) target.CustomHeaders = ch.ToDictionary(kv => kv.Key, kv => kv.Value);
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1911,8 +2083,13 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
+            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOidc(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value) };
+            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
+            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1930,6 +2107,10 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
+            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOkta(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value) };
+            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
+            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
@@ -1956,12 +2137,19 @@ namespace Alethic.Auth0.Operator.Controllers
             target.Cert = source.Cert;
             target.SigningCert = source.SigningCert;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApiSamlSignatureAlgorithm(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApiSamlDigestAlgorithm(digAlg);
+            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApiSamlProtocolBinding(pb);
             target.SignSamlRequest = source.SignSamlRequest;
+            if (source.Idpinitiated is { } idp) target.Idpinitiated = new ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } cp ? ToApiIdpInitiatedClientProtocol(cp) : null, ClientAuthorizequery = idp.ClientAuthorizequery };
+            if (source.DecryptionKey is { Key: { } dkKey }) target.DecryptionKey = ConnectionDecryptionKeySaml.FromString(dkKey);
+            if (source.AssertionDecryptionSettings is { DecryptionAlgorithm: { } adsAlg }) target.AssertionDecryptionSettings = new ConnectionAssertionDecryptionSettings { AlgorithmProfile = ToApiAssertionDecryptionAlgorithmProfile(adsAlg) };
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2006,10 +2194,18 @@ namespace Alethic.Auth0.Operator.Controllers
             target.MetadataXml = source.MetadataXml;
             target.EntityId = source.EntityId;
             target.SignSamlRequest = source.SignSamlRequest;
+            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApiSamlSignatureAlgorithm(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApiSamlDigestAlgorithm(digAlg);
+            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApiSamlProtocolBinding(pb);
             target.RequestTemplate = source.RequestTemplate;
             target.Debug = source.Debug;
             target.Deflate = source.Deflate;
+            if (source.Idpinitiated is { } idp) target.Idpinitiated = new ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } cp ? ToApiIdpInitiatedClientProtocol(cp) : null, ClientAuthorizequery = idp.ClientAuthorizequery };
             target.SigningCert = source.SigningCert;
+            if (source.SigningKey is { } sk) target.SigningKey = new ConnectionSigningKeySaml { Key = sk.Key, Cert = sk.Cert };
+            if (source.DecryptionKey is { Key: { } dkKey }) target.DecryptionKey = ConnectionDecryptionKeySaml.FromString(dkKey);
+            if (source.AssertionDecryptionSettings is { DecryptionAlgorithm: { } adsAlg }) target.AssertionDecryptionSettings = new ConnectionAssertionDecryptionSettings { AlgorithmProfile = ToApiAssertionDecryptionAlgorithmProfile(adsAlg) };
+            if (source.FieldsMap is { } fm) target.FieldsMap = fm.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => ConnectionFieldsMapSamlValue.FromString(kv.Value!));
             target.UserIdAttribute = source.UserIdAttribute;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
@@ -2018,6 +2214,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2035,6 +2232,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.DisableSignup = source.DisableSignup;
             target.BruteForceProtection = source.BruteForceProtection;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.Totp is { } t) target.Totp = new ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep };
             if (source.GatewayAuthentication is { } ga)
             {
                 var gatewayAuth = new ConnectionGatewayAuthenticationSms

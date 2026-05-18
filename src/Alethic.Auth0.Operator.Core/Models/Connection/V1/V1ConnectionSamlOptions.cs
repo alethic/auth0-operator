@@ -81,18 +81,18 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         public string? EntityId { get; set; }
 
         /// <summary>
-        /// Algorithm used to verify SAML assertion signatures (e.g. <c>rsa-sha256</c>).
+        /// Algorithm used to verify SAML assertion signatures.
         /// </summary>
         [JsonPropertyName("signatureAlgorithm")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? SignatureAlgorithm { get; set; }
+        public V1ConnectionSamlSignatureAlgorithm? SignatureAlgorithm { get; set; }
 
         /// <summary>
-        /// Digest algorithm used when signing SAML requests (e.g. <c>sha256</c>).
+        /// Digest algorithm used when signing SAML requests.
         /// </summary>
         [JsonPropertyName("digestAlgorithm")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? DigestAlgorithm { get; set; }
+        public V1ConnectionSamlDigestAlgorithm? DigestAlgorithm { get; set; }
 
         /// <summary>
         /// When <c>true</c>, Auth0 will sign outgoing SAML authentication requests.
@@ -102,11 +102,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         public bool? SignSamlRequest { get; set; }
 
         /// <summary>
-        /// SAML protocol binding to use. Can be <c>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect</c> or <c>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST</c>.
+        /// SAML protocol binding to use.
         /// </summary>
         [JsonPropertyName("protocolBinding")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ProtocolBinding { get; set; }
+        public V1ConnectionSamlProtocolBinding? ProtocolBinding { get; set; }
 
         /// <summary>
         /// Custom SAML request template (Liquid syntax).
