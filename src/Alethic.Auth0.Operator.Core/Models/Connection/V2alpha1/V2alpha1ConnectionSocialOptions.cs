@@ -11,18 +11,18 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     {
 
         /// <summary>
-        /// Space-separated list of OAuth 2.0 scopes to request from the social identity provider.
+        /// List of OAuth 2.0 scopes to request from the social identity provider.
         /// </summary>
         [JsonPropertyName("scope")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Scope { get; set; }
+        public string[]? Scope { get; set; }
 
         /// <summary>
         /// When <c>true</c>, allows entering any custom scope string instead of a predefined list.
         /// </summary>
         [JsonPropertyName("freeform_scopes")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? FreeformScopes { get; set; }
+        public string[]? FreeformScopes { get; set; }
 
         /// <summary>
         /// List of user attributes that will not be persisted in the Auth0 user store after each login.

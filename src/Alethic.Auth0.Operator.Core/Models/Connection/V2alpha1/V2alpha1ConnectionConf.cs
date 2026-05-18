@@ -31,7 +31,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         /// </summary>
         [JsonPropertyName("strategy")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Strategy { get; set; }
+        public V2alpha1ConnectionStrategy? Strategy { get; set; }
 
         /// <summary>
         /// Provisioning ticket URL used for enterprise connections during setup.

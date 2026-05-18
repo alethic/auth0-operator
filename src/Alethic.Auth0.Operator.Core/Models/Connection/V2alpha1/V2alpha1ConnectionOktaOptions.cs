@@ -53,11 +53,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         public string? Issuer { get; set; }
 
         /// <summary>
-        /// Space-separated list of OAuth 2.0 scopes to request.
+        /// List of OAuth 2.0 scopes to request.
         /// </summary>
         [JsonPropertyName("scope")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Scope { get; set; }
+        public string[]? Scope { get; set; }
 
         /// <summary>
         /// URL of the icon to display for this connection in the Universal Login experience.

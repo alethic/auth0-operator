@@ -6,7 +6,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     /// <summary>
     /// Common client credentials (<c>client_id</c> / <c>client_secret</c>) shared by many social and enterprise connection option types.
     /// </summary>
-    public record V2alpha1ConnectionOptionsClientCredentials
+    public record V2alpha1ConnectionOptionsClientCredentials : V2alpha1ConnectionOptionsBase
     {
 
         /// <summary>

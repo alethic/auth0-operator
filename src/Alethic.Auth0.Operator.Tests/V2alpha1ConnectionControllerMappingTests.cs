@@ -38,7 +38,7 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("test-conn", result.Name);
             Assert.AreEqual("Test Connection", result.DisplayName);
-            Assert.AreEqual("auth0", result.Strategy);
+            Assert.AreEqual(V2alpha1ConnectionStrategy.Auth0, result.Strategy);
             CollectionAssert.AreEqual(new[] { "realm1", "realm2" }, result.Realms);
             Assert.AreEqual(true, result.IsDomainConnection);
             Assert.AreEqual(false, result.ShowAsButton);
@@ -153,7 +153,7 @@ namespace Alethic.Auth0.Operator.Tests
             };
 
             var conf = V2alpha1ConnectionController.FromApi(source)!;
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(conf.Strategy!), Name = conf.Name! };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(System.Text.Json.JsonSerializer.Serialize(conf.Strategy).Trim('"')), Name = conf.Name! };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
 
             Assert.AreEqual(source.Name, req.Name);

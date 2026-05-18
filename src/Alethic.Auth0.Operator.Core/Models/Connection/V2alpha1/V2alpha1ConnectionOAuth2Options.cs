@@ -21,7 +21,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
 
         [JsonPropertyName("scope")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Scope { get; set; }
+        public string[]? Scope { get; set; }
 
         [JsonPropertyName("authParams")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

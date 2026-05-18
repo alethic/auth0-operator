@@ -88,11 +88,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         public string? UseridAttribute { get; set; }
 
         /// <summary>
-        /// Space-separated list of OAuth 2.0 scopes to request from Azure AD.
+        /// List of OAuth 2.0 scopes to request from Azure AD.
         /// </summary>
         [JsonPropertyName("scope")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Scope { get; set; }
+        public string[]? Scope { get; set; }
 
         /// <summary>
         /// Certificate thumbprints used to validate tokens from the Azure AD server.

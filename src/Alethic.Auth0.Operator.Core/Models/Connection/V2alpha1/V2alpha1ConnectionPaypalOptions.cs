@@ -9,13 +9,21 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     public record V2alpha1ConnectionPaypalOptions : V2alpha1ConnectionSocialOptions
     {
 
-        [JsonPropertyName("paypal_scope")]
+        [JsonPropertyName("address")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? PaypalScope { get; set; }
+        public bool? Address { get; set; }
 
-        [JsonPropertyName("icon_url")]
+        [JsonPropertyName("email")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? IconUrl { get; set; }
+        public bool? Email { get; set; }
+
+        [JsonPropertyName("phone")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Phone { get; set; }
+
+        [JsonPropertyName("profile")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Profile { get; set; }
 
     }
 

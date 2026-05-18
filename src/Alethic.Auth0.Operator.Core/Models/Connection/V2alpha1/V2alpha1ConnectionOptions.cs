@@ -243,10 +243,6 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha1ConnectionYahooOptions? Yahoo { get; set; }
 
-        [JsonExtensionData]
-        [Ignore]
-        public Dictionary<string, object?>? AdditionalProperties { get; set; }
-
     }
 
 }

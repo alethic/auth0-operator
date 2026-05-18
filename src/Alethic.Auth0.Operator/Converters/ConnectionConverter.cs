@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.Versioning;
+using System.Text.Json;
 
 using Alethic.Auth0.Operator.Core.Models.Connection.V1;
 using Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
@@ -59,18 +60,20 @@ namespace Alethic.Auth0.Operator.Converters
                 if (source is null)
                     return null;
 
+                var strategy = source.Strategy is { } s ? JsonSerializer.Deserialize<V2alpha1ConnectionStrategy?>(JsonSerializer.Serialize(s)) : null;
+
                 return new V2alpha1ConnectionConf
                 {
                     Name = source.Name,
                     DisplayName = source.DisplayName,
-                    Strategy = source.Strategy,
+                    Strategy = strategy,
                     ProvisioningTicketUrl = source.ProvisioningTicketUrl,
                     Metadata = source.Metadata,
                     Realms = source.Realms,
                     EnabledClients = source.EnabledClients,
                     ShowAsButton = source.ShowAsButton,
                     IsDomainConnection = source.IsDomainConnection,
-                    Options = ConvertOptions(source.Strategy, source.Options),
+                    Options = ConvertOptions(strategy, source.Options),
                 };
             }
 
@@ -83,7 +86,7 @@ namespace Alethic.Auth0.Operator.Converters
                 {
                     Name = source.Name,
                     DisplayName = source.DisplayName,
-                    Strategy = source.Strategy,
+                    Strategy = source.Strategy is { } sv ? JsonSerializer.SerializeToElement(sv).GetString() : null,
                     ProvisioningTicketUrl = source.ProvisioningTicketUrl,
                     Metadata = source.Metadata,
                     Realms = source.Realms,
@@ -91,530 +94,169 @@ namespace Alethic.Auth0.Operator.Converters
                     ShowAsButton = source.ShowAsButton,
                     IsDomainConnection = source.IsDomainConnection,
                     Options = RevertOptions(source.Strategy, source.Options),
+
                 };
             }
 
-            static V2alpha1ConnectionOptions? ConvertOptions(string? strategy, V1ConnectionOptions? source)
+            static V2alpha1ConnectionOptions? ConvertOptions(V2alpha1ConnectionStrategy? strategy, V1ConnectionOptions? source)
             {
                 if (source is null)
                     return null;
 
+                var json = JsonSerializer.SerializeToElement(source);
                 var options = new V2alpha1ConnectionOptions();
 
                 switch (strategy)
                 {
-                    case "auth0":
-                        options.Auth0 = new V2alpha1ConnectionAuth0Options
-                        {
-                            PasswordPolicy = source.PasswordPolicy?.ToString(),
-                            PasswordHistory = source.PasswordHistory is { } ph ? new V2alpha1ConnectionOptionsPasswordHistory { Enable = ph.Enable, Size = ph.Size } : null,
-                            PasswordNoPersonalInfo = source.PasswordNoPersonalInfo is { } pnpi ? new V2alpha1ConnectionOptionsPasswordNoPersonalInfo { Enable = pnpi.Enable } : null,
-                            PasswordDictionary = source.PasswordDictionary is { } pd ? new V2alpha1ConnectionOptionsPasswordDictionary { Enable = pd.Enable, Dictionary = pd.Dictionary } : null,
-                            PasswordComplexityOptions = source.PasswordComplexityOptions is { } pco ? new V2alpha1ConnectionOptionsPasswordComplexityOptions { MinLength = pco.MinLength } : null,
-                            Validation = source.Validation is { } v ? new V2alpha1ConnectionOptionsValidation { UserName = v.UserName is { } un ? new V2alpha1ConnectionOptionsUserName { Min = un.Min, Max = un.Max } : null } : null,
-                            EnableScriptContext = source.EnableScriptContext,
-                            EnabledDatabaseCustomization = source.EnableDatabaseCustomization,
-                            CustomScripts = source.CustomScripts is { } cs ? new V2alpha1ConnectionOptionsCustomScripts
-                            {
-                                Login = cs.Login,
-                                GetUser = cs.GetUser,
-                                Delete = cs.Delete,
-                                ChangePassword = cs.ChangePassword,
-                                Verify = cs.Verify,
-                                Create = cs.Create,
-                                ChangeUsername = cs.ChangeUsername,
-                                ChangeEmail = cs.ChangeEmail,
-                            } : null,
-                            ImportMode = source.ImportMode,
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? ConvertSetUserRootAttributes(sura) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Auth0:
+                        options.Auth0 = json.Deserialize<V2alpha1ConnectionAuth0Options>();
                         break;
-                    case "ad":
-                        options.Ad = new V2alpha1ConnectionAdOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura2 ? ConvertSetUserRootAttributes(sura2) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Ad:
+                        options.Ad = json.Deserialize<V2alpha1ConnectionAdOptions>();
                         break;
-                    case "adfs":
-                        options.Adfs = new V2alpha1ConnectionAdfsOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura3 ? ConvertSetUserRootAttributes(sura3) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Adfs:
+                        options.Adfs = json.Deserialize<V2alpha1ConnectionAdfsOptions>();
                         break;
-                    case "auth0-oidc":
-                        options.Auth0Oidc = new V2alpha1ConnectionAuth0OidcOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura4 ? ConvertSetUserRootAttributes(sura4) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Auth0Oidc:
+                        options.Auth0Oidc = json.Deserialize<V2alpha1ConnectionAuth0OidcOptions>();
                         break;
-                    case "waad":
-                        options.AzureAd = new V2alpha1ConnectionAzureAdOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura5 ? ConvertSetUserRootAttributes(sura5) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.AzureAd:
+                        options.AzureAd = json.Deserialize<V2alpha1ConnectionAzureAdOptions>();
                         break;
-                    case "bitbucket":
-                        options.Bitbucket = new V2alpha1ConnectionBitbucketOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura6 ? ConvertSetUserRootAttributes(sura6) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Bitbucket:
+                        options.Bitbucket = json.Deserialize<V2alpha1ConnectionBitbucketOptions>();
                         break;
-                    case "box":
-                        options.Box = new V2alpha1ConnectionBoxOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura7 ? ConvertSetUserRootAttributes(sura7) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Box:
+                        options.Box = json.Deserialize<V2alpha1ConnectionBoxOptions>();
                         break;
-                    case "dropbox":
-                        options.Dropbox = new V2alpha1ConnectionDropboxOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura8 ? ConvertSetUserRootAttributes(sura8) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Dropbox:
+                        options.Dropbox = json.Deserialize<V2alpha1ConnectionDropboxOptions>();
                         break;
-                    case "email":
-                        options.Email = new V2alpha1ConnectionEmailOptions();
+                    case V2alpha1ConnectionStrategy.Email:
+                        options.Email = json.Deserialize<V2alpha1ConnectionEmailOptions>();
                         break;
-                    case "evernote":
-                        options.Evernote = new V2alpha1ConnectionEvernoteOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura9 ? ConvertSetUserRootAttributes(sura9) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Evernote:
+                        options.Evernote = json.Deserialize<V2alpha1ConnectionEvernoteOptions>();
                         break;
-                    case "evernote-sandbox":
-                        options.EvernoteSandbox = new V2alpha1ConnectionEvernoteOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura10 ? ConvertSetUserRootAttributes(sura10) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.EvernoteSandbox:
+                        options.EvernoteSandbox = json.Deserialize<V2alpha1ConnectionEvernoteOptions>();
                         break;
-                    case "exact":
-                        options.Exact = new V2alpha1ConnectionExactOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura11 ? ConvertSetUserRootAttributes(sura11) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Exact:
+                        options.Exact = json.Deserialize<V2alpha1ConnectionExactOptions>();
                         break;
-                    case "facebook":
-                        options.Facebook = new V2alpha1ConnectionFacebookOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura12 ? ConvertSetUserRootAttributes(sura12) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Facebook:
+                        options.Facebook = json.Deserialize<V2alpha1ConnectionFacebookOptions>();
                         break;
-                    case "github":
-                        options.GitHub = new V2alpha1ConnectionGitHubOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura13 ? ConvertSetUserRootAttributes(sura13) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.GitHub:
+                        options.GitHub = json.Deserialize<V2alpha1ConnectionGitHubOptions>();
                         break;
-                    case "google-apps":
-                        options.GoogleApps = new V2alpha1ConnectionGoogleAppsOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura14 ? ConvertSetUserRootAttributes(sura14) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.GoogleApps:
+                        options.GoogleApps = json.Deserialize<V2alpha1ConnectionGoogleAppsOptions>();
                         break;
-                    case "google-oauth2":
-                        options.GoogleOAuth2 = new V2alpha1ConnectionGoogleOAuth2Options
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura15 ? ConvertSetUserRootAttributes(sura15) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.GoogleOAuth2:
+                        options.GoogleOAuth2 = json.Deserialize<V2alpha1ConnectionGoogleOAuth2Options>();
                         break;
-                    case "linkedin":
-                        options.Linkedin = new V2alpha1ConnectionLinkedinOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura16 ? ConvertSetUserRootAttributes(sura16) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Linkedin:
+                        options.Linkedin = json.Deserialize<V2alpha1ConnectionLinkedinOptions>();
                         break;
-                    case "oauth1":
-                        options.OAuth1 = new V2alpha1ConnectionOAuth1Options
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                        };
+                    case V2alpha1ConnectionStrategy.OAuth1:
+                        options.OAuth1 = json.Deserialize<V2alpha1ConnectionOAuth1Options>();
                         break;
-                    case "oauth2":
-                        options.OAuth2 = new V2alpha1ConnectionOAuth2Options
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura17 ? ConvertSetUserRootAttributes(sura17) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.OAuth2:
+                        options.OAuth2 = json.Deserialize<V2alpha1ConnectionOAuth2Options>();
                         break;
-                    case "office365":
-                        options.Office365 = new V2alpha1ConnectionOffice365Options
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura18 ? ConvertSetUserRootAttributes(sura18) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Office365:
+                        options.Office365 = json.Deserialize<V2alpha1ConnectionOffice365Options>();
                         break;
-                    case "oidc":
-                        options.Oidc = new V2alpha1ConnectionOidcOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura19 ? ConvertSetUserRootAttributes(sura19) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Oidc:
+                        options.Oidc = json.Deserialize<V2alpha1ConnectionOidcOptions>();
                         break;
-                    case "okta":
-                        options.Okta = new V2alpha1ConnectionOktaOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura20 ? ConvertSetUserRootAttributes(sura20) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Okta:
+                        options.Okta = json.Deserialize<V2alpha1ConnectionOktaOptions>();
                         break;
-                    case "paypal":
-                        options.Paypal = new V2alpha1ConnectionPaypalOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura21 ? ConvertSetUserRootAttributes(sura21) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Paypal:
+                        options.Paypal = json.Deserialize<V2alpha1ConnectionPaypalOptions>();
                         break;
-                    case "paypal-sandbox":
-                        options.PaypalSandbox = new V2alpha1ConnectionPaypalOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura22 ? ConvertSetUserRootAttributes(sura22) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.PaypalSandbox:
+                        options.PaypalSandbox = json.Deserialize<V2alpha1ConnectionPaypalOptions>();
                         break;
-                    case "pingfederate":
-                        options.PingFederate = new V2alpha1ConnectionPingFederateOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura23 ? ConvertSetUserRootAttributes(sura23) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.PingFederate:
+                        options.PingFederate = json.Deserialize<V2alpha1ConnectionPingFederateOptions>();
                         break;
-                    case "salesforce":
-                        options.Salesforce = new V2alpha1ConnectionSalesforceOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura24 ? ConvertSetUserRootAttributes(sura24) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Salesforce:
+                        options.Salesforce = json.Deserialize<V2alpha1ConnectionSalesforceOptions>();
                         break;
-                    case "salesforce-community":
-                        options.SalesforceCommunity = new V2alpha1ConnectionSalesforceCommunityOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura25 ? ConvertSetUserRootAttributes(sura25) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.SalesforceCommunity:
+                        options.SalesforceCommunity = json.Deserialize<V2alpha1ConnectionSalesforceCommunityOptions>();
                         break;
-                    case "salesforce-sandbox":
-                        options.SalesforceSandbox = new V2alpha1ConnectionSalesforceOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura26 ? ConvertSetUserRootAttributes(sura26) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.SalesforceSandbox:
+                        options.SalesforceSandbox = json.Deserialize<V2alpha1ConnectionSalesforceOptions>();
                         break;
-                    case "samlp":
-                        options.Saml = new V2alpha1ConnectionSamlOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura27 ? ConvertSetUserRootAttributes(sura27) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Saml:
+                        options.Saml = json.Deserialize<V2alpha1ConnectionSamlOptions>();
                         break;
-                    case "sms":
-                        options.Sms = new V2alpha1ConnectionSmsOptions();
+                    case V2alpha1ConnectionStrategy.Sms:
+                        options.Sms = json.Deserialize<V2alpha1ConnectionSmsOptions>();
                         break;
-                    case "twitter":
-                        options.Twitter = new V2alpha1ConnectionTwitterOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura28 ? ConvertSetUserRootAttributes(sura28) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Twitter:
+                        options.Twitter = json.Deserialize<V2alpha1ConnectionTwitterOptions>();
                         break;
-                    case "windowslive":
-                        options.WindowsLive = new V2alpha1ConnectionWindowsLiveOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura29 ? ConvertSetUserRootAttributes(sura29) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.WindowsLive:
+                        options.WindowsLive = json.Deserialize<V2alpha1ConnectionWindowsLiveOptions>();
                         break;
-                    case "yahoo":
-                        options.Yahoo = new V2alpha1ConnectionYahooOptions
-                        {
-                            NonPersistentAttrs = source.NonPersistentAttributes,
-                            SetUserRootAttributes = source.SetUserRootAttributes is { } sura30 ? ConvertSetUserRootAttributes(sura30) : null,
-                        };
+                    case V2alpha1ConnectionStrategy.Yahoo:
+                        options.Yahoo = json.Deserialize<V2alpha1ConnectionYahooOptions>();
                         break;
                 }
 
-                options.AdditionalProperties = source.AdditionalProperties;
                 return options;
             }
 
-            static V1ConnectionOptions? RevertOptions(string? strategy, V2alpha1ConnectionOptions? source)
+            static V1ConnectionOptions? RevertOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions? source)
             {
                 if (source is null)
                     return null;
 
-                var options = new V1ConnectionOptions();
-
-                switch (strategy)
+                JsonElement? json = strategy switch
                 {
-                    case "auth0":
-                        if (source.Auth0 is { } auth0)
-                        {
-                            options.PasswordPolicy = auth0.PasswordPolicy is { } pp && System.Enum.TryParse<V1ConnectionOptionsPasswordPolicy>(pp, ignoreCase: true, out var ppVal) ? ppVal : null;
-                            options.PasswordHistory = auth0.PasswordHistory is { } ph ? new V1ConnectionOptionsPasswordHistory { Enable = ph.Enable, Size = ph.Size } : null;
-                            options.PasswordNoPersonalInfo = auth0.PasswordNoPersonalInfo is { } pnpi ? new V1ConnectionOptionsPasswordNoPersonalInfo { Enable = pnpi.Enable } : null;
-                            options.PasswordDictionary = auth0.PasswordDictionary is { } pd ? new V1ConnectionOptionsPasswordDictionary { Enable = pd.Enable, Dictionary = pd.Dictionary } : null;
-                            options.PasswordComplexityOptions = auth0.PasswordComplexityOptions is { } pco ? new V1ConnectionOptionsPasswordComplexityOptions { MinLength = pco.MinLength } : null;
-                            options.Validation = auth0.Validation is { } v ? new V1ConnectionOptionsValidation { UserName = v.UserName is { } un ? new V1ConnectionOptionsUserName { Min = un.Min, Max = un.Max } : null } : null;
-                            options.EnableScriptContext = auth0.EnableScriptContext;
-                            options.EnableDatabaseCustomization = auth0.EnabledDatabaseCustomization;
-                            options.CustomScripts = auth0.CustomScripts is { } cs ? new V1ConnectionOptionsCustomScripts
-                            {
-                                Login = cs.Login,
-                                GetUser = cs.GetUser,
-                                Delete = cs.Delete,
-                                ChangePassword = cs.ChangePassword,
-                                Verify = cs.Verify,
-                                Create = cs.Create,
-                                ChangeUsername = cs.ChangeUsername,
-                                ChangeEmail = cs.ChangeEmail,
-                            } : null;
-                            options.ImportMode = auth0.ImportMode;
-                            options.NonPersistentAttributes = auth0.NonPersistentAttrs;
-                            options.SetUserRootAttributes = auth0.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "ad":
-                        if (source.Ad is { } ad)
-                        {
-                            options.NonPersistentAttributes = ad.NonPersistentAttrs;
-                            options.SetUserRootAttributes = ad.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "adfs":
-                        if (source.Adfs is { } adfs)
-                        {
-                            options.NonPersistentAttributes = adfs.NonPersistentAttrs;
-                            options.SetUserRootAttributes = adfs.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "auth0-oidc":
-                        if (source.Auth0Oidc is { } auth0Oidc)
-                        {
-                            options.NonPersistentAttributes = auth0Oidc.NonPersistentAttrs;
-                            options.SetUserRootAttributes = auth0Oidc.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "waad":
-                        if (source.AzureAd is { } azureAd)
-                        {
-                            options.NonPersistentAttributes = azureAd.NonPersistentAttrs;
-                            options.SetUserRootAttributes = azureAd.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "bitbucket":
-                        if (source.Bitbucket is { } bitbucket)
-                        {
-                            options.NonPersistentAttributes = bitbucket.NonPersistentAttrs;
-                            options.SetUserRootAttributes = bitbucket.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "box":
-                        if (source.Box is { } box)
-                        {
-                            options.NonPersistentAttributes = box.NonPersistentAttrs;
-                            options.SetUserRootAttributes = box.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "dropbox":
-                        if (source.Dropbox is { } dropbox)
-                        {
-                            options.NonPersistentAttributes = dropbox.NonPersistentAttrs;
-                            options.SetUserRootAttributes = dropbox.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "evernote":
-                        if (source.Evernote is { } evernote)
-                        {
-                            options.NonPersistentAttributes = evernote.NonPersistentAttrs;
-                            options.SetUserRootAttributes = evernote.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "evernote-sandbox":
-                        if (source.EvernoteSandbox is { } evernoteSandbox)
-                        {
-                            options.NonPersistentAttributes = evernoteSandbox.NonPersistentAttrs;
-                            options.SetUserRootAttributes = evernoteSandbox.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "exact":
-                        if (source.Exact is { } exact)
-                        {
-                            options.NonPersistentAttributes = exact.NonPersistentAttrs;
-                            options.SetUserRootAttributes = exact.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "facebook":
-                        if (source.Facebook is { } facebook)
-                        {
-                            options.NonPersistentAttributes = facebook.NonPersistentAttrs;
-                            options.SetUserRootAttributes = facebook.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "github":
-                        if (source.GitHub is { } gitHub)
-                        {
-                            options.NonPersistentAttributes = gitHub.NonPersistentAttrs;
-                            options.SetUserRootAttributes = gitHub.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "google-apps":
-                        if (source.GoogleApps is { } googleApps)
-                        {
-                            options.NonPersistentAttributes = googleApps.NonPersistentAttrs;
-                            options.SetUserRootAttributes = googleApps.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "google-oauth2":
-                        if (source.GoogleOAuth2 is { } googleOAuth2)
-                        {
-                            options.NonPersistentAttributes = googleOAuth2.NonPersistentAttrs;
-                            options.SetUserRootAttributes = googleOAuth2.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "linkedin":
-                        if (source.Linkedin is { } linkedin)
-                        {
-                            options.NonPersistentAttributes = linkedin.NonPersistentAttrs;
-                            options.SetUserRootAttributes = linkedin.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "oauth1":
-                        if (source.OAuth1 is { } oauth1)
-                        {
-                            options.NonPersistentAttributes = oauth1.NonPersistentAttrs;
-                        }
-                        break;
-                    case "oauth2":
-                        if (source.OAuth2 is { } oauth2)
-                        {
-                            options.NonPersistentAttributes = oauth2.NonPersistentAttrs;
-                            options.SetUserRootAttributes = oauth2.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "office365":
-                        if (source.Office365 is { } office365)
-                        {
-                            options.NonPersistentAttributes = office365.NonPersistentAttrs;
-                            options.SetUserRootAttributes = office365.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "oidc":
-                        if (source.Oidc is { } oidc)
-                        {
-                            options.NonPersistentAttributes = oidc.NonPersistentAttrs;
-                            options.SetUserRootAttributes = oidc.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "okta":
-                        if (source.Okta is { } okta)
-                        {
-                            options.NonPersistentAttributes = okta.NonPersistentAttrs;
-                            options.SetUserRootAttributes = okta.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "paypal":
-                        if (source.Paypal is { } paypal)
-                        {
-                            options.NonPersistentAttributes = paypal.NonPersistentAttrs;
-                            options.SetUserRootAttributes = paypal.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "paypal-sandbox":
-                        if (source.PaypalSandbox is { } paypalSandbox)
-                        {
-                            options.NonPersistentAttributes = paypalSandbox.NonPersistentAttrs;
-                            options.SetUserRootAttributes = paypalSandbox.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "pingfederate":
-                        if (source.PingFederate is { } pingFederate)
-                        {
-                            options.NonPersistentAttributes = pingFederate.NonPersistentAttrs;
-                            options.SetUserRootAttributes = pingFederate.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "salesforce":
-                        if (source.Salesforce is { } salesforce)
-                        {
-                            options.NonPersistentAttributes = salesforce.NonPersistentAttrs;
-                            options.SetUserRootAttributes = salesforce.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "salesforce-community":
-                        if (source.SalesforceCommunity is { } salesforceCommunity)
-                        {
-                            options.NonPersistentAttributes = salesforceCommunity.NonPersistentAttrs;
-                            options.SetUserRootAttributes = salesforceCommunity.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "salesforce-sandbox":
-                        if (source.SalesforceSandbox is { } salesforceSandbox)
-                        {
-                            options.NonPersistentAttributes = salesforceSandbox.NonPersistentAttrs;
-                            options.SetUserRootAttributes = salesforceSandbox.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "samlp":
-                        if (source.Saml is { } saml)
-                        {
-                            options.NonPersistentAttributes = saml.NonPersistentAttrs;
-                            options.SetUserRootAttributes = saml.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "twitter":
-                        if (source.Twitter is { } twitter)
-                        {
-                            options.NonPersistentAttributes = twitter.NonPersistentAttrs;
-                            options.SetUserRootAttributes = twitter.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "windowslive":
-                        if (source.WindowsLive is { } windowsLive)
-                        {
-                            options.NonPersistentAttributes = windowsLive.NonPersistentAttrs;
-                            options.SetUserRootAttributes = windowsLive.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                    case "yahoo":
-                        if (source.Yahoo is { } yahoo)
-                        {
-                            options.NonPersistentAttributes = yahoo.NonPersistentAttrs;
-                            options.SetUserRootAttributes = yahoo.SetUserRootAttributes is { } sura ? RevertSetUserRootAttributes(sura) : null;
-                        }
-                        break;
-                }
+                    V2alpha1ConnectionStrategy.Auth0 => source.Auth0 is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Ad => source.Ad is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Adfs => source.Adfs is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Auth0Oidc => source.Auth0Oidc is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.AzureAd => source.AzureAd is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Bitbucket => source.Bitbucket is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Box => source.Box is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Dropbox => source.Dropbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Email => source.Email is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Evernote => source.Evernote is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.EvernoteSandbox => source.EvernoteSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Exact => source.Exact is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Facebook => source.Facebook is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.GitHub => source.GitHub is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.GoogleApps => source.GoogleApps is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.GoogleOAuth2 => source.GoogleOAuth2 is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Linkedin => source.Linkedin is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.OAuth1 => source.OAuth1 is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.OAuth2 => source.OAuth2 is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Office365 => source.Office365 is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Oidc => source.Oidc is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Okta => source.Okta is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Paypal => source.Paypal is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.PaypalSandbox => source.PaypalSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.PingFederate => source.PingFederate is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Salesforce => source.Salesforce is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.SalesforceCommunity => source.SalesforceCommunity is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.SalesforceSandbox => source.SalesforceSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Saml => source.Saml is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Sms => source.Sms is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Twitter => source.Twitter is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.WindowsLive => source.WindowsLive is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Yahoo => source.Yahoo is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    _ => null,
+                };
 
-                options.AdditionalProperties = source.AdditionalProperties;
-                return options;
+                return json is { } j ? j.Deserialize<V1ConnectionOptions>() : null;
             }
-
-            static V2alpha1ConnectionSetUserRootAttributes ConvertSetUserRootAttributes(V1ConnectionSetUserRootAttributes source) => source switch
-            {
-                V1ConnectionSetUserRootAttributes.OnEachLogin => V2alpha1ConnectionSetUserRootAttributes.OnEachLogin,
-                V1ConnectionSetUserRootAttributes.NeverOnLogin => V2alpha1ConnectionSetUserRootAttributes.NeverOnLogin,
-                _ => V2alpha1ConnectionSetUserRootAttributes.OnFirstLogin,
-            };
-
-            static V1ConnectionSetUserRootAttributes RevertSetUserRootAttributes(V2alpha1ConnectionSetUserRootAttributes source) => source switch
-            {
-                V2alpha1ConnectionSetUserRootAttributes.OnEachLogin => V1ConnectionSetUserRootAttributes.OnEachLogin,
-                V2alpha1ConnectionSetUserRootAttributes.NeverOnLogin => V1ConnectionSetUserRootAttributes.NeverOnLogin,
-                _ => V1ConnectionSetUserRootAttributes.OnFirstLogin,
-            };
 
         }
 

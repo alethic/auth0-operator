@@ -9,6 +9,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     /// </summary>
     public record V2alpha1ConnectionSalesforceCommunityOptions : V2alpha1ConnectionSalesforceOptions
     {
+
+        [JsonPropertyName("community_base_url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? CommunityBaseUrl { get; set; }
+
     }
 
 }

@@ -82,7 +82,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Name = source.Name,
                 DisplayName = source.DisplayName,
-                Strategy = source.Strategy,
+                Strategy = JsonSerializer.Deserialize<V2alpha1ConnectionStrategy?>(JsonSerializer.Serialize(source.Strategy)),
                 Realms = source.Realms?.ToArray(),
                 IsDomainConnection = source.IsDomainConnection,
                 ShowAsButton = source.ShowAsButton,
@@ -389,7 +389,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 IconUrl = source.IconUrl,
                 IdentityApi = source.IdentityApi?.ToString(),
                 MaxGroupsToRetrieve = source.MaxGroupsToRetrieve,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                Scope = source.Scope?.ToArray(),
                 ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection?.ToString(),
                 TenantDomain = source.TenantDomain,
                 TenantId = source.TenantId,
@@ -400,6 +400,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 WaadProtocol = source.WaadProtocol?.ToString(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -412,8 +413,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope is not null ? source.Scope.ToArray() : null,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Profile = source.Profile,
@@ -431,6 +432,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -445,6 +447,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -485,6 +488,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -499,6 +503,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -511,8 +516,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope is not null ? new[] { source.Scope } : null,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Email = source.Email,
@@ -556,6 +561,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 AllowContextProfileField = source.AllowContextProfileField,
                 PagesManageCta = source.PagesManageCta,
                 PagesManageInstantArticles = source.PagesManageInstantArticles,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -568,8 +574,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope is not null ? source.Scope.ToArray() : null,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 AdminOrg = source.AdminOrg,
@@ -592,6 +598,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 WritePublicKey = source.WritePublicKey,
                 WriteRepoHook = source.WriteRepoHook,
                 Profile = source.Profile,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -604,7 +611,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
+                Scope = source.Scope is not null ? source.Scope.ToArray() : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
@@ -641,8 +648,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 IconUrl = source.IconUrl,
@@ -712,6 +719,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 YoutubeReadonly = source.YoutubeReadonly,
                 YoutubeUpload = source.YoutubeUpload,
                 Youtubepartner = source.Youtubepartner,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -724,8 +732,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 BasicProfile = source.BasicProfile,
@@ -735,6 +743,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 StrategyVersion = source.StrategyVersion,
                 Network = source.Network,
                 Profile = source.Profile,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -769,7 +778,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 AuthorizationUrl = source.AuthorizationUrl,
                 TokenUrl = source.TokenUrl,
                 LogoutUrl = source.LogoutUrl,
-                Scope = source.Scope?.ToString(),
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
                 IconUrl = source.IconUrl,
                 PkceEnabled = source.PkceEnabled,
                 UseOauthSpecScope = source.UseOauthSpecScope,
@@ -811,7 +820,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserinfoEndpoint = source.UserinfoEndpoint,
                 JwksUri = source.JwksUri,
                 Issuer = source.Issuer,
-                Scope = source.Scope,
+                Scope = source.Scope is not null ? source.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
@@ -846,7 +855,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserinfoEndpoint = source.UserinfoEndpoint,
                 JwksUri = source.JwksUri,
                 Issuer = source.Issuer,
-                Scope = source.Scope,
+                Scope = source.Scope is not null ? source.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
@@ -877,10 +886,14 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                Address = source.Address,
+                Email = source.Email,
+                Phone = source.Phone,
+                Profile = source.Profile,
             };
         }
 
@@ -922,11 +935,12 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -940,11 +954,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 CommunityBaseUrl = source.CommunityBaseUrl,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1024,8 +1039,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Protocol = source.Protocol?.ToString(),
@@ -1033,6 +1048,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 TweetRead = source.TweetRead,
                 UsersRead = source.UsersRead,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1045,8 +1061,8 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null,
-                FreeformScopes = source.FreeformScopes is not null ? source.FreeformScopes.Any() : null,
+                Scope = source.Scope?.ToArray(),
+                FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 BasicProfile = source.Basic,
@@ -1108,6 +1124,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 TeamReadwriteAll = source.TeamReadwriteAll,
                 UserReadAll = source.UserReadAll,
                 UserReadbasicAll = source.UserReadbasicAll,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1122,6 +1139,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1149,6 +1167,35 @@ namespace Alethic.Auth0.Operator.Controllers
                     alias = v.AsConnectionUpstreamAlias().Alias?.Value;
                 result[key] = alias is not null ? new V2alpha1ConnectionUpstreamParam { Alias = alias } : null;
             }
+            return result;
+        }
+
+        internal static Dictionary<string, V2alpha1ConnectionUpstreamParam?>? FromApi(Dictionary<string, ConnectionUpstreamAdditionalProperties>? source)
+        {
+            if (source is null)
+                return null;
+
+            var result = new Dictionary<string, V2alpha1ConnectionUpstreamParam?>(source.Count);
+            foreach (var (key, value) in source)
+            {
+                string? alias = null;
+                if (value.IsConnectionUpstreamAlias())
+                    alias = value.AsConnectionUpstreamAlias().Alias?.Value;
+                result[key] = alias is not null ? new V2alpha1ConnectionUpstreamParam { Alias = alias } : null;
+            }
+            return result;
+        }
+
+        internal static Dictionary<string, ConnectionUpstreamAdditionalProperties>? ToApiUpstreamParamsNonOptional(Dictionary<string, V2alpha1ConnectionUpstreamParam?>? source)
+        {
+            if (source is null)
+                return null;
+
+            var result = new Dictionary<string, ConnectionUpstreamAdditionalProperties>(source.Count);
+            foreach (var (key, value) in source)
+                result[key] = value?.Alias is { } alias
+                    ? ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias { Alias = new ConnectionUpstreamAliasEnum(alias) })
+                    : ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias());
             return result;
         }
 
@@ -1724,7 +1771,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.Granted = source.Granted;
             target.IconUrl = source.IconUrl;
             target.MaxGroupsToRetrieve = source.MaxGroupsToRetrieve;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (source.Scope is { } scope) target.Scope = scope;
             target.TenantDomain = source.TenantDomain;
             target.TenantId = source.TenantId;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
@@ -1732,6 +1779,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UseWsfed = source.UseWsfed;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1740,8 +1788,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsBitbucket();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
@@ -1755,6 +1803,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1765,6 +1814,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1798,6 +1848,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1808,6 +1859,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -1816,8 +1868,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsFacebook();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = string.Join(" ", scope);
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.AdsManagement = source.AdsManagement;
@@ -1861,6 +1913,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserStatus = source.UserStatus;
             target.UserTaggedPlaces = source.UserTaggedPlaces;
             target.UserVideos = source.UserVideos;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParamsNonOptional(up);
             return target;
         }
 
@@ -1869,8 +1922,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsGitHub();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.AdminOrg = source.AdminOrg;
@@ -1893,16 +1946,14 @@ namespace Alethic.Auth0.Operator.Controllers
             target.WriteOrg = source.WriteOrg;
             target.WritePublicKey = source.WritePublicKey;
             target.WriteRepoHook = source.WriteRepoHook;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
         internal static ConnectionOptionsGoogleApps ToApi(V2alpha1ConnectionGoogleAppsOptions source)
         {
             var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            target.Domain = source.Domain;
+            if (source.Scope is { } scope) target.Scope = scope;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.IconUrl = source.IconUrl;
@@ -1932,8 +1983,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsGoogleOAuth2();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.IconUrl = source.IconUrl;
@@ -2003,6 +2054,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.YoutubeReadonly = source.YoutubeReadonly;
             target.YoutubeUpload = source.YoutubeUpload;
             target.Youtubepartner = source.Youtubepartner;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2011,8 +2063,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsLinkedin();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.BasicProfile = source.BasicProfile;
@@ -2022,6 +2074,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.Openid = source.Openid;
             target.Profile = source.Profile;
             target.StrategyVersion = source.StrategyVersion;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2078,13 +2131,13 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserinfoEndpoint = source.UserinfoEndpoint;
             target.JwksUri = source.JwksUri;
             target.Issuer = source.Issuer;
-            target.Scope = source.Scope;
+            target.Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
-            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOidc(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value) };
+            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOidc(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!) };
             if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
             if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
@@ -2102,13 +2155,13 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserinfoEndpoint = source.UserinfoEndpoint;
             target.JwksUri = source.JwksUri;
             target.Issuer = source.Issuer;
-            target.Scope = source.Scope;
+            target.Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
-            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOkta(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value) };
+            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOkta(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!) };
             if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
             if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
@@ -2122,10 +2175,14 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsPaypal();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            target.Address = source.Address;
+            target.Email = source.Email;
+            target.Phone = source.Phone;
+            target.Profile = source.Profile;
             return target;
         }
 
@@ -2158,11 +2215,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsSalesforce();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2172,11 +2230,12 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             target.CommunityBaseUrl = source.CommunityBaseUrl;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2253,14 +2312,15 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsTwitter();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.OfflineAccess = source.OfflineAccess;
             target.Profile = source.Profile;
             target.TweetRead = source.TweetRead;
             target.UsersRead = source.UsersRead;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2269,8 +2329,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsWindowsLive();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs ? (IEnumerable<string>)new[] { "true" } : Array.Empty<string>();
+            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
             target.Basic = source.BasicProfile;
@@ -2332,6 +2392,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.TeamReadwriteAll = source.TeamReadwriteAll;
             target.UserReadAll = source.UserReadAll;
             target.UserReadbasicAll = source.UserReadbasicAll;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
@@ -2342,11 +2403,12 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
             return target;
         }
 
         /// <summary>
-        /// Gets the list of enabled client IDs for the specified connection.
+        /// Gets the list of enabled client IDs
         /// </summary>
         /// <param name="api"></param>
         /// <param name="connectionId"></param>
@@ -2459,7 +2521,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var req = new CreateConnectionRequestContent()
             {
                 Name = conf.Name ?? throw new InvalidOperationException("Missing connection name."),
-                Strategy = ConnectionIdentityProviderEnum.FromCustom(conf.Strategy),
+                Strategy = ConnectionIdentityProviderEnum.FromCustom(JsonSerializer.Serialize(conf.Strategy).Trim('"')),
             };
 
             ApplyToApi(conf, req);
@@ -2492,41 +2554,41 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="strategy"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        internal static object? ResolveStrategyOptions(string? strategy, V2alpha1ConnectionOptions? options) => strategy switch
+        internal static object? ResolveStrategyOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions? options) => strategy switch
         {
-            "auth0" when options?.Auth0 is { } o => ToApi(o),
-            "ad" when options?.Ad is { } o => ToApi(o),
-            "adfs" when options?.Adfs is { } o => ToApi(o),
-            "auth0-oidc" when options?.Auth0Oidc is { } o => ToApi(o),
-            "waad" when options?.AzureAd is { } o => ToApi(o),
-            "bitbucket" when options?.Bitbucket is { } o => ToApi(o),
-            "box" when options?.Box is { } o => ToApi(o),
-            "dropbox" when options?.Dropbox is { } o => ToApi(o),
-            "email" when options?.Email is { } o => ToApi(o),
-            "evernote" when options?.Evernote is { } o => ToApi(o),
-            "evernote-sandbox" when options?.EvernoteSandbox is { } o => ToApi(o),
-            "exact" when options?.Exact is { } o => ToApi(o),
-            "facebook" when options?.Facebook is { } o => ToApi(o),
-            "github" when options?.GitHub is { } o => ToApi(o),
-            "google-apps" when options?.GoogleApps is { } o => ToApi(o),
-            "google-oauth2" when options?.GoogleOAuth2 is { } o => ToApi(o),
-            "linkedin" when options?.Linkedin is { } o => ToApi(o),
-            "oauth1" when options?.OAuth1 is { } o => ToApi(o),
-            "oauth2" when options?.OAuth2 is { } o => ToApi(o),
-            "office365" when options?.Office365 is { } o => ToApi(o),
-            "oidc" when options?.Oidc is { } o => ToApi(o),
-            "okta" when options?.Okta is { } o => ToApi(o),
-            "paypal" when options?.Paypal is { } o => ToApi(o),
-            "paypal-sandbox" when options?.PaypalSandbox is { } o => ToApi(o),
-            "pingfederate" when options?.PingFederate is { } o => ToApi(o),
-            "salesforce" when options?.Salesforce is { } o => ToApi(o),
-            "salesforce-community" when options?.SalesforceCommunity is { } o => ToApi(o),
-            "salesforce-sandbox" when options?.SalesforceSandbox is { } o => ToApi(o),
-            "samlp" when options?.Saml is { } o => ToApi(o),
-            "sms" when options?.Sms is { } o => ToApi(o),
-            "twitter" when options?.Twitter is { } o => ToApi(o),
-            "windowslive" when options?.WindowsLive is { } o => ToApi(o),
-            "yahoo" when options?.Yahoo is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Auth0 when options?.Auth0 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Ad when options?.Ad is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Adfs when options?.Adfs is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Auth0Oidc when options?.Auth0Oidc is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.AzureAd when options?.AzureAd is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Bitbucket when options?.Bitbucket is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Box when options?.Box is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Dropbox when options?.Dropbox is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Email when options?.Email is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Evernote when options?.Evernote is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.EvernoteSandbox when options?.EvernoteSandbox is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Exact when options?.Exact is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Facebook when options?.Facebook is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.GitHub when options?.GitHub is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.GoogleApps when options?.GoogleApps is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.GoogleOAuth2 when options?.GoogleOAuth2 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Linkedin when options?.Linkedin is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.OAuth1 when options?.OAuth1 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.OAuth2 when options?.OAuth2 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Office365 when options?.Office365 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Oidc when options?.Oidc is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Okta when options?.Okta is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Paypal when options?.Paypal is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.PaypalSandbox when options?.PaypalSandbox is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.PingFederate when options?.PingFederate is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Salesforce when options?.Salesforce is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.SalesforceCommunity when options?.SalesforceCommunity is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.SalesforceSandbox when options?.SalesforceSandbox is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Saml when options?.Saml is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Sms when options?.Sms is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Twitter when options?.Twitter is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.WindowsLive when options?.WindowsLive is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Yahoo when options?.Yahoo is { } o => ToApi(o),
             _ => null,
         };
 

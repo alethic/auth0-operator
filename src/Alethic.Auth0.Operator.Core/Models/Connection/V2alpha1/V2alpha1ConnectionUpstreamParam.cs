@@ -16,6 +16,13 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Alias { get; set; }
 
+        /// <summary>
+        /// The name of the parameter as expected by the upstream identity provider.
+        /// </summary>
+        [JsonPropertyName("value")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Value { get; set; }
+
     }
 
 }

@@ -7,106 +7,76 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     /// <summary>
     /// Configuration options for the <c>adfs</c> (Active Directory Federation Services) connection strategy.
     /// </summary>
-    public record V2alpha1ConnectionAdfsOptions
+    public record V2alpha1ConnectionAdfsOptions : V2alpha1ConnectionOptionsBase
     {
 
         /// <summary>
-        /// ADFS server URL (e.g. <c>https://adfs.myserver.com</c>).
+        /// ADFS federation metadata host or XML URL used to discover WS-Fed endpoints and certificates. Errors if adfs_server and fedMetadataXml are both absent.
         /// </summary>
-        [JsonPropertyName("adfsServer")]
+        [JsonPropertyName("adfs_server")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? AdfsServer { get; set; }
 
-        /// <summary>
-        /// ADFS sign-in endpoint URL.
-        /// </summary>
-        [JsonPropertyName("signInEndpoint")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? SignInEndpoint { get; set; }
-
-        /// <summary>
-        /// Entity ID / issuer for this connection as configured in ADFS.
-        /// </summary>
-        [JsonPropertyName("entityId")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? EntityId { get; set; }
-
-        /// <summary>
-        /// Federation metadata XML document describing the ADFS identity provider.
-        /// </summary>
-        [JsonPropertyName("fedMetadataXml")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? FedMetadataXml { get; set; }
-
-        /// <summary>
-        /// Current certificate thumbprints used to validate tokens from the ADFS server.
-        /// </summary>
-        [JsonPropertyName("thumbprints")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string[]? Thumbprints { get; set; }
-
-        /// <summary>
-        /// Previous certificate thumbprints retained for rollover scenarios.
-        /// </summary>
-        [JsonPropertyName("prevThumbprints")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string[]? PrevThumbprints { get; set; }
-
-        /// <summary>
-        /// URL of the icon to display for this connection in the Universal Login experience.
-        /// </summary>
-        [JsonPropertyName("icon_url")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? IconUrl { get; set; }
-
-        /// <summary>
-        /// List of domain aliases for the connection (e.g. additional email domains that map to this connection).
-        /// </summary>
         [JsonPropertyName("domain_aliases")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[]? DomainAliases { get; set; }
 
         /// <summary>
-        /// Primary tenant domain for the connection.
+        /// The entity identifier (Issuer) for the ADFS Service Provider. When not provided, defaults to 'urn:auth0:{tenant}:{connection}'.
         /// </summary>
+        [JsonPropertyName("entityId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? EntityId { get; set; }
+
+        [JsonPropertyName("fedMetadataXml")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? FedMetadataXml { get; set; }
+
+        [JsonPropertyName("icon_url")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? IconUrl { get; set; }
+
+        [JsonPropertyName("prev_thumbprints")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[]? PrevThumbprints { get; set; }
+
+        [JsonPropertyName("set_user_root_attributes")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha1ConnectionSetUserRootAttributes? SetUserRootAttributes { get; set; }
+
+        [JsonPropertyName("should_trust_email_verified_connection")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha1ConnectionShouldTrustEmailVerifiedConnection? ShouldTrustEmailVerifiedConnection { get; set; }
+
+        [JsonPropertyName("signInEndpoint")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? SignInEndpoint { get; set; }
+
         [JsonPropertyName("tenant_domain")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? TenantDomain { get; set; }
 
+        [JsonPropertyName("thumbprints")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[]? Thumbprints { get; set; }
+
+        [JsonPropertyName("upstream_params")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string, V2alpha1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
+
         /// <summary>
-        /// SAML attribute that will be mapped to the Auth0 user ID.
+        /// Custom ADFS claim to use as the unique user identifier. When provided, this attribute is prepended to the default user_id mapping list with highest priority. Accepts a string (single ADFS claim name).
         /// </summary>
         [JsonPropertyName("user_id_attribute")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? UserIdAttribute { get; set; }
 
-        /// <summary>
-        /// Determines whether Auth0 should trust the email-verified claim coming from this identity provider.
-        /// </summary>
-        [JsonPropertyName("should_trust_email_verified_connection")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ShouldTrustEmailVerifiedConnection { get; set; }
-
-        /// <summary>
-        /// List of user attributes that will not be persisted in the Auth0 user store after each login.
-        /// </summary>
         [JsonPropertyName("non_persistent_attrs")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[]? NonPersistentAttrs { get; set; }
 
-        /// <summary>
-        /// Controls when root profile attributes (<c>name</c>, <c>given_name</c>, etc.) are updated from the identity provider.
-        /// </summary>
-        [JsonPropertyName("set_user_root_attributes")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V2alpha1ConnectionSetUserRootAttributes? SetUserRootAttributes { get; set; }
-
-        /// <summary>
-        /// Upstream parameters that will be sent to the identity provider on each authentication request.
-        /// </summary>
-        [JsonPropertyName("upstream_params")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<string, V2alpha1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
+        [JsonExtensionData]
+        public Dictionary<string, object?> AdditionalProperties { get; set; } = new();
 
     }
 

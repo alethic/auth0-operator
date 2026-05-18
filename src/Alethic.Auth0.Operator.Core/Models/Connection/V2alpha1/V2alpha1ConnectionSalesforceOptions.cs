@@ -9,14 +9,6 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
     public record V2alpha1ConnectionSalesforceOptions : V2alpha1ConnectionSocialOptions
     {
 
-        [JsonPropertyName("community_base_url")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? CommunityBaseUrl { get; set; }
-
-        [JsonPropertyName("icon_url")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? IconUrl { get; set; }
-
         [JsonPropertyName("profile")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? Profile { get; set; }
