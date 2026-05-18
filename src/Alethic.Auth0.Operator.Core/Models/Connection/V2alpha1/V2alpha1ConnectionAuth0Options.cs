@@ -56,31 +56,31 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
 
         [JsonPropertyName("passkey_options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasskeyOptions?> PasskeyOptions { get; set; }
+        public V2alpha1ConnectionPasskeyOptions? PasskeyOptions { get; set; }
 
         [JsonPropertyName("passwordPolicy")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasswordPolicyEnum?> PasswordPolicy { get; set; }
+        public V2alpha1ConnectionConnectionPasswordPolicy? PasswordPolicy { get; set; }
 
         [JsonPropertyName("password_complexity_options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasswordComplexityOptions?> PasswordComplexityOptions { get; set; }
+        public V2alpha1ConnectionPasswordComplexityOptions? PasswordComplexityOptions { get; set; }
 
         [JsonPropertyName("password_dictionary")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasswordDictionaryOptions?> PasswordDictionary { get; set; }
+        public V2alpha1ConnectionPasswordDictionaryOptions? PasswordDictionary { get; set; }
 
         [JsonPropertyName("password_history")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasswordHistoryOptions?> PasswordHistory { get; set; }
+        public V2alpha1ConnectionPasswordHistoryOptions? PasswordHistory { get; set; }
 
         [JsonPropertyName("password_no_personal_info")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Optional<ConnectionPasswordNoPersonalInfoOptions?> PasswordNoPersonalInfo { get; set; }
+        public V2alpha1ConnectionPasswordNoPersonalInfoOptions? PasswordNoPersonalInfo { get; set; }
 
         [JsonPropertyName("password_options")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ConnectionPasswordOptions? PasswordOptions { get; set; }
+        public V2alpha1ConnectionPasswordOptions? PasswordOptions { get; set; }
 
         [JsonPropertyName("precedence")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
