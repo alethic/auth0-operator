@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
@@ -56,7 +55,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 
         [JsonPropertyName("idpinitiated")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Idpinitiated { get; set; }
+        public V1ConnectionOptionsIdpinitiated? Idpinitiated { get; set; }
 
     }
 
