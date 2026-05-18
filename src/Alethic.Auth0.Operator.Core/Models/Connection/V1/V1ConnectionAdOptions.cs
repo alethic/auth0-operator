@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -93,7 +92,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
         /// </summary>
         [JsonPropertyName("kerberos")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IDictionary? Kerberos { get; set; }
+        public V1ConnectionOptionsKerberos? Kerberos { get; set; }
 
         /// <summary>
         /// When <c>true</c>, caching of group membership information is disabled.
