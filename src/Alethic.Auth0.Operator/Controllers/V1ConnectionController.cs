@@ -85,113 +85,114 @@ namespace Alethic.Auth0.Operator.Controllers
                 Strategy = source.Strategy,
                 Realms = source.Realms?.ToArray(),
                 IsDomainConnection = source.IsDomainConnection,
+                Options = new V1ConnectionOptions()
             };
 
             switch (source.Strategy)
             {
                 case ConnectionResponseContentAuth0Strategy.Values.Auth0:
-                    conf.Auth0Options = FromApi(ConvertTo<ConnectionResponseContentAuth0>(source).Options);
+                    conf.Options.Auth0 = FromApi(ConvertTo<ConnectionResponseContentAuth0>(source).Options);
                     break;
                 case ConnectionResponseContentAdStrategy.Values.Ad:
-                    conf.AdOptions = FromApi(ConvertTo<ConnectionResponseContentAd>(source).Options);
+                    conf.Options.Ad = FromApi(ConvertTo<ConnectionResponseContentAd>(source).Options);
                     break;
                 case ConnectionResponseContentAdfsStrategy.Values.Adfs:
-                    conf.AdfsOptions = FromApi(ConvertTo<ConnectionResponseContentAdfs>(source).Options);
+                    conf.Options.Adfs = FromApi(ConvertTo<ConnectionResponseContentAdfs>(source).Options);
                     break;
                 case ConnectionResponseContentAmazonStrategy.Values.Amazon:
                     break;
                 case ConnectionResponseContentAppleStrategy.Values.Apple:
                     break;
                 case ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc:
-                    conf.Auth0OidcOptions = FromApi(ConvertTo<ConnectionResponseContentAuth0Oidc>(source).Options);
+                    conf.Options.Auth0Oidc = FromApi(ConvertTo<ConnectionResponseContentAuth0Oidc>(source).Options);
                     break;
                 case ConnectionResponseContentBaiduStrategy.Values.Baidu:
                     break;
                 case ConnectionResponseContentBitbucketStrategy.Values.Bitbucket:
-                    conf.BitbucketOptions = FromApi(ConvertTo<ConnectionResponseContentBitbucket>(source).Options);
+                    conf.Options.Bitbucket = FromApi(ConvertTo<ConnectionResponseContentBitbucket>(source).Options);
                     break;
                 case ConnectionResponseContentBitlyStrategy.Values.Bitly:
                     break;
                 case ConnectionResponseContentBoxStrategy.Values.Box:
-                    conf.BoxOptions = FromApi(ConvertTo<ConnectionResponseContentBox>(source).Options);
+                    conf.Options.Box = FromApi(ConvertTo<ConnectionResponseContentBox>(source).Options);
                     break;
                 case ConnectionResponseContentDaccountStrategy.Values.Daccount:
                     break;
                 case ConnectionResponseContentDropboxStrategy.Values.Dropbox:
-                    conf.DropboxOptions = FromApi(ConvertTo<ConnectionResponseContentDropbox>(source).Options);
+                    conf.Options.Dropbox = FromApi(ConvertTo<ConnectionResponseContentDropbox>(source).Options);
                     break;
                 case ConnectionResponseContentDwollaStrategy.Values.Dwolla:
                     break;
                 case ConnectionResponseContentEmailStrategy.Values.Email:
-                    conf.EmailOptions = FromApi(ConvertTo<ConnectionResponseContentEmail>(source).Options);
+                    conf.Options.Email = FromApi(ConvertTo<ConnectionResponseContentEmail>(source).Options);
                     break;
                 case ConnectionResponseContentEvernoteStrategy.Values.Evernote:
-                    conf.EvernoteOptions = FromApi(ConvertTo<ConnectionResponseContentEvernote>(source).Options);
+                    conf.Options.Evernote = FromApi(ConvertTo<ConnectionResponseContentEvernote>(source).Options);
                     break;
                 case ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox:
-                    conf.EvernoteSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentEvernoteSandbox>(source).Options);
+                    conf.Options.EvernoteSandbox = FromApi(ConvertTo<ConnectionResponseContentEvernoteSandbox>(source).Options);
                     break;
                 case ConnectionResponseContentExactStrategy.Values.Exact:
-                    conf.ExactOptions = FromApi(ConvertTo<ConnectionResponseContentExact>(source).Options);
+                    conf.Options.Exact = FromApi(ConvertTo<ConnectionResponseContentExact>(source).Options);
                     break;
                 case ConnectionResponseContentFacebookStrategy.Values.Facebook:
-                    conf.FacebookOptions = FromApi(ConvertTo<ConnectionResponseContentFacebook>(source).Options);
+                    conf.Options.Facebook = FromApi(ConvertTo<ConnectionResponseContentFacebook>(source).Options);
                     break;
                 case ConnectionResponseContentFitbitStrategy.Values.Fitbit:
                     break;
                 case ConnectionResponseContentGitHubStrategy.Values.Github:
-                    conf.GitHubOptions = FromApi(ConvertTo<ConnectionResponseContentGitHub>(source).Options);
+                    conf.Options.GitHub = FromApi(ConvertTo<ConnectionResponseContentGitHub>(source).Options);
                     break;
                 case ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps:
-                    conf.GoogleAppsOptions = FromApi(ConvertTo<ConnectionResponseContentGoogleApps>(source).Options);
+                    conf.Options.GoogleApps = FromApi(ConvertTo<ConnectionResponseContentGoogleApps>(source).Options);
                     break;
                 case ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2:
-                    conf.GoogleOAuth2Options = FromApi(ConvertTo<ConnectionResponseContentGoogleOAuth2>(source).Options);
+                    conf.Options.GoogleOAuth2 = FromApi(ConvertTo<ConnectionResponseContentGoogleOAuth2>(source).Options);
                     break;
                 case ConnectionResponseContentInstagramStrategy.Values.Instagram:
                     break;
                 case ConnectionResponseContentLineStrategy.Values.Line:
                     break;
                 case ConnectionResponseContentLinkedinStrategy.Values.Linkedin:
-                    conf.LinkedinOptions = FromApi(ConvertTo<ConnectionResponseContentLinkedin>(source).Options);
+                    conf.Options.Linkedin = FromApi(ConvertTo<ConnectionResponseContentLinkedin>(source).Options);
                     break;
                 case ConnectionResponseContentOAuth1Strategy.Values.Oauth1:
-                    conf.OAuth1Options = FromApi(ConvertTo<ConnectionResponseContentOAuth1>(source).Options);
+                    conf.Options.OAuth1 = FromApi(ConvertTo<ConnectionResponseContentOAuth1>(source).Options);
                     break;
                 case ConnectionResponseContentOAuth2Strategy.Values.Oauth2:
-                    conf.OAuth2Options = FromApi(ConvertTo<ConnectionResponseContentOAuth2>(source).Options);
+                    conf.Options.OAuth2 = FromApi(ConvertTo<ConnectionResponseContentOAuth2>(source).Options);
                     break;
                 case ConnectionResponseContentOffice365Strategy.Values.Office365:
-                    conf.Office365Options = FromApi(ConvertTo<ConnectionResponseContentOffice365>(source).Options);
+                    conf.Options.Office365 = FromApi(ConvertTo<ConnectionResponseContentOffice365>(source).Options);
                     break;
                 case ConnectionResponseContentOidcStrategy.Values.Oidc:
-                    conf.OidcOptions = FromApi(ConvertTo<ConnectionResponseContentOidc>(source).Options);
+                    conf.Options.Oidc = FromApi(ConvertTo<ConnectionResponseContentOidc>(source).Options);
                     break;
                 case ConnectionResponseContentOktaStrategy.Values.Okta:
-                    conf.OktaOptions = FromApi(ConvertTo<ConnectionResponseContentOkta>(source).Options);
+                    conf.Options.Okta = FromApi(ConvertTo<ConnectionResponseContentOkta>(source).Options);
                     break;
                 case ConnectionResponseContentPaypalStrategy.Values.Paypal:
-                    conf.PaypalOptions = FromApi(ConvertTo<ConnectionResponseContentPaypal>(source).Options);
+                    conf.Options.Paypal = FromApi(ConvertTo<ConnectionResponseContentPaypal>(source).Options);
                     break;
                 case ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox:
-                    conf.PaypalSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentPaypalSandbox>(source).Options);
+                    conf.Options.PaypalSandbox = FromApi(ConvertTo<ConnectionResponseContentPaypalSandbox>(source).Options);
                     break;
                 case ConnectionResponseContentPingFederateStrategy.Values.Pingfederate:
-                    conf.PingFederateOptions = FromApi(ConvertTo<ConnectionResponseContentPingFederate>(source).Options);
+                    conf.Options.PingFederate = FromApi(ConvertTo<ConnectionResponseContentPingFederate>(source).Options);
                     break;
                 case ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter:
                     break;
                 case ConnectionResponseContentSalesforceStrategy.Values.Salesforce:
-                    conf.SalesforceOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforce>(source).Options);
+                    conf.Options.Salesforce = FromApi(ConvertTo<ConnectionResponseContentSalesforce>(source).Options);
                     break;
                 case ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity:
-                    conf.SalesforceCommunityOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforceCommunity>(source).Options);
+                    conf.Options.SalesforceCommunity = FromApi(ConvertTo<ConnectionResponseContentSalesforceCommunity>(source).Options);
                     break;
                 case ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox:
-                    conf.SalesforceSandboxOptions = FromApi(ConvertTo<ConnectionResponseContentSalesforceSandbox>(source).Options);
+                    conf.Options.SalesforceSandbox = FromApi(ConvertTo<ConnectionResponseContentSalesforceSandbox>(source).Options);
                     break;
                 case ConnectionResponseContentSamlStrategy.Values.Samlp:
-                    conf.SamlOptions = FromApi(ConvertTo<ConnectionResponseContentSaml>(source).Options);
+                    conf.Options.Saml = FromApi(ConvertTo<ConnectionResponseContentSaml>(source).Options);
                     break;
                 case ConnectionResponseContentSharepointStrategy.Values.Sharepoint:
                     break;
@@ -200,31 +201,31 @@ namespace Alethic.Auth0.Operator.Controllers
                 case ConnectionResponseContentShopStrategy.Values.Shop:
                     break;
                 case ConnectionResponseContentSmsStrategy.Values.Sms:
-                    conf.SmsOptions = FromApi(ConvertTo<ConnectionResponseContentSms>(source).Options);
+                    conf.Options.Sms = FromApi(ConvertTo<ConnectionResponseContentSms>(source).Options);
                     break;
                 case ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud:
                     break;
                 case ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals:
                     break;
                 case ConnectionResponseContentTwitterStrategy.Values.Twitter:
-                    conf.TwitterOptions = FromApi(ConvertTo<ConnectionResponseContentTwitter>(source).Options);
+                    conf.Options.Twitter = FromApi(ConvertTo<ConnectionResponseContentTwitter>(source).Options);
                     break;
                 case ConnectionResponseContentUntappdStrategy.Values.Untappd:
                     break;
                 case ConnectionResponseContentVkontakteStrategy.Values.Vkontakte:
                     break;
                 case ConnectionResponseContentAzureAdStrategy.Values.Waad:
-                    conf.AzureAdOptions = FromApi(ConvertTo<ConnectionResponseContentAzureAd>(source).Options);
+                    conf.Options.AzureAd = FromApi(ConvertTo<ConnectionResponseContentAzureAd>(source).Options);
                     break;
                 case ConnectionResponseContentWeiboStrategy.Values.Weibo:
                     break;
                 case ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive:
-                    conf.WindowsLiveOptions = FromApi(ConvertTo<ConnectionResponseContentWindowsLive>(source).Options);
+                    conf.Options.WindowsLive = FromApi(ConvertTo<ConnectionResponseContentWindowsLive>(source).Options);
                     break;
                 case ConnectionResponseContentWordpressStrategy.Values.Wordpress:
                     break;
                 case ConnectionResponseContentYahooStrategy.Values.Yahoo:
-                    conf.YahooOptions = FromApi(ConvertTo<ConnectionResponseContentYahoo>(source).Options);
+                    conf.Options.Yahoo = FromApi(ConvertTo<ConnectionResponseContentYahoo>(source).Options);
                     break;
                 case ConnectionResponseContentYandexStrategy.Values.Yandex:
                     break;
@@ -2288,6 +2289,50 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
+        /// Resolves the strategy-specific options object for the given strategy name and options.
+        /// </summary>
+        /// <param name="strategy"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        internal static object? ResolveStrategyOptions(string? strategy, V1ConnectionOptions? options) => strategy switch
+        {
+            "auth0" when options?.Auth0 is { } o => ToApi(o),
+            "ad" when options?.Ad is { } o => ToApi(o),
+            "adfs" when options?.Adfs is { } o => ToApi(o),
+            "auth0-oidc" when options?.Auth0Oidc is { } o => ToApi(o),
+            "waad" when options?.AzureAd is { } o => ToApi(o),
+            "bitbucket" when options?.Bitbucket is { } o => ToApi(o),
+            "box" when options?.Box is { } o => ToApi(o),
+            "dropbox" when options?.Dropbox is { } o => ToApi(o),
+            "email" when options?.Email is { } o => ToApi(o),
+            "evernote" when options?.Evernote is { } o => ToApi(o),
+            "evernote-sandbox" when options?.EvernoteSandbox is { } o => ToApi(o),
+            "exact" when options?.Exact is { } o => ToApi(o),
+            "facebook" when options?.Facebook is { } o => ToApi(o),
+            "github" when options?.GitHub is { } o => ToApi(o),
+            "google-apps" when options?.GoogleApps is { } o => ToApi(o),
+            "google-oauth2" when options?.GoogleOAuth2 is { } o => ToApi(o),
+            "linkedin" when options?.Linkedin is { } o => ToApi(o),
+            "oauth1" when options?.OAuth1 is { } o => ToApi(o),
+            "oauth2" when options?.OAuth2 is { } o => ToApi(o),
+            "office365" when options?.Office365 is { } o => ToApi(o),
+            "oidc" when options?.Oidc is { } o => ToApi(o),
+            "okta" when options?.Okta is { } o => ToApi(o),
+            "paypal" when options?.Paypal is { } o => ToApi(o),
+            "paypal-sandbox" when options?.PaypalSandbox is { } o => ToApi(o),
+            "pingfederate" when options?.PingFederate is { } o => ToApi(o),
+            "salesforce" when options?.Salesforce is { } o => ToApi(o),
+            "salesforce-community" when options?.SalesforceCommunity is { } o => ToApi(o),
+            "salesforce-sandbox" when options?.SalesforceSandbox is { } o => ToApi(o),
+            "samlp" when options?.Saml is { } o => ToApi(o),
+            "sms" when options?.Sms is { } o => ToApi(o),
+            "twitter" when options?.Twitter is { } o => ToApi(o),
+            "windowslive" when options?.WindowsLive is { } o => ToApi(o),
+            "yahoo" when options?.Yahoo is { } o => ToApi(o),
+            _ => null,
+        };
+
+        /// <summary>
         /// Applies the specified configuration to the request object.
         /// </summary>
         /// <param name="target"></param>
@@ -2312,46 +2357,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
-            object? apiOptions = source.Strategy switch
-            {
-                "auth0" when source.Auth0Options is { } o => ToApi(o),
-                "ad" when source.AdOptions is { } o => ToApi(o),
-                "adfs" when source.AdfsOptions is { } o => ToApi(o),
-                "auth0-oidc" when source.Auth0OidcOptions is { } o => ToApi(o),
-                "waad" when source.AzureAdOptions is { } o => ToApi(o),
-                "bitbucket" when source.BitbucketOptions is { } o => ToApi(o),
-                "box" when source.BoxOptions is { } o => ToApi(o),
-                "dropbox" when source.DropboxOptions is { } o => ToApi(o),
-                "email" when source.EmailOptions is { } o => ToApi(o),
-                "evernote" when source.EvernoteOptions is { } o => ToApi(o),
-                "evernote-sandbox" when source.EvernoteSandboxOptions is { } o => ToApi(o),
-                "exact" when source.ExactOptions is { } o => ToApi(o),
-                "facebook" when source.FacebookOptions is { } o => ToApi(o),
-                "github" when source.GitHubOptions is { } o => ToApi(o),
-                "google-apps" when source.GoogleAppsOptions is { } o => ToApi(o),
-                "google-oauth2" when source.GoogleOAuth2Options is { } o => ToApi(o),
-                "linkedin" when source.LinkedinOptions is { } o => ToApi(o),
-                "oauth1" when source.OAuth1Options is { } o => ToApi(o),
-                "oauth2" when source.OAuth2Options is { } o => ToApi(o),
-                "office365" when source.Office365Options is { } o => ToApi(o),
-                "oidc" when source.OidcOptions is { } o => ToApi(o),
-                "okta" when source.OktaOptions is { } o => ToApi(o),
-                "paypal" when source.PaypalOptions is { } o => ToApi(o),
-                "paypal-sandbox" when source.PaypalSandboxOptions is { } o => ToApi(o),
-                "pingfederate" when source.PingFederateOptions is { } o => ToApi(o),
-                "salesforce" when source.SalesforceOptions is { } o => ToApi(o),
-                "salesforce-community" when source.SalesforceCommunityOptions is { } o => ToApi(o),
-                "salesforce-sandbox" when source.SalesforceSandboxOptions is { } o => ToApi(o),
-                "samlp" when source.SamlOptions is { } o => ToApi(o),
-                "sms" when source.SmsOptions is { } o => ToApi(o),
-                "twitter" when source.TwitterOptions is { } o => ToApi(o),
-                "windowslive" when source.WindowsLiveOptions is { } o => ToApi(o),
-                "yahoo" when source.YahooOptions is { } o => ToApi(o),
-                _ => null,
-            };
-
-            if (apiOptions is not null)
-                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(apiOptions));
+            var options = ResolveStrategyOptions(source.Strategy, source.Options);
+            if (options is not null)
+                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options));
         }
 
         internal static void ApplyToApi(V1ConnectionConf source, UpdateConnectionRequestContent target)
@@ -2371,341 +2379,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
-            object? apiOptions = source.Strategy switch
-            {
-                "auth0" when source.Auth0Options is { } o => ToApi(o),
-                "ad" when source.AdOptions is { } o => ToApi(o),
-                "adfs" when source.AdfsOptions is { } o => ToApi(o),
-                "auth0-oidc" when source.Auth0OidcOptions is { } o => ToApi(o),
-                "waad" when source.AzureAdOptions is { } o => ToApi(o),
-                "bitbucket" when source.BitbucketOptions is { } o => ToApi(o),
-                "box" when source.BoxOptions is { } o => ToApi(o),
-                "dropbox" when source.DropboxOptions is { } o => ToApi(o),
-                "email" when source.EmailOptions is { } o => ToApi(o),
-                "evernote" when source.EvernoteOptions is { } o => ToApi(o),
-                "evernote-sandbox" when source.EvernoteSandboxOptions is { } o => ToApi(o),
-                "exact" when source.ExactOptions is { } o => ToApi(o),
-                "facebook" when source.FacebookOptions is { } o => ToApi(o),
-                "github" when source.GitHubOptions is { } o => ToApi(o),
-                "google-apps" when source.GoogleAppsOptions is { } o => ToApi(o),
-                "google-oauth2" when source.GoogleOAuth2Options is { } o => ToApi(o),
-                "linkedin" when source.LinkedinOptions is { } o => ToApi(o),
-                "oauth1" when source.OAuth1Options is { } o => ToApi(o),
-                "oauth2" when source.OAuth2Options is { } o => ToApi(o),
-                "office365" when source.Office365Options is { } o => ToApi(o),
-                "oidc" when source.OidcOptions is { } o => ToApi(o),
-                "okta" when source.OktaOptions is { } o => ToApi(o),
-                "paypal" when source.PaypalOptions is { } o => ToApi(o),
-                "paypal-sandbox" when source.PaypalSandboxOptions is { } o => ToApi(o),
-                "pingfederate" when source.PingFederateOptions is { } o => ToApi(o),
-                "salesforce" when source.SalesforceOptions is { } o => ToApi(o),
-                "salesforce-community" when source.SalesforceCommunityOptions is { } o => ToApi(o),
-                "salesforce-sandbox" when source.SalesforceSandboxOptions is { } o => ToApi(o),
-                "samlp" when source.SamlOptions is { } o => ToApi(o),
-                "sms" when source.SmsOptions is { } o => ToApi(o),
-                "twitter" when source.TwitterOptions is { } o => ToApi(o),
-                "windowslive" when source.WindowsLiveOptions is { } o => ToApi(o),
-                "yahoo" when source.YahooOptions is { } o => ToApi(o),
-                _ => null,
-            };
-
-            if (apiOptions is not null)
-                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(apiOptions));
-        }
-
-        void ApplyToApi(V1ConnectionOptions source, ConnectionOptionsAuth0 target)
-        {
-            if (source.Validation is { } validation)
-            {
-                var v = new ConnectionValidationOptions();
-                ApplyToApi(validation, v);
-                target.Validation = Optional<ConnectionValidationOptions?>.Of(v);
-            }
-
-            if (source.NonPersistentAttributes is { } nonPersistentAttributes)
-                target.NonPersistentAttrs = nonPersistentAttributes;
-
-            if (source.Precedence is { } precedence)
-                target.Precedence = precedence.Select(ToApi).ToArray();
-
-            if (source.Attributes is { } attributes)
-            {
-                target.Attributes ??= new ConnectionAttributes();
-                ApplyToApi(attributes, target.Attributes);
-            }
-
-            if (source.EnableScriptContext is { } enableScriptContext)
-                target.EnableScriptContext = enableScriptContext;
-
-            if (source.EnableDatabaseCustomization is { } enableDatabaseCustomization)
-                target.EnabledDatabaseCustomization = enableDatabaseCustomization;
-
-            if (source.ImportMode is { } importMode)
-                target.ImportMode = importMode;
-
-            if (source.CustomScripts is { } customScripts)
-            {
-                target.CustomScripts ??= new ConnectionCustomScripts();
-                ApplyToApi(customScripts, target.CustomScripts);
-            }
-
-            if (source.AuthenticationMethods is { } authenticationMethods)
-            {
-                var am = new ConnectionAuthenticationMethods();
-                ApplyToApi(authenticationMethods, am);
-                target.AuthenticationMethods = Optional<ConnectionAuthenticationMethods?>.Of(am);
-            }
-
-            if (source.PasskeyOptions is { } passkeyOptions)
-            {
-                var po = new ConnectionPasskeyOptions();
-                ApplyToApi(passkeyOptions, po);
-                target.PasskeyOptions = Optional<ConnectionPasskeyOptions?>.Of(po);
-            }
-
-            if (source.PasswordPolicy is { } passwordPolicy)
-                target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(ToApi(passwordPolicy));
-
-            if (source.PasswordComplexityOptions is { } passwordComplexityOptions)
-            {
-                var pco = new ConnectionPasswordComplexityOptions();
-                ApplyToApi(passwordComplexityOptions, pco);
-                target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(pco);
-            }
-
-            if (source.PasswordHistory is { } passwordHistory)
-            {
-                var ph = new ConnectionPasswordHistoryOptions() { Enable = false };
-                ApplyToApi(passwordHistory, ph);
-                target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(ph);
-            }
-
-            if (source.PasswordNoPersonalInfo is { } passwordNoPersonalInfo)
-            {
-                var pnpi = new ConnectionPasswordNoPersonalInfoOptions() { Enable = false };
-                ApplyToApi(passwordNoPersonalInfo, pnpi);
-                target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(pnpi);
-            }
-
-            if (source.PasswordDictionary is { } passwordDictionary)
-            {
-                var pd = new ConnectionPasswordDictionaryOptions() { Enable = false };
-                ApplyToApi(passwordDictionary, pd);
-                target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(pd);
-            }
-
-            if (source.DisableSelfServiceChangePassword is { } disableSelfServiceChangePassword)
-                target.DisableSelfServiceChangePassword = disableSelfServiceChangePassword;
-        }
-
-        void ApplyToApi(V1ConnectionOptions source, ConnectionPropertiesOptions target)
-        {
-            if (source.Validation is { } validation)
-            {
-                var v = new ConnectionValidationOptions();
-                ApplyToApi(validation, v);
-                target.Validation = Optional<ConnectionValidationOptions?>.Of(v);
-            }
-
-            if (source.NonPersistentAttributes is { } nonPersistentAttributes)
-                target.NonPersistentAttrs = nonPersistentAttributes;
-
-            if (source.Precedence is { } precedence)
-                target.Precedence = precedence.Select(ToApi).ToArray();
-
-            if (source.Attributes is { } attributes)
-            {
-                target.Attributes ??= new ConnectionAttributes();
-                ApplyToApi(attributes, target.Attributes);
-            }
-
-            if (source.EnableScriptContext is { } enableScriptContext)
-                target.EnableScriptContext = enableScriptContext;
-
-            if (source.EnableDatabaseCustomization is { } enableDatabaseCustomization)
-                target.EnabledDatabaseCustomization = enableDatabaseCustomization;
-
-            if (source.ImportMode is { } importMode)
-                target.ImportMode = importMode;
-
-            if (source.CustomScripts is { } customScripts)
-            {
-                target.CustomScripts ??= new ConnectionCustomScripts();
-                ApplyToApi(customScripts, target.CustomScripts);
-            }
-
-            if (source.AuthenticationMethods is { } authenticationMethods)
-            {
-                var am = new ConnectionAuthenticationMethods();
-                ApplyToApi(authenticationMethods, am);
-                target.AuthenticationMethods = Optional<ConnectionAuthenticationMethods?>.Of(am);
-            }
-
-            if (source.PasskeyOptions is { } passkeyOptions)
-            {
-                var po = new ConnectionPasskeyOptions();
-                ApplyToApi(passkeyOptions, po);
-                target.PasskeyOptions = Optional<ConnectionPasskeyOptions?>.Of(po);
-            }
-
-            if (source.PasswordPolicy is { } passwordPolicy)
-                target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(ToApi(passwordPolicy));
-
-            if (source.PasswordComplexityOptions is { } passwordComplexityOptions)
-            {
-                var pco = new ConnectionPasswordComplexityOptions();
-                ApplyToApi(passwordComplexityOptions, pco);
-                target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(pco);
-            }
-
-            if (source.PasswordHistory is { } passwordHistory)
-            {
-                var ph = new ConnectionPasswordHistoryOptions() { Enable = false };
-                ApplyToApi(passwordHistory, ph);
-                target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(ph);
-            }
-
-            if (source.PasswordNoPersonalInfo is { } passwordNoPersonalInfo)
-            {
-                var pnpi = new ConnectionPasswordNoPersonalInfoOptions() { Enable = false };
-                ApplyToApi(passwordNoPersonalInfo, pnpi);
-                target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(pnpi);
-            }
-
-            if (source.PasswordDictionary is { } passwordDictionary)
-            {
-                var pd = new ConnectionPasswordDictionaryOptions() { Enable = false };
-                ApplyToApi(passwordDictionary, pd);
-                target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(pd);
-            }
-
-            if (source.DisableSelfServiceChangePassword is { } disableSelfServiceChangePassword)
-                target.DisableSelfServiceChangePassword = disableSelfServiceChangePassword;
-        }
-
-        void ApplyToApi(V1ConnectionOptions source, UpdateConnectionOptions target)
-        {
-            if (source.Validation is { } validation)
-            {
-                var v = new ConnectionValidationOptions();
-                ApplyToApi(validation, v);
-                target.Validation = Optional<ConnectionValidationOptions?>.Of(v);
-            }
-
-            if (source.NonPersistentAttributes is { } nonPersistentAttributes)
-                target.NonPersistentAttrs = nonPersistentAttributes;
-
-            if (source.Precedence is { } precedence)
-                target.Precedence = precedence.Select(ToApi).ToArray();
-
-            if (source.Attributes is { } attributes)
-            {
-                target.Attributes ??= new ConnectionAttributes();
-                ApplyToApi(attributes, target.Attributes);
-            }
-
-            if (source.EnableScriptContext is { } enableScriptContext)
-                target.EnableScriptContext = enableScriptContext;
-
-            if (source.EnableDatabaseCustomization is { } enableDatabaseCustomization)
-                target.EnabledDatabaseCustomization = enableDatabaseCustomization;
-
-            if (source.ImportMode is { } importMode)
-                target.ImportMode = importMode;
-
-            if (source.CustomScripts is { } customScripts)
-            {
-                target.CustomScripts ??= new ConnectionCustomScripts();
-                ApplyToApi(customScripts, target.CustomScripts);
-            }
-
-            if (source.AuthenticationMethods is { } authenticationMethods)
-            {
-                var am = new ConnectionAuthenticationMethods();
-                ApplyToApi(authenticationMethods, am);
-                target.AuthenticationMethods = Optional<ConnectionAuthenticationMethods?>.Of(am);
-            }
-
-            if (source.PasskeyOptions is { } passkeyOptions)
-            {
-                var po = new ConnectionPasskeyOptions();
-                ApplyToApi(passkeyOptions, po);
-                target.PasskeyOptions = Optional<ConnectionPasskeyOptions?>.Of(po);
-            }
-
-            if (source.PasswordPolicy is { } passwordPolicy)
-                target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(ToApi(passwordPolicy));
-
-            if (source.PasswordComplexityOptions is { } passwordComplexityOptions)
-            {
-                var pco = new ConnectionPasswordComplexityOptions();
-                ApplyToApi(passwordComplexityOptions, pco);
-                target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(pco);
-            }
-
-            if (source.PasswordHistory is { } passwordHistory)
-            {
-                var ph = new ConnectionPasswordHistoryOptions() { Enable = false };
-                ApplyToApi(passwordHistory, ph);
-                target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(ph);
-            }
-
-            if (source.PasswordNoPersonalInfo is { } passwordNoPersonalInfo)
-            {
-                var pnpi = new ConnectionPasswordNoPersonalInfoOptions() { Enable = false };
-                ApplyToApi(passwordNoPersonalInfo, pnpi);
-                target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(pnpi);
-            }
-
-            if (source.PasswordDictionary is { } passwordDictionary)
-            {
-                var pd = new ConnectionPasswordDictionaryOptions() { Enable = false };
-                ApplyToApi(passwordDictionary, pd);
-                target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(pd);
-            }
-
-            if (source.DisableSelfServiceChangePassword is { } disableSelfServiceChangePassword)
-                target.DisableSelfServiceChangePassword = disableSelfServiceChangePassword;
-        }
-
-        static void ApplyToApi(V1ConnectionOptionsValidation source, ConnectionValidationOptions target)
-        {
-            if (source.UserName is { } userName)
-            {
-                var v = new ConnectionUsernameValidationOptions() { Min = 0, Max = 0 };
-                ApplyToApi(userName, v);
-                target.Username = Optional<ConnectionUsernameValidationOptions?>.Of(v);
-            }
-        }
-
-        static void ApplyToApi(V1ConnectionOptionsUserName source, ConnectionUsernameValidationOptions target)
-        {
-            if (source.Min is { } min)
-                target.Min = min;
-
-            if (source.Max is { } max)
-                target.Max = max;
-        }
-
-        static void ApplyToApi(V1ConnectionOptionsAttributes source, ConnectionAttributes target)
-        {
-            if (source.Email is { } email)
-            {
-                target.Email ??= new EmailAttribute();
-                ApplyToApi(email, target.Email);
-            }
-
-            if (source.PhoneNumber is { } phoneNumber)
-            {
-                target.PhoneNumber ??= new PhoneAttribute();
-                ApplyToApi(phoneNumber, target.PhoneNumber);
-            }
-
-            if (source.Username is { } username)
-            {
-                target.Username ??= new UsernameAttribute();
-                ApplyToApi(username, target.Username);
-            }
+            var options = ResolveStrategyOptions(source.Strategy, source.Options);
+            if (options is not null)
+                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options));
         }
 
         static void ApplyToApi(V1ConnectionOptionsEmailAttribute source, EmailAttribute target)

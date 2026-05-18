@@ -1,214 +1,244 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
-
-using KubeOps.Abstractions.Entities.Attributes;
+﻿using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V1
 {
 
     /// <summary>
-    /// Configuration options for a database connection.
+    /// Set of typed configuration options.
     /// </summary>
-    [PreserveUnknownFields]
     public record V1ConnectionOptions
     {
 
         /// <summary>
-        /// Username validation rules for the connection.
+        /// Strategy-specific options for the <c>auth0</c> (database) connection strategy.
         /// </summary>
-        [JsonPropertyName("validation")]
+        [JsonPropertyName("auth0")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsValidation? Validation { get; set; }
+        public V1ConnectionAuth0Options? Auth0 { get; set; }
 
         /// <summary>
-        /// List of user attributes that will not be persisted in the Auth0 user store after each login.
+        /// Strategy-specific options for the <c>ad</c> (Active Directory / LDAP) connection strategy.
         /// </summary>
-        [JsonPropertyName("non_persistent_attrs")]
+        [JsonPropertyName("ad")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string[]? NonPersistentAttributes { get; set; }
+        public V1ConnectionAdOptions? Ad { get; set; }
 
         /// <summary>
-        /// Ordered list of identifier attributes used during login precedence resolution.
+        /// Strategy-specific options for the <c>adfs</c> (Active Directory Federation Services) connection strategy.
         /// </summary>
-        [JsonPropertyName("precedence")]
+        [JsonPropertyName("adfs")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPrecedence[]? Precedence { get; set; }
+        public V1ConnectionAdfsOptions? Adfs { get; set; }
 
         /// <summary>
-        /// Configuration for the connection's user attribute schema.
+        /// Strategy-specific options for the <c>auth0-oidc</c> connection strategy (Auth0 tenant as OIDC provider).
         /// </summary>
-        [JsonPropertyName("attributes")]
+        [JsonPropertyName("auth0Oidc")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsAttributes? Attributes { get; set; }
+        public V1ConnectionAuth0OidcOptions? Auth0Oidc { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, enables script context so custom scripts have access to the connection configuration.
+        /// Strategy-specific options for the <c>waad</c> (Azure Active Directory) connection strategy.
         /// </summary>
-        [JsonPropertyName("enable_script_context")]
+        [JsonPropertyName("azureAd")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? EnableScriptContext { get; set; }
+        public V1ConnectionAzureAdOptions? AzureAd { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, enables the use of custom database scripts for this connection.
+        /// Strategy-specific options for the <c>bitbucket</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("enabledDatabaseCustomization")]
+        [JsonPropertyName("bitbucket")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? EnableDatabaseCustomization { get; set; }
+        public V1ConnectionBitbucketOptions? Bitbucket { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, the connection operates in import mode; users are migrated from a custom database on first login.
+        /// Strategy-specific options for the <c>box</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("import_mode")]
+        [JsonPropertyName("box")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ImportMode { get; set; }
+        public V1ConnectionBoxOptions? Box { get; set; }
 
         /// <summary>
-        /// Custom script implementations for CRUD operations on the backing user store.
+        /// Strategy-specific options for the <c>dropbox</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("customScripts")]
+        [JsonPropertyName("dropbox")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsCustomScripts? CustomScripts { get; set; }
+        public V1ConnectionDropboxOptions? Dropbox { get; set; }
 
         /// <summary>
-        /// Controls which authentication methods (password and/or passkey) are enabled for this connection.
+        /// Strategy-specific options for the <c>email</c> (passwordless) connection strategy.
         /// </summary>
-        [JsonPropertyName("authentication_methods")]
+        [JsonPropertyName("email")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsAuthenticationMethods? AuthenticationMethods { get; set; }
+        public V1ConnectionEmailOptions? Email { get; set; }
 
         /// <summary>
-        /// Passkey-specific options such as challenge UI style and enrollment settings.
+        /// Strategy-specific options for the <c>evernote</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("passkey_options")]
+        [JsonPropertyName("evernote")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasskeyOptions? PasskeyOptions { get; set; }
+        public V1ConnectionEvernoteOptions? Evernote { get; set; }
 
         /// <summary>
-        /// Password strength policy enforced for new and updated passwords.
+        /// Strategy-specific options for the <c>evernote-sandbox</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("passwordPolicy")]
+        [JsonPropertyName("evernoteSandbox")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasswordPolicy? PasswordPolicy { get; set; }
+        public V1ConnectionEvernoteOptions? EvernoteSandbox { get; set; }
 
         /// <summary>
-        /// Minimum-length requirement and other complexity rules for passwords.
+        /// Strategy-specific options for the <c>exact</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("password_complexity_options")]
+        [JsonPropertyName("exact")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasswordComplexityOptions? PasswordComplexityOptions { get; set; }
+        public V1ConnectionExactOptions? Exact { get; set; }
 
         /// <summary>
-        /// Controls whether password-history checking is enabled and how many previous passwords to retain.
+        /// Strategy-specific options for the <c>facebook</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("password_history")]
+        [JsonPropertyName("facebook")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasswordHistory? PasswordHistory { get; set; }
+        public V1ConnectionFacebookOptions? Facebook { get; set; }
 
         /// <summary>
-        /// When enabled, prevents users from using personal information (name, email, etc.) as part of their password.
+        /// Strategy-specific options for the <c>github</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("password_no_personal_info")]
+        [JsonPropertyName("gitHub")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasswordNoPersonalInfo? PasswordNoPersonalInfo { get; set; }
+        public V1ConnectionGitHubOptions? GitHub { get; set; }
 
         /// <summary>
-        /// Controls whether a common-password dictionary check is enabled, optionally extended with custom words.
+        /// Strategy-specific options for the <c>google-apps</c> (Google Workspace) enterprise connection strategy.
         /// </summary>
-        [JsonPropertyName("password_dictionary")]
+        [JsonPropertyName("googleApps")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionOptionsPasswordDictionary? PasswordDictionary { get; set; }
+        public V1ConnectionGoogleAppsOptions? GoogleApps { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, enables user management via the Auth0 Management API for this connection.
+        /// Strategy-specific options for the <c>google-oauth2</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("api_enable_users")]
+        [JsonPropertyName("googleOAuth2")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ApiEnableUsers { get; set; }
+        public V1ConnectionGoogleOAuth2Options? GoogleOAuth2 { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the user's basic profile information from the identity provider.
+        /// Strategy-specific options for the <c>linkedin</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("basic_profile")]
+        [JsonPropertyName("linkedin")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? BasicProfile { get; set; }
+        public V1ConnectionLinkedinOptions? Linkedin { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the <c>isAdmin</c> extended attribute from the identity provider.
+        /// Strategy-specific options for a generic <c>oauth1</c> connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_admin")]
+        [JsonPropertyName("oAuth1")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtAdmin { get; set; }
+        public V1ConnectionOAuth1Options? OAuth1 { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the <c>isSuspended</c> extended attribute from the identity provider.
+        /// Strategy-specific options for a generic <c>oauth2</c> connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_is_suspended")]
+        [JsonPropertyName("oAuth2")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtIsSuspended { get; set; }
+        public V1ConnectionOAuth2Options? OAuth2 { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the <c>agreedTerms</c> extended attribute from the identity provider.
+        /// Strategy-specific options for the <c>office365</c> enterprise connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_agreed_terms")]
+        [JsonPropertyName("office365")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtAgreedTerms { get; set; }
+        public V1ConnectionOffice365Options? Office365 { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the <c>groups</c> extended attribute from the identity provider.
+        /// Strategy-specific options for a generic <c>oidc</c> connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_groups")]
+        [JsonPropertyName("oidc")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtGroups { get; set; }
+        public V1ConnectionOidcOptions? Oidc { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the <c>assignedPlans</c> extended attribute from the identity provider.
+        /// Strategy-specific options for the <c>okta</c> enterprise connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_assigned_plans")]
+        [JsonPropertyName("okta")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtAssignedPlans { get; set; }
+        public V1ConnectionOktaOptions? Okta { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, requests the full profile extended attribute from the identity provider.
+        /// Strategy-specific options for the <c>paypal</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("ext_profile")]
+        [JsonPropertyName("paypal")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? ExtProfile { get; set; }
+        public V1ConnectionPaypalOptions? Paypal { get; set; }
 
         /// <summary>
-        /// When <c>true</c>, hides the self-service change-password option from users.
+        /// Strategy-specific options for the <c>paypal-sandbox</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("disable_self_service_change_password")]
+        [JsonPropertyName("paypalSandbox")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public bool? DisableSelfServiceChangePassword { get; set; }
+        public V1ConnectionPaypalOptions? PaypalSandbox { get; set; }
 
         /// <summary>
-        /// Upstream parameters that will be forwarded to the identity provider on each authentication request.
+        /// Strategy-specific options for the <c>pingfederate</c> enterprise connection strategy.
         /// </summary>
+        [JsonPropertyName("pingFederate")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [JsonPropertyName("upstream_params")]
-        public Dictionary<string, V1ConnectionUpstreamParam?>? UpstreamParams { get; set; }
+        public V1ConnectionPingFederateOptions? PingFederate { get; set; }
 
         /// <summary>
-        /// Controls when root profile attributes (<c>name</c>, <c>given_name</c>, etc.) are updated from the identity provider.
+        /// Strategy-specific options for the <c>salesforce</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("set_user_root_attributes")]
+        [JsonPropertyName("salesforce")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionSetUserRootAttributes? SetUserRootAttributes { get; set; }
+        public V1ConnectionSalesforceOptions? Salesforce { get; set; }
 
         /// <summary>
-        /// Gateway authentication configuration used when the connection routes through a self-hosted gateway.
+        /// Strategy-specific options for the <c>salesforce-community</c> social connection strategy.
         /// </summary>
-        [JsonPropertyName("gateway_authentication")]
+        [JsonPropertyName("salesforceCommunity")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V1ConnectionGatewayAuthentication? GatewayAuthentication { get; set; }
+        public V1ConnectionSalesforceCommunityOptions? SalesforceCommunity { get; set; }
 
         /// <summary>
-        /// Additional properties not captured by the defined schema, preserved for round-trip fidelity.
+        /// Strategy-specific options for the <c>salesforce-sandbox</c> social connection strategy.
         /// </summary>
-        [JsonExtensionData]
-        [Ignore]
-        public Dictionary<string, object?>? AdditionalProperties { get; set; }
+        [JsonPropertyName("salesforceSandbox")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionSalesforceOptions? SalesforceSandbox { get; set; }
+
+        /// <summary>
+        /// Strategy-specific options for a <c>samlp</c> (SAML Identity Provider) connection strategy.
+        /// </summary>
+        [JsonPropertyName("saml")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionSamlOptions? Saml { get; set; }
+
+        /// <summary>
+        /// Strategy-specific options for the <c>sms</c> (passwordless) connection strategy.
+        /// </summary>
+        [JsonPropertyName("sms")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionSmsOptions? Sms { get; set; }
+
+        /// <summary>
+        /// Strategy-specific options for the <c>twitter</c> social connection strategy.
+        /// </summary>
+        [JsonPropertyName("twitter")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionTwitterOptions? Twitter { get; set; }
+
+        /// <summary>
+        /// Strategy-specific options for the <c>windowslive</c> social connection strategy.
+        /// </summary>
+        [JsonPropertyName("windowsLive")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionWindowsLiveOptions? WindowsLive { get; set; }
+
+        /// <summary>
+        /// Strategy-specific options for the <c>yahoo</c> social connection strategy.
+        /// </summary>
+        [JsonPropertyName("yahoo")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ConnectionYahooOptions? Yahoo { get; set; }
 
     }
 
