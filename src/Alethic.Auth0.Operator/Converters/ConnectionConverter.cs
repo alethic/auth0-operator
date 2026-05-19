@@ -109,103 +109,103 @@ namespace Alethic.Auth0.Operator.Converters
                 switch (strategy)
                 {
                     case V2alpha1ConnectionStrategy.Auth0:
-                        options.Auth0 = json.Deserialize<V2alpha1ConnectionAuth0Options>();
+                        options.Auth0 = json.Deserialize<V2alpha1ConnectionOptionsAuth0>();
                         break;
                     case V2alpha1ConnectionStrategy.Ad:
-                        options.Ad = json.Deserialize<V2alpha1ConnectionAdOptions>();
+                        options.Ad = json.Deserialize<V2alpha1ConnectionOptionsAd>();
                         break;
                     case V2alpha1ConnectionStrategy.Adfs:
-                        options.Adfs = json.Deserialize<V2alpha1ConnectionAdfsOptions>();
+                        options.Adfs = json.Deserialize<V2alpha1ConnectionOptionsAdfs>();
                         break;
                     case V2alpha1ConnectionStrategy.Auth0Oidc:
-                        options.Auth0Oidc = json.Deserialize<V2alpha1ConnectionAuth0OidcOptions>();
+                        options.Auth0Oidc = json.Deserialize<V2alpha1ConnectionOptionsAuth0Oidc>();
                         break;
                     case V2alpha1ConnectionStrategy.AzureAd:
-                        options.AzureAd = json.Deserialize<V2alpha1ConnectionAzureAdOptions>();
+                        options.AzureAd = json.Deserialize<V2alpha1ConnectionOptionsAzureAd>();
                         break;
                     case V2alpha1ConnectionStrategy.Bitbucket:
-                        options.Bitbucket = json.Deserialize<V2alpha1ConnectionBitbucketOptions>();
+                        options.Bitbucket = json.Deserialize<V2alpha1ConnectionOptionsBitbucket>();
                         break;
                     case V2alpha1ConnectionStrategy.Box:
-                        options.Box = json.Deserialize<V2alpha1ConnectionBoxOptions>();
+                        options.Box = json.Deserialize<V2alpha1ConnectionOptionsBox>();
                         break;
                     case V2alpha1ConnectionStrategy.Dropbox:
-                        options.Dropbox = json.Deserialize<V2alpha1ConnectionDropboxOptions>();
+                        options.Dropbox = json.Deserialize<V2alpha1ConnectionOptionsDropbox>();
                         break;
                     case V2alpha1ConnectionStrategy.Email:
-                        options.Email = json.Deserialize<V2alpha1ConnectionEmailOptions>();
+                        options.Email = json.Deserialize<V2alpha1ConnectionOptionsEmail>();
                         break;
                     case V2alpha1ConnectionStrategy.Evernote:
-                        options.Evernote = json.Deserialize<V2alpha1ConnectionEvernoteOptions>();
+                        options.Evernote = json.Deserialize<V2alpha1ConnectionOptionsEvernote>();
                         break;
                     case V2alpha1ConnectionStrategy.EvernoteSandbox:
-                        options.EvernoteSandbox = json.Deserialize<V2alpha1ConnectionEvernoteOptions>();
+                        options.EvernoteSandbox = json.Deserialize<V2alpha1ConnectionOptionsEvernote>();
                         break;
                     case V2alpha1ConnectionStrategy.Exact:
-                        options.Exact = json.Deserialize<V2alpha1ConnectionExactOptions>();
+                        options.Exact = json.Deserialize<V2alpha1ConnectionOptionsExact>();
                         break;
                     case V2alpha1ConnectionStrategy.Facebook:
-                        options.Facebook = json.Deserialize<V2alpha1ConnectionFacebookOptions>();
+                        options.Facebook = json.Deserialize<V2alpha1ConnectionOptionsFacebook>();
                         break;
                     case V2alpha1ConnectionStrategy.GitHub:
-                        options.GitHub = json.Deserialize<V2alpha1ConnectionGitHubOptions>();
+                        options.GitHub = json.Deserialize<V2alpha1ConnectionOptionsGitHub>();
                         break;
                     case V2alpha1ConnectionStrategy.GoogleApps:
-                        options.GoogleApps = json.Deserialize<V2alpha1ConnectionGoogleAppsOptions>();
+                        options.GoogleApps = json.Deserialize<V2alpha1ConnectionOptionsGoogleApps>();
                         break;
                     case V2alpha1ConnectionStrategy.GoogleOAuth2:
-                        options.GoogleOAuth2 = json.Deserialize<V2alpha1ConnectionGoogleOAuth2Options>();
+                        options.GoogleOAuth2 = json.Deserialize<V2alpha1ConnectionOptionsGoogleOAuth2>();
                         break;
                     case V2alpha1ConnectionStrategy.Linkedin:
-                        options.Linkedin = json.Deserialize<V2alpha1ConnectionLinkedinOptions>();
+                        options.Linkedin = json.Deserialize<V2alpha1ConnectionOptionsLinkedin>();
                         break;
                     case V2alpha1ConnectionStrategy.OAuth1:
-                        options.OAuth1 = json.Deserialize<V2alpha1ConnectionOAuth1Options>();
+                        options.OAuth1 = json.Deserialize<V2alpha1ConnectionOptionsOAuth1>();
                         break;
                     case V2alpha1ConnectionStrategy.OAuth2:
-                        options.OAuth2 = json.Deserialize<V2alpha1ConnectionOAuth2Options>();
+                        options.OAuth2 = json.Deserialize<V2alpha1ConnectionOptionsOAuth2>();
                         break;
                     case V2alpha1ConnectionStrategy.Office365:
-                        options.Office365 = json.Deserialize<V2alpha1ConnectionOffice365Options>();
+                        options.Office365 = json.Deserialize<V2alpha1ConnectionOptionsOffice365>();
                         break;
                     case V2alpha1ConnectionStrategy.Oidc:
-                        options.Oidc = json.Deserialize<V2alpha1ConnectionOidcOptions>();
+                        options.Oidc = json.Deserialize<V2alpha1ConnectionOptionsOidc>();
                         break;
                     case V2alpha1ConnectionStrategy.Okta:
-                        options.Okta = json.Deserialize<V2alpha1ConnectionOktaOptions>();
+                        options.Okta = json.Deserialize<V2alpha1ConnectionOptionsOkta>();
                         break;
                     case V2alpha1ConnectionStrategy.Paypal:
-                        options.Paypal = json.Deserialize<V2alpha1ConnectionPaypalOptions>();
+                        options.Paypal = json.Deserialize<V2alpha1ConnectionOptionsPaypal>();
                         break;
                     case V2alpha1ConnectionStrategy.PaypalSandbox:
-                        options.PaypalSandbox = json.Deserialize<V2alpha1ConnectionPaypalOptions>();
+                        options.PaypalSandbox = json.Deserialize<V2alpha1ConnectionOptionsPaypal>();
                         break;
                     case V2alpha1ConnectionStrategy.PingFederate:
-                        options.PingFederate = json.Deserialize<V2alpha1ConnectionPingFederateOptions>();
+                        options.PingFederate = json.Deserialize<V2alpha1ConnectionOptionsPingFederate>();
                         break;
                     case V2alpha1ConnectionStrategy.Salesforce:
-                        options.Salesforce = json.Deserialize<V2alpha1ConnectionSalesforceOptions>();
+                        options.Salesforce = json.Deserialize<V2alpha1ConnectionOptionsSalesforce>();
                         break;
                     case V2alpha1ConnectionStrategy.SalesforceCommunity:
-                        options.SalesforceCommunity = json.Deserialize<V2alpha1ConnectionSalesforceCommunityOptions>();
+                        options.SalesforceCommunity = json.Deserialize<V2alpha1ConnectionOptionsSalesforceCommunity>();
                         break;
                     case V2alpha1ConnectionStrategy.SalesforceSandbox:
-                        options.SalesforceSandbox = json.Deserialize<V2alpha1ConnectionSalesforceOptions>();
+                        options.SalesforceSandbox = json.Deserialize<V2alpha1ConnectionOptionsSalesforce>();
                         break;
                     case V2alpha1ConnectionStrategy.Saml:
-                        options.Saml = json.Deserialize<V2alpha1ConnectionSamlOptions>();
+                        options.Saml = json.Deserialize<V2alpha1ConnectionOptionsSaml>();
                         break;
                     case V2alpha1ConnectionStrategy.Sms:
-                        options.Sms = json.Deserialize<V2alpha1ConnectionSmsOptions>();
+                        options.Sms = json.Deserialize<V2alpha1ConnectionOptionsSms>();
                         break;
                     case V2alpha1ConnectionStrategy.Twitter:
-                        options.Twitter = json.Deserialize<V2alpha1ConnectionTwitterOptions>();
+                        options.Twitter = json.Deserialize<V2alpha1ConnectionOptionsTwitter>();
                         break;
                     case V2alpha1ConnectionStrategy.WindowsLive:
-                        options.WindowsLive = json.Deserialize<V2alpha1ConnectionWindowsLiveOptions>();
+                        options.WindowsLive = json.Deserialize<V2alpha1ConnectionOptionsWindowsLive>();
                         break;
                     case V2alpha1ConnectionStrategy.Yahoo:
-                        options.Yahoo = json.Deserialize<V2alpha1ConnectionYahooOptions>();
+                        options.Yahoo = json.Deserialize<V2alpha1ConnectionOptionsYahoo>();
                         break;
                 }
 

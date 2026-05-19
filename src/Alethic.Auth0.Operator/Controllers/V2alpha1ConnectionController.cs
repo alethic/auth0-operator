@@ -246,7 +246,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return new V2alpha1ConnectionOptionsAuth0
             {
                 Attributes = source.Attributes is { } attributes ? FromApi(attributes) : null,
-                AuthenticationMethods = source.AuthenticationMethods is { } authenticationMethods ? FromApi(authenticationMethods) : null,
+                AuthenticationMethods = source.AuthenticationMethods.IsDefined && source.AuthenticationMethods.Value is { } authenticationMethods ? FromApi(authenticationMethods) : null,
                 BruteForceProtection = source.BruteForceProtection,
                 Configuration = source.Configuration?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 DisableSignup = source.DisableSignup,
@@ -255,8 +255,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 EnabledDatabaseCustomization = source.EnabledDatabaseCustomization,
                 ImportMode = source.ImportMode,
                 Mfa = source.Mfa is { } mfa ? FromApi(mfa) : null,
-                PasskeyOptions = source.PasskeyOptions is { } passkeyOptions ? FromApi(passkeyOptions) : null,
+                PasskeyOptions = source.PasskeyOptions.IsDefined && source.PasskeyOptions.Value is { } passkeyOptions ? FromApi(passkeyOptions) : null,
                 PasswordOptions = source.PasswordOptions is { } passwordOptions ? FromApi(passwordOptions) : null,
+                Precedence = source.Precedence?.Select(static i => i.Value switch
+                {
+                    ConnectionIdentifierPrecedenceEnum.Values.Email => V2alpha1ConnectionIdentifierPrecedenceEnum.Email,
+                    ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber => V2alpha1ConnectionIdentifierPrecedenceEnum.PhoneNumber,
+                    ConnectionIdentifierPrecedenceEnum.Values.Username => V2alpha1ConnectionIdentifierPrecedenceEnum.Username,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), i, null),
+                }).ToArray(),
+                RealmFallback = source.RealmFallback,
                 RequiresUsername = source.RequiresUsername,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 PasswordPolicy = source.PasswordPolicy.IsDefined ? FromApi(source.PasswordPolicy.Value) : null,
@@ -266,7 +274,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 PasswordComplexityOptions = source.PasswordComplexityOptions.IsDefined && source.PasswordComplexityOptions.Value is { } pco ? FromApi(pco) : null,
                 Validation = source.Validation.IsDefined && source.Validation.Value is { } v ? FromApi(v) : null,
                 CustomScripts = source.CustomScripts is { } cs ? FromApi(cs) : null,
-                Mfa = source.Mfa is { } mfa ? FromApi(mfa) : null,
             };
         }
 
@@ -291,10 +298,10 @@ namespace Alethic.Auth0.Operator.Controllers
                 SignInEndpoint = source.SignInEndpoint,
                 TenantDomain = source.TenantDomain,
                 Thumbprints = source.Thumbprints?.ToArray(),
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Kerberos = source.Kerberos,
-                UpstreamParams = null,
             };
         }
 
@@ -311,14 +318,20 @@ namespace Alethic.Auth0.Operator.Controllers
                 FedMetadataXml = source.FedMetadataXml,
                 IconUrl = source.IconUrl,
                 PrevThumbprints = source.PrevThumbprints?.ToArray(),
-                ShouldTrustEmailVerifiedConnection = FromApi(source.ShouldTrustEmailVerifiedConnection),
+                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection switch
+                {
+                    { Value: ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.NeverSetEmailsAsVerified } => V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.NeverSetEmailsAsVerified,
+                    { Value: ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.AlwaysSetEmailsAsVerified } => V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.AlwaysSetEmailsAsVerified,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.ShouldTrustEmailVerifiedConnection, null),
+                },
                 SignInEndpoint = source.SignInEndpoint,
                 TenantDomain = source.TenantDomain,
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UserIdAttribute = source.UserIdAttribute,
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
             };
         }
 
@@ -394,20 +407,45 @@ namespace Alethic.Auth0.Operator.Controllers
                 ExtUserId = source.ExtUserId,
                 Granted = source.Granted,
                 IconUrl = source.IconUrl,
-                IdentityApi = FromApi(source.IdentityApi),
+                IdentityApi = source.IdentityApi switch
+                {
+                    { Value: ConnectionIdentityApiEnumAzureAd.Values.MicrosoftIdentityPlatformV20 } => V2alpha1ConnectionIdentityApiEnumAzureAd.MicrosoftIdentityPlatformV20,
+                    { Value: ConnectionIdentityApiEnumAzureAd.Values.AzureActiveDirectoryV10 } => V2alpha1ConnectionIdentityApiEnumAzureAd.AzureActiveDirectoryV10,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.IdentityApi, null),
+                },
                 MaxGroupsToRetrieve = source.MaxGroupsToRetrieve,
                 Scope = source.Scope?.ToArray(),
-                ShouldTrustEmailVerifiedConnection = FromApi(source.ShouldTrustEmailVerifiedConnection),
+                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection switch
+                {
+                    { Value: ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.NeverSetEmailsAsVerified } => V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.NeverSetEmailsAsVerified,
+                    { Value: ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.AlwaysSetEmailsAsVerified } => V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.AlwaysSetEmailsAsVerified,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.ShouldTrustEmailVerifiedConnection, null),
+                },
                 TenantDomain = source.TenantDomain,
                 TenantId = source.TenantId,
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UseCommonEndpoint = source.UseCommonEndpoint,
                 UseWsfed = source.UseWsfed,
-                UseridAttribute = FromApi(source.UseridAttribute),
-                WaadProtocol = FromApi(source.WaadProtocol),
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
+                UseridAttribute = source.UseridAttribute switch
+                {
+                    { Value: ConnectionUseridAttributeEnumAzureAd.Values.Oid } => V2alpha1ConnectionUseridAttributeEnumAzureAd.Oid,
+                    { Value: ConnectionUseridAttributeEnumAzureAd.Values.Sub } => V2alpha1ConnectionUseridAttributeEnumAzureAd.Sub,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.UseridAttribute, null),
+                },
+                WaadProtocol = source.WaadProtocol switch
+                {
+                    { Value: ConnectionWaadProtocolEnumAzureAd.Values.WsFederation } => V2alpha1ConnectionWaadProtocolEnumAzureAd.WsFederation,
+                    { Value: ConnectionWaadProtocolEnumAzureAd.Values.OpenidConnect } => V2alpha1ConnectionWaadProtocolEnumAzureAd.OpenidConnect,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.WaadProtocol, null),
+                },
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
             };
         }
 
@@ -765,11 +803,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 AccessTokenUrl = source.AccessTokenUrl,
                 RequestTokenUrl = source.RequestTokenUrl,
-                SignatureMethod = source.SignatureMethod is { } signatureMethod ? FromApi(signatureMethod) : null,
+                SignatureMethod = FromApi(source.SignatureMethod),
                 UserAuthorizationUrl = source.UserAuthorizationUrl,
                 Scripts = source.Scripts is { } sc ? new V2alpha1ConnectionScriptsOAuth1 { FetchUserProfile = sc.FetchUserProfile } : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
-                UpstreamParams = null,
             };
         }
 
@@ -794,9 +832,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 AuthParamsMap = source.AuthParamsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 FieldsMap = source.FieldsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 CustomHeaders = source.CustomHeaders?.ToDictionary(kv => kv.Key, kv => kv.Value),
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
             };
         }
 
@@ -833,18 +871,18 @@ namespace Alethic.Auth0.Operator.Controllers
                 TenantDomain = source.TenantDomain,
                 TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? FromApi(source.TokenEndpointAuthMethod.Value) : null,
                 TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? FromApi(source.TokenEndpointAuthSigningAlg.Value) : null,
-                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat is { } tokenEndpointJwtcaAudFormat ? FromApi(tokenEndpointJwtcaAudFormat) : null,
-                DpopSigningAlg = source.DpopSigningAlg is { } dpopSigningAlg ? FromApi(dpopSigningAlg) : null,
+                TokenEndpointJwtcaAudFormat = FromApi(source.TokenEndpointJwtcaAudFormat),
+                DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
-                Type = source.Type is { } type ? FromApi(type) : null,
+                Type = FromApi(source.Type),
                 OidcMetadata = null,
-                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mappingMode ? FromApi(mappingMode) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value) } : null,
-                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionConnectionSettings { Pkce = cs.Pkce is { } pkce ? FromApi(pkce) : null } : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
+                AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
             };
         }
 
@@ -868,19 +906,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 TenantDomain = source.TenantDomain,
                 TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? FromApi(source.TokenEndpointAuthMethod.Value) : null,
                 TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? FromApi(source.TokenEndpointAuthSigningAlg.Value) : null,
-                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat is { } tokenEndpointJwtcaAudFormat ? FromApi(tokenEndpointJwtcaAudFormat) : null,
-                DpopSigningAlg = source.DpopSigningAlg is { } dpopSigningAlg ? FromApi(dpopSigningAlg) : null,
+                TokenEndpointJwtcaAudFormat = FromApi(source.TokenEndpointJwtcaAudFormat),
+                DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
-                Type = source.Type is { } type ? FromApi(type) : null,
+                Type = FromApi(source.Type),
                 OidcMetadata = null,
-                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mappingMode ? FromApi(mappingMode) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value) } : null,
-                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionConnectionSettings { Pkce = cs.Pkce is { } pkce ? FromApi(pkce) : null } : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
+                AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -917,13 +955,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 Cert = source.Cert,
                 SigningCert = source.SigningCert,
                 Thumbprints = source.Thumbprints?.ToArray(),
-                SignatureAlgorithm = source.SignatureAlgorithm is { } signatureAlgorithm ? FromApi(signatureAlgorithm) : null,
-                DigestAlgorithm = source.DigestAlgorithm is { } digestAlgorithm ? FromApi(digestAlgorithm) : null,
+                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
+                DigestAlgorithm = FromApi(source.DigestAlgorithm),
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = source.ProtocolBinding is { } protocolBinding ? FromApi(protocolBinding) : null,
-                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } clientProtocol ? FromApi(clientProtocol) : null, ClientAuthorizequery = idp.ClientAuthorizequery, Enabled = idp.Enabled } : null,
+                ProtocolBinding = FromApi(source.ProtocolBinding),
+                Idpinitiated = source.Idpinitiated is { } idp ? FromApi(idp) : null,
                 DecryptionKey = null,
-                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionAssertionDecryptionSettings { AlgorithmProfile = ads.AlgorithmProfile is { } algorithmProfile ? FromApi(algorithmProfile) : null, AlgorithmExceptions = ads.AlgorithmExceptions?.ToArray() } : null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? FromApi(ads) : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
@@ -987,18 +1025,18 @@ namespace Alethic.Auth0.Operator.Controllers
                 MetadataUrl = source.MetadataUrl,
                 MetadataXml = source.MetadataXml,
                 EntityId = source.EntityId,
-                SignatureAlgorithm = source.SignatureAlgorithm is { } signatureAlgorithm ? FromApi(signatureAlgorithm) : null,
-                DigestAlgorithm = source.DigestAlgorithm is { } digestAlgorithm ? FromApi(digestAlgorithm) : null,
+                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
+                DigestAlgorithm = FromApi(source.DigestAlgorithm),
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = source.ProtocolBinding is { } protocolBinding ? FromApi(protocolBinding) : null,
+                ProtocolBinding = FromApi(source.ProtocolBinding),
                 RequestTemplate = source.RequestTemplate,
                 Debug = source.Debug,
                 Deflate = source.Deflate,
-                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } clientProtocol ? FromApi(clientProtocol) : null, ClientAuthorizequery = idp.ClientAuthorizequery, Enabled = idp.Enabled } : null,
+                Idpinitiated = source.Idpinitiated is { } idp ? FromApi(idp) : null,
                 SigningCert = source.SigningCert,
                 SigningKey = source.SigningKey is { } signingKey ? new V2alpha1ConnectionSigningKeySaml { Key = signingKey.Key, Cert = signingKey.Cert } : null,
                 DecryptionKey = null,
-                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionAssertionDecryptionSettings { AlgorithmProfile = ads.AlgorithmProfile is { } algorithmProfile ? FromApi(algorithmProfile) : null, AlgorithmExceptions = ads.AlgorithmExceptions?.ToArray() } : null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? FromApi(ads) : null,
                 FieldsMap = null,
                 UserIdAttribute = source.UserIdAttribute,
                 IconUrl = source.IconUrl,
@@ -1006,9 +1044,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 TenantDomain = source.TenantDomain,
                 GlobalTokenRevocationJwtIss = source.GlobalTokenRevocationJwtIss,
                 GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub,
+                UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
             };
         }
 
@@ -1022,8 +1060,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 Name = source.Name,
                 From = source.From,
                 Template = source.Template,
-                Syntax = source.Syntax is { } syntax ? FromApi(syntax) : null,
-                Provider = source.Provider is { } provider ? FromApi(provider) : null,
+                Syntax = FromApi(source.Syntax),
+                Provider = FromApi(source.Provider),
                 TwilioSid = source.TwilioSid,
                 TwilioToken = source.TwilioToken,
                 MessagingServiceSid = source.MessagingServiceSid,
@@ -1033,7 +1071,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 BruteForceProtection = source.BruteForceProtection,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 Totp = source.Totp is { } t ? new V2alpha1ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep } : null,
-                GatewayAuthentication = source.GatewayAuthentication.IsDefined && source.GatewayAuthentication.Value is { } ga ? new V2alpha1ConnectionGatewayAuthenticationSms { Method = ga.Method, Subject = ga.Subject, Audience = ga.Audience, Secret = ga.Secret, SecretBase64Encoded = ga.SecretBase64Encoded } : null,
+                GatewayAuthentication = source.GatewayAuthentication.IsDefined && source.GatewayAuthentication.Value is { } ga ? FromApi(ga) : null,
             };
         }
 
@@ -1050,7 +1088,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                Protocol = source.Protocol is { } protocol ? FromApi(protocol) : null,
+                Protocol = FromApi(source.Protocol),
                 OfflineAccess = source.OfflineAccess,
                 Profile = source.Profile,
                 TweetRead = source.TweetRead,
@@ -1131,7 +1169,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 TeamReadwriteAll = source.TeamReadwriteAll,
                 UserReadAll = source.UserReadAll,
                 UserReadbasicAll = source.UserReadbasicAll,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1157,6 +1195,338 @@ namespace Alethic.Auth0.Operator.Controllers
                 ConnectionSetUserRootAttributesEnum.Values.OnEachLogin => V2alpha1ConnectionSetUserRootAttributesEnum.OnEachLogin,
                 ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin => V2alpha1ConnectionSetUserRootAttributesEnum.OnFirstLogin,
                 ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin => V2alpha1ConnectionSetUserRootAttributesEnum.NeverOnLogin,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static SignupStatusEnum? ToApi(V2alpha1ConnectionSignupStatusEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionSignupStatusEnum.Required => new SignupStatusEnum(SignupStatusEnum.Values.Required),
+                V2alpha1ConnectionSignupStatusEnum.Optional => new SignupStatusEnum(SignupStatusEnum.Values.Optional),
+                V2alpha1ConnectionSignupStatusEnum.Inactive => new SignupStatusEnum(SignupStatusEnum.Values.Inactive),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionShouldTrustEmailVerifiedConnectionEnum? ToApi(V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.NeverSetEmailsAsVerified => new ConnectionShouldTrustEmailVerifiedConnectionEnum(ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.NeverSetEmailsAsVerified),
+                V2alpha1ConnectionShouldTrustEmailVerifiedConnectionEnum.AlwaysSetEmailsAsVerified => new ConnectionShouldTrustEmailVerifiedConnectionEnum(ConnectionShouldTrustEmailVerifiedConnectionEnum.Values.AlwaysSetEmailsAsVerified),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionPasskeyChallengeUiEnum? ToApi(V2alpha1ConnectionPasskeyChallengeUiEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionPasskeyChallengeUiEnum.Both => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Both),
+                V2alpha1ConnectionPasskeyChallengeUiEnum.Autofill => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Autofill),
+                V2alpha1ConnectionPasskeyChallengeUiEnum.Button => new ConnectionPasskeyChallengeUiEnum(ConnectionPasskeyChallengeUiEnum.Values.Button),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionIdentityApiEnumAzureAd? ToApi(V2alpha1ConnectionIdentityApiEnumAzureAd? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionIdentityApiEnumAzureAd.MicrosoftIdentityPlatformV20 => new ConnectionIdentityApiEnumAzureAd(ConnectionIdentityApiEnumAzureAd.Values.MicrosoftIdentityPlatformV20),
+                V2alpha1ConnectionIdentityApiEnumAzureAd.AzureActiveDirectoryV10 => new ConnectionIdentityApiEnumAzureAd(ConnectionIdentityApiEnumAzureAd.Values.AzureActiveDirectoryV10),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionUseridAttributeEnumAzureAd? ToApi(V2alpha1ConnectionUseridAttributeEnumAzureAd? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionUseridAttributeEnumAzureAd.Oid => new ConnectionUseridAttributeEnumAzureAd(ConnectionUseridAttributeEnumAzureAd.Values.Oid),
+                V2alpha1ConnectionUseridAttributeEnumAzureAd.Sub => new ConnectionUseridAttributeEnumAzureAd(ConnectionUseridAttributeEnumAzureAd.Values.Sub),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionWaadProtocolEnumAzureAd? ToApi(V2alpha1ConnectionWaadProtocolEnumAzureAd? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionWaadProtocolEnumAzureAd.WsFederation => new ConnectionWaadProtocolEnumAzureAd(ConnectionWaadProtocolEnumAzureAd.Values.WsFederation),
+                V2alpha1ConnectionWaadProtocolEnumAzureAd.OpenidConnect => new ConnectionWaadProtocolEnumAzureAd(ConnectionWaadProtocolEnumAzureAd.Values.OpenidConnect),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionSignatureMethodOAuth1? ToApi(V2alpha1ConnectionSignatureMethodOAuth1? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionSignatureMethodOAuth1.RsaSha1 => new ConnectionSignatureMethodOAuth1(ConnectionSignatureMethodOAuth1.Values.RsaSha1),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionTokenEndpointAuthMethodEnum? ToApi(V2alpha1ConnectionTokenEndpointAuthMethodEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionTokenEndpointAuthMethodEnum.ClientSecretPost => new ConnectionTokenEndpointAuthMethodEnum(ConnectionTokenEndpointAuthMethodEnum.Values.ClientSecretPost),
+                V2alpha1ConnectionTokenEndpointAuthMethodEnum.PrivateKeyJwt => new ConnectionTokenEndpointAuthMethodEnum(ConnectionTokenEndpointAuthMethodEnum.Values.PrivateKeyJwt),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionTokenEndpointAuthSigningAlgEnum? ToApi(V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Es256 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Es256),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Es384 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Es384),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Ps256 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Ps256),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Ps384 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Ps384),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs256 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs256),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs384 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs384),
+                V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs512 => new ConnectionTokenEndpointAuthSigningAlgEnum(ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs512),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionTokenEndpointJwtcaAudFormatEnumOidc? ToApi(V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Issuer => new ConnectionTokenEndpointJwtcaAudFormatEnumOidc(ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Values.Issuer),
+                V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc.TokenEndpoint => new ConnectionTokenEndpointJwtcaAudFormatEnumOidc(ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Values.TokenEndpoint),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionDpopSigningAlgEnum? ToApi(V2alpha1ConnectionDpopSigningAlgEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionDpopSigningAlgEnum.Es256 => new ConnectionDpopSigningAlgEnum(ConnectionDpopSigningAlgEnum.Values.Es256),
+                V2alpha1ConnectionDpopSigningAlgEnum.Ed25519 => new ConnectionDpopSigningAlgEnum(ConnectionDpopSigningAlgEnum.Values.Ed25519),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionTypeEnumOidc? ToApi(V2alpha1ConnectionTypeEnumOidc? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionTypeEnumOidc.BackChannel => new ConnectionTypeEnumOidc(ConnectionTypeEnumOidc.Values.BackChannel),
+                V2alpha1ConnectionTypeEnumOidc.FrontChannel => new ConnectionTypeEnumOidc(ConnectionTypeEnumOidc.Values.FrontChannel),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionTypeEnumOkta? ToApi(V2alpha1ConnectionTypeEnumOkta? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionTypeEnumOkta.BackChannel => new ConnectionTypeEnumOkta(ConnectionTypeEnumOkta.Values.BackChannel),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionOptionsProtocolEnumTwitter? ToApi(V2alpha1ConnectionOptionsProtocolEnumTwitter? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionOptionsProtocolEnumTwitter.Oauth1 => new ConnectionOptionsProtocolEnumTwitter(ConnectionOptionsProtocolEnumTwitter.Values.Oauth1),
+                V2alpha1ConnectionOptionsProtocolEnumTwitter.Oauth2 => new ConnectionOptionsProtocolEnumTwitter(ConnectionOptionsProtocolEnumTwitter.Values.Oauth2),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionSetUserRootAttributesEnum? ToApi(V2alpha1ConnectionSetUserRootAttributesEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionSetUserRootAttributesEnum.OnEachLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.OnEachLogin),
+                V2alpha1ConnectionSetUserRootAttributesEnum.OnFirstLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin),
+                V2alpha1ConnectionSetUserRootAttributesEnum.NeverOnLogin => new ConnectionSetUserRootAttributesEnum(ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?> ToApiUpstreamAdditionalProperties(Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? source)
+        {
+            if (source is null)
+                return default;
+
+            var result = new Dictionary<string, ConnectionUpstreamAdditionalProperties?>(source.Count);
+            foreach (var (key, value) in source)
+                result[key] = value is null
+                    ? null
+                    : ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias());
+
+            return Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(result);
+        }
+
+        internal static Dictionary<string, ConnectionUpstreamAdditionalProperties>? ToApiUpstreamAdditionalPropertiesNonOptional(Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? source)
+        {
+            if (source is null)
+                return null;
+
+            var result = new Dictionary<string, ConnectionUpstreamAdditionalProperties>(source.Count);
+            foreach (var (key, value) in source)
+                if (value is not null)
+                    result[key] = ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias());
+
+            return result;
+        }
+
+        internal static ConnectionIdTokenSignedResponseAlgEnum ToApi(V2alpha1ConnectionIdTokenSignedResponseAlgEnum source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Es256 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Es256),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Es384 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Es384),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Ps256 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Ps256),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Ps384 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Ps384),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs256 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Rs256),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs384 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Rs384),
+                V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs512 => new ConnectionIdTokenSignedResponseAlgEnum(ConnectionIdTokenSignedResponseAlgEnum.Values.Rs512),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionMappingModeEnumOidc? ToApi(V2alpha1ConnectionMappingModeEnumOidc? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionMappingModeEnumOidc.BindAll => new ConnectionMappingModeEnumOidc(ConnectionMappingModeEnumOidc.Values.BindAll),
+                V2alpha1ConnectionMappingModeEnumOidc.UseMap => new ConnectionMappingModeEnumOidc(ConnectionMappingModeEnumOidc.Values.UseMap),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionMappingModeEnumOkta? ToApi(V2alpha1ConnectionMappingModeEnumOkta? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionMappingModeEnumOkta.BasicProfile => new ConnectionMappingModeEnumOkta(ConnectionMappingModeEnumOkta.Values.BasicProfile),
+                V2alpha1ConnectionMappingModeEnumOkta.UseMap => new ConnectionMappingModeEnumOkta(ConnectionMappingModeEnumOkta.Values.UseMap),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionConnectionSettingsPkceEnum? ToApi(V2alpha1ConnectionConnectionSettingsPkceEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionConnectionSettingsPkceEnum.Auto => new ConnectionConnectionSettingsPkceEnum(ConnectionConnectionSettingsPkceEnum.Values.Auto),
+                V2alpha1ConnectionConnectionSettingsPkceEnum.S256 => new ConnectionConnectionSettingsPkceEnum(ConnectionConnectionSettingsPkceEnum.Values.S256),
+                V2alpha1ConnectionConnectionSettingsPkceEnum.Plain => new ConnectionConnectionSettingsPkceEnum(ConnectionConnectionSettingsPkceEnum.Values.Plain),
+                V2alpha1ConnectionConnectionSettingsPkceEnum.Disabled => new ConnectionConnectionSettingsPkceEnum(ConnectionConnectionSettingsPkceEnum.Values.Disabled),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionSignatureAlgorithmEnumSaml ToApi(V2alpha1ConnectionSignatureAlgorithmEnumSaml source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionSignatureAlgorithmEnumSaml.RsaSha1 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1),
+                V2alpha1ConnectionSignatureAlgorithmEnumSaml.RsaSha256 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionDigestAlgorithmEnumSaml ToApi(V2alpha1ConnectionDigestAlgorithmEnumSaml source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionDigestAlgorithmEnumSaml.Sha1 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha1),
+                V2alpha1ConnectionDigestAlgorithmEnumSaml.Sha256 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha256),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionProtocolBindingEnumSaml ToApi(V2alpha1ConnectionProtocolBindingEnumSaml source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionProtocolBindingEnumSaml.UrnOasisNamesTcSaml20BindingsHttpPost => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost),
+                V2alpha1ConnectionProtocolBindingEnumSaml.UrnOasisNamesTcSaml20BindingsHttpRedirect => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionOptionsIdpInitiatedClientProtocolEnumSaml ToApi(V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Oidc => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc),
+                V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Samlp => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp),
+                V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Wsfed => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionAssertionDecryptionAlgorithmProfileEnum ToApi(V2alpha1ConnectionAssertionDecryptionAlgorithmProfileEnum source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionAssertionDecryptionAlgorithmProfileEnum.V20261 => new ConnectionAssertionDecryptionAlgorithmProfileEnum(ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static SignupStatusEnum ToApi(V2alpha1ConnectionOptionsAttributeStatus source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionOptionsAttributeStatus.Required => new SignupStatusEnum(SignupStatusEnum.Values.Required),
+                V2alpha1ConnectionOptionsAttributeStatus.Optional => new SignupStatusEnum(SignupStatusEnum.Values.Optional),
+                V2alpha1ConnectionOptionsAttributeStatus.Inactive => new SignupStatusEnum(SignupStatusEnum.Values.Inactive),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionPasswordPolicyEnum ToApi(V2alpha1ConnectionPasswordPolicyEnum source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionPasswordPolicyEnum.None => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.None),
+                V2alpha1ConnectionPasswordPolicyEnum.Low => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Low),
+                V2alpha1ConnectionPasswordPolicyEnum.Fair => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Fair),
+                V2alpha1ConnectionPasswordPolicyEnum.Good => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Good),
+                V2alpha1ConnectionPasswordPolicyEnum.Excellent => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Excellent),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static ConnectionEmailEmailSyntax? ToApi(V2alpha1ConnectionEmailEmailSyntax? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionEmailEmailSyntax.Liquid => new ConnectionEmailEmailSyntax(ConnectionEmailEmailSyntax.Values.Liquid),
                 null => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
@@ -1216,135 +1586,307 @@ namespace Alethic.Auth0.Operator.Controllers
             return Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(result);
         }
 
-        internal static V2alpha1ConnectionOptionsValidation FromApi(ConnectionValidationOptions source)
+        internal static V2alpha1ConnectionValidationOptions FromApi(ConnectionValidationOptions source)
         {
-            return new V2alpha1ConnectionOptionsValidation
+            return new V2alpha1ConnectionValidationOptions
             {
-                UserName = source.Username.IsDefined && source.Username.Value is { } u ? FromApi(u) : null,
+                Username = source.Username.IsDefined && source.Username.Value is { } u ? new V2alpha1ConnectionUsernameValidationOptions
+                {
+                    Min = u.Min,
+                    Max = u.Max,
+                } : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsUserName FromApi(ConnectionUsernameValidationOptions source)
+        internal static V2alpha1ConnectionAttributes FromApi(ConnectionAttributes source)
         {
-            return new V2alpha1ConnectionOptionsUserName
+            return new V2alpha1ConnectionAttributes
             {
-                Min = source.Min,
-                Max = source.Max,
+                Email = source.Email is { } email ? FromApi(email) : null,
+                PhoneNumber = source.PhoneNumber is { } phoneNumber ? FromApi(phoneNumber) : null,
+                Username = source.Username is { } username ? FromApi(username) : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAttributes FromApi(ConnectionAttributes source)
+        internal static V2alpha1ConnectionEmailAttribute FromApi(EmailAttribute source)
         {
-            return new V2alpha1ConnectionOptionsAttributes
+            return new V2alpha1ConnectionEmailAttribute
             {
-                Email = source.Email is { } e ? FromApi(e) : null,
-                PhoneNumber = source.PhoneNumber is { } p ? FromApi(p) : null,
-                Username = source.Username is { } u ? FromApi(u) : null,
-            };
-        }
-
-        internal static V2alpha1ConnectionOptionsEmailAttribute FromApi(EmailAttribute source)
-        {
-            return new V2alpha1ConnectionOptionsEmailAttribute
-            {
-                Identifier = source.Identifier is { } i ? FromApi(i) : null,
+                Identifier = source.Identifier is { } identifier ? FromApi(identifier) : null,
+                Unique = source.Unique,
                 ProfileRequired = source.ProfileRequired,
-                Signup = source.Signup is { } s ? FromApi(s) : null,
+                VerificationMethod = FromApi(source.VerificationMethod),
+                Signup = source.Signup is { } signup ? FromApi(signup) : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsEmailSignup FromApi(SignupVerified source)
+        internal static V2alpha1ConnectionPhoneAttribute FromApi(PhoneAttribute source)
         {
-            return new V2alpha1ConnectionOptionsEmailSignup
+            return new V2alpha1ConnectionPhoneAttribute
             {
-                Status = source.Status is { } st ? FromApi(st) : null,
-                Verification = source.Verification is { } v ? FromApi(v) : null,
-            };
-        }
-
-        internal static V2alpha1ConnectionOptionsPhoneNumberAttribute FromApi(PhoneAttribute source)
-        {
-            return new V2alpha1ConnectionOptionsPhoneNumberAttribute
-            {
-                Signup = source.Signup is { } s ? FromApi(s, true) : null,
-            };
-        }
-
-        internal static V2alpha1ConnectionOptionsPhoneNumberSignup FromApi(SignupVerified source, bool phone)
-        {
-            return new V2alpha1ConnectionOptionsPhoneNumberSignup
-            {
-                Status = source.Status is { } st ? FromApi(st) : null,
-                Verification = source.Verification is { } v ? FromApi(v) : null,
-            };
-        }
-
-        internal static V2alpha1ConnectionOptionsUsernameAttribute FromApi(UsernameAttribute source)
-        {
-            return new V2alpha1ConnectionOptionsUsernameAttribute
-            {
-                Identifier = source.Identifier is { } i ? FromApi(i) : null,
+                Identifier = source.Identifier is { } identifier ? FromApi(identifier) : null,
                 ProfileRequired = source.ProfileRequired,
-                Signup = source.Signup is { } s ? FromApi(s) : null,
-                Validation = source.Validation is { } v ? FromApi(v) : null,
+                Signup = source.Signup is { } signup ? FromApi(signup) : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsUsernameSignup FromApi(SignupSchema source)
+        internal static V2alpha1ConnectionUsernameAttribute FromApi(UsernameAttribute source)
         {
-            return new V2alpha1ConnectionOptionsUsernameSignup
+            return new V2alpha1ConnectionUsernameAttribute
             {
-                Status = source.Status is { } st ? FromApi(st) : null,
+                Identifier = source.Identifier is { } identifier ? FromApi(identifier) : null,
+                ProfileRequired = source.ProfileRequired,
+                Signup = source.Signup is { } signup ? FromApi(signup) : null,
+                Validation = source.Validation is { } validation ? FromApi(validation) : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAttributeIdentifier FromApi(ConnectionAttributeIdentifier source)
+        internal static V2alpha1ConnectionAttributeIdentifier FromApi(ConnectionAttributeIdentifier source)
         {
-            return new V2alpha1ConnectionOptionsAttributeIdentifier
+            return new V2alpha1ConnectionAttributeIdentifier
             {
                 Active = source.Active,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAttributeValidation FromApi(UsernameValidation source)
+        internal static V2alpha1ConnectionVerificationMethodEnum? FromApi(VerificationMethodEnum? source)
         {
-            return new V2alpha1ConnectionOptionsAttributeValidation
+            return source?.Value switch
             {
-                MinLength = (int?)source.MinLength,
-                MaxLength = (int?)source.MaxLength,
-                AllowedTypes = source.AllowedTypes is { } at ? FromApi(at) : null,
+                VerificationMethodEnum.Values.Link => V2alpha1ConnectionVerificationMethodEnum.Link,
+                VerificationMethodEnum.Values.Otp => V2alpha1ConnectionVerificationMethodEnum.Otp,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAttributeAllowedTypes FromApi(UsernameAllowedTypes source)
+        internal static V2alpha1ConnectionSignupVerified FromApi(SignupVerified source)
         {
-            return new V2alpha1ConnectionOptionsAttributeAllowedTypes
+            return new V2alpha1ConnectionSignupVerified
+            {
+                Status = FromApi(source.Status),
+                Verification = source.Verification is { } verification ? FromApi(verification) : null,
+            };
+        }
+
+        internal static V2alpha1ConnectionSignupSchema FromApi(SignupSchema source)
+        {
+            return new V2alpha1ConnectionSignupSchema
+            {
+                Status = FromApi(source.Status),
+            };
+        }
+
+        internal static V2alpha1ConnectionSignupStatusEnum? FromApi(SignupStatusEnum? source)
+        {
+            return source?.Value switch
+            {
+                SignupStatusEnum.Values.Required => V2alpha1ConnectionSignupStatusEnum.Required,
+                SignupStatusEnum.Values.Optional => V2alpha1ConnectionSignupStatusEnum.Optional,
+                SignupStatusEnum.Values.Inactive => V2alpha1ConnectionSignupStatusEnum.Inactive,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionSignupVerification FromApi(SignupVerification source)
+        {
+            return new V2alpha1ConnectionSignupVerification
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V2alpha1ConnectionUsernameValidation FromApi(UsernameValidation source)
+        {
+            return new V2alpha1ConnectionUsernameValidation
+            {
+                MinLength = source.MinLength,
+                MaxLength = source.MaxLength,
+                AllowedTypes = source.AllowedTypes is { } allowedTypes ? FromApi(allowedTypes) : null,
+            };
+        }
+
+        internal static V2alpha1ConnectionUsernameAllowedTypes FromApi(UsernameAllowedTypes source)
+        {
+            return new V2alpha1ConnectionUsernameAllowedTypes
             {
                 Email = source.Email,
                 PhoneNumber = source.PhoneNumber,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsVerification FromApi(SignupVerification source)
+        internal static V2alpha1ConnectionAuthenticationMethods FromApi(ConnectionAuthenticationMethods source)
         {
-            return new V2alpha1ConnectionOptionsVerification
+            return new V2alpha1ConnectionAuthenticationMethods
             {
-                Active = source.Active,
+                Password = source.Password is { } password ? FromApi(password) : null,
+                Passkey = source.Passkey is { } passkey ? FromApi(passkey) : null,
+                EmailOtp = source.EmailOtp is { } emailOtp ? FromApi(emailOtp) : null,
+                PhoneOtp = source.PhoneOtp is { } phoneOtp ? FromApi(phoneOtp) : null,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsMfa FromApi(ConnectionMfa source)
+        internal static V2alpha1ConnectionPasswordAuthenticationMethod FromApi(ConnectionPasswordAuthenticationMethod source)
         {
-            return new V2alpha1ConnectionOptionsMfa
+            return new V2alpha1ConnectionPasswordAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasskeyAuthenticationMethod FromApi(ConnectionPasskeyAuthenticationMethod source)
+        {
+            return new V2alpha1ConnectionPasskeyAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V2alpha1ConnectionEmailOtpAuthenticationMethod FromApi(ConnectionEmailOtpAuthenticationMethod source)
+        {
+            return new V2alpha1ConnectionEmailOtpAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V2alpha1ConnectionPhoneOtpAuthenticationMethod FromApi(ConnectionPhoneOtpAuthenticationMethod source)
+        {
+            return new V2alpha1ConnectionPhoneOtpAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static V2alpha1ConnectionMfa FromApi(ConnectionMfa source)
+        {
+            return new V2alpha1ConnectionMfa
             {
                 Active = source.Active,
                 ReturnEnrollSettings = source.ReturnEnrollSettings,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsCustomScripts FromApi(ConnectionCustomScripts source)
+        internal static V2alpha1ConnectionPasskeyOptions FromApi(ConnectionPasskeyOptions source)
         {
-            return new V2alpha1ConnectionOptionsCustomScripts
+            return new V2alpha1ConnectionPasskeyOptions
+            {
+                ChallengeUi = FromApi(source.ChallengeUi),
+                ProgressiveEnrollmentEnabled = source.ProgressiveEnrollmentEnabled,
+                LocalEnrollmentEnabled = source.LocalEnrollmentEnabled,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasskeyChallengeUiEnum? FromApi(ConnectionPasskeyChallengeUiEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionPasskeyChallengeUiEnum.Values.Both => V2alpha1ConnectionPasskeyChallengeUiEnum.Both,
+                ConnectionPasskeyChallengeUiEnum.Values.Autofill => V2alpha1ConnectionPasskeyChallengeUiEnum.Autofill,
+                ConnectionPasskeyChallengeUiEnum.Values.Button => V2alpha1ConnectionPasskeyChallengeUiEnum.Button,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordOptions FromApi(ConnectionPasswordOptions source)
+        {
+            return new V2alpha1ConnectionPasswordOptions
+            {
+                Complexity = source.Complexity is { } complexity ? FromApi(complexity) : null,
+                Dictionary = source.Dictionary is { } dictionary ? FromApi(dictionary) : null,
+                History = source.History is { } history ? FromApi(history) : null,
+                ProfileData = source.ProfileData is { } profileData ? FromApi(profileData) : null,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordOptionsComplexity FromApi(ConnectionPasswordOptionsComplexity source)
+        {
+            return new V2alpha1ConnectionPasswordOptionsComplexity
+            {
+                MinLength = source.MinLength,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordOptionsDictionary FromApi(ConnectionPasswordOptionsDictionary source)
+        {
+            return new V2alpha1ConnectionPasswordOptionsDictionary
+            {
+                Active = source.Active,
+                Custom = source.Custom?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordOptionsHistory FromApi(ConnectionPasswordOptionsHistory source)
+        {
+            return new V2alpha1ConnectionPasswordOptionsHistory
+            {
+                Active = source.Active,
+                Size = source.Size,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordOptionsProfileData FromApi(ConnectionPasswordOptionsProfileData source)
+        {
+            return new V2alpha1ConnectionPasswordOptionsProfileData
+            {
+                Active = source.Active,
+                BlockedFields = source.BlockedFields?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordPolicyEnum? FromApi(ConnectionPasswordPolicyEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionPasswordPolicyEnum.Values.None => V2alpha1ConnectionPasswordPolicyEnum.None,
+                ConnectionPasswordPolicyEnum.Values.Low => V2alpha1ConnectionPasswordPolicyEnum.Low,
+                ConnectionPasswordPolicyEnum.Values.Fair => V2alpha1ConnectionPasswordPolicyEnum.Fair,
+                ConnectionPasswordPolicyEnum.Values.Good => V2alpha1ConnectionPasswordPolicyEnum.Good,
+                ConnectionPasswordPolicyEnum.Values.Excellent => V2alpha1ConnectionPasswordPolicyEnum.Excellent,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordHistoryOptions FromApi(ConnectionPasswordHistoryOptions source)
+        {
+            return new V2alpha1ConnectionPasswordHistoryOptions
+            {
+                Enable = source.Enable,
+                Size = source.Size,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordNoPersonalInfoOptions FromApi(ConnectionPasswordNoPersonalInfoOptions source)
+        {
+            return new V2alpha1ConnectionPasswordNoPersonalInfoOptions
+            {
+                Enable = source.Enable,
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordDictionaryOptions FromApi(ConnectionPasswordDictionaryOptions source)
+        {
+            return new V2alpha1ConnectionPasswordDictionaryOptions
+            {
+                Enable = source.Enable,
+                Dictionary = source.Dictionary?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionPasswordComplexityOptions FromApi(ConnectionPasswordComplexityOptions source)
+        {
+            return new V2alpha1ConnectionPasswordComplexityOptions
+            {
+                MinLength = source.MinLength,
+            };
+        }
+
+        internal static V2alpha1ConnectionCustomScripts FromApi(ConnectionCustomScripts source)
+        {
+            return new V2alpha1ConnectionCustomScripts
             {
                 Login = source.Login,
                 GetUser = source.GetUser,
@@ -1358,72 +1900,307 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAuthenticationMethods FromApi(ConnectionAuthenticationMethods source)
+        internal static V2alpha1ConnectionEmailEmailSyntax? FromApi(ConnectionEmailEmailSyntax? source)
         {
-            return new V2alpha1ConnectionOptionsAuthenticationMethods
+            return source?.Value switch
             {
-                Password = source.Password is { } p ? FromApi(p) : null,
-                Passkey = source.Passkey is { } pk ? FromApi(pk) : null,
+                ConnectionEmailEmailSyntax.Values.Liquid => V2alpha1ConnectionEmailEmailSyntax.Liquid,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasswordAuthenticationMethod FromApi(ConnectionPasswordAuthenticationMethod source)
+        internal static V2alpha1ConnectionSignatureMethodOAuth1? FromApi(ConnectionSignatureMethodOAuth1? source)
         {
-            return new V2alpha1ConnectionOptionsPasswordAuthenticationMethod
+            return source?.Value switch
             {
+                ConnectionSignatureMethodOAuth1.Values.RsaSha1 => V2alpha1ConnectionSignatureMethodOAuth1.RsaSha1,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionTokenEndpointAuthMethodEnum? FromApi(ConnectionTokenEndpointAuthMethodEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionTokenEndpointAuthMethodEnum.Values.ClientSecretPost => V2alpha1ConnectionTokenEndpointAuthMethodEnum.ClientSecretPost,
+                ConnectionTokenEndpointAuthMethodEnum.Values.PrivateKeyJwt => V2alpha1ConnectionTokenEndpointAuthMethodEnum.PrivateKeyJwt,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum? FromApi(ConnectionTokenEndpointAuthSigningAlgEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Es256 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Es256,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Es384 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Es384,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Ps256 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Ps256,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Ps384 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Ps384,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs256 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs256,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs384 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs384,
+                ConnectionTokenEndpointAuthSigningAlgEnum.Values.Rs512 => V2alpha1ConnectionTokenEndpointAuthSigningAlgEnum.Rs512,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc? FromApi(ConnectionTokenEndpointJwtcaAudFormatEnumOidc? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Values.Issuer => V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Issuer,
+                ConnectionTokenEndpointJwtcaAudFormatEnumOidc.Values.TokenEndpoint => V2alpha1ConnectionTokenEndpointJwtcaAudFormatEnumOidc.TokenEndpoint,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionDpopSigningAlgEnum? FromApi(ConnectionDpopSigningAlgEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionDpopSigningAlgEnum.Values.Es256 => V2alpha1ConnectionDpopSigningAlgEnum.Es256,
+                ConnectionDpopSigningAlgEnum.Values.Ed25519 => V2alpha1ConnectionDpopSigningAlgEnum.Ed25519,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionIdTokenSignedResponseAlgEnum FromApi(ConnectionIdTokenSignedResponseAlgEnum source)
+        {
+            return source.Value switch
+            {
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Es256 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Es256,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Es384 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Es384,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Ps256 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Ps256,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Ps384 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Ps384,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Rs256 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs256,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Rs384 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs384,
+                ConnectionIdTokenSignedResponseAlgEnum.Values.Rs512 => V2alpha1ConnectionIdTokenSignedResponseAlgEnum.Rs512,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionTypeEnumOidc? FromApi(ConnectionTypeEnumOidc? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionTypeEnumOidc.Values.BackChannel => V2alpha1ConnectionTypeEnumOidc.BackChannel,
+                ConnectionTypeEnumOidc.Values.FrontChannel => V2alpha1ConnectionTypeEnumOidc.FrontChannel,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionAttributeMapOidc FromApi(ConnectionAttributeMapOidc source)
+        {
+            return new V2alpha1ConnectionAttributeMapOidc
+            {
+                MappingMode = FromApi(source.MappingMode),
+                UserinfoScope = source.UserinfoScope,
+                Attributes = source.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value),
+            };
+        }
+
+        internal static V2alpha1ConnectionMappingModeEnumOidc? FromApi(ConnectionMappingModeEnumOidc? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionMappingModeEnumOidc.Values.BindAll => V2alpha1ConnectionMappingModeEnumOidc.BindAll,
+                ConnectionMappingModeEnumOidc.Values.UseMap => V2alpha1ConnectionMappingModeEnumOidc.UseMap,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionConnectionSettings FromApi(ConnectionConnectionSettings source)
+        {
+            return new V2alpha1ConnectionConnectionSettings
+            {
+                Pkce = FromApi(source.Pkce),
+            };
+        }
+
+        internal static V2alpha1ConnectionConnectionSettingsPkceEnum? FromApi(ConnectionConnectionSettingsPkceEnum? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionConnectionSettingsPkceEnum.Values.Auto => V2alpha1ConnectionConnectionSettingsPkceEnum.Auto,
+                ConnectionConnectionSettingsPkceEnum.Values.S256 => V2alpha1ConnectionConnectionSettingsPkceEnum.S256,
+                ConnectionConnectionSettingsPkceEnum.Values.Plain => V2alpha1ConnectionConnectionSettingsPkceEnum.Plain,
+                ConnectionConnectionSettingsPkceEnum.Values.Disabled => V2alpha1ConnectionConnectionSettingsPkceEnum.Disabled,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionFederatedConnectionsAccessTokens FromApi(ConnectionFederatedConnectionsAccessTokens source)
+        {
+            return new V2alpha1ConnectionFederatedConnectionsAccessTokens
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V2alpha1ConnectionTypeEnumOkta? FromApi(ConnectionTypeEnumOkta? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionTypeEnumOkta.Values.BackChannel => V2alpha1ConnectionTypeEnumOkta.BackChannel,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionAttributeMapOkta FromApi(ConnectionAttributeMapOkta source)
+        {
+            return new V2alpha1ConnectionAttributeMapOkta
+            {
+                MappingMode = FromApi(source.MappingMode),
+                UserinfoScope = source.UserinfoScope,
+                Attributes = source.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value),
+            };
+        }
+
+        internal static V2alpha1ConnectionMappingModeEnumOkta? FromApi(ConnectionMappingModeEnumOkta? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionMappingModeEnumOkta.Values.BasicProfile => V2alpha1ConnectionMappingModeEnumOkta.BasicProfile,
+                ConnectionMappingModeEnumOkta.Values.UseMap => V2alpha1ConnectionMappingModeEnumOkta.UseMap,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionSignatureAlgorithmEnumSaml? FromApi(ConnectionSignatureAlgorithmEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1 => V2alpha1ConnectionSignatureAlgorithmEnumSaml.RsaSha1,
+                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256 => V2alpha1ConnectionSignatureAlgorithmEnumSaml.RsaSha256,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionDigestAlgorithmEnumSaml? FromApi(ConnectionDigestAlgorithmEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionDigestAlgorithmEnumSaml.Values.Sha1 => V2alpha1ConnectionDigestAlgorithmEnumSaml.Sha1,
+                ConnectionDigestAlgorithmEnumSaml.Values.Sha256 => V2alpha1ConnectionDigestAlgorithmEnumSaml.Sha256,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionProtocolBindingEnumSaml? FromApi(ConnectionProtocolBindingEnumSaml? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost => V2alpha1ConnectionProtocolBindingEnumSaml.UrnOasisNamesTcSaml20BindingsHttpPost,
+                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect => V2alpha1ConnectionProtocolBindingEnumSaml.UrnOasisNamesTcSaml20BindingsHttpRedirect,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsIdpinitiatedSaml FromApi(ConnectionOptionsIdpinitiatedSaml source)
+        {
+            return new V2alpha1ConnectionOptionsIdpinitiatedSaml
+            {
+                ClientId = source.ClientId,
+                ClientProtocol = FromApi(source.ClientProtocol),
+                ClientAuthorizequery = source.ClientAuthorizequery,
                 Enabled = source.Enabled,
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasskeyAuthenticationMethod FromApi(ConnectionPasskeyAuthenticationMethod source)
+        internal static V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml? FromApi(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml? source)
         {
-            return new V2alpha1ConnectionOptionsPasskeyAuthenticationMethod
+            return source?.Value switch
             {
-                Enabled = source.Enabled,
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc => V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Oidc,
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp => V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Samlp,
+                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed => V2alpha1ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Wsfed,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasskeyOptions FromApi(ConnectionPasskeyOptions source)
+        internal static V2alpha1ConnectionAssertionDecryptionSettings FromApi(ConnectionAssertionDecryptionSettings source)
         {
-            return new V2alpha1ConnectionOptionsPasskeyOptions
+            return new V2alpha1ConnectionAssertionDecryptionSettings
             {
-                ChallengeUi = source.ChallengeUi is { } cui ? FromApi(cui) : null,
-                ProgressiveEnrollmentEnabled = source.ProgressiveEnrollmentEnabled,
-                LocalEnrollmentEnabled = source.LocalEnrollmentEnabled,
+                AlgorithmProfile = FromApi(source.AlgorithmProfile),
+                AlgorithmExceptions = source.AlgorithmExceptions?.ToArray(),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasswordComplexityOptions FromApi(ConnectionPasswordComplexityOptions source)
+        internal static V2alpha1ConnectionAssertionDecryptionAlgorithmProfileEnum FromApi(ConnectionAssertionDecryptionAlgorithmProfileEnum source)
         {
-            return new V2alpha1ConnectionOptionsPasswordComplexityOptions
+            return source.Value switch
             {
-                MinLength = source.MinLength,
+                ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261 => V2alpha1ConnectionAssertionDecryptionAlgorithmProfileEnum.V20261,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasswordHistory FromApi(ConnectionPasswordHistoryOptions source)
+        internal static V2alpha1ConnectionTemplateSyntaxEnumSms? FromApi(ConnectionTemplateSyntaxEnumSms? source)
         {
-            return new V2alpha1ConnectionOptionsPasswordHistory
+            return source?.Value switch
             {
-                Enable = source.Enable,
-                Size = source.Size,
+                ConnectionTemplateSyntaxEnumSms.Values.Liquid => V2alpha1ConnectionTemplateSyntaxEnumSms.Liquid,
+                ConnectionTemplateSyntaxEnumSms.Values.MdWithMacros => V2alpha1ConnectionTemplateSyntaxEnumSms.MdWithMacros,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasswordNoPersonalInfo FromApi(ConnectionPasswordNoPersonalInfoOptions source)
+        internal static V2alpha1ConnectionProviderEnumSms? FromApi(ConnectionProviderEnumSms? source)
         {
-            return new V2alpha1ConnectionOptionsPasswordNoPersonalInfo
+            return source?.Value switch
             {
-                Enable = source.Enable,
+                ConnectionProviderEnumSms.Values.SmsGateway => V2alpha1ConnectionProviderEnumSms.SmsGateway,
+                ConnectionProviderEnumSms.Values.Twilio => V2alpha1ConnectionProviderEnumSms.Twilio,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static V2alpha1ConnectionOptionsPasswordDictionary FromApi(ConnectionPasswordDictionaryOptions source)
+        internal static V2alpha1ConnectionGatewayAuthenticationSms FromApi(ConnectionGatewayAuthenticationSms source)
         {
-            return new V2alpha1ConnectionOptionsPasswordDictionary
+            return new V2alpha1ConnectionGatewayAuthenticationSms
             {
-                Enable = source.Enable,
-                Dictionary = source.Dictionary?.ToArray(),
+                Method = source.Method,
+                Subject = source.Subject,
+                Audience = source.Audience,
+                Secret = source.Secret,
+                SecretBase64Encoded = source.SecretBase64Encoded,
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsProtocolEnumTwitter? FromApi(ConnectionOptionsProtocolEnumTwitter? source)
+        {
+            return source?.Value switch
+            {
+                ConnectionOptionsProtocolEnumTwitter.Values.Oauth1 => V2alpha1ConnectionOptionsProtocolEnumTwitter.Oauth1,
+                ConnectionOptionsProtocolEnumTwitter.Values.Oauth2 => V2alpha1ConnectionOptionsProtocolEnumTwitter.Oauth2,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsUserName FromApi(ConnectionUsernameValidationOptions source)
+        {
+            return new V2alpha1ConnectionOptionsUserName
+            {
+                Min = source.Min,
+                Max = source.Max,
             };
         }
 
@@ -1461,156 +2238,13 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionOptionsAttributeStatus? FromApi(SignupStatusEnum? source)
-        {
-            return source?.Value switch
-            {
-                SignupStatusEnum.Values.Required => V2alpha1ConnectionOptionsAttributeStatus.Required,
-                SignupStatusEnum.Values.Optional => V2alpha1ConnectionOptionsAttributeStatus.Optional,
-                SignupStatusEnum.Values.Inactive => V2alpha1ConnectionOptionsAttributeStatus.Inactive,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static SignupStatusEnum ToApi(V2alpha1ConnectionOptionsAttributeStatus source)
+        internal static ConnectionIdentifierPrecedenceEnum ToApi(V2alpha1ConnectionIdentifierPrecedenceEnum source)
         {
             return source switch
             {
-                V2alpha1ConnectionOptionsAttributeStatus.Required => new SignupStatusEnum(SignupStatusEnum.Values.Required),
-                V2alpha1ConnectionOptionsAttributeStatus.Optional => new SignupStatusEnum(SignupStatusEnum.Values.Optional),
-                V2alpha1ConnectionOptionsAttributeStatus.Inactive => new SignupStatusEnum(SignupStatusEnum.Values.Inactive),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionOptionsPasswordPolicy? FromApi(ConnectionPasswordPolicyEnum? source)
-        {
-            return source?.Value switch
-            {
-                ConnectionPasswordPolicyEnum.Values.None => V2alpha1ConnectionOptionsPasswordPolicy.None,
-                ConnectionPasswordPolicyEnum.Values.Low => V2alpha1ConnectionOptionsPasswordPolicy.Low,
-                ConnectionPasswordPolicyEnum.Values.Fair => V2alpha1ConnectionOptionsPasswordPolicy.Fair,
-                ConnectionPasswordPolicyEnum.Values.Good => V2alpha1ConnectionOptionsPasswordPolicy.Good,
-                ConnectionPasswordPolicyEnum.Values.Excellent => V2alpha1ConnectionOptionsPasswordPolicy.Excellent,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionPasswordPolicyEnum ToApi(V2alpha1ConnectionOptionsPasswordPolicy source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionOptionsPasswordPolicy.None => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.None),
-                V2alpha1ConnectionOptionsPasswordPolicy.Low => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Low),
-                V2alpha1ConnectionOptionsPasswordPolicy.Fair => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Fair),
-                V2alpha1ConnectionOptionsPasswordPolicy.Good => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Good),
-                V2alpha1ConnectionOptionsPasswordPolicy.Excellent => new ConnectionPasswordPolicyEnum(ConnectionPasswordPolicyEnum.Values.Excellent),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionSamlSignatureAlgorithm? FromApi(ConnectionSignatureAlgorithmEnumSaml? source)
-        {
-            return source?.Value switch
-            {
-                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1 => V2alpha1ConnectionSamlSignatureAlgorithm.RsaSha1,
-                ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256 => V2alpha1ConnectionSamlSignatureAlgorithm.RsaSha256,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionSignatureAlgorithmEnumSaml ToApiSamlSignatureAlgorithm(V2alpha1ConnectionSamlSignatureAlgorithm source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionSamlSignatureAlgorithm.RsaSha1 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha1),
-                V2alpha1ConnectionSamlSignatureAlgorithm.RsaSha256 => new ConnectionSignatureAlgorithmEnumSaml(ConnectionSignatureAlgorithmEnumSaml.Values.RsaSha256),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionSamlDigestAlgorithm? FromApi(ConnectionDigestAlgorithmEnumSaml? source)
-        {
-            return source?.Value switch
-            {
-                ConnectionDigestAlgorithmEnumSaml.Values.Sha1 => V2alpha1ConnectionSamlDigestAlgorithm.Sha1,
-                ConnectionDigestAlgorithmEnumSaml.Values.Sha256 => V2alpha1ConnectionSamlDigestAlgorithm.Sha256,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionDigestAlgorithmEnumSaml ToApiSamlDigestAlgorithm(V2alpha1ConnectionSamlDigestAlgorithm source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionSamlDigestAlgorithm.Sha1 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha1),
-                V2alpha1ConnectionSamlDigestAlgorithm.Sha256 => new ConnectionDigestAlgorithmEnumSaml(ConnectionDigestAlgorithmEnumSaml.Values.Sha256),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionSamlProtocolBinding? FromApi(ConnectionProtocolBindingEnumSaml? source)
-        {
-            return source?.Value switch
-            {
-                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost => V2alpha1ConnectionSamlProtocolBinding.HttpPost,
-                ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect => V2alpha1ConnectionSamlProtocolBinding.HttpRedirect,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionProtocolBindingEnumSaml ToApiSamlProtocolBinding(V2alpha1ConnectionSamlProtocolBinding source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionSamlProtocolBinding.HttpPost => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpPost),
-                V2alpha1ConnectionSamlProtocolBinding.HttpRedirect => new ConnectionProtocolBindingEnumSaml(ConnectionProtocolBindingEnumSaml.Values.UrnOasisNamesTcSaml20BindingsHttpRedirect),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionIdpInitiatedClientProtocol? FromApi(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml? source)
-        {
-            return source?.Value switch
-            {
-                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc => V2alpha1ConnectionIdpInitiatedClientProtocol.Oidc,
-                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp => V2alpha1ConnectionIdpInitiatedClientProtocol.Samlp,
-                ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed => V2alpha1ConnectionIdpInitiatedClientProtocol.WsFed,
-                null => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionOptionsIdpInitiatedClientProtocolEnumSaml ToApiIdpInitiatedClientProtocol(V2alpha1ConnectionIdpInitiatedClientProtocol source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionIdpInitiatedClientProtocol.Oidc => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Oidc),
-                V2alpha1ConnectionIdpInitiatedClientProtocol.Samlp => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Samlp),
-                V2alpha1ConnectionIdpInitiatedClientProtocol.WsFed => new ConnectionOptionsIdpInitiatedClientProtocolEnumSaml(ConnectionOptionsIdpInitiatedClientProtocolEnumSaml.Values.Wsfed),
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static V2alpha1ConnectionAssertionDecryptionAlgorithmProfile? FromApi(ConnectionAssertionDecryptionAlgorithmProfileEnum source)
-        {
-            return source.Value switch
-            {
-                ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261 => V2alpha1ConnectionAssertionDecryptionAlgorithmProfile.V20261,
-                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
-            };
-        }
-
-        internal static ConnectionAssertionDecryptionAlgorithmProfileEnum ToApiAssertionDecryptionAlgorithmProfile(V2alpha1ConnectionAssertionDecryptionAlgorithmProfile source)
-        {
-            return source switch
-            {
-                V2alpha1ConnectionAssertionDecryptionAlgorithmProfile.V20261 => new ConnectionAssertionDecryptionAlgorithmProfileEnum(ConnectionAssertionDecryptionAlgorithmProfileEnum.Values.V20261),
+                V2alpha1ConnectionIdentifierPrecedenceEnum.Email => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Email),
+                V2alpha1ConnectionIdentifierPrecedenceEnum.PhoneNumber => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.PhoneNumber),
+                V2alpha1ConnectionIdentifierPrecedenceEnum.Username => new ConnectionIdentifierPrecedenceEnum(ConnectionIdentifierPrecedenceEnum.Values.Username),
                 _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
@@ -1649,24 +2283,393 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static ConnectionAttributes ToApi(V2alpha1ConnectionAttributes source)
+        {
+            return new ConnectionAttributes
+            {
+                Email = source.Email is { } email ? ToApi(email) : null,
+                PhoneNumber = source.PhoneNumber is { } phoneNumber ? ToApi(phoneNumber) : null,
+                Username = source.Username is { } username ? ToApi(username) : null,
+            };
+        }
+
+        internal static EmailAttribute ToApi(V2alpha1ConnectionEmailAttribute source)
+        {
+            return new EmailAttribute
+            {
+                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                Unique = source.Unique,
+                ProfileRequired = source.ProfileRequired,
+                VerificationMethod = ToApi(source.VerificationMethod),
+                Signup = source.Signup is { } signup ? ToApi(signup) : null,
+            };
+        }
+
+        internal static PhoneAttribute ToApi(V2alpha1ConnectionPhoneAttribute source)
+        {
+            return new PhoneAttribute
+            {
+                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                ProfileRequired = source.ProfileRequired,
+                Signup = source.Signup is { } signup ? ToApi(signup) : null,
+            };
+        }
+
+        internal static UsernameAttribute ToApi(V2alpha1ConnectionUsernameAttribute source)
+        {
+            return new UsernameAttribute
+            {
+                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                ProfileRequired = source.ProfileRequired,
+                Signup = source.Signup is { } signup ? ToApi(signup) : null,
+                Validation = source.Validation is { } validation ? ToApi(validation) : null,
+            };
+        }
+
+        internal static ConnectionAttributeIdentifier ToApi(V2alpha1ConnectionAttributeIdentifier source)
+        {
+            return new ConnectionAttributeIdentifier
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static VerificationMethodEnum? ToApi(V2alpha1ConnectionVerificationMethodEnum? source)
+        {
+            return source switch
+            {
+                V2alpha1ConnectionVerificationMethodEnum.Link => new VerificationMethodEnum(VerificationMethodEnum.Values.Link),
+                V2alpha1ConnectionVerificationMethodEnum.Otp => new VerificationMethodEnum(VerificationMethodEnum.Values.Otp),
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        internal static SignupVerified ToApi(V2alpha1ConnectionSignupVerified source)
+        {
+            return new SignupVerified
+            {
+                Status = source.Status is { } status ? ToApi(status) : null,
+                Verification = source.Verification is { } verification ? ToApi(verification) : null,
+            };
+        }
+
+        internal static SignupSchema ToApi(V2alpha1ConnectionSignupSchema source)
+        {
+            return new SignupSchema
+            {
+                Status = source.Status is { } status ? ToApi(status) : null,
+            };
+        }
+
+        internal static SignupVerification ToApi(V2alpha1ConnectionSignupVerification source)
+        {
+            return new SignupVerification
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static UsernameValidation ToApi(V2alpha1ConnectionUsernameValidation source)
+        {
+            return new UsernameValidation
+            {
+                MinLength = source.MinLength,
+                MaxLength = source.MaxLength,
+                AllowedTypes = source.AllowedTypes is { } allowedTypes ? ToApi(allowedTypes) : null,
+            };
+        }
+
+        internal static UsernameAllowedTypes ToApi(V2alpha1ConnectionUsernameAllowedTypes source)
+        {
+            return new UsernameAllowedTypes
+            {
+                Email = source.Email,
+                PhoneNumber = source.PhoneNumber,
+            };
+        }
+
+        internal static ConnectionAuthenticationMethods ToApi(V2alpha1ConnectionAuthenticationMethods source)
+        {
+            return new ConnectionAuthenticationMethods
+            {
+                Password = source.Password is { } password ? ToApi(password) : null,
+                Passkey = source.Passkey is { } passkey ? ToApi(passkey) : null,
+                EmailOtp = source.EmailOtp is { } emailOtp ? ToApi(emailOtp) : null,
+                PhoneOtp = source.PhoneOtp is { } phoneOtp ? ToApi(phoneOtp) : null,
+            };
+        }
+
+        internal static ConnectionPasswordAuthenticationMethod ToApi(V2alpha1ConnectionPasswordAuthenticationMethod source)
+        {
+            return new ConnectionPasswordAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static ConnectionPasskeyAuthenticationMethod ToApi(V2alpha1ConnectionPasskeyAuthenticationMethod source)
+        {
+            return new ConnectionPasskeyAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static ConnectionEmailOtpAuthenticationMethod ToApi(V2alpha1ConnectionEmailOtpAuthenticationMethod source)
+        {
+            return new ConnectionEmailOtpAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static ConnectionPhoneOtpAuthenticationMethod ToApi(V2alpha1ConnectionPhoneOtpAuthenticationMethod source)
+        {
+            return new ConnectionPhoneOtpAuthenticationMethod
+            {
+                Enabled = source.Enabled,
+            };
+        }
+
+        internal static ConnectionPasskeyOptions ToApi(V2alpha1ConnectionPasskeyOptions source)
+        {
+            return new ConnectionPasskeyOptions
+            {
+                ChallengeUi = source.ChallengeUi is { } challengeUi ? ToApi(challengeUi) : null,
+                ProgressiveEnrollmentEnabled = source.ProgressiveEnrollmentEnabled,
+                LocalEnrollmentEnabled = source.LocalEnrollmentEnabled,
+            };
+        }
+
+        internal static ConnectionPasswordOptions ToApi(V2alpha1ConnectionPasswordOptions source)
+        {
+            return new ConnectionPasswordOptions
+            {
+                Complexity = source.Complexity is { } complexity ? ToApi(complexity) : null,
+                Dictionary = source.Dictionary is { } dictionary ? ToApi(dictionary) : null,
+                History = source.History is { } history ? ToApi(history) : null,
+                ProfileData = source.ProfileData is { } profileData ? ToApi(profileData) : null,
+            };
+        }
+
+        internal static ConnectionPasswordOptionsComplexity ToApi(V2alpha1ConnectionPasswordOptionsComplexity source)
+        {
+            return new ConnectionPasswordOptionsComplexity
+            {
+                MinLength = source.MinLength,
+            };
+        }
+
+        internal static ConnectionPasswordOptionsDictionary ToApi(V2alpha1ConnectionPasswordOptionsDictionary source)
+        {
+            return new ConnectionPasswordOptionsDictionary
+            {
+                Active = source.Active,
+                Custom = source.Custom,
+            };
+        }
+
+        internal static ConnectionPasswordOptionsHistory ToApi(V2alpha1ConnectionPasswordOptionsHistory source)
+        {
+            return new ConnectionPasswordOptionsHistory
+            {
+                Active = source.Active,
+                Size = source.Size,
+            };
+        }
+
+        internal static ConnectionPasswordOptionsProfileData ToApi(V2alpha1ConnectionPasswordOptionsProfileData source)
+        {
+            return new ConnectionPasswordOptionsProfileData
+            {
+                Active = source.Active,
+                BlockedFields = source.BlockedFields,
+            };
+        }
+
+        internal static ConnectionPasswordHistoryOptions ToApi(V2alpha1ConnectionPasswordHistoryOptions source)
+        {
+            return new ConnectionPasswordHistoryOptions
+            {
+                Enable = source.Enable ?? false,
+                Size = source.Size,
+            };
+        }
+
+        internal static ConnectionPasswordNoPersonalInfoOptions ToApi(V2alpha1ConnectionPasswordNoPersonalInfoOptions source)
+        {
+            return new ConnectionPasswordNoPersonalInfoOptions
+            {
+                Enable = source.Enable ?? false,
+            };
+        }
+
+        internal static ConnectionPasswordDictionaryOptions ToApi(V2alpha1ConnectionPasswordDictionaryOptions source)
+        {
+            return new ConnectionPasswordDictionaryOptions
+            {
+                Enable = source.Enable ?? false,
+                Dictionary = source.Dictionary,
+            };
+        }
+
+        internal static ConnectionPasswordComplexityOptions ToApi(V2alpha1ConnectionPasswordComplexityOptions source)
+        {
+            return new ConnectionPasswordComplexityOptions
+            {
+                MinLength = source.MinLength,
+            };
+        }
+
+        internal static ConnectionValidationOptions ToApi(V2alpha1ConnectionValidationOptions source)
+        {
+            var target = new ConnectionValidationOptions();
+            if (source.Username is { } username)
+                target.Username = Optional<ConnectionUsernameValidationOptions?>.Of(ToApi(username));
+
+            return target;
+        }
+
+        internal static ConnectionUsernameValidationOptions ToApi(V2alpha1ConnectionUsernameValidationOptions source)
+        {
+            return new ConnectionUsernameValidationOptions
+            {
+                Min = source.Min ?? 0,
+                Max = source.Max ?? 0,
+            };
+        }
+
+        internal static ConnectionMfa ToApi(V2alpha1ConnectionMfa source)
+        {
+            return new ConnectionMfa
+            {
+                Active = source.Active,
+                ReturnEnrollSettings = source.ReturnEnrollSettings,
+            };
+        }
+
+        internal static ConnectionFederatedConnectionsAccessTokens ToApi(V2alpha1ConnectionFederatedConnectionsAccessTokens source)
+        {
+            return new ConnectionFederatedConnectionsAccessTokens
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?> ToApi(IEnumerable<V2alpha1ConnectionIdTokenSignedResponseAlgEnum> source)
+        {
+            return Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(source.Select(ToApi));
+        }
+
+        internal static ConnectionAttributeMapOidc ToApi(V2alpha1ConnectionAttributeMapOidc source)
+        {
+            return new ConnectionAttributeMapOidc
+            {
+                MappingMode = ToApi(source.MappingMode),
+                UserinfoScope = source.UserinfoScope,
+                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!),
+            };
+        }
+
+        internal static ConnectionConnectionSettings ToApi(V2alpha1ConnectionConnectionSettings source)
+        {
+            return new ConnectionConnectionSettings
+            {
+                Pkce = ToApi(source.Pkce),
+            };
+        }
+
+        internal static ConnectionAttributeMapOkta ToApi(V2alpha1ConnectionAttributeMapOkta source)
+        {
+            return new ConnectionAttributeMapOkta
+            {
+                MappingMode = ToApi(source.MappingMode),
+                UserinfoScope = source.UserinfoScope,
+                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!),
+            };
+        }
+
+        internal static ConnectionOptionsIdpinitiatedSaml ToApi(V2alpha1ConnectionOptionsIdpinitiatedSaml source)
+        {
+            return new ConnectionOptionsIdpinitiatedSaml
+            {
+                ClientId = source.ClientId,
+                ClientProtocol = source.ClientProtocol is { } clientProtocol ? ToApi(clientProtocol) : null,
+                ClientAuthorizequery = source.ClientAuthorizequery,
+            };
+        }
+
+        internal static ConnectionAssertionDecryptionSettings? ToApi(V2alpha1ConnectionAssertionDecryptionSettings source)
+        {
+            if (source.AlgorithmProfile is not { } algorithmProfile)
+                return null;
+
+            return new ConnectionAssertionDecryptionSettings
+            {
+                AlgorithmProfile = ToApi(algorithmProfile),
+                AlgorithmExceptions = source.AlgorithmExceptions,
+            };
+        }
+
+        internal static ConnectionSigningKeySaml ToApi(V2alpha1ConnectionSigningKeySaml source)
+        {
+            return new ConnectionSigningKeySaml
+            {
+                Key = source.Key,
+                Cert = source.Cert,
+            };
+        }
+
+        internal static ConnectionGatewayAuthenticationSms ToApi(V2alpha1ConnectionGatewayAuthenticationSms source)
+        {
+            var target = new ConnectionGatewayAuthenticationSms
+            {
+                Method = source.Method ?? string.Empty,
+                Audience = source.Audience ?? string.Empty,
+                Secret = source.Secret ?? string.Empty,
+            };
+
+            if (source.Subject is { } subject)
+                target.Subject = subject;
+
+            if (source.SecretBase64Encoded is { } secretBase64Encoded)
+                target.SecretBase64Encoded = secretBase64Encoded;
+
+            return target;
+        }
+
         internal static ConnectionOptionsAuth0 ToApi(V2alpha1ConnectionOptionsAuth0 source)
         {
             var target = new ConnectionOptionsAuth0();
+            if (source.Attributes is { } attributes)
+                target.Attributes = ToApi(attributes);
+            if (source.AuthenticationMethods is { } authenticationMethods)
+                target.AuthenticationMethods = Optional<ConnectionAuthenticationMethods?>.Of(ToApi(authenticationMethods));
             target.BruteForceProtection = source.BruteForceProtection;
+            if (source.Configuration is { } configuration) target.Configuration = configuration.ToDictionary(kv => kv.Key, kv => kv.Value);
+            target.DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword;
             target.DisableSignup = source.DisableSignup;
             target.EnableScriptContext = source.EnableScriptContext;
             target.EnabledDatabaseCustomization = source.EnabledDatabaseCustomization;
             target.ImportMode = source.ImportMode;
+            if (source.PasskeyOptions is { } passkeyOptions)
+                target.PasskeyOptions = Optional<ConnectionPasskeyOptions?>.Of(ToApi(passkeyOptions));
+            if (source.PasswordOptions is { } passwordOptions)
+                target.PasswordOptions = ToApi(passwordOptions);
+            if (source.Precedence is { } precedence)
+                target.Precedence = precedence.Select(i => ToApi(i)).ToArray();
+            target.RealmFallback = source.RealmFallback;
             target.RequiresUsername = source.RequiresUsername;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (source.PasswordPolicy is { } pp) target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(new ConnectionPasswordPolicyEnum(pp));
-            if (source.PasswordHistory is { } ph) target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(new ConnectionPasswordHistoryOptions { Enable = ph.Enable ?? false, Size = ph.Size });
-            if (source.PasswordNoPersonalInfo is { } pnpi) target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(new ConnectionPasswordNoPersonalInfoOptions { Enable = pnpi.Enable ?? false });
-            if (source.PasswordDictionary is { } pd) target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(new ConnectionPasswordDictionaryOptions { Enable = pd.Enable ?? false, Dictionary = pd.Dictionary });
-            if (source.PasswordComplexityOptions is { } pco) target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(new ConnectionPasswordComplexityOptions { MinLength = pco.MinLength });
-            if (source.Validation is { } val) { var v = new ConnectionValidationOptions(); if (val.UserName is { } un) v.Username = Optional<ConnectionUsernameValidationOptions?>.Of(new ConnectionUsernameValidationOptions { Min = un.Min ?? 0, Max = un.Max ?? 0 }); target.Validation = Optional<ConnectionValidationOptions?>.Of(v); }
+            if (source.PasswordPolicy is { } pp) target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(ToApi(pp));
+            if (source.PasswordHistory is { } ph) target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(ToApi(ph));
+            if (source.PasswordNoPersonalInfo is { } pnpi) target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(ToApi(pnpi));
+            if (source.PasswordDictionary is { } pd) target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(ToApi(pd));
+            if (source.PasswordComplexityOptions is { } pco) target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(ToApi(pco));
+            if (source.Validation is { } val) target.Validation = Optional<ConnectionValidationOptions?>.Of(ToApi(val));
             if (source.CustomScripts is { } cs) { target.CustomScripts ??= new ConnectionCustomScripts(); ApplyToApi(cs, target.CustomScripts); }
-            if (source.Mfa is { } mfa) target.Mfa = new ConnectionMfa { Active = mfa.Active, ReturnEnrollSettings = mfa.ReturnEnrollSettings };
+            if (source.Mfa is { } mfa) target.Mfa = ToApi(mfa);
             return target;
         }
 
@@ -1674,6 +2677,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             var target = new ConnectionOptionsAd();
             target.AgentIp = source.AgentIp;
+            target.AgentMode = source.AgentMode;
             target.AgentVersion = source.AgentVersion;
             target.BruteForceProtection = source.BruteForceProtection;
             target.CertAuth = source.CertAuth;
@@ -1687,9 +2691,10 @@ namespace Alethic.Auth0.Operator.Controllers
             target.TenantDomain = source.TenantDomain;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.Kerberos is { } kb) target.Kerberos = kb.Enabled;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.Kerberos is { } kb) target.Kerberos = kb;
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1702,13 +2707,16 @@ namespace Alethic.Auth0.Operator.Controllers
             target.FedMetadataXml = source.FedMetadataXml;
             target.IconUrl = source.IconUrl;
             if (source.PrevThumbprints is { } pt) target.PrevThumbprints = pt;
+            if (source.ShouldTrustEmailVerifiedConnection is not null)
+                target.ShouldTrustEmailVerifiedConnection = ToApi(source.ShouldTrustEmailVerifiedConnection);
             target.SignInEndpoint = source.SignInEndpoint;
             target.TenantDomain = source.TenantDomain;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
             target.UserIdAttribute = source.UserIdAttribute;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1772,18 +2780,29 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtUpn = source.ExtUpn;
             target.ExtUsageLocation = source.ExtUsageLocation;
             target.ExtUserId = source.ExtUserId;
+            if (source.FederatedConnectionsAccessTokens is { } federatedConnectionsAccessTokens)
+                target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(federatedConnectionsAccessTokens));
             target.Granted = source.Granted;
             target.IconUrl = source.IconUrl;
+            if (source.IdentityApi is not null)
+                target.IdentityApi = ToApi(source.IdentityApi);
             target.MaxGroupsToRetrieve = source.MaxGroupsToRetrieve;
             if (source.Scope is { } scope) target.Scope = scope;
+            if (source.ShouldTrustEmailVerifiedConnection is not null)
+                target.ShouldTrustEmailVerifiedConnection = ToApi(source.ShouldTrustEmailVerifiedConnection);
             target.TenantDomain = source.TenantDomain;
             target.TenantId = source.TenantId;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
             target.UseCommonEndpoint = source.UseCommonEndpoint;
             target.UseWsfed = source.UseWsfed;
+            if (source.UseridAttribute is not null)
+                target.UseridAttribute = ToApi(source.UseridAttribute);
+            if (source.WaadProtocol is not null)
+                target.WaadProtocol = ToApi(source.WaadProtocol);
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1796,7 +2815,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             return target;
         }
 
@@ -1806,8 +2826,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1817,8 +2838,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1833,7 +2855,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     From = e.From,
                     Subject = e.Subject,
                     Body = e.Body,
-                    Syntax = e.Syntax is { } s ? new ConnectionEmailEmailSyntax(s) : null,
+                    Syntax = ToApi(e.Syntax),
                 } : new ConnectionEmailEmail(),
                 Totp = source.Totp is { } t ? new ConnectionTotpEmail
                 {
@@ -1851,8 +2873,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1862,8 +2885,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1875,7 +2899,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = string.Join(" ", scope);
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.AdsManagement = source.AdsManagement;
             target.AdsRead = source.AdsRead;
             target.AllowContextProfileField = source.AllowContextProfileField;
@@ -1917,7 +2942,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserStatus = source.UserStatus;
             target.UserTaggedPlaces = source.UserTaggedPlaces;
             target.UserVideos = source.UserVideos;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParamsNonOptional(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalPropertiesNonOptional(up);
             return target;
         }
 
@@ -1929,7 +2954,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.AdminOrg = source.AdminOrg;
             target.AdminPublicKey = source.AdminPublicKey;
             target.AdminRepoHook = source.AdminRepoHook;
@@ -1950,7 +2976,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.WriteOrg = source.WriteOrg;
             target.WritePublicKey = source.WritePublicKey;
             target.WriteRepoHook = source.WriteRepoHook;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1978,7 +3004,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FederatedConnectionsAccessTokens is { } fcat)
                 target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(
                     new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -1990,7 +3016,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.IconUrl = source.IconUrl;
             if (source.AllowedAudiences is { } aa) target.AllowedAudiences = aa;
             target.AdsenseManagement = source.AdsenseManagement;
@@ -2058,7 +3085,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.YoutubeReadonly = source.YoutubeReadonly;
             target.YoutubeUpload = source.YoutubeUpload;
             target.Youtubepartner = source.Youtubepartner;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2070,15 +3097,16 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.BasicProfile = source.BasicProfile;
-            target.Email = source.EmailAddress;
+            target.Email = source.Email;
             target.FullProfile = source.FullProfile;
             target.Network = source.Network;
             target.Openid = source.Openid;
             target.Profile = source.Profile;
             target.StrategyVersion = source.StrategyVersion;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2089,10 +3117,12 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientSecret = source.ClientSecret;
             target.AccessTokenUrl = source.AccessTokenUrl;
             target.RequestTokenUrl = source.RequestTokenUrl;
+            if (source.SignatureMethod is not null)
+                target.SignatureMethod = ToApi(source.SignatureMethod);
             target.UserAuthorizationUrl = source.UserAuthorizationUrl;
             if (source.Scripts is { } sc) target.Scripts = new ConnectionScriptsOAuth1 { FetchUserProfile = sc.FetchUserProfile };
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2104,6 +3134,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.AuthorizationUrl = source.AuthorizationUrl;
             target.TokenUrl = source.TokenUrl;
             target.LogoutUrl = source.LogoutUrl;
+            if (source.Scope is { } scope) target.Scope = string.Join(" ", scope);
             target.IconUrl = source.IconUrl;
             target.PkceEnabled = source.PkceEnabled;
             target.UseOauthSpecScope = source.UseOauthSpecScope;
@@ -2113,8 +3144,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FieldsMap is { } fm) target.FieldsMap = fm.ToDictionary(kv => kv.Key, kv => kv.Value);
             if (source.CustomHeaders is { } ch) target.CustomHeaders = ch.ToDictionary(kv => kv.Key, kv => kv.Value);
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2135,18 +3167,29 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserinfoEndpoint = source.UserinfoEndpoint;
             target.JwksUri = source.JwksUri;
             target.Issuer = source.Issuer;
-            target.Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null;
+            target.Scope = source.Scope;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
+            if (source.TokenEndpointAuthMethod is not null)
+                target.TokenEndpointAuthMethod = Optional<ConnectionTokenEndpointAuthMethodEnum?>.Of(ToApi(source.TokenEndpointAuthMethod));
+            if (source.TokenEndpointAuthSigningAlg is not null)
+                target.TokenEndpointAuthSigningAlg = Optional<ConnectionTokenEndpointAuthSigningAlgEnum?>.Of(ToApi(source.TokenEndpointAuthSigningAlg));
+            if (source.TokenEndpointJwtcaAudFormat is not null)
+                target.TokenEndpointJwtcaAudFormat = ToApi(source.TokenEndpointJwtcaAudFormat);
+            if (source.DpopSigningAlg is not null)
+                target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
-            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
-            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOidc(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!) };
-            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
-            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+            if (source.Type is not null)
+                target.Type = ToApi(source.Type);
+            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = ToApi(algs);
+            if (source.AttributeMap is { } am) target.AttributeMap = ToApi(am);
+            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = ToApi(cs);
+            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(fcat));
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2159,18 +3202,29 @@ namespace Alethic.Auth0.Operator.Controllers
             target.UserinfoEndpoint = source.UserinfoEndpoint;
             target.JwksUri = source.JwksUri;
             target.Issuer = source.Issuer;
-            target.Scope = source.Scope is not null ? string.Join(" ", source.Scope) : null;
+            target.Scope = source.Scope;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
+            if (source.TokenEndpointAuthMethod is not null)
+                target.TokenEndpointAuthMethod = Optional<ConnectionTokenEndpointAuthMethodEnum?>.Of(ToApi(source.TokenEndpointAuthMethod));
+            if (source.TokenEndpointAuthSigningAlg is not null)
+                target.TokenEndpointAuthSigningAlg = Optional<ConnectionTokenEndpointAuthSigningAlgEnum?>.Of(ToApi(source.TokenEndpointAuthSigningAlg));
+            if (source.TokenEndpointJwtcaAudFormat is not null)
+                target.TokenEndpointJwtcaAudFormat = ToApi(source.TokenEndpointJwtcaAudFormat);
+            if (source.DpopSigningAlg is not null)
+                target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
-            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?>.Of(algs.Select(a => new ConnectionIdTokenSignedResponseAlgEnum(a)));
-            if (source.AttributeMap is { } am) target.AttributeMap = new ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mm ? new ConnectionMappingModeEnumOkta(mm) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!) };
-            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = new ConnectionConnectionSettings { Pkce = cs.Pkce is { } p ? new ConnectionConnectionSettingsPkceEnum(p) : null };
-            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+            if (source.Type is not null)
+                target.Type = ToApi(source.Type);
+            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = ToApi(algs);
+            if (source.AttributeMap is { } am) target.AttributeMap = ToApi(am);
+            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = ToApi(cs);
+            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(fcat));
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2182,7 +3236,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.Address = source.Address;
             target.Email = source.Email;
             target.Phone = source.Phone;
@@ -2198,19 +3253,19 @@ namespace Alethic.Auth0.Operator.Controllers
             target.Cert = source.Cert;
             target.SigningCert = source.SigningCert;
             if (source.Thumbprints is { } tp) target.Thumbprints = tp;
-            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApiSamlSignatureAlgorithm(sigAlg);
-            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApiSamlDigestAlgorithm(digAlg);
-            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApiSamlProtocolBinding(pb);
+            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApi(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApi(digAlg);
+            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApi(pb);
             target.SignSamlRequest = source.SignSamlRequest;
-            if (source.Idpinitiated is { } idp) target.Idpinitiated = new ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } cp ? ToApiIdpInitiatedClientProtocol(cp) : null, ClientAuthorizequery = idp.ClientAuthorizequery };
-            if (source.DecryptionKey is { Key: { } dkKey }) target.DecryptionKey = ConnectionDecryptionKeySaml.FromString(dkKey);
-            if (source.AssertionDecryptionSettings is { DecryptionAlgorithm: { } adsAlg }) target.AssertionDecryptionSettings = new ConnectionAssertionDecryptionSettings { AlgorithmProfile = ToApiAssertionDecryptionAlgorithmProfile(adsAlg) };
+            if (source.Idpinitiated is { } idp) target.Idpinitiated = ToApi(idp);
+            if (source.AssertionDecryptionSettings is { } ads) target.AssertionDecryptionSettings = ToApi(ads);
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2223,8 +3278,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2238,8 +3294,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2257,18 +3314,16 @@ namespace Alethic.Auth0.Operator.Controllers
             target.MetadataXml = source.MetadataXml;
             target.EntityId = source.EntityId;
             target.SignSamlRequest = source.SignSamlRequest;
-            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApiSamlSignatureAlgorithm(sigAlg);
-            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApiSamlDigestAlgorithm(digAlg);
-            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApiSamlProtocolBinding(pb);
+            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApi(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApi(digAlg);
+            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApi(pb);
             target.RequestTemplate = source.RequestTemplate;
             target.Debug = source.Debug;
             target.Deflate = source.Deflate;
-            if (source.Idpinitiated is { } idp) target.Idpinitiated = new ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } cp ? ToApiIdpInitiatedClientProtocol(cp) : null, ClientAuthorizequery = idp.ClientAuthorizequery };
+            if (source.Idpinitiated is { } idp) target.Idpinitiated = ToApi(idp);
             target.SigningCert = source.SigningCert;
-            if (source.SigningKey is { } sk) target.SigningKey = new ConnectionSigningKeySaml { Key = sk.Key, Cert = sk.Cert };
-            if (source.DecryptionKey is { Key: { } dkKey }) target.DecryptionKey = ConnectionDecryptionKeySaml.FromString(dkKey);
-            if (source.AssertionDecryptionSettings is { DecryptionAlgorithm: { } adsAlg }) target.AssertionDecryptionSettings = new ConnectionAssertionDecryptionSettings { AlgorithmProfile = ToApiAssertionDecryptionAlgorithmProfile(adsAlg) };
-            if (source.FieldsMap is { } fm) target.FieldsMap = fm.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => ConnectionFieldsMapSamlValue.FromString(kv.Value!));
+            if (source.SigningKey is { } sk) target.SigningKey = ToApi(sk);
+            if (source.AssertionDecryptionSettings is { } ads) target.AssertionDecryptionSettings = ToApi(ads);
             target.UserIdAttribute = source.UserIdAttribute;
             target.IconUrl = source.IconUrl;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
@@ -2276,8 +3331,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.GlobalTokenRevocationJwtIss = source.GlobalTokenRevocationJwtIss;
             target.GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2297,17 +3353,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.Totp is { } t) target.Totp = new ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep };
             if (source.GatewayAuthentication is { } ga)
-            {
-                var gatewayAuth = new ConnectionGatewayAuthenticationSms
-                {
-                    Method = ga.Method ?? string.Empty,
-                    Audience = ga.Audience ?? string.Empty,
-                    Secret = ga.Secret ?? string.Empty,
-                };
-                if (ga.Subject is { } subject) gatewayAuth.Subject = subject;
-                if (ga.SecretBase64Encoded is { } sbe) gatewayAuth.SecretBase64Encoded = sbe;
-                target.GatewayAuthentication = Optional<ConnectionGatewayAuthenticationSms?>.Of(gatewayAuth);
-            }
+                target.GatewayAuthentication = Optional<ConnectionGatewayAuthenticationSms?>.Of(ToApi(ga));
             return target;
         }
 
@@ -2319,12 +3365,15 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.Protocol is not null)
+                target.Protocol = ToApi(source.Protocol);
             target.OfflineAccess = source.OfflineAccess;
             target.Profile = source.Profile;
             target.TweetRead = source.TweetRead;
             target.UsersRead = source.UsersRead;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2336,8 +3385,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            target.Basic = source.BasicProfile;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            target.Basic = source.Basic;
             target.OfflineAccess = source.OfflineAccess;
             target.Signin = source.Signin;
             target.Birthday = source.Birthday;
@@ -2345,7 +3395,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.CalendarsUpdate = source.CalendarsUpdate;
             target.ContactsBirthday = source.ContactsBirthday;
             target.ContactsCreate = source.ContactsCreate;
-            target.ContactsCalendars = source.ContactsCalendar;
+            target.ContactsCalendars = source.ContactsCalendars;
             target.ContactsPhotos = source.ContactsPhotos;
             target.ContactsSkydrive = source.ContactsSkydrive;
             target.Emails = source.Emails;
@@ -2396,7 +3446,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.TeamReadwriteAll = source.TeamReadwriteAll;
             target.UserReadAll = source.UserReadAll;
             target.UserReadbasicAll = source.UserReadbasicAll;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2406,8 +3456,9 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (ToApi(source.SetUserRootAttributes) is { } sura) target.SetUserRootAttributes = sura;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamParams(up);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2763,6 +3814,36 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.Active is { } active)
                 target.Active = active;
+        }
+
+        static void ApplyToApi(V2alpha1ConnectionCustomScripts source, ConnectionCustomScripts target)
+        {
+            if (source.Login is { } login)
+                target.Login = login;
+
+            if (source.GetUser is { } getUser)
+                target.GetUser = getUser;
+
+            if (source.Delete is { } delete)
+                target.Delete = delete;
+
+            if (source.ChangePassword is { } changePassword)
+                target.ChangePassword = changePassword;
+
+            if (source.Verify is { } verify)
+                target.Verify = verify;
+
+            if (source.Create is { } create)
+                target.Create = create;
+
+            if (source.ChangeUsername is { } changeUsername)
+                target.ChangeUsername = changeUsername;
+
+            if (source.ChangeEmail is { } changeEmail)
+                target.ChangeEmail = changeEmail;
+
+            if (source.ChangePhoneNumber is { } changePhoneNumber)
+                target.ChangePhoneNumber = changePhoneNumber;
         }
 
         static void ApplyToApi(V2alpha1ConnectionOptionsCustomScripts source, ConnectionCustomScripts target)
