@@ -477,7 +477,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -492,7 +492,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -533,7 +533,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -548,7 +548,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -606,7 +606,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 AllowContextProfileField = source.AllowContextProfileField,
                 PagesManageCta = source.PagesManageCta,
                 PagesManageInstantArticles = source.PagesManageInstantArticles,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -643,7 +643,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 WritePublicKey = source.WritePublicKey,
                 WriteRepoHook = source.WriteRepoHook,
                 Profile = source.Profile,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -764,7 +764,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 YoutubeReadonly = source.YoutubeReadonly,
                 YoutubeUpload = source.YoutubeUpload,
                 Youtubepartner = source.Youtubepartner,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -788,7 +788,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 StrategyVersion = source.StrategyVersion,
                 Network = source.Network,
                 Profile = source.Profile,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -876,7 +876,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
                 Type = FromApi(source.Type),
-                OidcMetadata = null,
+                OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
                 FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
@@ -911,7 +911,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
                 Type = FromApi(source.Type),
-                OidcMetadata = null,
+                OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
                 FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
@@ -960,14 +960,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 SignSamlRequest = source.SignSamlRequest,
                 ProtocolBinding = FromApi(source.ProtocolBinding),
                 Idpinitiated = source.Idpinitiated is { } idp ? FromApi(idp) : null,
-                DecryptionKey = null,
+                DecryptionKey = FromApi(source.DecryptionKey),
                 AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? FromApi(ads) : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -985,7 +985,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1004,7 +1004,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1035,7 +1035,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 Idpinitiated = source.Idpinitiated is { } idp ? FromApi(idp) : null,
                 SigningCert = source.SigningCert,
                 SigningKey = source.SigningKey is { } signingKey ? new V2alpha1ConnectionSigningKeySaml { Key = signingKey.Key, Cert = signingKey.Cert } : null,
-                DecryptionKey = null,
+                DecryptionKey = FromApi(source.DecryptionKey),
                 AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? FromApi(ads) : null,
                 FieldsMap = null,
                 UserIdAttribute = source.UserIdAttribute,
@@ -1048,6 +1048,58 @@ namespace Alethic.Auth0.Operator.Controllers
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
             };
+        }
+
+        internal static V2alpha1ConnectionDecryptionKeySaml? FromApi(ConnectionDecryptionKeySaml? source)
+        {
+            if (source is null)
+                return null;
+
+            if (source.IsString())
+            {
+                return new V2alpha1ConnectionDecryptionKeySaml
+                {
+                    PrivateKey = source.AsString(),
+                };
+            }
+
+            if (source.IsConnectionDecryptionKeySamlCert())
+            {
+                var cert = source.AsConnectionDecryptionKeySamlCert();
+                return new V2alpha1ConnectionDecryptionKeySaml
+                {
+                    KeyPair = new V2alpha1ConnectionDecryptionKeySamlCert
+                    {
+                        Cert = cert.Cert,
+                        Key = cert.Key,
+                    },
+                };
+            }
+
+            return new V2alpha1ConnectionDecryptionKeySaml();
+        }
+
+        internal static ConnectionDecryptionKeySaml? ToApi(V2alpha1ConnectionDecryptionKeySaml? source)
+        {
+            if (source is null)
+                return null;
+
+            if (source.PrivateKey is { } privateKey)
+            {
+                return ConnectionDecryptionKeySaml.FromString(privateKey);
+            }
+
+            if (source.KeyPair is { } keyPair)
+            {
+                return ConnectionDecryptionKeySaml.FromConnectionDecryptionKeySamlCert(
+                    new ConnectionDecryptionKeySamlCert
+                    {
+                        Cert = keyPair.Cert,
+                        Key = keyPair.Key,
+                    });
+            }
+
+            return null;
         }
 
         internal static V2alpha1ConnectionOptionsSms? FromApi(ConnectionOptionsSms? source)
@@ -1093,7 +1145,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 TweetRead = source.TweetRead,
                 UsersRead = source.UsersRead,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -1184,7 +1236,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = null,
+                UpstreamParams = FromApi(source.UpstreamParams),
             };
         }
 
@@ -2097,6 +2149,50 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V2alpha1ConnectionOptionsOidcMetadata FromApi(ConnectionOptionsOidcMetadata source)
+        {
+            return new V2alpha1ConnectionOptionsOidcMetadata
+            {
+                AcrValuesSupported = source.AcrValuesSupported?.ToArray(),
+                AuthorizationEndpoint = source.AuthorizationEndpoint,
+                ClaimTypesSupported = source.ClaimTypesSupported?.ToArray(),
+                ClaimsLocalesSupported = source.ClaimsLocalesSupported?.ToArray(),
+                ClaimsParameterSupported = source.ClaimsParameterSupported,
+                ClaimsSupported = source.ClaimsSupported?.ToArray(),
+                DisplayValuesSupported = source.DisplayValuesSupported?.ToArray(),
+                DpopSigningAlgValuesSupported = source.DpopSigningAlgValuesSupported?.ToArray(),
+                EndSessionEndpoint = source.EndSessionEndpoint,
+                GrantTypesSupported = source.GrantTypesSupported?.ToArray(),
+                IdTokenEncryptionAlgValuesSupported = source.IdTokenEncryptionAlgValuesSupported?.ToArray(),
+                IdTokenEncryptionEncValuesSupported = source.IdTokenEncryptionEncValuesSupported?.ToArray(),
+                IdTokenSigningAlgValuesSupported = source.IdTokenSigningAlgValuesSupported?.ToArray(),
+                Issuer = source.Issuer,
+                JwksUri = source.JwksUri,
+                OpPolicyUri = source.OpPolicyUri,
+                OpTosUri = source.OpTosUri,
+                RegistrationEndpoint = source.RegistrationEndpoint,
+                RequestObjectEncryptionAlgValuesSupported = source.RequestObjectEncryptionAlgValuesSupported?.ToArray(),
+                RequestObjectEncryptionEncValuesSupported = source.RequestObjectEncryptionEncValuesSupported?.ToArray(),
+                RequestObjectSigningAlgValuesSupported = source.RequestObjectSigningAlgValuesSupported?.ToArray(),
+                RequestParameterSupported = source.RequestParameterSupported,
+                RequestUriParameterSupported = source.RequestUriParameterSupported,
+                RequireRequestUriRegistration = source.RequireRequestUriRegistration,
+                ResponseModesSupported = source.ResponseModesSupported?.ToArray(),
+                ResponseTypesSupported = source.ResponseTypesSupported?.ToArray(),
+                ScopesSupported = source.ScopesSupported.IsDefined && source.ScopesSupported.Value is { } scopesSupported ? scopesSupported.ToArray() : null,
+                ServiceDocumentation = source.ServiceDocumentation,
+                SubjectTypesSupported = source.SubjectTypesSupported?.ToArray(),
+                TokenEndpoint = source.TokenEndpoint,
+                TokenEndpointAuthMethodsSupported = source.TokenEndpointAuthMethodsSupported?.ToArray(),
+                TokenEndpointAuthSigningAlgValuesSupported = source.TokenEndpointAuthSigningAlgValuesSupported?.ToArray(),
+                UiLocalesSupported = source.UiLocalesSupported?.ToArray(),
+                UserinfoEncryptionAlgValuesSupported = source.UserinfoEncryptionAlgValuesSupported?.ToArray(),
+                UserinfoEncryptionEncValuesSupported = source.UserinfoEncryptionEncValuesSupported?.ToArray(),
+                UserinfoEndpoint = source.UserinfoEndpoint,
+                UserinfoSigningAlgValuesSupported = source.UserinfoSigningAlgValuesSupported?.ToArray(),
+            };
+        }
+
         internal static V2alpha1ConnectionTypeEnumOkta? FromApi(ConnectionTypeEnumOkta? source)
         {
             return source?.Value switch
@@ -2606,6 +2702,50 @@ namespace Alethic.Auth0.Operator.Controllers
             return new ConnectionFederatedConnectionsAccessTokens
             {
                 Active = source.Active,
+            };
+        }
+
+        internal static ConnectionOptionsOidcMetadata ToApi(V2alpha1ConnectionOptionsOidcMetadata source)
+        {
+            return new ConnectionOptionsOidcMetadata
+            {
+                AcrValuesSupported = source.AcrValuesSupported,
+                AuthorizationEndpoint = source.AuthorizationEndpoint,
+                ClaimTypesSupported = source.ClaimTypesSupported,
+                ClaimsLocalesSupported = source.ClaimsLocalesSupported,
+                ClaimsParameterSupported = source.ClaimsParameterSupported,
+                ClaimsSupported = source.ClaimsSupported,
+                DisplayValuesSupported = source.DisplayValuesSupported,
+                DpopSigningAlgValuesSupported = source.DpopSigningAlgValuesSupported,
+                EndSessionEndpoint = source.EndSessionEndpoint,
+                GrantTypesSupported = source.GrantTypesSupported,
+                IdTokenEncryptionAlgValuesSupported = source.IdTokenEncryptionAlgValuesSupported,
+                IdTokenEncryptionEncValuesSupported = source.IdTokenEncryptionEncValuesSupported,
+                IdTokenSigningAlgValuesSupported = source.IdTokenSigningAlgValuesSupported,
+                Issuer = source.Issuer,
+                JwksUri = source.JwksUri,
+                OpPolicyUri = source.OpPolicyUri,
+                OpTosUri = source.OpTosUri,
+                RegistrationEndpoint = source.RegistrationEndpoint,
+                RequestObjectEncryptionAlgValuesSupported = source.RequestObjectEncryptionAlgValuesSupported,
+                RequestObjectEncryptionEncValuesSupported = source.RequestObjectEncryptionEncValuesSupported,
+                RequestObjectSigningAlgValuesSupported = source.RequestObjectSigningAlgValuesSupported,
+                RequestParameterSupported = source.RequestParameterSupported,
+                RequestUriParameterSupported = source.RequestUriParameterSupported,
+                RequireRequestUriRegistration = source.RequireRequestUriRegistration,
+                ResponseModesSupported = source.ResponseModesSupported,
+                ResponseTypesSupported = source.ResponseTypesSupported,
+                ServiceDocumentation = source.ServiceDocumentation,
+                SubjectTypesSupported = source.SubjectTypesSupported,
+                TokenEndpoint = source.TokenEndpoint,
+                TokenEndpointAuthMethodsSupported = source.TokenEndpointAuthMethodsSupported,
+                TokenEndpointAuthSigningAlgValuesSupported = source.TokenEndpointAuthSigningAlgValuesSupported,
+                UiLocalesSupported = source.UiLocalesSupported,
+                UserinfoEncryptionAlgValuesSupported = source.UserinfoEncryptionAlgValuesSupported,
+                UserinfoEncryptionEncValuesSupported = source.UserinfoEncryptionEncValuesSupported,
+                UserinfoEndpoint = source.UserinfoEndpoint,
+                UserinfoSigningAlgValuesSupported = source.UserinfoSigningAlgValuesSupported,
+                ScopesSupported = source.ScopesSupported is { } scopesSupported ? Optional<IEnumerable<string>?>.Of(scopesSupported) : default,
             };
         }
 
@@ -3308,6 +3448,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
+            if (source.OidcMetadata is { } oidcMetadata)
+                target.OidcMetadata = ToApi(oidcMetadata);
             if (source.IdTokenSignedResponseAlgs is { } algs)
                 target.IdTokenSignedResponseAlgs = ToApi(algs);
             if (source.AttributeMap is { } am)
@@ -3350,6 +3492,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
+            if (source.OidcMetadata is { } oidcMetadata)
+                target.OidcMetadata = ToApi(oidcMetadata);
             if (source.IdTokenSignedResponseAlgs is { } algs)
                 target.IdTokenSignedResponseAlgs = ToApi(algs);
             if (source.AttributeMap is { } am)
@@ -3394,6 +3538,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.EntityId = source.EntityId;
             target.Cert = source.Cert;
             target.SigningCert = source.SigningCert;
+            if (source.DecryptionKey is { } decryptionKey)
+                target.DecryptionKey = ToApi(decryptionKey);
             if (source.Thumbprints is { } tp)
                 target.Thumbprints = tp;
             if (source.SignatureAlgorithm is { } sigAlg)
@@ -3488,6 +3634,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.SigningCert = source.SigningCert;
             if (source.SigningKey is { } sk)
                 target.SigningKey = ToApi(sk);
+            if (source.DecryptionKey is { } decryptionKey)
+                target.DecryptionKey = ToApi(decryptionKey);
             if (source.AssertionDecryptionSettings is { } ads)
                 target.AssertionDecryptionSettings = ToApi(ads);
             target.UserIdAttribute = source.UserIdAttribute;

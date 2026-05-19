@@ -21,6 +21,7 @@
     "ConnectionFieldsMapSamlValue",
     "ConnectionOptionsIdpInitiatedClientProtocolEnumSamlSerializer",
     "ConnectionOptionsProtocolEnumTwitterSerializer",
+    "ConnectionReadOnlyAdditionalProperties",
     "ConnectionUpstreamAdditionalProperties",
     "SelfServiceProfileSsoTicketConnectionOptions",
     "UpdateConnectionOptions"
@@ -67,6 +68,10 @@
     }
   ],
   "typeReplacements": {
+    "Auth0.ManagementApi.ConnectionDecryptionKeySaml": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionDecryptionKeySaml",
+    "ConnectionDecryptionKeySaml": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionDecryptionKeySaml",
+    "Auth0.ManagementApi.ConnectionFieldsMapSamlValue": "string[]?",
+    "ConnectionFieldsMapSamlValue": "string[]?",
     "Auth0.ManagementApi.ConnectionUpstreamAdditionalProperties": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionUpstreamAdditionalProperties",
     "ConnectionUpstreamAdditionalProperties": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionUpstreamAdditionalProperties",
     "Auth0.ManagementApi.Types.ConnectionScopeOAuth2": "string[]?",

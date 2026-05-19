@@ -25,7 +25,7 @@ public record V2alpha1ConnectionOptionsSaml
 
     [JsonPropertyName("fieldsMap")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, V2alpha1ConnectionFieldsMapSamlValue>? FieldsMap { get; set; }
+    public Dictionary<string, string[]?>? FieldsMap { get; set; }
 
     [JsonPropertyName("global_token_revocation_jwt_iss")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

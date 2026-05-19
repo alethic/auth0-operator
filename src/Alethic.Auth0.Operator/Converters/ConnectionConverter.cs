@@ -217,6 +217,8 @@ namespace Alethic.Auth0.Operator.Converters
                 if (source is null)
                     return null;
 
+                NormalizeSpecialSamlOptions(strategy, source);
+
                 JsonElement? json = strategy switch
                 {
                     V2alpha1ConnectionStrategy.Auth0 => source.Auth0 is { } v ? JsonSerializer.SerializeToElement(v) : null,
@@ -256,6 +258,36 @@ namespace Alethic.Auth0.Operator.Converters
                 };
 
                 return json is { } j ? j.Deserialize<V1ConnectionOptions>() : null;
+            }
+
+            static void NormalizeSpecialSamlOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions source)
+            {
+                switch (strategy)
+                {
+                    case V2alpha1ConnectionStrategy.Saml when source.Saml is { } saml:
+                        NormalizeDecryptionKey(saml.DecryptionKey);
+                        break;
+                    case V2alpha1ConnectionStrategy.PingFederate when source.PingFederate is { } pingFederate:
+                        NormalizeDecryptionKey(pingFederate.DecryptionKey);
+                        break;
+                }
+            }
+
+            static void NormalizeDecryptionKey(V2alpha1ConnectionDecryptionKeySaml? decryptionKey)
+            {
+                if (decryptionKey is null)
+                    return;
+
+                if (decryptionKey.PrivateKey is not null)
+                {
+                    decryptionKey.KeyPair = null;
+                    return;
+                }
+
+                if (decryptionKey.KeyPair is not null)
+                {
+                    decryptionKey.PrivateKey = null;
+                }
             }
 
         }
