@@ -3,7 +3,8 @@
   "sourceNamespacePrefix": "Auth0.ManagementApi",
   "targetNamespacePrefix": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1",
   "rootTypeNames": [
-    "ConnectionOptions*"
+    "ConnectionOptions*",
+    "ConnectionUpstreamAliasEnum"
   ],
   "followReferencedTypes": true,
   "resolverAssemblyPaths": [
@@ -18,6 +19,7 @@
   "excludeTypeNames": [
     "ConnectionOptionsIdpInitiatedClientProtocolEnumSamlSerializer",
     "ConnectionOptionsProtocolEnumTwitterSerializer",
+    "ConnectionUpstreamAdditionalProperties",
     "SelfServiceProfileSsoTicketConnectionOptions",
     "UpdateConnectionOptions"
   ],
@@ -63,6 +65,8 @@
     }
   ],
   "typeReplacements": {
+    "Auth0.ManagementApi.ConnectionUpstreamAdditionalProperties": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionUpstreamAdditionalProperties",
+    "ConnectionUpstreamAdditionalProperties": "Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1.V2alpha1ConnectionUpstreamAdditionalProperties",
     "Auth0.ManagementApi.Types.ConnectionScopeOAuth2": "string[]?",
     "ConnectionScopeOAuth2": "string[]?"
   },

@@ -6,9 +6,9 @@ public record V2alpha1ConnectionUpstreamAdditionalProperties
 {
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Type { get; }
+    public V2alpha1ConnectionUpstreamAliasEnum? Alias { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object? Value { get; }
+    public string? Value { get; set; }
 
 }
