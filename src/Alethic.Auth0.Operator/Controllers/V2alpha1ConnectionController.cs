@@ -2896,7 +2896,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsFacebook();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = string.Join(" ", scope);
+            if (source.Scope is { } scope) target.Scope = scope;
             if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -2984,6 +2984,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
             if (source.Scope is { } scope) target.Scope = scope;
+            target.Domain = source.Domain;
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.IconUrl = source.IconUrl;
@@ -2992,6 +2993,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ApiEnableUsers = source.ApiEnableUsers;
             target.MapUserIdToId = source.MapUserIdToId;
             target.AdminAccessToken = source.AdminAccessToken;
+            target.AdminAccessTokenExpiresin = source.AdminAccessTokenExpiresin;
             target.AdminRefreshToken = source.AdminRefreshToken;
             target.AllowSettingLoginScopes = source.AllowSettingLoginScopes;
             target.ApiEnableGroups = source.ApiEnableGroups;
@@ -3004,6 +3006,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.FederatedConnectionsAccessTokens is { } fcat)
                 target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(
                     new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
