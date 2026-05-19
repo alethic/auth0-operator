@@ -8,7 +8,7 @@ Refreshes copied Auth0 API model types by loading a source assembly, enumerating
 dotnet run --project src/Alethic.Auth0.Operator.ModelGenerator -- \
   --assembly "C:\path\to\Auth0.ManagementApi.dll" \
   --output "D:\auth0-operator\artifacts\generated-models" \
-  --config "src\Alethic.Auth0.Operator.ModelGenerator\auth0-model-generator.json"
+	--config "src\Alethic.Auth0.Operator.ModelGenerator\connection-options-v2alpha1.json"
 ```
 
 ## Supported transforms
@@ -23,10 +23,10 @@ dotnet run --project src/Alethic.Auth0.Operator.ModelGenerator -- \
 
 ## Configuration workflow
 
-Start from `auth0-model-generator.json` and adjust the transform rules as needed.
+Start from an existing scenario-specific config such as `connection-options-v2alpha1.json` and adjust the transform rules as needed.
 
 You can also emit a fresh default file:
 
 ```powershell
-dotnet run --project src/Alethic.Auth0.Operator.ModelGenerator -- --write-default-config --config ".\auth0-model-generator.json"
+dotnet run --project src/Alethic.Auth0.Operator.ModelGenerator -- --write-default-config --config ".\connection-options-v2alpha1.json"
 ```

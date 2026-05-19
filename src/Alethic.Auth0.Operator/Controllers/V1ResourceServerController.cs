@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
@@ -12,7 +11,6 @@ using Alethic.Auth0.Operator.Options;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Core;
 
 using k8s.Models;
 
@@ -45,17 +43,21 @@ namespace Alethic.Auth0.Operator.Controllers
             Id = source.Id,
             Identifier = source.Identifier,
             Name = source.Name,
-            Scopes = source.Scopes?.Select(FromApi).ToList(),
+            Scopes = source.Scopes?.Select(FromApi).ToArray(),
             SigningAlgorithm = FromApi(source.SigningAlg),
             SigningSecret = source.SigningSecret,
             TokenLifetime = source.TokenLifetime,
             TokenLifetimeForWeb = source.TokenLifetimeForWeb,
             AllowOfflineAccess = source.AllowOfflineAccess,
+            AllowOnlineAccess = source.AllowOnlineAccess,
+            AllowOnlineAccessWithEphemeralSessions = source.AllowOnlineAccessWithEphemeralSessions,
             SkipConsentForVerifiableFirstPartyClients = source.SkipConsentForVerifiableFirstPartyClients,
             TokenDialect = source.TokenDialect is { } td ? FromApi(td) : null,
             EnforcePolicies = source.EnforcePolicies,
             ConsentPolicy = source.ConsentPolicy.IsDefined && source.ConsentPolicy.Value is { } cp ? FromApi(cp) : null,
             AuthorizationDetails = null,
+            AuthorizationPolicy = source.AuthorizationPolicy.IsDefined && source.AuthorizationPolicy.Value is { } ap ? FromApi(ap) : null,
+            SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
             TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
             ProofOfPossession = source.ProofOfPossession.IsDefined && source.ProofOfPossession.Value is { } pop ? FromApi(pop) : null,
         };
@@ -66,18 +68,47 @@ namespace Alethic.Auth0.Operator.Controllers
             Id = source.Id,
             Identifier = source.Identifier,
             Name = source.Name,
-            Scopes = source.Scopes?.Select(FromApi).ToList(),
+            Scopes = source.Scopes?.Select(FromApi).ToArray(),
             SigningAlgorithm = FromApi(source.SigningAlg),
             SigningSecret = source.SigningSecret,
             TokenLifetime = source.TokenLifetime,
             TokenLifetimeForWeb = source.TokenLifetimeForWeb,
             AllowOfflineAccess = source.AllowOfflineAccess,
+            AllowOnlineAccess = source.AllowOnlineAccess,
+            AllowOnlineAccessWithEphemeralSessions = source.AllowOnlineAccessWithEphemeralSessions,
             SkipConsentForVerifiableFirstPartyClients = source.SkipConsentForVerifiableFirstPartyClients,
             TokenDialect = source.TokenDialect is { } td ? FromApi(td) : null,
             EnforcePolicies = source.EnforcePolicies,
             ConsentPolicy = source.ConsentPolicy.IsDefined && source.ConsentPolicy.Value is { } cp ? FromApi(cp) : null,
+            AuthorizationPolicy = source.AuthorizationPolicy.IsDefined && source.AuthorizationPolicy.Value is { } ap ? FromApi(ap) : null,
+            SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
             TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
             ProofOfPossession = source.ProofOfPossession.IsDefined && source.ProofOfPossession.Value is { } pop ? FromApi(pop) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerAuthorizationPolicy? FromApi(ResourceServerAuthorizationPolicy? source) => source is null ? null : new()
+        {
+            PolicyId = source.PolicyId,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorization? FromApi(ResourceServerSubjectTypeAuthorization? source) => source is null ? null : new()
+        {
+            Client = FromApi(source.Client),
+            User = FromApi(source.User),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorizationClient? FromApi(ResourceServerSubjectTypeAuthorizationClient? source) => source is null ? null : new()
+        {
+            Policy = source.Policy is { } policy ? FromApi(policy) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorizationUser? FromApi(ResourceServerSubjectTypeAuthorizationUser? source) => source is null ? null : new()
+        {
+            Policy = source.Policy is { } policy ? FromApi(policy) : null,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -146,7 +177,23 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static V1ResourceServerMechanism? FromApi(ResourceServerProofOfPossessionMechanismEnum source) => source.Value switch
         {
+            ResourceServerProofOfPossessionMechanismEnum.Values.Dpop => V1ResourceServerMechanism.Dpop,
             ResourceServerProofOfPossessionMechanismEnum.Values.Mtls => V1ResourceServerMechanism.Mtls,
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static V1ResourceServerSubjectTypeAuthorizationClientPolicy? FromApi(ResourceServerSubjectTypeAuthorizationClientPolicyEnum source) => source.Value switch
+        {
+            ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.DenyAll => V1ResourceServerSubjectTypeAuthorizationClientPolicy.DenyAll,
+            ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant => V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant,
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static V1ResourceServerSubjectTypeAuthorizationUserPolicy? FromApi(ResourceServerSubjectTypeAuthorizationUserPolicyEnum source) => source.Value switch
+        {
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll => V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll,
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.DenyAll => V1ResourceServerSubjectTypeAuthorizationUserPolicy.DenyAll,
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.RequireClientGrant => V1ResourceServerSubjectTypeAuthorizationUserPolicy.RequireClientGrant,
             _ => throw new NotImplementedException(),
         };
 
@@ -173,16 +220,72 @@ namespace Alethic.Auth0.Operator.Controllers
             _ => throw new NotImplementedException(),
         };
 
+        internal static ResourceServerAuthorizationPolicy ToApi(V1ResourceServerAuthorizationPolicy source) => new()
+        {
+            PolicyId = source.PolicyId,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorization ToApi(V1ResourceServerSubjectTypeAuthorization source) => new()
+        {
+            Client = source.Client is { } client ? ToApi(client) : null,
+            User = source.User is { } user ? ToApi(user) : null,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationClient ToApi(V1ResourceServerSubjectTypeAuthorizationClient source) => new()
+        {
+            Policy = source.Policy is { } policy ? ToApi(policy) : null,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationUser ToApi(V1ResourceServerSubjectTypeAuthorizationUser source) => new()
+        {
+            Policy = source.Policy is { } policy ? ToApi(policy) : null,
+        };
+
         internal static ResourceServerTokenEncryptionFormatEnum ToApi(V1ResourceServerTokenFormat source) => source switch
         {
             V1ResourceServerTokenFormat.CompactNestedJwe => new ResourceServerTokenEncryptionFormatEnum(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe),
             _ => throw new NotImplementedException(),
         };
 
+        internal static ResourceServerTokenEncryption ToApi(V1ResourceServerTokenEncryption source) => new()
+        {
+            Format = ToApi(source.Format ?? default),
+            EncryptionKey = source.EncryptionKey is { } key ? ToApi(key) : null,
+        };
+
+        internal static ResourceServerTokenEncryptionKey ToApi(V1ResourceServerTokenEncryptionKey source) => new()
+        {
+            Name = source.Name,
+            Kid = source.Kid,
+            Pem = source.Pem,
+        };
+
         internal static ResourceServerProofOfPossessionMechanismEnum ToApi(V1ResourceServerMechanism source) => source switch
         {
+            V1ResourceServerMechanism.Dpop => new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop),
             V1ResourceServerMechanism.Mtls => new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls),
             _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationClientPolicyEnum ToApi(V1ResourceServerSubjectTypeAuthorizationClientPolicy source) => source switch
+        {
+            V1ResourceServerSubjectTypeAuthorizationClientPolicy.DenyAll => new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.DenyAll),
+            V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant => new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationUserPolicyEnum ToApi(V1ResourceServerSubjectTypeAuthorizationUserPolicy source) => source switch
+        {
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll),
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.DenyAll => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.DenyAll),
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.RequireClientGrant => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.RequireClientGrant),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerProofOfPossession ToApi(V1ResourceServerProofOfPossession source) => new()
+        {
+            Required = source.Required ?? false,
+            Mechanism = source.Mechanism is { } mech ? ToApi(mech) : default!,
         };
 
         internal static ResourceServerScope ToApi(V1ResourceServerScope source) => new()
@@ -214,6 +317,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.AllowOfflineAccess is not null)
                 request.AllowOfflineAccess = conf.AllowOfflineAccess;
 
+            if (conf.AllowOnlineAccess is not null)
+                request.AllowOnlineAccess = conf.AllowOnlineAccess;
+
+            if (conf.AllowOnlineAccessWithEphemeralSessions is not null)
+                request.AllowOnlineAccessWithEphemeralSessions = conf.AllowOnlineAccessWithEphemeralSessions;
+
             if (conf.SkipConsentForVerifiableFirstPartyClients is not null)
                 request.SkipConsentForVerifiableFirstPartyClients = conf.SkipConsentForVerifiableFirstPartyClients;
 
@@ -224,26 +333,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.EnforcePolicies = conf.EnforcePolicies;
 
             if (conf.ConsentPolicy is { } consentPolicy)
-                request.ConsentPolicy = Optional<ResourceServerConsentPolicyEnum?>.Of(ToApi(consentPolicy));
+                request.ConsentPolicy = ToApi(consentPolicy);
+
+            if (conf.AuthorizationPolicy is { } authorizationPolicy)
+                request.AuthorizationPolicy = ToApi(authorizationPolicy);
+
+            if (conf.SubjectTypeAuthorization is { } subjectTypeAuthorization)
+                request.SubjectTypeAuthorization = ToApi(subjectTypeAuthorization);
 
             if (conf.TokenEncryption is { } tokenEncryption)
-                request.TokenEncryption = Optional<ResourceServerTokenEncryption?>.Of(new ResourceServerTokenEncryption
-                {
-                    Format = ToApi(tokenEncryption.Format ?? default),
-                    EncryptionKey = tokenEncryption.EncryptionKey is { } key ? new ResourceServerTokenEncryptionKey
-                    {
-                        Name = key.Name,
-                        Kid = key.Kid,
-                        Pem = key.Pem,
-                    } : null,
-                });
+                request.TokenEncryption = ToApi(tokenEncryption);
 
             if (conf.ProofOfPossession is { } pop)
-                request.ProofOfPossession = Optional<ResourceServerProofOfPossession?>.Of(new ResourceServerProofOfPossession
-                {
-                    Required = pop.Required ?? false,
-                    Mechanism = pop.Mechanism is { } mech ? ToApi(mech) : default!,
-                });
+                request.ProofOfPossession = ToApi(pop);
         }
 
         internal static void ApplyToApi(V1ResourceServerConf conf, UpdateResourceServerRequestContent request)
@@ -266,6 +368,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.AllowOfflineAccess is not null)
                 request.AllowOfflineAccess = conf.AllowOfflineAccess;
 
+            if (conf.AllowOnlineAccess is not null)
+                request.AllowOnlineAccess = conf.AllowOnlineAccess;
+
+            if (conf.AllowOnlineAccessWithEphemeralSessions is not null)
+                request.AllowOnlineAccessWithEphemeralSessions = conf.AllowOnlineAccessWithEphemeralSessions;
+
             if (conf.SkipConsentForVerifiableFirstPartyClients is not null)
                 request.SkipConsentForVerifiableFirstPartyClients = conf.SkipConsentForVerifiableFirstPartyClients;
 
@@ -276,26 +384,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.EnforcePolicies = conf.EnforcePolicies;
 
             if (conf.ConsentPolicy is { } consentPolicy)
-                request.ConsentPolicy = Optional<ResourceServerConsentPolicyEnum?>.Of(ToApi(consentPolicy));
+                request.ConsentPolicy = ToApi(consentPolicy);
+
+            if (conf.AuthorizationPolicy is { } authorizationPolicy)
+                request.AuthorizationPolicy = ToApi(authorizationPolicy);
+
+            if (conf.SubjectTypeAuthorization is { } subjectTypeAuthorization)
+                request.SubjectTypeAuthorization = ToApi(subjectTypeAuthorization);
 
             if (conf.TokenEncryption is { } tokenEncryption)
-                request.TokenEncryption = Optional<ResourceServerTokenEncryption?>.Of(new ResourceServerTokenEncryption
-                {
-                    Format = ToApi(tokenEncryption.Format ?? default),
-                    EncryptionKey = tokenEncryption.EncryptionKey is { } key ? new ResourceServerTokenEncryptionKey
-                    {
-                        Name = key.Name,
-                        Kid = key.Kid,
-                        Pem = key.Pem,
-                    } : null,
-                });
+                request.TokenEncryption = ToApi(tokenEncryption);
 
             if (conf.ProofOfPossession is { } pop)
-                request.ProofOfPossession = Optional<ResourceServerProofOfPossession?>.Of(new ResourceServerProofOfPossession
-                {
-                    Required = pop.Required ?? false,
-                    Mechanism = pop.Mechanism is { } mech ? ToApi(mech) : default!,
-                });
+                request.ProofOfPossession = ToApi(pop);
         }
 
         /// <summary>

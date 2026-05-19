@@ -103,7 +103,7 @@ namespace Alethic.Auth0.Operator.Tests
 
             var result = V1ResourceServerController.FromApi(source)!;
 
-            Assert.AreEqual(2, result.Scopes!.Count);
+            Assert.AreEqual(2, result.Scopes!.Length);
             Assert.AreEqual("read:data", result.Scopes[0].Value);
             Assert.AreEqual("write:data", result.Scopes[1].Value);
         }
@@ -149,6 +149,37 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(V1ResourceServerMechanism.Mtls, result.Mechanism);
         }
 
+        [TestMethod]
+        public void FromApi_ResourceServer_MapsNewRequestBackedProperties()
+        {
+            var source = new ResourceServer
+            {
+                Identifier = "https://api.example.com",
+                AllowOnlineAccess = true,
+                AllowOnlineAccessWithEphemeralSessions = false,
+                AuthorizationPolicy = new ResourceServerAuthorizationPolicy { PolicyId = "pol_123" },
+                SubjectTypeAuthorization = new ResourceServerSubjectTypeAuthorization
+                {
+                    Client = new ResourceServerSubjectTypeAuthorizationClient
+                    {
+                        Policy = new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant),
+                    },
+                    User = new ResourceServerSubjectTypeAuthorizationUser
+                    {
+                        Policy = new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll),
+                    },
+                },
+            };
+
+            var result = V1ResourceServerController.FromApi(source)!;
+
+            Assert.IsTrue(result.AllowOnlineAccess);
+            Assert.IsFalse(result.AllowOnlineAccessWithEphemeralSessions);
+            Assert.AreEqual("pol_123", result.AuthorizationPolicy!.PolicyId);
+            Assert.AreEqual(V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant, result.SubjectTypeAuthorization!.Client!.Policy);
+            Assert.AreEqual(V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll, result.SubjectTypeAuthorization.User!.Policy);
+        }
+
         // ──────────────────────── FromApi enum tests ────────────────────────
 
         [TestMethod]
@@ -188,6 +219,13 @@ namespace Alethic.Auth0.Operator.Tests
                 V1ResourceServerController.FromApi(new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls)));
         }
 
+        [TestMethod]
+        public void FromApi_Mechanism_Dpop_MapsCorrectly()
+        {
+            Assert.AreEqual(V1ResourceServerMechanism.Dpop,
+                V1ResourceServerController.FromApi(new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop)));
+        }
+
         // ──────────────────────── ToApi enum tests ────────────────────────
 
         [TestMethod]
@@ -225,6 +263,13 @@ namespace Alethic.Auth0.Operator.Tests
         {
             Assert.AreEqual(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls,
                 V1ResourceServerController.ToApi(V1ResourceServerMechanism.Mtls).Value);
+        }
+
+        [TestMethod]
+        public void ToApi_Mechanism_Dpop_MapsCorrectly()
+        {
+            Assert.AreEqual(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop,
+                V1ResourceServerController.ToApi(V1ResourceServerMechanism.Dpop).Value);
         }
 
         [TestMethod]
@@ -296,12 +341,26 @@ namespace Alethic.Auth0.Operator.Tests
                 TokenLifetime = 86400,
                 TokenLifetimeForWeb = 7200,
                 AllowOfflineAccess = true,
+                AllowOnlineAccess = true,
+                AllowOnlineAccessWithEphemeralSessions = false,
                 SkipConsentForVerifiableFirstPartyClients = false,
                 VerificationLocation = "https://verify.example.com",
                 TokenDialect = V1ResourceServerTokenDialect.AccessToken,
                 EnforcePolicies = true,
                 ConsentPolicy = V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa,
                 Scopes = [new V1ResourceServerScope { Value = "read:data", Description = "Read" }],
+                AuthorizationPolicy = new V1ResourceServerAuthorizationPolicy { PolicyId = "pol_123" },
+                SubjectTypeAuthorization = new V1ResourceServerSubjectTypeAuthorization
+                {
+                    Client = new V1ResourceServerSubjectTypeAuthorizationClient
+                    {
+                        Policy = V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant,
+                    },
+                    User = new V1ResourceServerSubjectTypeAuthorizationUser
+                    {
+                        Policy = V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll,
+                    },
+                },
             };
 
             var req = new CreateResourceServerRequestContent { Identifier = "https://api.example.com" };
@@ -313,10 +372,15 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("secret", req.SigningSecret);
             Assert.AreEqual(86400, req.TokenLifetime);
             Assert.IsTrue(req.AllowOfflineAccess);
+            Assert.IsTrue(req.AllowOnlineAccess);
+            Assert.IsFalse(req.AllowOnlineAccessWithEphemeralSessions);
             Assert.IsFalse(req.SkipConsentForVerifiableFirstPartyClients);
             Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.AccessToken, req.TokenDialect?.Value);
             Assert.IsTrue(req.EnforcePolicies);
             Assert.AreEqual(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa, req.ConsentPolicy.Value?.Value);
+            Assert.AreEqual("pol_123", req.AuthorizationPolicy.Value!.PolicyId);
+            Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant.ToString(), req.SubjectTypeAuthorization.Client!.Policy!.Value.ToString());
+            Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll.ToString(), req.SubjectTypeAuthorization.User!.Policy!.Value.ToString());
             Assert.AreEqual(1, req.Scopes!.Count());
             Assert.AreEqual("read:data", req.Scopes.First().Value);
         }
