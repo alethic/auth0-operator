@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionSigningKeySaml
 {
+
     [JsonPropertyName("cert")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Cert { get; set; }
@@ -10,4 +12,5 @@ public record V2alpha1ConnectionSigningKeySaml
     [JsonPropertyName("key")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Key { get; set; }
+
 }

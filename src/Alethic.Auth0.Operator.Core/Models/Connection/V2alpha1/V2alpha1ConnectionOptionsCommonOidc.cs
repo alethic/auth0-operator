@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsCommonOidc
 {
+
     [JsonPropertyName("authorization_endpoint")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? AuthorizationEndpoint { get; set; }
@@ -92,4 +94,5 @@ public record V2alpha1ConnectionOptionsCommonOidc
     [JsonPropertyName("userinfo_endpoint")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? UserinfoEndpoint { get; set; }
+
 }

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsOidc
 {
+
     [JsonPropertyName("attribute_map")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionAttributeMapOidc? AttributeMap { get; set; }
@@ -108,4 +110,5 @@ public record V2alpha1ConnectionOptionsOidc
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

@@ -44,6 +44,10 @@ public sealed class GeneratorConfiguration
 
     public Dictionary<string, string> NamespaceMappings { get; set; } = new(StringComparer.Ordinal);
 
+    public Dictionary<string, string> TypeReplacements { get; set; } = new(StringComparer.Ordinal);
+
+    public List<TypeNameRewriteRuleConfiguration> TypeNameRewriteRules { get; set; } = [];
+
     public bool EmitRecords { get; set; } = true;
 
     public bool UseNamespaceSubdirectories { get; set; } = true;
@@ -96,6 +100,8 @@ public sealed class GeneratorConfiguration
             AddedPropertyAttributes = [.. AddedPropertyAttributes],
             StandardProperties = [.. StandardProperties],
             NamespaceMappings = new Dictionary<string, string>(NamespaceMappings, StringComparer.Ordinal),
+            TypeReplacements = new Dictionary<string, string>(TypeReplacements, StringComparer.Ordinal),
+            TypeNameRewriteRules = [.. TypeNameRewriteRules],
             EmitRecords = EmitRecords,
             UseNamespaceSubdirectories = UseNamespaceSubdirectories,
             OverwriteExistingFiles = options.OverwriteExistingFiles ?? OverwriteExistingFiles,

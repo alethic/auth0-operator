@@ -2,8 +2,10 @@ using System;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsOidcMetadata
 {
+
     [JsonPropertyName("acr_values_supported")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? AcrValuesSupported { get; set; }
@@ -151,4 +153,5 @@ public record V2alpha1ConnectionOptionsOidcMetadata
     [JsonPropertyName("userinfo_signing_alg_values_supported")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? UserinfoSigningAlgValuesSupported { get; set; }
+
 }

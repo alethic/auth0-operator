@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E13F491D-01A4-4586-9D6C-C2B2150ACB65}"
 	ProjectSection(SolutionItems) = preProject
@@ -43,6 +43,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "targets", "targets", "{ABA7
 EndProject
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dist-images", "src\dist-images\dist-images.msbuildproj", "{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alethic.Auth0.Operator.ModelGenerator", "src\Alethic.Auth0.Operator.ModelGenerator\Alethic.Auth0.Operator.ModelGenerator.csproj", "{881E837A-A326-BD1A-F0E0-0490CCA70CA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EB6F7F9-BEA2-EA96-955E-2ED53346803D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881E837A-A326-BD1A-F0E0-0490CCA70CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881E837A-A326-BD1A-F0E0-0490CCA70CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881E837A-A326-BD1A-F0E0-0490CCA70CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881E837A-A326-BD1A-F0E0-0490CCA70CA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

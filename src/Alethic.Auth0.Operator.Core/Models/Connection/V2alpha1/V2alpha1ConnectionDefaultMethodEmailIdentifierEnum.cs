@@ -1,11 +1,15 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum V2alpha1DefaultMethodEmailIdentifierEnum
+public enum V2alpha1ConnectionDefaultMethodEmailIdentifierEnum
 {
+
     [JsonStringEnumMemberName("password")]
     Password,
+
     [JsonStringEnumMemberName("email_otp")]
     EmailOtp
+
 }

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsOAuth1
 {
+
     [JsonPropertyName("accessTokenURL")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? AccessTokenUrl { get; set; }
@@ -40,4 +42,5 @@ public record V2alpha1ConnectionOptionsOAuth1
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsSaml
 {
+
     [JsonPropertyName("debug")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Debug { get; set; }
@@ -132,4 +134,5 @@ public record V2alpha1ConnectionOptionsSaml
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

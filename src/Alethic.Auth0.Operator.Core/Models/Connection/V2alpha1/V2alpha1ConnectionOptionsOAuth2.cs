@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsOAuth2
 {
+
     [JsonPropertyName("authParams")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, string>? AuthParams { get; set; }
@@ -47,7 +49,7 @@ public record V2alpha1ConnectionOptionsOAuth2
 
     [JsonPropertyName("scope")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha1ConnectionScopeOAuth2? Scope { get; set; }
+    public string[]? Scope { get; set; }
 
     [JsonPropertyName("scripts")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -72,4 +74,5 @@ public record V2alpha1ConnectionOptionsOAuth2
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

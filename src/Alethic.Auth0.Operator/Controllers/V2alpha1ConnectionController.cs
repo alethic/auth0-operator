@@ -238,21 +238,28 @@ namespace Alethic.Auth0.Operator.Controllers
             return conf;
         }
 
-        internal static V2alpha1ConnectionAuth0Options? FromApi(ConnectionOptionsAuth0? source)
+        internal static V2alpha1ConnectionOptionsAuth0? FromApi(ConnectionOptionsAuth0? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionAuth0Options
+            return new V2alpha1ConnectionOptionsAuth0
             {
+                Attributes = source.Attributes is { } attributes ? FromApi(attributes) : null,
+                AuthenticationMethods = source.AuthenticationMethods is { } authenticationMethods ? FromApi(authenticationMethods) : null,
                 BruteForceProtection = source.BruteForceProtection,
+                Configuration = source.Configuration?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 DisableSignup = source.DisableSignup,
+                DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword,
                 EnableScriptContext = source.EnableScriptContext,
                 EnabledDatabaseCustomization = source.EnabledDatabaseCustomization,
                 ImportMode = source.ImportMode,
+                Mfa = source.Mfa is { } mfa ? FromApi(mfa) : null,
+                PasskeyOptions = source.PasskeyOptions is { } passkeyOptions ? FromApi(passkeyOptions) : null,
+                PasswordOptions = source.PasswordOptions is { } passwordOptions ? FromApi(passwordOptions) : null,
                 RequiresUsername = source.RequiresUsername,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
-                PasswordPolicy = source.PasswordPolicy.IsDefined ? FromApi(source.PasswordPolicy.Value)?.ToString()?.ToLowerInvariant() : null,
+                PasswordPolicy = source.PasswordPolicy.IsDefined ? FromApi(source.PasswordPolicy.Value) : null,
                 PasswordHistory = source.PasswordHistory.IsDefined && source.PasswordHistory.Value is { } ph ? FromApi(ph) : null,
                 PasswordNoPersonalInfo = source.PasswordNoPersonalInfo.IsDefined && source.PasswordNoPersonalInfo.Value is { } pnpi ? FromApi(pnpi) : null,
                 PasswordDictionary = source.PasswordDictionary.IsDefined && source.PasswordDictionary.Value is { } pd ? FromApi(pd) : null,
@@ -263,15 +270,15 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionAdOptions? FromApi(ConnectionOptionsAd? source)
+        internal static V2alpha1ConnectionOptionsAd? FromApi(ConnectionOptionsAd? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionAdOptions
+            return new V2alpha1ConnectionOptionsAd
             {
                 AgentIp = source.AgentIp,
-                AgentMode = source.AgentMode?.ToString(),
+                AgentMode = source.AgentMode,
                 AgentVersion = source.AgentVersion,
                 BruteForceProtection = source.BruteForceProtection,
                 CertAuth = source.CertAuth,
@@ -286,17 +293,17 @@ namespace Alethic.Auth0.Operator.Controllers
                 Thumbprints = source.Thumbprints?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                Kerberos = source.Kerberos is bool kb ? new V2alpha1ConnectionOptionsKerberos { Enabled = kb } : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                Kerberos = source.Kerberos,
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionAdfsOptions? FromApi(ConnectionOptionsAdfs? source)
+        internal static V2alpha1ConnectionOptionsAdfs? FromApi(ConnectionOptionsAdfs? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionAdfsOptions
+            return new V2alpha1ConnectionOptionsAdfs
             {
                 AdfsServer = source.AdfsServer,
                 DomainAliases = source.DomainAliases?.ToArray(),
@@ -304,35 +311,35 @@ namespace Alethic.Auth0.Operator.Controllers
                 FedMetadataXml = source.FedMetadataXml,
                 IconUrl = source.IconUrl,
                 PrevThumbprints = source.PrevThumbprints?.ToArray(),
-                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection?.ToString(),
+                ShouldTrustEmailVerifiedConnection = FromApi(source.ShouldTrustEmailVerifiedConnection),
                 SignInEndpoint = source.SignInEndpoint,
                 TenantDomain = source.TenantDomain,
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UserIdAttribute = source.UserIdAttribute,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionAuth0OidcOptions? FromApi(ConnectionOptionsAuth0Oidc? source)
+        internal static V2alpha1ConnectionOptionsAuth0Oidc? FromApi(ConnectionOptionsAuth0Oidc? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionAuth0OidcOptions
+            return new V2alpha1ConnectionOptionsAuth0Oidc
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
             };
         }
 
-        internal static V2alpha1ConnectionAzureAdOptions? FromApi(ConnectionOptionsAzureAd? source)
+        internal static V2alpha1ConnectionOptionsAzureAd? FromApi(ConnectionOptionsAzureAd? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionAzureAdOptions
+            return new V2alpha1ConnectionOptionsAzureAd
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -387,29 +394,29 @@ namespace Alethic.Auth0.Operator.Controllers
                 ExtUserId = source.ExtUserId,
                 Granted = source.Granted,
                 IconUrl = source.IconUrl,
-                IdentityApi = source.IdentityApi?.ToString(),
+                IdentityApi = FromApi(source.IdentityApi),
                 MaxGroupsToRetrieve = source.MaxGroupsToRetrieve,
                 Scope = source.Scope?.ToArray(),
-                ShouldTrustEmailVerifiedConnection = source.ShouldTrustEmailVerifiedConnection?.ToString(),
+                ShouldTrustEmailVerifiedConnection = FromApi(source.ShouldTrustEmailVerifiedConnection),
                 TenantDomain = source.TenantDomain,
                 TenantId = source.TenantId,
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UseCommonEndpoint = source.UseCommonEndpoint,
                 UseWsfed = source.UseWsfed,
-                UseridAttribute = source.UseridAttribute?.ToString(),
-                WaadProtocol = source.WaadProtocol?.ToString(),
+                UseridAttribute = FromApi(source.UseridAttribute),
+                WaadProtocol = FromApi(source.WaadProtocol),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionBitbucketOptions? FromApi(ConnectionOptionsBitbucket? source)
+        internal static V2alpha1ConnectionOptionsBitbucket? FromApi(ConnectionOptionsBitbucket? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionBitbucketOptions
+            return new V2alpha1ConnectionOptionsBitbucket
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -421,52 +428,52 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionBoxOptions? FromApi(ConnectionOptionsBox? source)
+        internal static V2alpha1ConnectionOptionsBox? FromApi(ConnectionOptionsBox? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionBoxOptions
+            return new V2alpha1ConnectionOptionsBox
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionDropboxOptions? FromApi(ConnectionOptionsDropbox? source)
+        internal static V2alpha1ConnectionOptionsDropbox? FromApi(ConnectionOptionsDropbox? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionDropboxOptions
+            return new V2alpha1ConnectionOptionsDropbox
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionEmailOptions? FromApi(ConnectionOptionsEmail? source)
+        internal static V2alpha1ConnectionOptionsEmail? FromApi(ConnectionOptionsEmail? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionEmailOptions
+            return new V2alpha1ConnectionOptionsEmail
             {
                 Name = source.Name,
-                Email = source.Email is { } e ? new V2alpha1ConnectionEmailMessage
+                Email = source.Email is { } e ? new V2alpha1ConnectionEmailEmail
                 {
                     From = e.From,
                     Subject = e.Subject,
                     Body = e.Body,
-                    Syntax = e.Syntax?.Value,
+                    Syntax = FromApi(e.Syntax),
                 } : null,
-                Totp = source.Totp is { } t ? new V2alpha1ConnectionEmailTotp
+                Totp = source.Totp is { } t ? new V2alpha1ConnectionTotpEmail
                 {
                     Length = t.Length,
                     TimeStep = t.TimeStep,
@@ -477,46 +484,46 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionEvernoteOptions? FromApi(ConnectionOptionsEvernote? source)
+        internal static V2alpha1ConnectionOptionsEvernote? FromApi(ConnectionOptionsEvernote? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionEvernoteOptions
+            return new V2alpha1ConnectionOptionsEvernote
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionExactOptions? FromApi(ConnectionOptionsExact? source)
+        internal static V2alpha1ConnectionOptionsExact? FromApi(ConnectionOptionsExact? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionExactOptions
+            return new V2alpha1ConnectionOptionsExact
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionFacebookOptions? FromApi(ConnectionOptionsFacebook? source)
+        internal static V2alpha1ConnectionOptionsFacebook? FromApi(ConnectionOptionsFacebook? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionFacebookOptions
+            return new V2alpha1ConnectionOptionsFacebook
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
-                Scope = source.Scope is not null ? new[] { source.Scope } : null,
+                Scope = source.Scope,
                 FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
@@ -561,16 +568,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 AllowContextProfileField = source.AllowContextProfileField,
                 PagesManageCta = source.PagesManageCta,
                 PagesManageInstantArticles = source.PagesManageInstantArticles,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionGitHubOptions? FromApi(ConnectionOptionsGitHub? source)
+        internal static V2alpha1ConnectionOptionsGitHub? FromApi(ConnectionOptionsGitHub? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionGitHubOptions
+            return new V2alpha1ConnectionOptionsGitHub
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -598,16 +605,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 WritePublicKey = source.WritePublicKey,
                 WriteRepoHook = source.WriteRepoHook,
                 Profile = source.Profile,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionGoogleAppsOptions? FromApi(ConnectionOptionsGoogleApps? source)
+        internal static V2alpha1ConnectionOptionsGoogleApps? FromApi(ConnectionOptionsGoogleApps? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionGoogleAppsOptions
+            return new V2alpha1ConnectionOptionsGoogleApps
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -633,18 +640,18 @@ namespace Alethic.Auth0.Operator.Controllers
                 ExtIsAdmin = source.ExtIsAdmin,
                 ExtIsSuspended = source.ExtIsSuspended,
                 FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat
-                    ? new V2alpha1ConnectionGoogleAppsFederatedConnectionsAccessTokens { Active = fcat.Active }
+                    ? new V2alpha1ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active }
                     : null,
                 HandleLoginFromSocial = source.HandleLoginFromSocial,
             };
         }
 
-        internal static V2alpha1ConnectionGoogleOAuth2Options? FromApi(ConnectionOptionsGoogleOAuth2? source)
+        internal static V2alpha1ConnectionOptionsGoogleOAuth2? FromApi(ConnectionOptionsGoogleOAuth2? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionGoogleOAuth2Options
+            return new V2alpha1ConnectionOptionsGoogleOAuth2
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -719,16 +726,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 YoutubeReadonly = source.YoutubeReadonly,
                 YoutubeUpload = source.YoutubeUpload,
                 Youtubepartner = source.Youtubepartner,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionLinkedinOptions? FromApi(ConnectionOptionsLinkedin? source)
+        internal static V2alpha1ConnectionOptionsLinkedin? FromApi(ConnectionOptionsLinkedin? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionLinkedinOptions
+            return new V2alpha1ConnectionOptionsLinkedin
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -737,41 +744,41 @@ namespace Alethic.Auth0.Operator.Controllers
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 BasicProfile = source.BasicProfile,
-                EmailAddress = source.Email,
+                Email = source.Email,
                 Openid = source.Openid,
                 FullProfile = source.FullProfile,
                 StrategyVersion = source.StrategyVersion,
                 Network = source.Network,
                 Profile = source.Profile,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionOAuth1Options? FromApi(ConnectionOptionsOAuth1? source)
+        internal static V2alpha1ConnectionOptionsOAuth1? FromApi(ConnectionOptionsOAuth1? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionOAuth1Options
+            return new V2alpha1ConnectionOptionsOAuth1
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 AccessTokenUrl = source.AccessTokenUrl,
                 RequestTokenUrl = source.RequestTokenUrl,
-                SignatureMethod = source.SignatureMethod?.ToString(),
+                SignatureMethod = source.SignatureMethod is { } signatureMethod ? FromApi(signatureMethod) : null,
                 UserAuthorizationUrl = source.UserAuthorizationUrl,
-                Scripts = source.Scripts is { } sc ? new V2alpha1ConnectionOptionsScripts { FetchUserProfile = sc.FetchUserProfile } : null,
+                Scripts = source.Scripts is { } sc ? new V2alpha1ConnectionScriptsOAuth1 { FetchUserProfile = sc.FetchUserProfile } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionOAuth2Options? FromApi(ConnectionOptionsOAuth2? source)
+        internal static V2alpha1ConnectionOptionsOAuth2? FromApi(ConnectionOptionsOAuth2? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionOAuth2Options
+            return new V2alpha1ConnectionOptionsOAuth2
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -782,35 +789,35 @@ namespace Alethic.Auth0.Operator.Controllers
                 IconUrl = source.IconUrl,
                 PkceEnabled = source.PkceEnabled,
                 UseOauthSpecScope = source.UseOauthSpecScope,
-                Scripts = source.Scripts is { } sc ? new V2alpha1ConnectionOptionsScripts { FetchUserProfile = sc.FetchUserProfile } : null,
+                Scripts = source.Scripts is { } sc ? new V2alpha1ConnectionScriptsOAuth2 { FetchUserProfile = sc.FetchUserProfile } : null,
                 AuthParams = source.AuthParams?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 AuthParamsMap = source.AuthParamsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 FieldsMap = source.FieldsMap?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 CustomHeaders = source.CustomHeaders?.ToDictionary(kv => kv.Key, kv => kv.Value),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionOffice365Options? FromApi(ConnectionOptionsOffice365? source)
+        internal static V2alpha1ConnectionOptionsOffice365? FromApi(ConnectionOptionsOffice365? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionOffice365Options
+            return new V2alpha1ConnectionOptionsOffice365
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
             };
         }
 
-        internal static V2alpha1ConnectionOidcOptions? FromApi(ConnectionOptionsOidc? source)
+        internal static V2alpha1ConnectionOptionsOidc? FromApi(ConnectionOptionsOidc? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionOidcOptions
+            return new V2alpha1ConnectionOptionsOidc
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -820,33 +827,33 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserinfoEndpoint = source.UserinfoEndpoint,
                 JwksUri = source.JwksUri,
                 Issuer = source.Issuer,
-                Scope = source.Scope is not null ? source.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                Scope = source.Scope,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
-                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? source.TokenEndpointAuthMethod.Value?.ToString() : null,
-                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
-                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
-                DpopSigningAlg = source.DpopSigningAlg?.ToString(),
-                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(a => a.Value).ToArray() : null,
+                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? FromApi(source.TokenEndpointAuthMethod.Value) : null,
+                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? FromApi(source.TokenEndpointAuthSigningAlg.Value) : null,
+                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat is { } tokenEndpointJwtcaAudFormat ? FromApi(tokenEndpointJwtcaAudFormat) : null,
+                DpopSigningAlg = source.DpopSigningAlg is { } dpopSigningAlg ? FromApi(dpopSigningAlg) : null,
+                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
-                Type = source.Type?.ToString(),
-                OidcMetadata = source.OidcMetadata?.AdditionalProperties?.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString()),
-                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionOptionsAttributeMap { MappingMode = am.MappingMode?.ToString(), UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (string?)kv.Value?.ToString()) } : null,
-                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionOptionsConnectionSettings { Pkce = cs.Pkce?.ToString() } : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionOptionsFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
+                Type = source.Type is { } type ? FromApi(type) : null,
+                OidcMetadata = null,
+                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionAttributeMapOidc { MappingMode = am.MappingMode is { } mappingMode ? FromApi(mappingMode) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value) } : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionConnectionSettings { Pkce = cs.Pkce is { } pkce ? FromApi(pkce) : null } : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionOktaOptions? FromApi(ConnectionOptionsOkta? source)
+        internal static V2alpha1ConnectionOptionsOkta? FromApi(ConnectionOptionsOkta? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionOktaOptions
+            return new V2alpha1ConnectionOptionsOkta
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -855,34 +862,34 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserinfoEndpoint = source.UserinfoEndpoint,
                 JwksUri = source.JwksUri,
                 Issuer = source.Issuer,
-                Scope = source.Scope is not null ? source.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                Scope = source.Scope,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
-                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? source.TokenEndpointAuthMethod.Value?.ToString() : null,
-                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? source.TokenEndpointAuthSigningAlg.Value?.ToString() : null,
-                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat?.ToString(),
-                DpopSigningAlg = source.DpopSigningAlg?.ToString(),
-                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(a => a.Value).ToArray() : null,
+                TokenEndpointAuthMethod = source.TokenEndpointAuthMethod.IsDefined ? FromApi(source.TokenEndpointAuthMethod.Value) : null,
+                TokenEndpointAuthSigningAlg = source.TokenEndpointAuthSigningAlg.IsDefined ? FromApi(source.TokenEndpointAuthSigningAlg.Value) : null,
+                TokenEndpointJwtcaAudFormat = source.TokenEndpointJwtcaAudFormat is { } tokenEndpointJwtcaAudFormat ? FromApi(tokenEndpointJwtcaAudFormat) : null,
+                DpopSigningAlg = source.DpopSigningAlg is { } dpopSigningAlg ? FromApi(dpopSigningAlg) : null,
+                IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
-                Type = source.Type?.ToString(),
-                OidcMetadata = source.OidcMetadata?.AdditionalProperties?.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString()),
-                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionOptionsAttributeMap { MappingMode = am.MappingMode?.ToString(), UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => (string?)kv.Value?.ToString()) } : null,
-                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionOptionsConnectionSettings { Pkce = cs.Pkce?.ToString() } : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionOptionsFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
+                Type = source.Type is { } type ? FromApi(type) : null,
+                OidcMetadata = null,
+                AttributeMap = source.AttributeMap is { } am ? new V2alpha1ConnectionAttributeMapOkta { MappingMode = am.MappingMode is { } mappingMode ? FromApi(mappingMode) : null, UserinfoScope = am.UserinfoScope, Attributes = am.Attributes?.ToDictionary(kv => kv.Key, kv => kv.Value) } : null,
+                ConnectionSettings = source.ConnectionSettings is { } cs ? new V2alpha1ConnectionConnectionSettings { Pkce = cs.Pkce is { } pkce ? FromApi(pkce) : null } : null,
+                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? new V2alpha1ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active } : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionPaypalOptions? FromApi(ConnectionOptionsPaypal? source)
+        internal static V2alpha1ConnectionOptionsPaypal? FromApi(ConnectionOptionsPaypal? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionPaypalOptions
+            return new V2alpha1ConnectionOptionsPaypal
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -897,12 +904,12 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha1ConnectionPingFederateOptions? FromApi(ConnectionOptionsPingFederate? source)
+        internal static V2alpha1ConnectionOptionsPingFederate? FromApi(ConnectionOptionsPingFederate? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionPingFederateOptions
+            return new V2alpha1ConnectionOptionsPingFederate
             {
                 PingFederateBaseUrl = source.PingFederateBaseUrl,
                 SignInEndpoint = source.SignInEndpoint,
@@ -910,28 +917,28 @@ namespace Alethic.Auth0.Operator.Controllers
                 Cert = source.Cert,
                 SigningCert = source.SigningCert,
                 Thumbprints = source.Thumbprints?.ToArray(),
-                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
-                DigestAlgorithm = FromApi(source.DigestAlgorithm),
+                SignatureAlgorithm = source.SignatureAlgorithm is { } signatureAlgorithm ? FromApi(signatureAlgorithm) : null,
+                DigestAlgorithm = source.DigestAlgorithm is { } digestAlgorithm ? FromApi(digestAlgorithm) : null,
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = FromApi(source.ProtocolBinding),
-                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiated { ClientId = idp.ClientId, ClientProtocol = FromApi(idp.ClientProtocol), ClientAuthorizequery = idp.ClientAuthorizequery } : null,
-                DecryptionKey = source.DecryptionKey is { } dk ? new V2alpha1ConnectionOptionsKeyPair { Key = dk.Value?.ToString() } : null,
-                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionOptionsAssertionDecryptionSettings { DecryptionAlgorithm = FromApi(ads.AlgorithmProfile), KeyEncryptionAlgorithm = ads.AlgorithmExceptions is { } ae ? string.Join(",", ae) : null } : null,
+                ProtocolBinding = source.ProtocolBinding is { } protocolBinding ? FromApi(protocolBinding) : null,
+                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } clientProtocol ? FromApi(clientProtocol) : null, ClientAuthorizequery = idp.ClientAuthorizequery, Enabled = idp.Enabled } : null,
+                DecryptionKey = null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionAssertionDecryptionSettings { AlgorithmProfile = ads.AlgorithmProfile is { } algorithmProfile ? FromApi(algorithmProfile) : null, AlgorithmExceptions = ads.AlgorithmExceptions?.ToArray() } : null,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
                 TenantDomain = source.TenantDomain,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionSalesforceOptions? FromApi(ConnectionOptionsSalesforce? source)
+        internal static V2alpha1ConnectionOptionsSalesforce? FromApi(ConnectionOptionsSalesforce? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionSalesforceOptions
+            return new V2alpha1ConnectionOptionsSalesforce
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -940,16 +947,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionSalesforceCommunityOptions? FromApi(ConnectionOptionsSalesforceCommunity? source)
+        internal static V2alpha1ConnectionOptionsSalesforceCommunity? FromApi(ConnectionOptionsSalesforceCommunity? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionSalesforceCommunityOptions
+            return new V2alpha1ConnectionOptionsSalesforceCommunity
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -959,16 +966,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 Profile = source.Profile,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionSamlOptions? FromApi(ConnectionOptionsSaml? source)
+        internal static V2alpha1ConnectionOptionsSaml? FromApi(ConnectionOptionsSaml? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionSamlOptions
+            return new V2alpha1ConnectionOptionsSaml
             {
                 SignInEndpoint = source.SignInEndpoint,
                 SignOutEndpoint = source.SignOutEndpoint,
@@ -980,19 +987,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 MetadataUrl = source.MetadataUrl,
                 MetadataXml = source.MetadataXml,
                 EntityId = source.EntityId,
-                SignatureAlgorithm = FromApi(source.SignatureAlgorithm),
-                DigestAlgorithm = FromApi(source.DigestAlgorithm),
+                SignatureAlgorithm = source.SignatureAlgorithm is { } signatureAlgorithm ? FromApi(signatureAlgorithm) : null,
+                DigestAlgorithm = source.DigestAlgorithm is { } digestAlgorithm ? FromApi(digestAlgorithm) : null,
                 SignSamlRequest = source.SignSamlRequest,
-                ProtocolBinding = FromApi(source.ProtocolBinding),
+                ProtocolBinding = source.ProtocolBinding is { } protocolBinding ? FromApi(protocolBinding) : null,
                 RequestTemplate = source.RequestTemplate,
                 Debug = source.Debug,
                 Deflate = source.Deflate,
-                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiated { ClientId = idp.ClientId, ClientProtocol = FromApi(idp.ClientProtocol), ClientAuthorizequery = idp.ClientAuthorizequery } : null,
+                Idpinitiated = source.Idpinitiated is { } idp ? new V2alpha1ConnectionOptionsIdpinitiatedSaml { ClientId = idp.ClientId, ClientProtocol = idp.ClientProtocol is { } clientProtocol ? FromApi(clientProtocol) : null, ClientAuthorizequery = idp.ClientAuthorizequery, Enabled = idp.Enabled } : null,
                 SigningCert = source.SigningCert,
-                SigningKey = source.SigningKey is { } sk ? new V2alpha1ConnectionOptionsKeyPair { Key = sk.Key, Cert = sk.Cert } : null,
-                DecryptionKey = source.DecryptionKey is { } dk ? new V2alpha1ConnectionOptionsKeyPair { Key = dk.Value?.ToString() } : null,
-                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionOptionsAssertionDecryptionSettings { DecryptionAlgorithm = FromApi(ads.AlgorithmProfile), KeyEncryptionAlgorithm = ads.AlgorithmExceptions is { } ae ? string.Join(",", ae) : null } : null,
-                FieldsMap = source.FieldsMap?.ToDictionary(kv => kv.Key, kv => kv.Value?.Value?.ToString()),
+                SigningKey = source.SigningKey is { } signingKey ? new V2alpha1ConnectionSigningKeySaml { Key = signingKey.Key, Cert = signingKey.Cert } : null,
+                DecryptionKey = null,
+                AssertionDecryptionSettings = source.AssertionDecryptionSettings is { } ads ? new V2alpha1ConnectionAssertionDecryptionSettings { AlgorithmProfile = ads.AlgorithmProfile is { } algorithmProfile ? FromApi(algorithmProfile) : null, AlgorithmExceptions = ads.AlgorithmExceptions?.ToArray() } : null,
+                FieldsMap = null,
                 UserIdAttribute = source.UserIdAttribute,
                 IconUrl = source.IconUrl,
                 DomainAliases = source.DomainAliases?.ToArray(),
@@ -1001,22 +1008,22 @@ namespace Alethic.Auth0.Operator.Controllers
                 GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionSmsOptions? FromApi(ConnectionOptionsSms? source)
+        internal static V2alpha1ConnectionOptionsSms? FromApi(ConnectionOptionsSms? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionSmsOptions
+            return new V2alpha1ConnectionOptionsSms
             {
                 Name = source.Name,
                 From = source.From,
                 Template = source.Template,
-                Syntax = source.Syntax?.ToString(),
-                Provider = source.Provider?.ToString(),
+                Syntax = source.Syntax is { } syntax ? FromApi(syntax) : null,
+                Provider = source.Provider is { } provider ? FromApi(provider) : null,
                 TwilioSid = source.TwilioSid,
                 TwilioToken = source.TwilioToken,
                 MessagingServiceSid = source.MessagingServiceSid,
@@ -1025,17 +1032,17 @@ namespace Alethic.Auth0.Operator.Controllers
                 DisableSignup = source.DisableSignup,
                 BruteForceProtection = source.BruteForceProtection,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
-                Totp = source.Totp is { } t ? new V2alpha1ConnectionEmailTotp { Length = t.Length, TimeStep = t.TimeStep } : null,
-                GatewayAuthentication = source.GatewayAuthentication.IsDefined && source.GatewayAuthentication.Value is { } ga ? new V2alpha1ConnectionGatewayAuthentication { Method = ga.Method, Subject = ga.Subject, Audience = ga.Audience, Secret = ga.Secret, SecretBase64Encoded = ga.SecretBase64Encoded } : null,
+                Totp = source.Totp is { } t ? new V2alpha1ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep } : null,
+                GatewayAuthentication = source.GatewayAuthentication.IsDefined && source.GatewayAuthentication.Value is { } ga ? new V2alpha1ConnectionGatewayAuthenticationSms { Method = ga.Method, Subject = ga.Subject, Audience = ga.Audience, Secret = ga.Secret, SecretBase64Encoded = ga.SecretBase64Encoded } : null,
             };
         }
 
-        internal static V2alpha1ConnectionTwitterOptions? FromApi(ConnectionOptionsTwitter? source)
+        internal static V2alpha1ConnectionOptionsTwitter? FromApi(ConnectionOptionsTwitter? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionTwitterOptions
+            return new V2alpha1ConnectionOptionsTwitter
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -1043,21 +1050,21 @@ namespace Alethic.Auth0.Operator.Controllers
                 FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                Protocol = source.Protocol?.ToString(),
+                Protocol = source.Protocol is { } protocol ? FromApi(protocol) : null,
                 OfflineAccess = source.OfflineAccess,
                 Profile = source.Profile,
                 TweetRead = source.TweetRead,
                 UsersRead = source.UsersRead,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionWindowsLiveOptions? FromApi(ConnectionOptionsWindowsLive? source)
+        internal static V2alpha1ConnectionOptionsWindowsLive? FromApi(ConnectionOptionsWindowsLive? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionWindowsLiveOptions
+            return new V2alpha1ConnectionOptionsWindowsLive
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
@@ -1065,7 +1072,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 FreeformScopes = source.FreeformScopes?.ToArray(),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                BasicProfile = source.Basic,
+                Basic = source.Basic,
                 OfflineAccess = source.OfflineAccess,
                 Signin = source.Signin,
                 Birthday = source.Birthday,
@@ -1073,7 +1080,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 CalendarsUpdate = source.CalendarsUpdate,
                 ContactsBirthday = source.ContactsBirthday,
                 ContactsCreate = source.ContactsCreate,
-                ContactsCalendar = source.ContactsCalendars,
+                ContactsCalendars = source.ContactsCalendars,
                 ContactsPhotos = source.ContactsPhotos,
                 ContactsSkydrive = source.ContactsSkydrive,
                 Emails = source.Emails,
@@ -1124,66 +1131,63 @@ namespace Alethic.Auth0.Operator.Controllers
                 TeamReadwriteAll = source.TeamReadwriteAll,
                 UserReadAll = source.UserReadAll,
                 UserReadbasicAll = source.UserReadbasicAll,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionYahooOptions? FromApi(ConnectionOptionsYahoo? source)
+        internal static V2alpha1ConnectionOptionsYahoo? FromApi(ConnectionOptionsYahoo? source)
         {
             if (source is null)
                 return null;
 
-            return new V2alpha1ConnectionYahooOptions
+            return new V2alpha1ConnectionOptionsYahoo
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
-                UpstreamParams = FromApi(source.UpstreamParams),
+                UpstreamParams = null,
             };
         }
 
-        internal static V2alpha1ConnectionSetUserRootAttributes FromApi(ConnectionSetUserRootAttributesEnum source)
+        internal static V2alpha1ConnectionSetUserRootAttributesEnum? FromApi(ConnectionSetUserRootAttributesEnum? source)
         {
-            return source.Value switch
+            return source?.Value switch
             {
-                ConnectionSetUserRootAttributesEnum.Values.OnEachLogin => V2alpha1ConnectionSetUserRootAttributes.OnEachLogin,
-                ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin => V2alpha1ConnectionSetUserRootAttributes.OnFirstLogin,
-                ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin => V2alpha1ConnectionSetUserRootAttributes.NeverOnLogin,
+                ConnectionSetUserRootAttributesEnum.Values.OnEachLogin => V2alpha1ConnectionSetUserRootAttributesEnum.OnEachLogin,
+                ConnectionSetUserRootAttributesEnum.Values.OnFirstLogin => V2alpha1ConnectionSetUserRootAttributesEnum.OnFirstLogin,
+                ConnectionSetUserRootAttributesEnum.Values.NeverOnLogin => V2alpha1ConnectionSetUserRootAttributesEnum.NeverOnLogin,
+                null => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
             };
         }
 
-        internal static Dictionary<string, V2alpha1ConnectionUpstreamParam?>? FromApi(Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?> source)
+        internal static Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? FromApi(Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?> source)
         {
             if (!source.IsDefined || source.Value is not { } dict)
                 return null;
 
-            var result = new Dictionary<string, V2alpha1ConnectionUpstreamParam?>(dict.Count);
+            var result = new Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>(dict.Count);
             foreach (var (key, value) in dict)
             {
-                string? alias = null;
-                if (value is { } v && v.IsConnectionUpstreamAlias())
-                    alias = v.AsConnectionUpstreamAlias().Alias?.Value;
-                result[key] = alias is not null ? new V2alpha1ConnectionUpstreamParam { Alias = alias } : null;
+                if (value is not null)
+                    result[key] = new V2alpha1ConnectionUpstreamAdditionalProperties();
             }
-            return result;
+            return result.Count > 0 ? result : null;
         }
 
-        internal static Dictionary<string, V2alpha1ConnectionUpstreamParam?>? FromApi(Dictionary<string, ConnectionUpstreamAdditionalProperties>? source)
+        internal static Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? FromApi(Dictionary<string, ConnectionUpstreamAdditionalProperties>? source)
         {
             if (source is null)
                 return null;
 
-            var result = new Dictionary<string, V2alpha1ConnectionUpstreamParam?>(source.Count);
+            var result = new Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>(source.Count);
             foreach (var (key, value) in source)
             {
-                string? alias = null;
-                if (value.IsConnectionUpstreamAlias())
-                    alias = value.AsConnectionUpstreamAlias().Alias?.Value;
-                result[key] = alias is not null ? new V2alpha1ConnectionUpstreamParam { Alias = alias } : null;
+                if (value is not null)
+                    result[key] = new V2alpha1ConnectionUpstreamAdditionalProperties();
             }
-            return result;
+            return result.Count > 0 ? result : null;
         }
 
         internal static Dictionary<string, ConnectionUpstreamAdditionalProperties>? ToApiUpstreamParamsNonOptional(Dictionary<string, V2alpha1ConnectionUpstreamParam?>? source)
@@ -1645,7 +1649,7 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static ConnectionOptionsAuth0 ToApi(V2alpha1ConnectionAuth0Options source)
+        internal static ConnectionOptionsAuth0 ToApi(V2alpha1ConnectionOptionsAuth0 source)
         {
             var target = new ConnectionOptionsAuth0();
             target.BruteForceProtection = source.BruteForceProtection;
@@ -1666,7 +1670,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsAd ToApi(V2alpha1ConnectionAdOptions source)
+        internal static ConnectionOptionsAd ToApi(V2alpha1ConnectionOptionsAd source)
         {
             var target = new ConnectionOptionsAd();
             target.AgentIp = source.AgentIp;
@@ -1689,7 +1693,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsAdfs ToApi(V2alpha1ConnectionAdfsOptions source)
+        internal static ConnectionOptionsAdfs ToApi(V2alpha1ConnectionOptionsAdfs source)
         {
             var target = new ConnectionOptionsAdfs();
             target.AdfsServer = source.AdfsServer;
@@ -1708,7 +1712,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsAuth0Oidc ToApi(V2alpha1ConnectionAuth0OidcOptions source)
+        internal static ConnectionOptionsAuth0Oidc ToApi(V2alpha1ConnectionOptionsAuth0Oidc source)
         {
             var target = new ConnectionOptionsAuth0Oidc();
             target.ClientId = source.ClientId;
@@ -1716,7 +1720,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsAzureAd ToApi(V2alpha1ConnectionAzureAdOptions source)
+        internal static ConnectionOptionsAzureAd ToApi(V2alpha1ConnectionOptionsAzureAd source)
         {
             var target = new ConnectionOptionsAzureAd { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
             target.ApiEnableUsers = source.ApiEnableUsers;
@@ -1783,7 +1787,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsBitbucket ToApi(V2alpha1ConnectionBitbucketOptions source)
+        internal static ConnectionOptionsBitbucket ToApi(V2alpha1ConnectionOptionsBitbucket source)
         {
             var target = new ConnectionOptionsBitbucket();
             target.ClientId = source.ClientId;
@@ -1796,7 +1800,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsBox ToApi(V2alpha1ConnectionBoxOptions source)
+        internal static ConnectionOptionsBox ToApi(V2alpha1ConnectionOptionsBox source)
         {
             var target = new ConnectionOptionsBox();
             target.ClientId = source.ClientId;
@@ -1807,7 +1811,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsDropbox ToApi(V2alpha1ConnectionDropboxOptions source)
+        internal static ConnectionOptionsDropbox ToApi(V2alpha1ConnectionOptionsDropbox source)
         {
             var target = new ConnectionOptionsDropbox();
             target.ClientId = source.ClientId;
@@ -1818,7 +1822,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsEmail ToApi(V2alpha1ConnectionEmailOptions source)
+        internal static ConnectionOptionsEmail ToApi(V2alpha1ConnectionOptionsEmail source)
         {
             return new ConnectionOptionsEmail
             {
@@ -1841,7 +1845,7 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static ConnectionOptionsEvernote ToApi(V2alpha1ConnectionEvernoteOptions source)
+        internal static ConnectionOptionsEvernote ToApi(V2alpha1ConnectionOptionsEvernote source)
         {
             var target = new ConnectionOptionsEvernote();
             target.ClientId = source.ClientId;
@@ -1852,7 +1856,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsExact ToApi(V2alpha1ConnectionExactOptions source)
+        internal static ConnectionOptionsExact ToApi(V2alpha1ConnectionOptionsExact source)
         {
             var target = new ConnectionOptionsExact();
             target.ClientId = source.ClientId;
@@ -1863,7 +1867,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsFacebook ToApi(V2alpha1ConnectionFacebookOptions source)
+        internal static ConnectionOptionsFacebook ToApi(V2alpha1ConnectionOptionsFacebook source)
         {
             var target = new ConnectionOptionsFacebook();
             target.ClientId = source.ClientId;
@@ -1917,7 +1921,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsGitHub ToApi(V2alpha1ConnectionGitHubOptions source)
+        internal static ConnectionOptionsGitHub ToApi(V2alpha1ConnectionOptionsGitHub source)
         {
             var target = new ConnectionOptionsGitHub();
             target.ClientId = source.ClientId;
@@ -1950,7 +1954,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsGoogleApps ToApi(V2alpha1ConnectionGoogleAppsOptions source)
+        internal static ConnectionOptionsGoogleApps ToApi(V2alpha1ConnectionOptionsGoogleApps source)
         {
             var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
             if (source.Scope is { } scope) target.Scope = scope;
@@ -1978,7 +1982,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsGoogleOAuth2 ToApi(V2alpha1ConnectionGoogleOAuth2Options source)
+        internal static ConnectionOptionsGoogleOAuth2 ToApi(V2alpha1ConnectionOptionsGoogleOAuth2 source)
         {
             var target = new ConnectionOptionsGoogleOAuth2();
             target.ClientId = source.ClientId;
@@ -2058,7 +2062,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsLinkedin ToApi(V2alpha1ConnectionLinkedinOptions source)
+        internal static ConnectionOptionsLinkedin ToApi(V2alpha1ConnectionOptionsLinkedin source)
         {
             var target = new ConnectionOptionsLinkedin();
             target.ClientId = source.ClientId;
@@ -2078,7 +2082,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsOAuth1 ToApi(V2alpha1ConnectionOAuth1Options source)
+        internal static ConnectionOptionsOAuth1 ToApi(V2alpha1ConnectionOptionsOAuth1 source)
         {
             var target = new ConnectionOptionsOAuth1();
             target.ClientId = source.ClientId;
@@ -2092,7 +2096,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsOAuth2 ToApi(V2alpha1ConnectionOAuth2Options source)
+        internal static ConnectionOptionsOAuth2 ToApi(V2alpha1ConnectionOptionsOAuth2 source)
         {
             var target = new ConnectionOptionsOAuth2();
             target.ClientId = source.ClientId;
@@ -2114,7 +2118,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsOffice365 ToApi(V2alpha1ConnectionOffice365Options source)
+        internal static ConnectionOptionsOffice365 ToApi(V2alpha1ConnectionOptionsOffice365 source)
         {
             var target = new ConnectionOptionsOffice365();
             target.ClientId = source.ClientId;
@@ -2122,7 +2126,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsOidc ToApi(V2alpha1ConnectionOidcOptions source)
+        internal static ConnectionOptionsOidc ToApi(V2alpha1ConnectionOptionsOidc source)
         {
             var target = new ConnectionOptionsOidc { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
             target.DiscoveryUrl = source.DiscoveryUrl;
@@ -2146,7 +2150,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsOkta ToApi(V2alpha1ConnectionOktaOptions source)
+        internal static ConnectionOptionsOkta ToApi(V2alpha1ConnectionOptionsOkta source)
         {
             var target = new ConnectionOptionsOkta { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
             target.Domain = source.Domain;
@@ -2170,7 +2174,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsPaypal ToApi(V2alpha1ConnectionPaypalOptions source)
+        internal static ConnectionOptionsPaypal ToApi(V2alpha1ConnectionOptionsPaypal source)
         {
             var target = new ConnectionOptionsPaypal();
             target.ClientId = source.ClientId;
@@ -2186,7 +2190,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsPingFederate ToApi(V2alpha1ConnectionPingFederateOptions source)
+        internal static ConnectionOptionsPingFederate ToApi(V2alpha1ConnectionOptionsPingFederate source)
         {
             var target = new ConnectionOptionsPingFederate { PingFederateBaseUrl = source.PingFederateBaseUrl };
             target.SignInEndpoint = source.SignInEndpoint;
@@ -2210,7 +2214,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsSalesforce ToApi(V2alpha1ConnectionSalesforceOptions source)
+        internal static ConnectionOptionsSalesforce ToApi(V2alpha1ConnectionOptionsSalesforce source)
         {
             var target = new ConnectionOptionsSalesforce();
             target.ClientId = source.ClientId;
@@ -2224,7 +2228,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsSalesforceCommunity ToApi(V2alpha1ConnectionSalesforceCommunityOptions source)
+        internal static ConnectionOptionsSalesforceCommunity ToApi(V2alpha1ConnectionOptionsSalesforceCommunity source)
         {
             var target = new ConnectionOptionsSalesforceCommunity();
             target.ClientId = source.ClientId;
@@ -2239,7 +2243,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsSaml ToApi(V2alpha1ConnectionSamlOptions source)
+        internal static ConnectionOptionsSaml ToApi(V2alpha1ConnectionOptionsSaml source)
         {
             var target = new ConnectionOptionsSaml();
             target.SignInEndpoint = source.SignInEndpoint;
@@ -2277,7 +2281,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsSms ToApi(V2alpha1ConnectionSmsOptions source)
+        internal static ConnectionOptionsSms ToApi(V2alpha1ConnectionOptionsSms source)
         {
             var target = new ConnectionOptionsSms();
             target.Name = source.Name;
@@ -2307,7 +2311,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsTwitter ToApi(V2alpha1ConnectionTwitterOptions source)
+        internal static ConnectionOptionsTwitter ToApi(V2alpha1ConnectionOptionsTwitter source)
         {
             var target = new ConnectionOptionsTwitter();
             target.ClientId = source.ClientId;
@@ -2324,7 +2328,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsWindowsLive ToApi(V2alpha1ConnectionWindowsLiveOptions source)
+        internal static ConnectionOptionsWindowsLive ToApi(V2alpha1ConnectionOptionsWindowsLive source)
         {
             var target = new ConnectionOptionsWindowsLive();
             target.ClientId = source.ClientId;
@@ -2396,7 +2400,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
-        internal static ConnectionOptionsYahoo ToApi(V2alpha1ConnectionYahooOptions source)
+        internal static ConnectionOptionsYahoo ToApi(V2alpha1ConnectionOptionsYahoo source)
         {
             var target = new ConnectionOptionsYahoo();
             target.ClientId = source.ClientId;

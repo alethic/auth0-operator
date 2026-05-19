@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionPasswordOptions
 {
+
     [JsonPropertyName("complexity")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionPasswordOptionsComplexity? Complexity { get; set; }
@@ -18,4 +20,5 @@ public record V2alpha1ConnectionPasswordOptions
     [JsonPropertyName("profile_data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionPasswordOptionsProfileData? ProfileData { get; set; }
+
 }

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.ModelGenerator.Configuration;
@@ -9,8 +11,12 @@ public sealed class TypeTransformer
 {
     public IReadOnlyList<GeneratedType> Transform(IReadOnlyList<DiscoveredType> discoveredTypes, GeneratorConfiguration configuration)
     {
-        var generatedTypeMap = BuildGeneratedTypeMap(discoveredTypes, configuration);
-        return discoveredTypes.Select(type => TransformType(type, configuration, generatedTypeMap)).ToList();
+        var filteredTypes = discoveredTypes
+            .Where(type => !IsConfiguredTypeReplacement(type, configuration))
+            .ToList();
+
+        var generatedTypeMap = BuildGeneratedTypeMap(filteredTypes, configuration);
+        return filteredTypes.Select(type => TransformType(type, configuration, generatedTypeMap)).ToList();
     }
 
     private GeneratedType TransformType(DiscoveredType discoveredType, GeneratorConfiguration configuration, IReadOnlyDictionary<string, DiscoveredTypeReference> generatedTypeMap)
@@ -47,7 +53,7 @@ public sealed class TypeTransformer
 
     private GeneratedProperty TransformProperty(DiscoveredProperty property, GeneratorConfiguration configuration, IReadOnlyDictionary<string, DiscoveredTypeReference> generatedTypeMap)
     {
-        var transformedType = NormalizePropertyType(property.Type, generatedTypeMap, true);
+        var transformedType = NormalizePropertyType(property.Type, generatedTypeMap, configuration, true);
         var jsonPropertyName = GetJsonPropertyName(property);
         var attributes = BuildPropertyAttributes(property, configuration, jsonPropertyName, transformedType);
 
@@ -94,6 +100,13 @@ public sealed class TypeTransformer
             trimmed = trimmed[..^1];
         }
 
+        var arrayRank = 0;
+        while (trimmed.EndsWith("[]", StringComparison.Ordinal))
+        {
+            arrayRank++;
+            trimmed = trimmed[..^2];
+        }
+
         var aliasMap = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["bool"] = typeof(bool).FullName!,
@@ -113,6 +126,27 @@ public sealed class TypeTransformer
             ["ushort"] = typeof(ushort).FullName!,
         };
 
+        if (arrayRank > 0)
+        {
+            var elementType = ParseConfiguredType(trimmed);
+            return new DiscoveredTypeReference
+            {
+                Name = elementType.Name,
+                Namespace = elementType.Namespace,
+                FullName = null,
+                Alias = null,
+                IsReferenceType = true,
+                IsNullableReferenceType = isNullable,
+                IsValueType = false,
+                IsNullableValueType = false,
+                IsOptionalWrapper = false,
+                IsArray = true,
+                ArrayRank = arrayRank,
+                ElementType = elementType,
+                GenericArguments = [],
+            };
+        }
+
         aliasMap.TryGetValue(trimmed, out var fullName);
         var namespaceSeparator = trimmed.LastIndexOf('.');
 
@@ -129,14 +163,20 @@ public sealed class TypeTransformer
         };
     }
 
+    private static bool IsConfiguredTypeReplacement(DiscoveredType discoveredType, GeneratorConfiguration configuration)
+    {
+        return TryGetConfiguredTypeReplacement(discoveredType.FullName, discoveredType.Name, configuration, out _);
+    }
+
     private static Dictionary<string, DiscoveredTypeReference> BuildGeneratedTypeMap(IReadOnlyList<DiscoveredType> discoveredTypes, GeneratorConfiguration configuration)
     {
         var map = new Dictionary<string, DiscoveredTypeReference>(StringComparer.Ordinal);
         foreach (var discoveredType in discoveredTypes)
         {
+            var rewrittenName = RewriteTypeName(StripSourcePrefixes(discoveredType.Name, configuration), configuration);
             map[discoveredType.FullName] = new DiscoveredTypeReference
             {
-                Name = configuration.ClassPrefix + StripSourcePrefixes(discoveredType.Name, configuration),
+                Name = configuration.ClassPrefix + rewrittenName,
                 Namespace = MapNamespace(discoveredType.Namespace, configuration),
                 FullName = discoveredType.FullName,
                 Alias = null,
@@ -281,11 +321,11 @@ public sealed class TypeTransformer
             && string.Equals(type.Name, "IEnumerable", StringComparison.Ordinal);
     }
 
-    private static DiscoveredTypeReference NormalizePropertyType(DiscoveredTypeReference type, IReadOnlyDictionary<string, DiscoveredTypeReference> generatedTypeMap, bool makeNullable)
+    private static DiscoveredTypeReference NormalizePropertyType(DiscoveredTypeReference type, IReadOnlyDictionary<string, DiscoveredTypeReference> generatedTypeMap, GeneratorConfiguration configuration, bool makeNullable)
     {
         if (IsNullableValueTypeReference(type) && type.GenericArguments.Count == 1)
         {
-            var underlyingType = NormalizePropertyType(type.GenericArguments[0], generatedTypeMap, false);
+            var underlyingType = NormalizePropertyType(type.GenericArguments[0], generatedTypeMap, configuration, false);
             return new DiscoveredTypeReference
             {
                 Name = underlyingType.Name,
@@ -306,7 +346,7 @@ public sealed class TypeTransformer
 
         if (IsEnumerableTypeReference(type) && type.GenericArguments.Count == 1)
         {
-            var elementType = NormalizePropertyType(type.GenericArguments[0], generatedTypeMap, false);
+            var elementType = NormalizePropertyType(type.GenericArguments[0], generatedTypeMap, configuration, false);
             return new DiscoveredTypeReference
             {
                 Name = elementType.Name,
@@ -340,9 +380,17 @@ public sealed class TypeTransformer
                 IsOptionalWrapper = type.IsOptionalWrapper,
                 IsArray = true,
                 ArrayRank = type.ArrayRank,
-                ElementType = NormalizePropertyType(type.ElementType, generatedTypeMap, false),
-                GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, false))],
+                ElementType = NormalizePropertyType(type.ElementType, generatedTypeMap, configuration, false),
+                GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, configuration, false))],
             };
+        }
+
+        if (TryGetConfiguredTypeReplacement(type.FullName, type.Name, configuration, out var replacementTypeName))
+        {
+            var replacementType = ParseConfiguredType(replacementTypeName!);
+            return makeNullable
+                ? MakeTypeNullable(replacementType)
+                : replacementType;
         }
 
         if (!string.IsNullOrWhiteSpace(type.FullName) && generatedTypeMap.TryGetValue(type.FullName, out var generatedType))
@@ -360,7 +408,7 @@ public sealed class TypeTransformer
                 IsOptionalWrapper = type.IsOptionalWrapper,
                 IsArray = false,
                 ArrayRank = 0,
-                GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, false))],
+                GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, configuration, false))],
             };
         }
 
@@ -377,9 +425,26 @@ public sealed class TypeTransformer
             IsOptionalWrapper = type.IsOptionalWrapper,
             IsArray = type.IsArray,
             ArrayRank = type.ArrayRank,
-            ElementType = type.ElementType is null ? null : NormalizePropertyType(type.ElementType, generatedTypeMap, false),
-            GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, false))],
+            ElementType = type.ElementType is null ? null : NormalizePropertyType(type.ElementType, generatedTypeMap, configuration, false),
+            GenericArguments = [.. type.GenericArguments.Select(argument => NormalizePropertyType(argument, generatedTypeMap, configuration, false))],
         };
+    }
+
+    private static bool TryGetConfiguredTypeReplacement(string? fullName, string name, GeneratorConfiguration configuration, out string? replacementTypeName)
+    {
+        replacementTypeName = null;
+
+        if (configuration.TypeReplacements.Count == 0)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(fullName) && configuration.TypeReplacements.TryGetValue(fullName, out replacementTypeName))
+        {
+            return true;
+        }
+
+        return configuration.TypeReplacements.TryGetValue(name, out replacementTypeName);
     }
 
     private static DiscoveredTypeReference MakeTypeNullable(DiscoveredTypeReference type)
@@ -413,6 +478,17 @@ public sealed class TypeTransformer
         }
 
         return name;
+    }
+
+    private static string RewriteTypeName(string name, GeneratorConfiguration configuration)
+    {
+        var rewrittenName = name;
+        foreach (var rule in configuration.TypeNameRewriteRules)
+        {
+            rewrittenName = Regex.Replace(rewrittenName, rule.Pattern, rule.Replacement, RegexOptions.CultureInvariant);
+        }
+
+        return rewrittenName;
     }
 
     private static string MapNamespace(string sourceNamespace, GeneratorConfiguration configuration)

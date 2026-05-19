@@ -56,6 +56,16 @@
   "addedPropertyAttributes": [],
   "standardProperties": [],
   "namespaceMappings": {},
+  "typeNameRewriteRules": [
+    {
+      "pattern": "^(?!Connection)(.+)$",
+      "replacement": "Connection$1"
+    }
+  ],
+  "typeReplacements": {
+    "Auth0.ManagementApi.Types.ConnectionScopeOAuth2": "string[]?",
+    "ConnectionScopeOAuth2": "string[]?"
+  },
   "emitRecords": true,
   "useNamespaceSubdirectories": false,
   "overwriteExistingFiles": true

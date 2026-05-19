@@ -2,8 +2,10 @@ using System;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionPasswordOptionsDictionary
 {
+
     [JsonPropertyName("active")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Active { get; set; }
@@ -14,5 +16,6 @@ public record V2alpha1ConnectionPasswordOptionsDictionary
 
     [JsonPropertyName("default")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha1PasswordDefaultDictionariesEnum? Default { get; set; }
+    public V2alpha1ConnectionPasswordDefaultDictionariesEnum? Default { get; set; }
+
 }

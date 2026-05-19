@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsSalesforceCommunity
 {
+
     [JsonPropertyName("community_base_url")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CommunityBaseUrl { get; set; }
@@ -40,4 +42,5 @@ public record V2alpha1ConnectionOptionsSalesforceCommunity
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

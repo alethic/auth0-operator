@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionAuthenticationMethods
 {
+
     [JsonPropertyName("password")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionPasswordAuthenticationMethod? Password { get; set; }
@@ -18,4 +20,5 @@ public record V2alpha1ConnectionAuthenticationMethods
     [JsonPropertyName("phone_otp")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionPhoneOtpAuthenticationMethod? PhoneOtp { get; set; }
+
 }

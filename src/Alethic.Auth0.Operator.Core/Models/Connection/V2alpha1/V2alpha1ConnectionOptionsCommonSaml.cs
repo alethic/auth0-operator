@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsCommonSaml
 {
+
     [JsonPropertyName("assertion_decryption_settings")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionAssertionDecryptionSettings? AssertionDecryptionSettings { get; set; }
@@ -68,4 +70,5 @@ public record V2alpha1ConnectionOptionsCommonSaml
     [JsonPropertyName("upstream_params")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? UpstreamParams { get; set; }
+
 }

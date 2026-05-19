@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionAttributeMapOidc
 {
+
     [JsonPropertyName("attributes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, object>? Attributes { get; set; }
@@ -15,4 +17,5 @@ public record V2alpha1ConnectionAttributeMapOidc
     [JsonPropertyName("userinfo_scope")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? UserinfoScope { get; set; }
+
 }

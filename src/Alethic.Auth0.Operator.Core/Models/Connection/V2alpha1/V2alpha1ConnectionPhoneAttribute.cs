@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
-public record V2alpha1UsernameAttribute
+
+public record V2alpha1ConnectionPhoneAttribute
 {
+
     [JsonPropertyName("identifier")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha1ConnectionAttributeIdentifier? Identifier { get; set; }
@@ -13,9 +15,6 @@ public record V2alpha1UsernameAttribute
 
     [JsonPropertyName("signup")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha1SignupSchema? Signup { get; set; }
+    public V2alpha1ConnectionSignupVerified? Signup { get; set; }
 
-    [JsonPropertyName("validation")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha1UsernameValidation? Validation { get; set; }
 }

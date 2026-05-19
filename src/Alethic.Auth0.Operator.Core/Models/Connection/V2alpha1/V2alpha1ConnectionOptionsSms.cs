@@ -2,8 +2,10 @@ using System;
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionOptionsSms
 {
+
     [JsonPropertyName("brute_force_protection")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? BruteForceProtection { get; set; }
@@ -63,4 +65,5 @@ public record V2alpha1ConnectionOptionsSms
     [JsonPropertyName("non_persistent_attrs")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string[]? NonPersistentAttrs { get; set; }
+
 }

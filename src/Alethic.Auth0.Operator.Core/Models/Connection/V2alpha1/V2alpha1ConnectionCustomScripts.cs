@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
+
 public record V2alpha1ConnectionCustomScripts
 {
+
     [JsonPropertyName("login")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Login { get; set; }
@@ -38,4 +40,5 @@ public record V2alpha1ConnectionCustomScripts
     [JsonPropertyName("change_phone_number")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ChangePhoneNumber { get; set; }
+
 }

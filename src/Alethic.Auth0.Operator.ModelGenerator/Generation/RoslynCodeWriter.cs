@@ -40,7 +40,8 @@ public sealed class RoslynCodeWriter
                 ]))
                 .NormalizeWhitespace();
 
-            File.WriteAllText(filePath, compilationUnit.ToFullString() + Environment.NewLine);
+            var generatedSource = FormatGeneratedSource(compilationUnit.ToFullString(), generatedType, configuration) + Environment.NewLine;
+            File.WriteAllText(filePath, generatedSource);
             generatedFiles.Add(filePath);
         }
 
@@ -51,11 +52,57 @@ public sealed class RoslynCodeWriter
         };
     }
 
+    private static string FormatGeneratedSource(string source, GeneratedType generatedType, GeneratorConfiguration configuration)
+    {
+        var lineEnding = Environment.NewLine;
+        var namespaceLine = $"namespace {generatedType.Namespace};{lineEnding}";
+        source = source.Replace(namespaceLine, namespaceLine + lineEnding, StringComparison.Ordinal);
+
+        if (generatedType.IsEnumLike)
+        {
+            var enumOpening = $"public enum {generatedType.Name}{lineEnding}{{{lineEnding}";
+            source = source.Replace(enumOpening, enumOpening + lineEnding, StringComparison.Ordinal);
+
+            foreach (var member in generatedType.EnumMembers.Take(Math.Max(0, generatedType.EnumMembers.Count - 1)))
+            {
+                var memberLine = $"    {member.Name},{lineEnding}";
+                source = source.Replace(memberLine, memberLine + lineEnding, StringComparison.Ordinal);
+            }
+
+            var enumClosingBrace = source.LastIndexOf(lineEnding + "}", StringComparison.Ordinal);
+            if (enumClosingBrace >= 0)
+            {
+                source = source.Insert(enumClosingBrace, lineEnding);
+            }
+
+            return source;
+        }
+
+        var typeKeyword = configuration.EmitRecords ? "record" : "class";
+        var typeOpening = $"public {typeKeyword} {generatedType.Name}{lineEnding}{{{lineEnding}";
+        source = source.Replace(typeOpening, typeOpening + lineEnding, StringComparison.Ordinal);
+
+        var lastClosingBrace = source.LastIndexOf(lineEnding + "}", StringComparison.Ordinal);
+        if (lastClosingBrace >= 0)
+        {
+            source = source.Insert(lastClosingBrace, lineEnding);
+        }
+
+        return source;
+    }
+
     private static MemberDeclarationSyntax CreateTypeDeclaration(GeneratedType generatedType, GeneratorConfiguration configuration)
     {
         if (generatedType.IsEnumLike)
         {
             return CreateEnumDeclaration(generatedType);
+        }
+
+        var members = generatedType.Properties.Select(CreatePropertyDeclaration).ToArray();
+        if (members.Length > 0)
+        {
+            members[0] = members[0].WithLeadingTrivia(members[0].GetLeadingTrivia().Insert(0, ElasticCarriageReturnLineFeed));
+            members[^1] = members[^1].WithTrailingTrivia(members[^1].GetTrailingTrivia().Add(ElasticCarriageReturnLineFeed));
         }
 
         TypeDeclarationSyntax declaration;
@@ -73,7 +120,7 @@ public sealed class RoslynCodeWriter
                     baseList: null,
                     constraintClauses: default,
                     openBraceToken: Token(SyntaxKind.OpenBraceToken),
-                    members: List(generatedType.Properties.Select(CreatePropertyDeclaration)),
+                    members: List(members),
                     closeBraceToken: Token(SyntaxKind.CloseBraceToken),
                     semicolonToken: default)
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
@@ -82,7 +129,7 @@ public sealed class RoslynCodeWriter
         {
             declaration = ClassDeclaration(generatedType.Name)
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .WithMembers(List(generatedType.Properties.Select(CreatePropertyDeclaration)));
+                .WithMembers(List(members));
         }
 
         if (generatedType.Attributes.Count > 0)
