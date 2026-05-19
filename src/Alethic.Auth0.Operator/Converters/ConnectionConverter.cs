@@ -1,10 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.Json;
 
+using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.Connection.V1;
 using Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1;
 using Alethic.Auth0.Operator.Models;
+
+using Auth0.ManagementApi;
+using Auth0.ManagementApi.Connections;
 
 using KubeOps.Operator.Web.Webhooks.Conversion;
 
@@ -28,6 +34,8 @@ namespace Alethic.Auth0.Operator.Converters
         /// </summary>
         class V1ToV2alpha1 : IEntityConverter<V1Connection, V2alpha1Connection>
         {
+
+            static readonly JsonSerializerOptions Auth0JsonSerializerOptions = CreateAuth0JsonSerializerOptions();
 
             public V2alpha1Connection Convert(V1Connection from)
             {
@@ -109,103 +117,103 @@ namespace Alethic.Auth0.Operator.Converters
                 switch (strategy)
                 {
                     case V2alpha1ConnectionStrategy.Auth0:
-                        options.Auth0 = json.Deserialize<V2alpha1ConnectionOptionsAuth0>();
+                        options.Auth0 = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsAuth0>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Ad:
-                        options.Ad = json.Deserialize<V2alpha1ConnectionOptionsAd>();
+                        options.Ad = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsAd>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Adfs:
-                        options.Adfs = json.Deserialize<V2alpha1ConnectionOptionsAdfs>();
+                        options.Adfs = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsAdfs>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Auth0Oidc:
-                        options.Auth0Oidc = json.Deserialize<V2alpha1ConnectionOptionsAuth0Oidc>();
+                        options.Auth0Oidc = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsAuth0Oidc>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.AzureAd:
-                        options.AzureAd = json.Deserialize<V2alpha1ConnectionOptionsAzureAd>();
+                        options.AzureAd = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsAzureAd>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Bitbucket:
-                        options.Bitbucket = json.Deserialize<V2alpha1ConnectionOptionsBitbucket>();
+                        options.Bitbucket = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsBitbucket>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Box:
-                        options.Box = json.Deserialize<V2alpha1ConnectionOptionsBox>();
+                        options.Box = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsBox>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Dropbox:
-                        options.Dropbox = json.Deserialize<V2alpha1ConnectionOptionsDropbox>();
+                        options.Dropbox = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsDropbox>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Email:
-                        options.Email = json.Deserialize<V2alpha1ConnectionOptionsEmail>();
+                        options.Email = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsEmail>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Evernote:
-                        options.Evernote = json.Deserialize<V2alpha1ConnectionOptionsEvernote>();
+                        options.Evernote = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsEvernote>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.EvernoteSandbox:
-                        options.EvernoteSandbox = json.Deserialize<V2alpha1ConnectionOptionsEvernote>();
+                        options.EvernoteSandbox = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsEvernote>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Exact:
-                        options.Exact = json.Deserialize<V2alpha1ConnectionOptionsExact>();
+                        options.Exact = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsExact>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Facebook:
-                        options.Facebook = json.Deserialize<V2alpha1ConnectionOptionsFacebook>();
+                        options.Facebook = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsFacebook>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.GitHub:
-                        options.GitHub = json.Deserialize<V2alpha1ConnectionOptionsGitHub>();
+                        options.GitHub = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsGitHub>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.GoogleApps:
-                        options.GoogleApps = json.Deserialize<V2alpha1ConnectionOptionsGoogleApps>();
+                        options.GoogleApps = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsGoogleApps>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.GoogleOAuth2:
-                        options.GoogleOAuth2 = json.Deserialize<V2alpha1ConnectionOptionsGoogleOAuth2>();
+                        options.GoogleOAuth2 = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsGoogleOAuth2>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Linkedin:
-                        options.Linkedin = json.Deserialize<V2alpha1ConnectionOptionsLinkedin>();
+                        options.Linkedin = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsLinkedin>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.OAuth1:
-                        options.OAuth1 = json.Deserialize<V2alpha1ConnectionOptionsOAuth1>();
+                        options.OAuth1 = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsOAuth1>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.OAuth2:
-                        options.OAuth2 = json.Deserialize<V2alpha1ConnectionOptionsOAuth2>();
+                        options.OAuth2 = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsOAuth2>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Office365:
-                        options.Office365 = json.Deserialize<V2alpha1ConnectionOptionsOffice365>();
+                        options.Office365 = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsOffice365>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Oidc:
-                        options.Oidc = json.Deserialize<V2alpha1ConnectionOptionsOidc>();
+                        options.Oidc = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsOidc>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Okta:
-                        options.Okta = json.Deserialize<V2alpha1ConnectionOptionsOkta>();
+                        options.Okta = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsOkta>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Paypal:
-                        options.Paypal = json.Deserialize<V2alpha1ConnectionOptionsPaypal>();
+                        options.Paypal = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsPaypal>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.PaypalSandbox:
-                        options.PaypalSandbox = json.Deserialize<V2alpha1ConnectionOptionsPaypal>();
+                        options.PaypalSandbox = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsPaypal>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.PingFederate:
-                        options.PingFederate = json.Deserialize<V2alpha1ConnectionOptionsPingFederate>();
+                        options.PingFederate = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsPingFederate>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Salesforce:
-                        options.Salesforce = json.Deserialize<V2alpha1ConnectionOptionsSalesforce>();
+                        options.Salesforce = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsSalesforce>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.SalesforceCommunity:
-                        options.SalesforceCommunity = json.Deserialize<V2alpha1ConnectionOptionsSalesforceCommunity>();
+                        options.SalesforceCommunity = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsSalesforceCommunity>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.SalesforceSandbox:
-                        options.SalesforceSandbox = json.Deserialize<V2alpha1ConnectionOptionsSalesforce>();
+                        options.SalesforceSandbox = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsSalesforce>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Saml:
-                        options.Saml = json.Deserialize<V2alpha1ConnectionOptionsSaml>();
+                        options.Saml = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsSaml>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Sms:
-                        options.Sms = json.Deserialize<V2alpha1ConnectionOptionsSms>();
+                        options.Sms = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsSms>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Twitter:
-                        options.Twitter = json.Deserialize<V2alpha1ConnectionOptionsTwitter>();
+                        options.Twitter = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsTwitter>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.WindowsLive:
-                        options.WindowsLive = json.Deserialize<V2alpha1ConnectionOptionsWindowsLive>();
+                        options.WindowsLive = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsWindowsLive>(Auth0JsonSerializerOptions));
                         break;
                     case V2alpha1ConnectionStrategy.Yahoo:
-                        options.Yahoo = json.Deserialize<V2alpha1ConnectionOptionsYahoo>();
+                        options.Yahoo = V2alpha1ConnectionController.FromApi(json.Deserialize<ConnectionOptionsYahoo>(Auth0JsonSerializerOptions));
                         break;
                 }
 
@@ -219,45 +227,56 @@ namespace Alethic.Auth0.Operator.Converters
 
                 NormalizeSpecialSamlOptions(strategy, source);
 
-                JsonElement? json = strategy switch
+                object? options = strategy switch
                 {
-                    V2alpha1ConnectionStrategy.Auth0 => source.Auth0 is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Ad => source.Ad is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Adfs => source.Adfs is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Auth0Oidc => source.Auth0Oidc is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.AzureAd => source.AzureAd is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Bitbucket => source.Bitbucket is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Box => source.Box is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Dropbox => source.Dropbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Email => source.Email is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Evernote => source.Evernote is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.EvernoteSandbox => source.EvernoteSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Exact => source.Exact is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Facebook => source.Facebook is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.GitHub => source.GitHub is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.GoogleApps => source.GoogleApps is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.GoogleOAuth2 => source.GoogleOAuth2 is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Linkedin => source.Linkedin is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.OAuth1 => source.OAuth1 is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.OAuth2 => source.OAuth2 is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Office365 => source.Office365 is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Oidc => source.Oidc is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Okta => source.Okta is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Paypal => source.Paypal is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.PaypalSandbox => source.PaypalSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.PingFederate => source.PingFederate is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Salesforce => source.Salesforce is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.SalesforceCommunity => source.SalesforceCommunity is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.SalesforceSandbox => source.SalesforceSandbox is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Saml => source.Saml is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Sms => source.Sms is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Twitter => source.Twitter is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.WindowsLive => source.WindowsLive is { } v ? JsonSerializer.SerializeToElement(v) : null,
-                    V2alpha1ConnectionStrategy.Yahoo => source.Yahoo is { } v ? JsonSerializer.SerializeToElement(v) : null,
+                    V2alpha1ConnectionStrategy.Auth0 => source.Auth0 is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Ad => source.Ad is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Adfs => source.Adfs is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Auth0Oidc => source.Auth0Oidc is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.AzureAd => source.AzureAd is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Bitbucket => source.Bitbucket is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Box => source.Box is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Dropbox => source.Dropbox is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Email => source.Email is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Evernote => source.Evernote is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.EvernoteSandbox => source.EvernoteSandbox is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Exact => source.Exact is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Facebook => source.Facebook is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.GitHub => source.GitHub is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.GoogleApps => source.GoogleApps is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.GoogleOAuth2 => source.GoogleOAuth2 is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Linkedin => source.Linkedin is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.OAuth1 => source.OAuth1 is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.OAuth2 => source.OAuth2 is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Office365 => source.Office365 is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Oidc => source.Oidc is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Okta => source.Okta is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Paypal => source.Paypal is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.PaypalSandbox => source.PaypalSandbox is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.PingFederate => source.PingFederate is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Salesforce => source.Salesforce is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.SalesforceCommunity => source.SalesforceCommunity is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.SalesforceSandbox => source.SalesforceSandbox is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Saml => source.Saml is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Sms => source.Sms is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Twitter => source.Twitter is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.WindowsLive => source.WindowsLive is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
+                    V2alpha1ConnectionStrategy.Yahoo => source.Yahoo is { } v ? V2alpha1ConnectionController.ToApi(v) : null,
                     _ => null,
                 };
 
-                return json is { } j ? j.Deserialize<V1ConnectionOptions>() : null;
+                return options is not null
+                    ? JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions))
+                    : null;
+            }
+
+            static JsonSerializerOptions CreateAuth0JsonSerializerOptions()
+            {
+                var type = typeof(ConnectionOptionsAuth0).Assembly.GetType("Auth0.ManagementApi.Core.JsonOptions")
+                    ?? throw new InvalidOperationException("Unable to locate Auth0.ManagementApi.Core.JsonOptions.");
+
+                return type.GetField("JsonSerializerOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as JsonSerializerOptions
+                    ?? throw new InvalidOperationException("Unable to resolve Auth0 JSON serializer options.");
             }
 
             static void NormalizeSpecialSamlOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions source)

@@ -368,9 +368,7 @@ namespace Alethic.Auth0.Operator.Tests
                         Strategy = "samlp",
                         Options = JsonSerializer.Deserialize<V1ConnectionOptions>("""
                         {
-                          "decryptionKey": {
-                            "privateKey": "pem-value"
-                          }
+                          "decryptionKey": "pem-value"
                         }
                         """)
                     }
@@ -382,6 +380,44 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsNotNull(result.Spec.Conf?.Options?.Saml?.DecryptionKey);
             Assert.AreEqual("pem-value", result.Spec.Conf.Options.Saml.DecryptionKey.PrivateKey);
             Assert.IsNull(result.Spec.Conf.Options.Saml.DecryptionKey.KeyPair);
+        }
+
+        [TestMethod]
+        public void Converter_ConvertConf_OidcMetadata_MapsThroughAuth0ApiModel()
+        {
+            var source = new V1Connection
+            {
+                Spec =
+                {
+                    Conf = new V1ConnectionConf
+                    {
+                        Name = "oidc-conn",
+                        Strategy = "oidc",
+                        Options = JsonSerializer.Deserialize<V1ConnectionOptions>("""
+                        {
+                          "client_id": "client-id",
+                          "issuer": "https://issuer.example",
+                          "jwks_uri": "https://issuer.example/jwks.json",
+                          "oidc_metadata": {
+                            "authorization_endpoint": "https://issuer.example/authorize",
+                            "issuer": "https://issuer.example",
+                            "jwks_uri": "https://issuer.example/jwks.json",
+                            "claims_supported": ["sub", "email"],
+                            "scopes_supported": ["openid", "profile"]
+                          }
+                        }
+                        """)
+                    }
+                }
+            };
+
+            var result = InvokeConvert(source);
+            var metadata = result.Spec.Conf?.Options?.Oidc?.OidcMetadata;
+
+            Assert.IsNotNull(metadata);
+            Assert.AreEqual("https://issuer.example/authorize", metadata.AuthorizationEndpoint);
+            CollectionAssert.AreEqual(new[] { "sub", "email" }, metadata.ClaimsSupported);
+            CollectionAssert.AreEqual(new[] { "openid", "profile" }, metadata.ScopesSupported);
         }
 
         [TestMethod]
@@ -417,9 +453,46 @@ namespace Alethic.Auth0.Operator.Tests
             var result = InvokeRevert(source);
             var decryptionKey = GetAdditionalProperty(result.Spec.Conf?.Options, "decryptionKey");
 
-            Assert.AreEqual(JsonValueKind.Object, decryptionKey.ValueKind);
-            Assert.AreEqual("pem-value", decryptionKey.GetProperty("privateKey").GetString());
-            Assert.IsFalse(decryptionKey.TryGetProperty("keyPair", out JsonElement _));
+            Assert.AreEqual(JsonValueKind.String, decryptionKey.ValueKind);
+            Assert.AreEqual("pem-value", decryptionKey.GetString());
+        }
+
+        [TestMethod]
+        public void Converter_RevertConf_OidcMetadata_MapsThroughAuth0ApiModel()
+        {
+            var source = new V2alpha1Connection
+            {
+                Spec =
+                {
+                    Conf = new V2alpha1ConnectionConf
+                    {
+                        Name = "oidc-conn",
+                        Strategy = V2alpha1ConnectionStrategy.Oidc,
+                        Options = new V2alpha1ConnectionOptions
+                        {
+                            Oidc = new V2alpha1ConnectionOptionsOidc
+                            {
+                                ClientId = "client-id",
+                                OidcMetadata = new V2alpha1ConnectionOptionsOidcMetadata
+                                {
+                                    AuthorizationEndpoint = "https://issuer.example/authorize",
+                                    ClaimsSupported = ["sub", "email"],
+                                    Issuer = "https://issuer.example",
+                                    JwksUri = "https://issuer.example/jwks.json",
+                                    ScopesSupported = ["openid", "profile"],
+                                },
+                            },
+                        },
+                    }
+                }
+            };
+
+            var result = InvokeRevert(source);
+            var oidcMetadata = GetAdditionalProperty(result.Spec.Conf?.Options, "oidc_metadata");
+
+            Assert.AreEqual("https://issuer.example/authorize", oidcMetadata.GetProperty("authorization_endpoint").GetString());
+            CollectionAssert.AreEqual(new[] { "sub", "email" }, oidcMetadata.GetProperty("claims_supported").EnumerateArray().Select(static i => i.GetString()).ToArray());
+            CollectionAssert.AreEqual(new[] { "openid", "profile" }, oidcMetadata.GetProperty("scopes_supported").EnumerateArray().Select(static i => i.GetString()).ToArray());
         }
 
         [TestMethod]
@@ -454,11 +527,10 @@ namespace Alethic.Auth0.Operator.Tests
 
             var result = InvokeRevert(source);
             var decryptionKey = GetAdditionalProperty(result.Spec.Conf?.Options, "decryptionKey");
-            var keyPair = decryptionKey.GetProperty("keyPair");
 
             Assert.IsFalse(decryptionKey.TryGetProperty("privateKey", out JsonElement _));
-            Assert.AreEqual("cert-value", keyPair.GetProperty("cert").GetString());
-            Assert.AreEqual("key-value", keyPair.GetProperty("key").GetString());
+            Assert.AreEqual("cert-value", decryptionKey.GetProperty("cert").GetString());
+            Assert.AreEqual("key-value", decryptionKey.GetProperty("key").GetString());
         }
 
         [TestMethod]
