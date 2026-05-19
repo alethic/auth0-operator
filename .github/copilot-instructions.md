@@ -1,5 +1,8 @@
 # Copilot Instructions
 
+## Code Style
+- When formatting C# code, wrap if statements onto two lines; do not use single-line if statements.
+
 ## Project Guidelines
 - For Auth0 connection option mappings, keep the controller/converter conversions manual; do not replace them with JSON-based mapping because the source and target models can be incompatible.
 - Extract nested conversion logic in controller mappings into separate FromApi/ToApi helper methods instead of inlining them inside larger conversion methods.

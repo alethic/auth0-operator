@@ -1382,7 +1382,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     ? null
                     : ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(new ConnectionUpstreamAlias());
 
-            return Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(result);
+            return result;
         }
 
         internal static Dictionary<string, ConnectionUpstreamAdditionalProperties>? ToApiUpstreamAdditionalPropertiesNonOptional(Dictionary<string, V2alpha1ConnectionUpstreamAdditionalProperties>? source)
@@ -2526,7 +2526,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             var target = new ConnectionValidationOptions();
             if (source.Username is { } username)
-                target.Username = Optional<ConnectionUsernameValidationOptions?>.Of(ToApi(username));
+                target.Username = ToApi(username);
 
             return target;
         }
@@ -2568,7 +2568,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 MappingMode = ToApi(source.MappingMode),
                 UserinfoScope = source.UserinfoScope,
-                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!),
+                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => kv.Value),
             };
         }
 
@@ -2586,7 +2586,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 MappingMode = ToApi(source.MappingMode),
                 UserinfoScope = source.UserinfoScope,
-                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => (object)kv.Value!),
+                Attributes = source.Attributes?.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => kv.Value),
             };
         }
 
@@ -2645,31 +2645,40 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.Attributes is { } attributes)
                 target.Attributes = ToApi(attributes);
             if (source.AuthenticationMethods is { } authenticationMethods)
-                target.AuthenticationMethods = Optional<ConnectionAuthenticationMethods?>.Of(ToApi(authenticationMethods));
+                target.AuthenticationMethods = ToApi(authenticationMethods);
             target.BruteForceProtection = source.BruteForceProtection;
-            if (source.Configuration is { } configuration) target.Configuration = configuration.ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (source.Configuration is { } configuration)
+                target.Configuration = configuration.ToDictionary(kv => kv.Key, kv => kv.Value);
             target.DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword;
             target.DisableSignup = source.DisableSignup;
             target.EnableScriptContext = source.EnableScriptContext;
             target.EnabledDatabaseCustomization = source.EnabledDatabaseCustomization;
             target.ImportMode = source.ImportMode;
             if (source.PasskeyOptions is { } passkeyOptions)
-                target.PasskeyOptions = Optional<ConnectionPasskeyOptions?>.Of(ToApi(passkeyOptions));
+                target.PasskeyOptions = ToApi(passkeyOptions);
             if (source.PasswordOptions is { } passwordOptions)
                 target.PasswordOptions = ToApi(passwordOptions);
             if (source.Precedence is { } precedence)
                 target.Precedence = precedence.Select(i => ToApi(i)).ToArray();
             target.RealmFallback = source.RealmFallback;
             target.RequiresUsername = source.RequiresUsername;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (source.PasswordPolicy is { } pp) target.PasswordPolicy = Optional<ConnectionPasswordPolicyEnum?>.Of(ToApi(pp));
-            if (source.PasswordHistory is { } ph) target.PasswordHistory = Optional<ConnectionPasswordHistoryOptions?>.Of(ToApi(ph));
-            if (source.PasswordNoPersonalInfo is { } pnpi) target.PasswordNoPersonalInfo = Optional<ConnectionPasswordNoPersonalInfoOptions?>.Of(ToApi(pnpi));
-            if (source.PasswordDictionary is { } pd) target.PasswordDictionary = Optional<ConnectionPasswordDictionaryOptions?>.Of(ToApi(pd));
-            if (source.PasswordComplexityOptions is { } pco) target.PasswordComplexityOptions = Optional<ConnectionPasswordComplexityOptions?>.Of(ToApi(pco));
-            if (source.Validation is { } val) target.Validation = Optional<ConnectionValidationOptions?>.Of(ToApi(val));
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            if (source.PasswordPolicy is { } pp)
+                target.PasswordPolicy = ToApi(pp);
+            if (source.PasswordHistory is { } ph)
+                target.PasswordHistory = ToApi(ph);
+            if (source.PasswordNoPersonalInfo is { } pnpi)
+                target.PasswordNoPersonalInfo = ToApi(pnpi);
+            if (source.PasswordDictionary is { } pd)
+                target.PasswordDictionary = ToApi(pd);
+            if (source.PasswordComplexityOptions is { } pco)
+                target.PasswordComplexityOptions = ToApi(pco);
+            if (source.Validation is { } val)
+                target.Validation = ToApi(val);
             if (source.CustomScripts is { } cs) { target.CustomScripts ??= new ConnectionCustomScripts(); ApplyToApi(cs, target.CustomScripts); }
-            if (source.Mfa is { } mfa) target.Mfa = ToApi(mfa);
+            if (source.Mfa is { } mfa)
+                target.Mfa = ToApi(mfa);
             return target;
         }
 
@@ -2681,20 +2690,27 @@ namespace Alethic.Auth0.Operator.Controllers
             target.AgentVersion = source.AgentVersion;
             target.BruteForceProtection = source.BruteForceProtection;
             target.CertAuth = source.CertAuth;
-            if (source.Certs is { } certs) target.Certs = certs;
+            if (source.Certs is { } certs)
+                target.Certs = certs;
             target.DisableCache = source.DisableCache;
             target.DisableSelfServiceChangePassword = source.DisableSelfServiceChangePassword;
-            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            if (source.DomainAliases is { } da)
+                target.DomainAliases = da;
             target.IconUrl = source.IconUrl;
-            if (source.Ips is { } ips) target.Ips = ips;
+            if (source.Ips is { } ips)
+                target.Ips = ips;
             target.SignInEndpoint = source.SignInEndpoint;
             target.TenantDomain = source.TenantDomain;
-            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.Thumbprints is { } tp)
+                target.Thumbprints = tp;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.Kerberos is { } kb) target.Kerberos = kb;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.Kerberos is { } kb)
+                target.Kerberos = kb;
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2706,17 +2722,21 @@ namespace Alethic.Auth0.Operator.Controllers
             target.EntityId = source.EntityId;
             target.FedMetadataXml = source.FedMetadataXml;
             target.IconUrl = source.IconUrl;
-            if (source.PrevThumbprints is { } pt) target.PrevThumbprints = pt;
+            if (source.PrevThumbprints is { } pt)
+                target.PrevThumbprints = pt;
             if (source.ShouldTrustEmailVerifiedConnection is not null)
                 target.ShouldTrustEmailVerifiedConnection = ToApi(source.ShouldTrustEmailVerifiedConnection);
             target.SignInEndpoint = source.SignInEndpoint;
             target.TenantDomain = source.TenantDomain;
-            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            if (source.Thumbprints is { } tp)
+                target.Thumbprints = tp;
             target.UserIdAttribute = source.UserIdAttribute;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2735,7 +2755,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.AppDomain = source.AppDomain;
             target.AppId = source.AppId;
             target.BasicProfile = source.BasicProfile;
-            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            if (source.DomainAliases is { } da)
+                target.DomainAliases = da;
             target.ExtAccessToken = source.ExtAccessToken;
             target.ExtAccountEnabled = source.ExtAccountEnabled;
             target.ExtAdmin = source.ExtAdmin;
@@ -2781,28 +2802,32 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtUsageLocation = source.ExtUsageLocation;
             target.ExtUserId = source.ExtUserId;
             if (source.FederatedConnectionsAccessTokens is { } federatedConnectionsAccessTokens)
-                target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(federatedConnectionsAccessTokens));
+                target.FederatedConnectionsAccessTokens = ToApi(federatedConnectionsAccessTokens);
             target.Granted = source.Granted;
             target.IconUrl = source.IconUrl;
             if (source.IdentityApi is not null)
                 target.IdentityApi = ToApi(source.IdentityApi);
             target.MaxGroupsToRetrieve = source.MaxGroupsToRetrieve;
-            if (source.Scope is { } scope) target.Scope = scope;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
             if (source.ShouldTrustEmailVerifiedConnection is not null)
                 target.ShouldTrustEmailVerifiedConnection = ToApi(source.ShouldTrustEmailVerifiedConnection);
             target.TenantDomain = source.TenantDomain;
             target.TenantId = source.TenantId;
-            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            if (source.Thumbprints is { } tp)
+                target.Thumbprints = tp;
             target.UseCommonEndpoint = source.UseCommonEndpoint;
             target.UseWsfed = source.UseWsfed;
             if (source.UseridAttribute is not null)
                 target.UseridAttribute = ToApi(source.UseridAttribute);
             if (source.WaadProtocol is not null)
                 target.WaadProtocol = ToApi(source.WaadProtocol);
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2811,8 +2836,10 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsBitbucket();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
             target.Profile = source.Profile;
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -2828,7 +2855,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -2840,7 +2868,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3004,8 +3033,7 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtIsSuspended = source.ExtIsSuspended;
             target.HandleLoginFromSocial = source.HandleLoginFromSocial;
             if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(
-                    new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active });
+                target.FederatedConnectionsAccessTokens = new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active };
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
@@ -3177,9 +3205,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             if (source.TokenEndpointAuthMethod is not null)
-                target.TokenEndpointAuthMethod = Optional<ConnectionTokenEndpointAuthMethodEnum?>.Of(ToApi(source.TokenEndpointAuthMethod));
+                target.TokenEndpointAuthMethod = ToApi(source.TokenEndpointAuthMethod);
             if (source.TokenEndpointAuthSigningAlg is not null)
-                target.TokenEndpointAuthSigningAlg = Optional<ConnectionTokenEndpointAuthSigningAlgEnum?>.Of(ToApi(source.TokenEndpointAuthSigningAlg));
+                target.TokenEndpointAuthSigningAlg = ToApi(source.TokenEndpointAuthSigningAlg);
             if (source.TokenEndpointJwtcaAudFormat is not null)
                 target.TokenEndpointJwtcaAudFormat = ToApi(source.TokenEndpointJwtcaAudFormat);
             if (source.DpopSigningAlg is not null)
@@ -3187,14 +3215,20 @@ namespace Alethic.Auth0.Operator.Controllers
             target.SendBackChannelNonce = source.SendBackChannelNonce;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
-            if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = ToApi(algs);
-            if (source.AttributeMap is { } am) target.AttributeMap = ToApi(am);
-            if (source.ConnectionSettings is { } cs) target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(fcat));
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.IdTokenSignedResponseAlgs is { } algs)
+                target.IdTokenSignedResponseAlgs = ToApi(algs);
+            if (source.AttributeMap is { } am)
+                target.AttributeMap = ToApi(am);
+            if (source.ConnectionSettings is { } cs)
+                target.ConnectionSettings = ToApi(cs);
+            if (source.FederatedConnectionsAccessTokens is { } fcat)
+                target.FederatedConnectionsAccessTokens = ToApi(fcat);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3212,9 +3246,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DomainAliases is { } da) target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             if (source.TokenEndpointAuthMethod is not null)
-                target.TokenEndpointAuthMethod = Optional<ConnectionTokenEndpointAuthMethodEnum?>.Of(ToApi(source.TokenEndpointAuthMethod));
+                target.TokenEndpointAuthMethod = ToApi(source.TokenEndpointAuthMethod);
             if (source.TokenEndpointAuthSigningAlg is not null)
-                target.TokenEndpointAuthSigningAlg = Optional<ConnectionTokenEndpointAuthSigningAlgEnum?>.Of(ToApi(source.TokenEndpointAuthSigningAlg));
+                target.TokenEndpointAuthSigningAlg = ToApi(source.TokenEndpointAuthSigningAlg);
             if (source.TokenEndpointJwtcaAudFormat is not null)
                 target.TokenEndpointJwtcaAudFormat = ToApi(source.TokenEndpointJwtcaAudFormat);
             if (source.DpopSigningAlg is not null)
@@ -3225,7 +3259,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.IdTokenSignedResponseAlgs is { } algs) target.IdTokenSignedResponseAlgs = ToApi(algs);
             if (source.AttributeMap is { } am) target.AttributeMap = ToApi(am);
             if (source.ConnectionSettings is { } cs) target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = Optional<ConnectionFederatedConnectionsAccessTokens?>.Of(ToApi(fcat));
+            if (source.FederatedConnectionsAccessTokens is { } fcat) target.FederatedConnectionsAccessTokens = ToApi(fcat);
             if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
@@ -3238,9 +3272,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsPaypal();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.Address = source.Address;
@@ -3257,20 +3294,29 @@ namespace Alethic.Auth0.Operator.Controllers
             target.EntityId = source.EntityId;
             target.Cert = source.Cert;
             target.SigningCert = source.SigningCert;
-            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
-            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApi(sigAlg);
-            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApi(digAlg);
-            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApi(pb);
+            if (source.Thumbprints is { } tp)
+                target.Thumbprints = tp;
+            if (source.SignatureAlgorithm is { } sigAlg)
+                target.SignatureAlgorithm = ToApi(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg)
+                target.DigestAlgorithm = ToApi(digAlg);
+            if (source.ProtocolBinding is { } pb)
+                target.ProtocolBinding = ToApi(pb);
             target.SignSamlRequest = source.SignSamlRequest;
-            if (source.Idpinitiated is { } idp) target.Idpinitiated = ToApi(idp);
-            if (source.AssertionDecryptionSettings is { } ads) target.AssertionDecryptionSettings = ToApi(ads);
+            if (source.Idpinitiated is { } idp)
+                target.Idpinitiated = ToApi(idp);
+            if (source.AssertionDecryptionSettings is { } ads)
+                target.AssertionDecryptionSettings = ToApi(ads);
             target.IconUrl = source.IconUrl;
-            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            if (source.DomainAliases is { } da)
+                target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3279,13 +3325,17 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsSalesforce();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
             target.Profile = source.Profile;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3295,13 +3345,17 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
             target.CommunityBaseUrl = source.CommunityBaseUrl;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
             target.Profile = source.Profile;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3314,14 +3368,18 @@ namespace Alethic.Auth0.Operator.Controllers
             target.DestinationUrl = source.DestinationUrl;
             target.RecipientUrl = source.RecipientUrl;
             target.Cert = source.Cert;
-            if (source.Thumbprints is { } tp) target.Thumbprints = tp;
+            if (source.Thumbprints is { } tp)
+                target.Thumbprints = tp;
             target.MetadataUrl = source.MetadataUrl;
             target.MetadataXml = source.MetadataXml;
             target.EntityId = source.EntityId;
             target.SignSamlRequest = source.SignSamlRequest;
-            if (source.SignatureAlgorithm is { } sigAlg) target.SignatureAlgorithm = ToApi(sigAlg);
-            if (source.DigestAlgorithm is { } digAlg) target.DigestAlgorithm = ToApi(digAlg);
-            if (source.ProtocolBinding is { } pb) target.ProtocolBinding = ToApi(pb);
+            if (source.SignatureAlgorithm is { } sigAlg)
+                target.SignatureAlgorithm = ToApi(sigAlg);
+            if (source.DigestAlgorithm is { } digAlg)
+                target.DigestAlgorithm = ToApi(digAlg);
+            if (source.ProtocolBinding is { } pb)
+                target.ProtocolBinding = ToApi(pb);
             target.RequestTemplate = source.RequestTemplate;
             target.Debug = source.Debug;
             target.Deflate = source.Deflate;
@@ -3331,14 +3389,17 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.AssertionDecryptionSettings is { } ads) target.AssertionDecryptionSettings = ToApi(ads);
             target.UserIdAttribute = source.UserIdAttribute;
             target.IconUrl = source.IconUrl;
-            if (source.DomainAliases is { } da) target.DomainAliases = da;
+            if (source.DomainAliases is { } da)
+                target.DomainAliases = da;
             target.TenantDomain = source.TenantDomain;
             target.GlobalTokenRevocationJwtIss = source.GlobalTokenRevocationJwtIss;
             target.GlobalTokenRevocationJwtSub = source.GlobalTokenRevocationJwtSub;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3355,10 +3416,12 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ForwardReqInfo = source.ForwardReqInfo;
             target.DisableSignup = source.DisableSignup;
             target.BruteForceProtection = source.BruteForceProtection;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
-            if (source.Totp is { } t) target.Totp = new ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep };
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            if (source.Totp is { } t)
+                target.Totp = new ConnectionTotpSms { Length = t.Length, TimeStep = t.TimeStep };
             if (source.GatewayAuthentication is { } ga)
-                target.GatewayAuthentication = Optional<ConnectionGatewayAuthenticationSms?>.Of(ToApi(ga));
+                target.GatewayAuthentication = ToApi(ga);
             return target;
         }
 
@@ -3367,9 +3430,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsTwitter();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             if (source.Protocol is not null)
@@ -3378,7 +3444,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.Profile = source.Profile;
             target.TweetRead = source.TweetRead;
             target.UsersRead = source.UsersRead;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3387,9 +3454,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsWindowsLive();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.Scope is { } scope) target.Scope = scope;
-            if (source.FreeformScopes is { } ffs) target.FreeformScopes = ffs;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             target.Basic = source.Basic;
@@ -3451,7 +3521,8 @@ namespace Alethic.Auth0.Operator.Controllers
             target.TeamReadwriteAll = source.TeamReadwriteAll;
             target.UserReadAll = source.UserReadAll;
             target.UserReadbasicAll = source.UserReadbasicAll;
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 
@@ -3460,10 +3531,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var target = new ConnectionOptionsYahoo();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
-            if (source.NonPersistentAttrs is { } npa) target.NonPersistentAttrs = npa;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
-            if (source.UpstreamParams is { } up) target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
             return target;
         }
 

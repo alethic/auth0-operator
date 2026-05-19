@@ -8,7 +8,7 @@ public record V2alpha1ConnectionAttributeMapOidc
 
     [JsonPropertyName("attributes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Attributes { get; set; }
+    public Dictionary<string, object?>? Attributes { get; set; }
 
     [JsonPropertyName("mapping_mode")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
