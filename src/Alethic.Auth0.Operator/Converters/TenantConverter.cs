@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
+
+using Auth0.ManagementApi;
 
 using Alethic.Auth0.Operator.Core.Models.Tenant.V1;
 using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
@@ -50,7 +53,7 @@ namespace Alethic.Auth0.Operator.Converters
                     FriendlyName = conf.FriendlyName,
                     SupportEmail = conf.SupportEmail,
                     SupportUrl = conf.SupportUrl,
-                    EnabledLocales = conf.EnabledLocales,
+                    EnabledLocales = conf.EnabledLocales?.ToArray(),
                     ChangePassword = conf.ChangePassword is { } change_password ? new()
                     {
                         Enabled = change_password.Enabled,
@@ -70,19 +73,17 @@ namespace Alethic.Auth0.Operator.Converters
                         DisableClickjackProtectionHeaders = flags.DisableClickjackProtectionHeaders,
                         DisableManagementApiSmsObfuscation = flags.DisableManagementApiSmsObfuscation,
                         EnableAdfsWaadEmailVerification = flags.EnableAdfsWaadEmailVerification,
-                        EnableAPIsSection = flags.EnableAPIsSection,
+                        EnableApisSection = flags.EnableAPIsSection,
                         EnableClientConnections = flags.EnableClientConnections,
-                        EnableCustomDomainInEmails = flags.EnableCustomDomainInEmails,
                         EnableDynamicClientRegistration = flags.EnableDynamicClientRegistration,
-                        EnableIdTokenApi2 = flags.EnableIdTokenApi2,
+                        EnableIdtokenApi2 = flags.EnableIdTokenApi2,
                         EnableLegacyProfile = flags.EnableLegacyProfile,
                         EnablePipeline2 = flags.EnablePipeline2,
                         EnablePublicSignupUserExistsError = flags.EnablePublicSignupUserExistsError,
-                        EnableSSO = flags.EnableSSO,
+                        EnableSso = flags.EnableSSO,
                         EnforceClientAuthenticationOnPasswordlessStart = flags.EnforceClientAuthenticationOnPasswordlessStart,
                         NoDiscloseEnterpriseConnections = flags.NoDiscloseEnterpriseConnections,
                         RemoveAlgFromJwks = flags.RemoveAlgFromJwks,
-                        RequirePushedAuthorizationRequests = flags.RequirePushedAuthorizationRequests,
                         RevokeRefreshTokenGrant = flags.RevokeRefreshTokenGrant,
                         TrustAzureAdfsEmailVerifiedConnectionProperty = flags.TrustAzureAdfsEmailVerifiedConnectionProperty,
                         DashboardLogStreamsNext = flags.DashboardLogStreamsNext,
@@ -108,15 +109,14 @@ namespace Alethic.Auth0.Operator.Converters
                     } : null,
                     PictureUrl = conf.PictureUrl,
                     AllowedLogoutUrls = conf.AllowedLogoutUrls,
-                    SessionLifetime = conf.SessionLifetime,
-                    IdleSessionLifetime = conf.IdleSessionLifetime,
+                    SessionLifetime = conf.SessionLifetime is { } session_lifetime ? (int?)session_lifetime : null,
+                    IdleSessionLifetime = conf.IdleSessionLifetime is { } idle_session_lifetime ? (int?)idle_session_lifetime : null,
                     SandboxVersion = conf.SandboxVersion,
-                    SandboxVersionsAvailable = conf.SandboxVersionsAvailable,
                     SessionCookie = conf.SessionCookie is { } session_cookie ? new()
                     {
-                        Mode = session_cookie.Mode
+                        Mode = Convert(session_cookie.Mode)
                     } : null,
-                    CustomizeMfaInPostLoginAction = conf.CustomizeMfaInPostLoginAction,
+                    CustomizeMfaInPostloginAction = conf.CustomizeMfaInPostLoginAction,
                     AcrValuesSupported = conf.AcrValuesSupported,
                     PushedAuthorizationRequestsSupported = conf.PushedAuthorizationRequestsSupported,
                     Mtls = conf.Mtls is { } mtls ? new()
@@ -130,6 +130,14 @@ namespace Alethic.Auth0.Operator.Converters
             {
                 V1TenantCharset.Base20 => V2alpha1TenantCharset.Base20,
                 V1TenantCharset.Digits => V2alpha1TenantCharset.Digits,
+                _ => null
+            };
+
+            V2alpha1TenantSessionCookieModeEnum? Convert(string? source) => source switch
+            {
+                SessionCookieModeEnum.Values.Persistent => V2alpha1TenantSessionCookieModeEnum.Persistent,
+                SessionCookieModeEnum.Values.NonPersistent => V2alpha1TenantSessionCookieModeEnum.NonPersistent,
+                null => null,
                 _ => null
             };
 
@@ -159,7 +167,7 @@ namespace Alethic.Auth0.Operator.Converters
                     FriendlyName = source.FriendlyName,
                     SupportEmail = source.SupportEmail,
                     SupportUrl = source.SupportUrl,
-                    EnabledLocales = source.EnabledLocales,
+                    EnabledLocales = source.EnabledLocales?.ToList(),
                     ChangePassword = source.ChangePassword is { } change_password ? new()
                     {
                         Enabled = change_password.Enabled,
@@ -179,19 +187,17 @@ namespace Alethic.Auth0.Operator.Converters
                         DisableClickjackProtectionHeaders = flags.DisableClickjackProtectionHeaders,
                         DisableManagementApiSmsObfuscation = flags.DisableManagementApiSmsObfuscation,
                         EnableAdfsWaadEmailVerification = flags.EnableAdfsWaadEmailVerification,
-                        EnableAPIsSection = flags.EnableAPIsSection,
+                        EnableAPIsSection = flags.EnableApisSection,
                         EnableClientConnections = flags.EnableClientConnections,
-                        EnableCustomDomainInEmails = flags.EnableCustomDomainInEmails,
                         EnableDynamicClientRegistration = flags.EnableDynamicClientRegistration,
-                        EnableIdTokenApi2 = flags.EnableIdTokenApi2,
+                        EnableIdTokenApi2 = flags.EnableIdtokenApi2,
                         EnableLegacyProfile = flags.EnableLegacyProfile,
                         EnablePipeline2 = flags.EnablePipeline2,
                         EnablePublicSignupUserExistsError = flags.EnablePublicSignupUserExistsError,
-                        EnableSSO = flags.EnableSSO,
+                        EnableSSO = flags.EnableSso,
                         EnforceClientAuthenticationOnPasswordlessStart = flags.EnforceClientAuthenticationOnPasswordlessStart,
                         NoDiscloseEnterpriseConnections = flags.NoDiscloseEnterpriseConnections,
                         RemoveAlgFromJwks = flags.RemoveAlgFromJwks,
-                        RequirePushedAuthorizationRequests = flags.RequirePushedAuthorizationRequests,
                         RevokeRefreshTokenGrant = flags.RevokeRefreshTokenGrant,
                         TrustAzureAdfsEmailVerifiedConnectionProperty = flags.TrustAzureAdfsEmailVerifiedConnectionProperty,
                         DashboardLogStreamsNext = flags.DashboardLogStreamsNext,
@@ -220,12 +226,11 @@ namespace Alethic.Auth0.Operator.Converters
                     SessionLifetime = source.SessionLifetime,
                     IdleSessionLifetime = source.IdleSessionLifetime,
                     SandboxVersion = source.SandboxVersion,
-                    SandboxVersionsAvailable = source.SandboxVersionsAvailable,
                     SessionCookie = source.SessionCookie is { } session_cookie ? new()
                     {
-                        Mode = session_cookie.Mode
+                        Mode = Revert(session_cookie.Mode)
                     } : null,
-                    CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostLoginAction,
+                    CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostloginAction,
                     AcrValuesSupported = source.AcrValuesSupported,
                     PushedAuthorizationRequestsSupported = source.PushedAuthorizationRequestsSupported,
                     Mtls = source.Mtls is { } mtls ? new()
@@ -239,6 +244,14 @@ namespace Alethic.Auth0.Operator.Converters
             {
                 V2alpha1TenantCharset.Base20 => V1TenantCharset.Base20,
                 V2alpha1TenantCharset.Digits => V1TenantCharset.Digits,
+                _ => null
+            };
+
+            string? Revert(V2alpha1TenantSessionCookieModeEnum? source) => source switch
+            {
+                V2alpha1TenantSessionCookieModeEnum.Persistent => SessionCookieModeEnum.Values.Persistent,
+                V2alpha1TenantSessionCookieModeEnum.NonPersistent => SessionCookieModeEnum.Values.NonPersistent,
+                null => null,
                 _ => null
             };
 

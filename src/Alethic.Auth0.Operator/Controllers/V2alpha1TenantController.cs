@@ -101,24 +101,59 @@ namespace Alethic.Auth0.Operator.Controllers
             Flags = FromApi(source.Flags),
             AcrValuesSupported = source.AcrValuesSupported.IsDefined ? source.AcrValuesSupported.Value?.ToArray() : null,
             AllowedLogoutUrls = source.AllowedLogoutUrls?.ToArray(),
+            AllowOrganizationNameInAuthenticationApi = source.AllowOrganizationNameInAuthenticationApi,
+            AuthorizationResponseIssParameterSupported = source.AuthorizationResponseIssParameterSupported.IsDefined ? source.AuthorizationResponseIssParameterSupported.Value : null,
             ChangePassword = source.ChangePassword.IsDefined ? FromApi(source.ChangePassword.Value) : null,
-            CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostloginAction,
+            ClientIdMetadataDocumentSupported = source.ClientIdMetadataDocumentSupported,
+            CustomizeMfaInPostloginAction = source.CustomizeMfaInPostloginAction,
+            DefaultRedirectionUri = source.DefaultRedirectionUri,
+            DefaultTokenQuota = source.DefaultTokenQuota.IsDefined ? FromApi(source.DefaultTokenQuota.Value) : null,
             DefaultAudience = source.DefaultAudience,
             DefaultDirectory = source.DefaultDirectory,
+            DynamicClientRegistrationSecurityMode = FromApi(source.DynamicClientRegistrationSecurityMode),
             DeviceFlow = source.DeviceFlow.IsDefined ? FromApi(source.DeviceFlow.Value) : null,
-            EnabledLocales = source.EnabledLocales?.Select(i => i.Value).ToList(),
+            EnabledLocales = source.EnabledLocales?.Select(i => i.Value).ToArray(),
+            EnableAiGuide = source.EnableAiGuide,
+            EphemeralSessionLifetime = source.EphemeralSessionLifetime is { } ephemeral_session_lifetime ? (int?)ephemeral_session_lifetime : null,
             ErrorPage = source.ErrorPage.IsDefined ? FromApi(source.ErrorPage.Value) : null,
             GuardianMfaPage = source.GuardianMfaPage.IsDefined ? FromApi(source.GuardianMfaPage.Value) : null,
-            IdleSessionLifetime = source.IdleSessionLifetime,
+            IdleEphemeralSessionLifetime = source.IdleEphemeralSessionLifetime is { } idle_ephemeral_session_lifetime ? (int?)idle_ephemeral_session_lifetime : null,
+            IdleSessionLifetime = source.IdleSessionLifetime is { } idle_session_lifetime ? (int?)idle_session_lifetime : null,
+            LegacySandboxVersion = source.LegacySandboxVersion,
+            OidcLogout = FromApi(source.OidcLogout),
             PictureUrl = source.PictureUrl,
-            SessionLifetime = source.SessionLifetime,
+            PhoneConsolidatedExperience = source.PhoneConsolidatedExperience,
+            ResourceParameterProfile = FromApi(source.ResourceParameterProfile),
+            SessionLifetime = source.SessionLifetime is { } session_lifetime ? (int?)session_lifetime : null,
             SessionCookie = source.SessionCookie.IsDefined ? FromApi(source.SessionCookie.Value) : null,
+            Sessions = source.Sessions.IsDefined ? FromApi(source.Sessions.Value) : null,
+            SkipNonVerifiableCallbackUriConfirmationPrompt = source.SkipNonVerifiableCallbackUriConfirmationPrompt.IsDefined ? source.SkipNonVerifiableCallbackUriConfirmationPrompt.Value : null,
             SupportEmail = source.SupportEmail,
             SupportUrl = source.SupportUrl,
             SandboxVersion = source.SandboxVersion,
-            SandboxVersionsAvailable = source.SandboxVersionsAvailable?.ToArray(),
             PushedAuthorizationRequestsSupported = source.PushedAuthorizationRequestsSupported,
             Mtls = source.Mtls.IsDefined ? FromApi(source.Mtls.Value) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantDefaultTokenQuota? FromApi(DefaultTokenQuota? source) => source is null ? null : new()
+        {
+            Clients = FromApi(source.Clients),
+            Organizations = FromApi(source.Organizations),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantTokenQuotaConfiguration? FromApi(TokenQuotaConfiguration? source) => source is null ? null : new()
+        {
+            ClientCredentials = FromApi(source.ClientCredentials),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantTokenQuotaClientCredentials? FromApi(TokenQuotaClientCredentials? source) => source is null ? null : new()
+        {
+            Enforce = source.Enforce,
+            PerDay = source.PerDay,
+            PerHour = source.PerHour,
         };
 
         /// <summary>
@@ -140,8 +175,56 @@ namespace Alethic.Auth0.Operator.Controllers
         [return: NotNullIfNotNull(nameof(source))]
         internal static V2alpha1TenantSessionCookie? FromApi(SessionCookieSchema? source) => source is null ? null : new()
         {
-            Mode = source.Mode.Value,
+            Mode = FromApi(source.Mode),
         };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantSessionCookieModeEnum? FromApi(SessionCookieModeEnum? source)
+        {
+            return source?.Value switch
+            {
+                "persistent" => V2alpha1TenantSessionCookieModeEnum.Persistent,
+                "non_persistent" => V2alpha1TenantSessionCookieModeEnum.NonPersistent,
+                null => null,
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantSessions? FromApi(TenantSettingsSessions? source) => source is null ? null : new()
+        {
+            OidcLogoutPromptEnabled = source.OidcLogoutPromptEnabled,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantOidcLogout? FromApi(TenantOidcLogoutSettings? source) => source is null ? null : new()
+        {
+            RpLogoutEndSessionEndpointDiscovery = source.RpLogoutEndSessionEndpointDiscovery,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantResourceParameterProfile? FromApi(TenantSettingsResourceParameterProfile? source)
+        {
+            return source?.Value switch
+            {
+                "audience" => V2alpha1TenantResourceParameterProfile.Audience,
+                "compatibility" => V2alpha1TenantResourceParameterProfile.Compatibility,
+                null => null,
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1TenantDynamicClientRegistrationSecurityMode? FromApi(TenantSettingsDynamicClientRegistrationSecurityMode? source)
+        {
+            return source?.Value switch
+            {
+                "strict" => V2alpha1TenantDynamicClientRegistrationSecurityMode.Strict,
+                "permissive" => V2alpha1TenantDynamicClientRegistrationSecurityMode.Permissive,
+                null => null,
+                _ => throw new NotImplementedException(),
+            };
+        }
 
         /// <summary>
         /// Converts an Auth0 API TenantGuardianMfaPage to an internal <see cref="Core.Models.Tenant.V1.V1TenantGuardianMfaPage"/> model.
@@ -225,14 +308,14 @@ namespace Alethic.Auth0.Operator.Controllers
             DisableClickjackProtectionHeaders = source.DisableClickjackProtectionHeaders,
             DisableManagementApiSmsObfuscation = source.DisableManagementApiSmsObfuscation,
             EnableAdfsWaadEmailVerification = source.EnableAdfsWaadEmailVerification,
-            EnableAPIsSection = source.EnableApisSection,
+            EnableApisSection = source.EnableApisSection,
             EnableClientConnections = source.EnableClientConnections,
             EnableDynamicClientRegistration = source.EnableDynamicClientRegistration,
-            EnableIdTokenApi2 = source.EnableIdtokenApi2,
+            EnableIdtokenApi2 = source.EnableIdtokenApi2,
             EnableLegacyProfile = source.EnableLegacyProfile,
             EnablePipeline2 = source.EnablePipeline2,
             EnablePublicSignupUserExistsError = source.EnablePublicSignupUserExistsError,
-            EnableSSO = source.EnableSso,
+            EnableSso = source.EnableSso,
             EnforceClientAuthenticationOnPasswordlessStart = source.EnforceClientAuthenticationOnPasswordlessStart,
             NoDiscloseEnterpriseConnections = source.NoDiscloseEnterpriseConnections,
             RemoveAlgFromJwks = source.RemoveAlgFromJwks,
@@ -255,6 +338,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.AllowedLogoutUrls is { } allowed_logout_urls)
                 target.AllowedLogoutUrls = allowed_logout_urls;
 
+            if (source.AllowOrganizationNameInAuthenticationApi is { } allow_organization_name_in_authentication_api)
+                target.AllowOrganizationNameInAuthenticationApi = allow_organization_name_in_authentication_api;
+
+            if (source.AuthorizationResponseIssParameterSupported is { } authorization_response_iss_parameter_supported)
+                target.AuthorizationResponseIssParameterSupported = authorization_response_iss_parameter_supported;
+
             if (source.ChangePassword is { } change_password)
             {
                 var v = new TenantSettingsPasswordPage();
@@ -262,14 +351,30 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.ChangePassword = v;
             }
 
-            if (source.CustomizeMfaInPostLoginAction is { } customize_mfa_in_postlogin_action)
+            if (source.ClientIdMetadataDocumentSupported is { } client_id_metadata_document_supported)
+                target.ClientIdMetadataDocumentSupported = client_id_metadata_document_supported;
+
+            if (source.CustomizeMfaInPostloginAction is { } customize_mfa_in_postlogin_action)
                 target.CustomizeMfaInPostloginAction = customize_mfa_in_postlogin_action;
+
+            if (source.DefaultRedirectionUri is { } default_redirection_uri)
+                target.DefaultRedirectionUri = default_redirection_uri;
+
+            if (source.DefaultTokenQuota is { } default_token_quota)
+            {
+                var v = new DefaultTokenQuota();
+                ApplyToApi(default_token_quota, v);
+                target.DefaultTokenQuota = v;
+            }
 
             if (source.DefaultAudience is { } default_audience)
                 target.DefaultAudience = default_audience;
 
             if (source.DefaultDirectory is { } default_directory)
                 target.DefaultDirectory = default_directory;
+
+            if (source.DynamicClientRegistrationSecurityMode is { } dynamic_client_registration_security_mode)
+                target.DynamicClientRegistrationSecurityMode = ToApi(dynamic_client_registration_security_mode);
 
             if (source.DeviceFlow is { } device_flow)
             {
@@ -280,6 +385,12 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.EnabledLocales is { } enabled_locales)
                 target.EnabledLocales = enabled_locales.Select(i => TenantSettingsSupportedLocalesEnum.FromCustom(i)).ToArray();
+
+            if (source.EnableAiGuide is { } enable_ai_guide)
+                target.EnableAiGuide = enable_ai_guide;
+
+            if (source.EphemeralSessionLifetime is { } ephemeral_session_lifetime)
+                target.EphemeralSessionLifetime = ephemeral_session_lifetime;
 
             if (source.ErrorPage is { } error_page)
             {
@@ -304,6 +415,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.IdleSessionLifetime is { } idle_session_lifetime)
                 target.IdleSessionLifetime = (int?)idle_session_lifetime;
 
+            if (source.IdleEphemeralSessionLifetime is { } idle_ephemeral_session_lifetime)
+                target.IdleEphemeralSessionLifetime = idle_ephemeral_session_lifetime;
+
+            if (source.LegacySandboxVersion is { } legacy_sandbox_version)
+                target.LegacySandboxVersion = legacy_sandbox_version;
+
             if (source.Mtls is { } mtls)
             {
                 var v = new TenantSettingsMtls();
@@ -311,25 +428,47 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Mtls = v;
             }
 
+            if (source.OidcLogout is { } oidc_logout)
+            {
+                var v = new TenantOidcLogoutSettings();
+                ApplyToApi(oidc_logout, v);
+                target.OidcLogout = v;
+            }
+
             if (source.PictureUrl is { } picture_url)
                 target.PictureUrl = picture_url;
 
+            if (source.PhoneConsolidatedExperience is { } phone_consolidated_experience)
+                target.PhoneConsolidatedExperience = phone_consolidated_experience;
+
             if (source.PushedAuthorizationRequestsSupported is { } pushed_authorization_requests_supported)
                 target.PushedAuthorizationRequestsSupported = pushed_authorization_requests_supported;
+
+            if (source.ResourceParameterProfile is { } resource_parameter_profile)
+                target.ResourceParameterProfile = ToApi(resource_parameter_profile);
 
             if (source.SandboxVersion is { } sandbox_version)
                 target.SandboxVersion = sandbox_version;
 
             if (source.SessionCookie is { } session_cookie)
             {
-                if (session_cookie.Mode is { } mode)
-                {
-                    target.SessionCookie = new SessionCookieSchema() { Mode = SessionCookieModeEnum.FromCustom(mode) };
-                }
+                var v = new SessionCookieSchema { Mode = SessionCookieModeEnum.FromCustom("persistent") };
+                ApplyToApi(session_cookie, v);
+                target.SessionCookie = v;
             }
 
             if (source.SessionLifetime is { } session_lifetime)
                 target.SessionLifetime = (int?)session_lifetime;
+
+            if (source.Sessions is { } sessions)
+            {
+                var v = new TenantSettingsSessions();
+                ApplyToApi(sessions, v);
+                target.Sessions = v;
+            }
+
+            if (source.SkipNonVerifiableCallbackUriConfirmationPrompt is { } skip_non_verifiable_callback_uri_confirmation_prompt)
+                target.SkipNonVerifiableCallbackUriConfirmationPrompt = skip_non_verifiable_callback_uri_confirmation_prompt;
 
             if (source.SupportEmail is { } support_email)
                 target.SupportEmail = support_email;
@@ -398,7 +537,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.EnableAdfsWaadEmailVerification is { } enable_adfs_waad_email_verification)
                 target.EnableAdfsWaadEmailVerification = enable_adfs_waad_email_verification;
 
-            if (source.EnableAPIsSection is { } enable_apis_section)
+            if (source.EnableApisSection is { } enable_apis_section)
                 target.EnableApisSection = enable_apis_section;
 
             if (source.EnableClientConnections is { } enable_client_connections)
@@ -407,7 +546,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.EnableDynamicClientRegistration is { } enable_dynamic_client_registration)
                 target.EnableDynamicClientRegistration = enable_dynamic_client_registration;
 
-            if (source.EnableIdTokenApi2 is { } enable_id_token_api2)
+            if (source.EnableIdtokenApi2 is { } enable_id_token_api2)
                 target.EnableIdtokenApi2 = enable_id_token_api2;
 
             if (source.EnableLegacyProfile is { } enable_legacy_profile)
@@ -419,7 +558,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.EnablePublicSignupUserExistsError is { } enable_public_signup_user_exists_error)
                 target.EnablePublicSignupUserExistsError = enable_public_signup_user_exists_error;
 
-            if (source.EnableSSO is { } enable_sso)
+            if (source.EnableSso is { } enable_sso)
                 target.EnableSso = enable_sso;
 
             if (source.EnforceClientAuthenticationOnPasswordlessStart is { } enforce_client_authentication_on_passwordless_start)
@@ -474,10 +613,68 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.EnableEndpointAliases = enable_endpoint_aliases;
         }
 
+        internal static void ApplyToApi(V2alpha1TenantDefaultTokenQuota source, DefaultTokenQuota target)
+        {
+            if (source.Clients?.ClientCredentials is not null)
+            {
+                var v = new TokenQuotaConfiguration { ClientCredentials = new TokenQuotaClientCredentials() };
+                ApplyToApi(source.Clients, v);
+                target.Clients = v;
+            }
+
+            if (source.Organizations?.ClientCredentials is not null)
+            {
+                var v = new TokenQuotaConfiguration { ClientCredentials = new TokenQuotaClientCredentials() };
+                ApplyToApi(source.Organizations, v);
+                target.Organizations = v;
+            }
+        }
+
+        internal static void ApplyToApi(V2alpha1TenantTokenQuotaConfiguration source, TokenQuotaConfiguration target)
+        {
+            if (source.ClientCredentials is { } client_credentials)
+            {
+                var v = new TokenQuotaClientCredentials();
+                ApplyToApi(client_credentials, v);
+                target.ClientCredentials = v;
+            }
+        }
+
+        internal static void ApplyToApi(V2alpha1TenantTokenQuotaClientCredentials source, TokenQuotaClientCredentials target)
+        {
+            if (source.Enforce is { } enforce)
+                target.Enforce = enforce;
+
+            if (source.PerDay is { } per_day)
+                target.PerDay = per_day;
+
+            if (source.PerHour is { } per_hour)
+                target.PerHour = per_hour;
+        }
+
+        internal static void ApplyToApi(V2alpha1TenantOidcLogout source, TenantOidcLogoutSettings target)
+        {
+            if (source.RpLogoutEndSessionEndpointDiscovery is { } rp_logout_end_session_endpoint_discovery)
+                target.RpLogoutEndSessionEndpointDiscovery = rp_logout_end_session_endpoint_discovery;
+        }
+
         internal static void ApplyToApi(V2alpha1TenantSessionCookie source, SessionCookieSchema target)
         {
             if (source.Mode is { } mode)
-                target.Mode = SessionCookieModeEnum.FromCustom(mode);
+                target.Mode = ToApi(mode);
+        }
+
+        internal static SessionCookieModeEnum ToApi(V2alpha1TenantSessionCookieModeEnum source) => source switch
+        {
+            V2alpha1TenantSessionCookieModeEnum.Persistent => SessionCookieModeEnum.FromCustom("persistent"),
+            V2alpha1TenantSessionCookieModeEnum.NonPersistent => SessionCookieModeEnum.FromCustom("non_persistent"),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static void ApplyToApi(V2alpha1TenantSessions source, TenantSettingsSessions target)
+        {
+            if (source.OidcLogoutPromptEnabled is { } oidc_logout_prompt_enabled)
+                target.OidcLogoutPromptEnabled = oidc_logout_prompt_enabled;
         }
 
         internal static void ApplyToApi(V2alpha1TenantPrompts source, UpdateSettingsRequestContent target)
@@ -493,6 +690,20 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             V2alpha1TenantUniversalLoginExperience.New => UniversalLoginExperienceEnum.FromCustom(UniversalLoginExperienceEnum.Values.New),
             V2alpha1TenantUniversalLoginExperience.Classic => UniversalLoginExperienceEnum.FromCustom(UniversalLoginExperienceEnum.Values.Classic),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static TenantSettingsResourceParameterProfile ToApi(V2alpha1TenantResourceParameterProfile source) => source switch
+        {
+            V2alpha1TenantResourceParameterProfile.Audience => TenantSettingsResourceParameterProfile.FromCustom("audience"),
+            V2alpha1TenantResourceParameterProfile.Compatibility => TenantSettingsResourceParameterProfile.FromCustom("compatibility"),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static TenantSettingsDynamicClientRegistrationSecurityMode ToApi(V2alpha1TenantDynamicClientRegistrationSecurityMode source) => source switch
+        {
+            V2alpha1TenantDynamicClientRegistrationSecurityMode.Strict => TenantSettingsDynamicClientRegistrationSecurityMode.FromCustom("strict"),
+            V2alpha1TenantDynamicClientRegistrationSecurityMode.Permissive => TenantSettingsDynamicClientRegistrationSecurityMode.FromCustom("permissive"),
             _ => throw new NotImplementedException(),
         };
 
@@ -563,7 +774,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf.Settings is { } newSettings)
                 {
                     // verify that no changes to enable_sso are being made
-                    if (newSettings.Flags != null && newSettings.Flags.EnableSSO != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSSO != settings.Flags.EnableSso)
+                    if (newSettings.Flags != null && newSettings.Flags.EnableSso != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSso != settings.Flags.EnableSso)
                         throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
 
                     // push update to Auth0

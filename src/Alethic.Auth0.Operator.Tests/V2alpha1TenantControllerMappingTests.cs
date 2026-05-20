@@ -2,6 +2,7 @@ using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 
 using Auth0.ManagementApi;
+using Auth0.ManagementApi.Tenants;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -156,7 +157,7 @@ namespace Alethic.Auth0.Operator.Tests
             var source = new SessionCookieSchema { Mode = new SessionCookieModeEnum("persistent") };
             var result = V2alpha1TenantController.FromApi(source);
             Assert.IsNotNull(result);
-            Assert.AreEqual("persistent", result.Mode);
+            Assert.AreEqual(V2alpha1TenantSessionCookieModeEnum.Persistent, result.Mode);
         }
 
         [TestMethod]
@@ -206,9 +207,113 @@ namespace Alethic.Auth0.Operator.Tests
             var source = new TenantSettingsFlags { EnableSso = true, EnablePipeline2 = false, RemoveAlgFromJwks = true };
             var result = V2alpha1TenantController.FromApi(source);
             Assert.IsNotNull(result);
-            Assert.AreEqual(true, result.EnableSSO);
+            Assert.AreEqual(true, result.EnableSso);
             Assert.AreEqual(false, result.EnablePipeline2);
             Assert.AreEqual(true, result.RemoveAlgFromJwks);
+        }
+
+        [TestMethod]
+        public void FromApi_TenantSettings_Maps_NewProperties()
+        {
+            var source = new GetTenantSettingsResponseContent
+            {
+                DefaultRedirectionUri = "https://example.com/callback",
+                LegacySandboxVersion = "8",
+                AllowOrganizationNameInAuthenticationApi = true,
+                CustomizeMfaInPostloginAction = false,
+                PushedAuthorizationRequestsSupported = true,
+                ClientIdMetadataDocumentSupported = true,
+                EnableAiGuide = false,
+                PhoneConsolidatedExperience = true,
+                OidcLogout = new TenantOidcLogoutSettings { RpLogoutEndSessionEndpointDiscovery = true },
+                Sessions = new TenantSettingsSessions { OidcLogoutPromptEnabled = true },
+                DefaultTokenQuota = new DefaultTokenQuota
+                {
+                    Clients = new TokenQuotaConfiguration
+                    {
+                        ClientCredentials = new TokenQuotaClientCredentials { Enforce = true, PerDay = 10, PerHour = 2 }
+                    }
+                },
+                ResourceParameterProfile = new TenantSettingsResourceParameterProfile(TenantSettingsResourceParameterProfile.Values.Audience),
+                DynamicClientRegistrationSecurityMode = new TenantSettingsDynamicClientRegistrationSecurityMode(TenantSettingsDynamicClientRegistrationSecurityMode.Values.Strict),
+                AuthorizationResponseIssParameterSupported = true,
+                SkipNonVerifiableCallbackUriConfirmationPrompt = false,
+                SessionCookie = new SessionCookieSchema { Mode = new SessionCookieModeEnum("persistent") }
+            };
+
+            var result = V2alpha1TenantController.FromApi(source);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("https://example.com/callback", result.DefaultRedirectionUri);
+            Assert.AreEqual("8", result.LegacySandboxVersion);
+            Assert.AreEqual(true, result.AllowOrganizationNameInAuthenticationApi);
+            Assert.AreEqual(false, result.CustomizeMfaInPostloginAction);
+            Assert.AreEqual(true, result.PushedAuthorizationRequestsSupported);
+            Assert.AreEqual(true, result.ClientIdMetadataDocumentSupported);
+            Assert.AreEqual(false, result.EnableAiGuide);
+            Assert.AreEqual(true, result.PhoneConsolidatedExperience);
+            Assert.AreEqual(true, result.OidcLogout?.RpLogoutEndSessionEndpointDiscovery);
+            Assert.AreEqual(true, result.Sessions?.OidcLogoutPromptEnabled);
+            Assert.AreEqual(true, result.DefaultTokenQuota?.Clients?.ClientCredentials?.Enforce);
+            Assert.AreEqual(10, result.DefaultTokenQuota?.Clients?.ClientCredentials?.PerDay);
+            Assert.AreEqual(2, result.DefaultTokenQuota?.Clients?.ClientCredentials?.PerHour);
+            Assert.AreEqual(V2alpha1TenantResourceParameterProfile.Audience, result.ResourceParameterProfile);
+            Assert.AreEqual(V2alpha1TenantDynamicClientRegistrationSecurityMode.Strict, result.DynamicClientRegistrationSecurityMode);
+            Assert.AreEqual(true, result.AuthorizationResponseIssParameterSupported);
+            Assert.AreEqual(false, result.SkipNonVerifiableCallbackUriConfirmationPrompt);
+            Assert.AreEqual(V2alpha1TenantSessionCookieModeEnum.Persistent, result.SessionCookie?.Mode);
+        }
+
+        [TestMethod]
+        public void ToApi_TenantSettings_Maps_NewProperties()
+        {
+            var source = new V2alpha1TenantSettings
+            {
+                DefaultRedirectionUri = "https://example.com/callback",
+                LegacySandboxVersion = "8",
+                AllowOrganizationNameInAuthenticationApi = true,
+                CustomizeMfaInPostloginAction = false,
+                PushedAuthorizationRequestsSupported = true,
+                ClientIdMetadataDocumentSupported = true,
+                EnableAiGuide = false,
+                PhoneConsolidatedExperience = true,
+                OidcLogout = new V2alpha1TenantOidcLogout { RpLogoutEndSessionEndpointDiscovery = true },
+                Sessions = new V2alpha1TenantSessions { OidcLogoutPromptEnabled = true },
+                DefaultTokenQuota = new V2alpha1TenantDefaultTokenQuota
+                {
+                    Clients = new V2alpha1TenantTokenQuotaConfiguration
+                    {
+                        ClientCredentials = new V2alpha1TenantTokenQuotaClientCredentials { Enforce = true, PerDay = 10, PerHour = 2 }
+                    }
+                },
+                ResourceParameterProfile = V2alpha1TenantResourceParameterProfile.Audience,
+                DynamicClientRegistrationSecurityMode = V2alpha1TenantDynamicClientRegistrationSecurityMode.Strict,
+                AuthorizationResponseIssParameterSupported = true,
+                SkipNonVerifiableCallbackUriConfirmationPrompt = false,
+                SessionCookie = new V2alpha1TenantSessionCookie { Mode = V2alpha1TenantSessionCookieModeEnum.Persistent }
+            };
+
+            var target = new UpdateTenantSettingsRequestContent();
+            V2alpha1TenantController.ApplyToApi(source, target);
+
+            Assert.AreEqual("https://example.com/callback", target.DefaultRedirectionUri);
+            Assert.AreEqual("8", target.LegacySandboxVersion);
+            Assert.AreEqual(true, target.AllowOrganizationNameInAuthenticationApi.Value);
+            Assert.AreEqual(false, target.CustomizeMfaInPostloginAction.Value);
+            Assert.AreEqual(true, target.PushedAuthorizationRequestsSupported.Value);
+            Assert.AreEqual(true, target.ClientIdMetadataDocumentSupported);
+            Assert.AreEqual(false, target.EnableAiGuide);
+            Assert.AreEqual(true, target.PhoneConsolidatedExperience);
+            Assert.AreEqual(true, target.OidcLogout?.RpLogoutEndSessionEndpointDiscovery);
+            Assert.AreEqual(true, target.Sessions.Value?.OidcLogoutPromptEnabled);
+            Assert.AreEqual(true, target.DefaultTokenQuota.Value?.Clients?.ClientCredentials?.Enforce);
+            Assert.AreEqual(10, target.DefaultTokenQuota.Value?.Clients?.ClientCredentials?.PerDay);
+            Assert.AreEqual(2, target.DefaultTokenQuota.Value?.Clients?.ClientCredentials?.PerHour);
+            Assert.AreEqual(TenantSettingsResourceParameterProfile.Values.Audience, target.ResourceParameterProfile?.Value);
+            Assert.AreEqual(TenantSettingsDynamicClientRegistrationSecurityMode.Values.Strict, target.DynamicClientRegistrationSecurityMode?.Value);
+            Assert.AreEqual(true, target.AuthorizationResponseIssParameterSupported.Value);
+            Assert.AreEqual(false, target.SkipNonVerifiableCallbackUriConfirmationPrompt.Value);
+            Assert.AreEqual("persistent", target.SessionCookie.Value?.Mode.Value);
         }
 
         // ──────────────────────── ToApi ───────────────────────────────────────────

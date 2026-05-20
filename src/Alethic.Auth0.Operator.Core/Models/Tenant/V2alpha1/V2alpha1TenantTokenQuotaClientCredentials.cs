@@ -2,19 +2,19 @@ using System.Text.Json.Serialization;
 
 namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 
-public record V2alpha1TenantErrorPage
+public record V2alpha1TenantTokenQuotaClientCredentials
 {
 
-    [JsonPropertyName("html")]
+    [JsonPropertyName("enforce")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Html { get; set; }
+    public bool? Enforce { get; set; }
 
-    [JsonPropertyName("show_log_link")]
+    [JsonPropertyName("per_day")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? ShowLogLink { get; set; }
+    public int? PerDay { get; set; }
 
-    [JsonPropertyName("url")]
+    [JsonPropertyName("per_hour")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Url { get; set; }
+    public int? PerHour { get; set; }
 
 }
