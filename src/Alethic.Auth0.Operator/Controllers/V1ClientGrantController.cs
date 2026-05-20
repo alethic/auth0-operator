@@ -85,6 +85,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 Scope = source.Scope?.ToArray(),
                 OrganizationUsage = FromApi(source.OrganizationUsage),
                 AllowAnyOrganization = source.AllowAnyOrganization,
+                Audience = new Core.Models.V1ResourceServerReference()
+                {
+                    Identifier = source.Audience
+                },
+                ClientRef = new Core.Models.V1ClientReference()
+                {
+                    Id = source.ClientId
+                }
             };
         }
 
