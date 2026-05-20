@@ -41,6 +41,7 @@ namespace Alethic.Auth0.Operator.Tests
                 Sso = false,
                 CrossOriginAuthentication = true,
                 IsFirstParty = true,
+                SkipNonVerifiableCallbackUriConfirmationPrompt = true,
                 AppType = new ClientAppTypeEnum(ClientAppTypeEnum.Values.RegularWeb),
                 TokenEndpointAuthMethod = new ClientTokenEndpointAuthMethodEnum(ClientTokenEndpointAuthMethodEnum.Values.ClientSecretPost),
                 ComplianceLevel = Optional<ClientComplianceLevelEnum?>.Of(new ClientComplianceLevelEnum(ClientComplianceLevelEnum.Values.Fapi1AdvPkjPar)),
@@ -58,6 +59,7 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(false, result.Sso);
             Assert.AreEqual(true, result.CrossOriginAuthentication);
             Assert.AreEqual(true, result.IsFirstParty);
+            Assert.AreEqual(true, result.SkipNonVerifiableCallbackUriConfirmationPrompt);
             Assert.AreEqual(V2alpha1ClientAppTypeEnum.RegularWeb, result.ApplicationType);
             Assert.AreEqual(V2alpha1ClientTokenEndpointAuthMethodEnum.ClientSecretPost, result.TokenEndpointAuthMethod);
             Assert.AreEqual(V2alpha1ClientComplianceLevelEnum.Fapi1AdvPkjPar, result.ComplianceLevel);
@@ -395,6 +397,36 @@ namespace Alethic.Auth0.Operator.Tests
             CollectionAssert.AreEqual(
                 new[] { ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials },
                 request.DefaultOrganization.Value?.Flows?.Select(static i => i.Value).ToArray());
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_MapsSkipNonVerifiableCallbackUriConfirmationPrompt()
+        {
+            var conf = new V2alpha1ClientConf
+            {
+                Name = "my-app",
+                ApplicationType = V2alpha1ClientAppTypeEnum.RegularWeb,
+                SkipNonVerifiableCallbackUriConfirmationPrompt = true,
+            };
+
+            var request = new CreateClientRequestContent { Name = conf.Name! };
+            V2alpha1ClientController.ApplyToApi(conf, request);
+
+            Assert.AreEqual(true, request.SkipNonVerifiableCallbackUriConfirmationPrompt);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Update_MapsSkipNonVerifiableCallbackUriConfirmationPrompt()
+        {
+            var conf = new V2alpha1ClientConf
+            {
+                SkipNonVerifiableCallbackUriConfirmationPrompt = false,
+            };
+
+            var request = new UpdateClientRequestContent();
+            V2alpha1ClientController.ApplyToApi(conf, request);
+
+            Assert.AreEqual(false, request.SkipNonVerifiableCallbackUriConfirmationPrompt);
         }
 
         [TestMethod]

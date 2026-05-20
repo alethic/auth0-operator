@@ -46,6 +46,7 @@ namespace Alethic.Auth0.Operator.Controllers
             WebOrigins = source.WebOrigins?.ToArray(),
             InitiateLoginUri = source.InitiateLoginUri,
             Callbacks = source.Callbacks?.ToArray(),
+            SkipNonVerifiableCallbackUriConfirmationPrompt = source.SkipNonVerifiableCallbackUriConfirmationPrompt,
             ClientAliases = source.ClientAliases?.ToArray(),
             ClientMetaData = source.ClientMetadata,
             IsCustomLoginPageOn = source.CustomLoginPageOn,
@@ -1069,6 +1070,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.Callbacks is not null)
                 request.Callbacks = conf.Callbacks;
 
+            if (conf.SkipNonVerifiableCallbackUriConfirmationPrompt is not null)
+                request.SkipNonVerifiableCallbackUriConfirmationPrompt = conf.SkipNonVerifiableCallbackUriConfirmationPrompt;
+
             if (conf.ClientAliases is not null)
                 request.ClientAliases = conf.ClientAliases;
 
@@ -1184,6 +1188,9 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.Callbacks is not null)
                 request.Callbacks = conf.Callbacks;
+
+            if (conf.SkipNonVerifiableCallbackUriConfirmationPrompt is not null)
+                request.SkipNonVerifiableCallbackUriConfirmationPrompt = conf.SkipNonVerifiableCallbackUriConfirmationPrompt;
 
             if (conf.ClientAliases is not null)
                 request.ClientAliases = conf.ClientAliases;

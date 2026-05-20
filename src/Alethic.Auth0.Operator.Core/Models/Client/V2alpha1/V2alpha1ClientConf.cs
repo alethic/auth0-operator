@@ -47,6 +47,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V2alpha1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[]? Callbacks { get; set; }
 
+        [JsonPropertyName("skip_non_verifiable_callback_uri_confirmation_prompt")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? SkipNonVerifiableCallbackUriConfirmationPrompt { get; set; }
+
         [JsonPropertyName("client_aliases")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[]? ClientAliases { get; set; }
