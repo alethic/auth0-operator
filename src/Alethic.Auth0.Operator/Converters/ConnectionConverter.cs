@@ -25,6 +25,15 @@ namespace Alethic.Auth0.Operator.Converters
     public class ConnectionConverter : ConversionWebhook<V2alpha1Connection>
     {
 
+        static JsonSerializerOptions GetAuth0JsonSerializerOptions()
+        {
+            var type = typeof(ConnectionOptionsAuth0).Assembly.GetType("Auth0.ManagementApi.Core.JsonOptions")
+                ?? throw new InvalidOperationException("Unable to locate Auth0.ManagementApi.Core.JsonOptions.");
+
+            return type.GetField("JsonSerializerOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as JsonSerializerOptions
+                ?? throw new InvalidOperationException("Unable to resolve Auth0 JSON serializer options.");
+        }
+
         protected override IEnumerable<IEntityConverter<V2alpha1Connection>> Converters => [
             new V1ToV2alpha1()
         ];
@@ -35,7 +44,7 @@ namespace Alethic.Auth0.Operator.Converters
         class V1ToV2alpha1 : IEntityConverter<V1Connection, V2alpha1Connection>
         {
 
-            static readonly JsonSerializerOptions Auth0JsonSerializerOptions = CreateAuth0JsonSerializerOptions();
+            static readonly JsonSerializerOptions Auth0JsonSerializerOptions = GetAuth0JsonSerializerOptions();
 
             public V2alpha1Connection Convert(V1Connection from)
             {
@@ -137,7 +146,7 @@ namespace Alethic.Auth0.Operator.Converters
                     EnabledClients = source.EnabledClients,
                     ShowAsButton = source.ShowAsButton,
                     IsDomainConnection = source.IsDomainConnection,
-                    Options = RevertOptions(source.Strategy, source.Options),
+                    Options = source.Strategy is { } s ? RevertOptions(s, source.Options) : null,
 
                 };
             }
@@ -256,12 +265,10 @@ namespace Alethic.Auth0.Operator.Converters
                 return options;
             }
 
-            static V1ConnectionOptions? RevertOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions? source)
+            static V1ConnectionOptions? RevertOptions(V2alpha1ConnectionStrategy strategy, V2alpha1ConnectionOptions? source)
             {
                 if (source is null)
                     return null;
-
-                NormalizeSpecialSamlOptions(strategy, source);
 
                 object? options = strategy switch
                 {
@@ -304,45 +311,6 @@ namespace Alethic.Auth0.Operator.Converters
                 return options is not null
                     ? JsonSerializer.Deserialize<V1ConnectionOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions))
                     : null;
-            }
-
-            static JsonSerializerOptions CreateAuth0JsonSerializerOptions()
-            {
-                var type = typeof(ConnectionOptionsAuth0).Assembly.GetType("Auth0.ManagementApi.Core.JsonOptions")
-                    ?? throw new InvalidOperationException("Unable to locate Auth0.ManagementApi.Core.JsonOptions.");
-
-                return type.GetField("JsonSerializerOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as JsonSerializerOptions
-                    ?? throw new InvalidOperationException("Unable to resolve Auth0 JSON serializer options.");
-            }
-
-            static void NormalizeSpecialSamlOptions(V2alpha1ConnectionStrategy? strategy, V2alpha1ConnectionOptions source)
-            {
-                switch (strategy)
-                {
-                    case V2alpha1ConnectionStrategy.Saml when source.Saml is { } saml:
-                        NormalizeDecryptionKey(saml.DecryptionKey);
-                        break;
-                    case V2alpha1ConnectionStrategy.PingFederate when source.PingFederate is { } pingFederate:
-                        NormalizeDecryptionKey(pingFederate.DecryptionKey);
-                        break;
-                }
-            }
-
-            static void NormalizeDecryptionKey(V2alpha1ConnectionDecryptionKeySaml? decryptionKey)
-            {
-                if (decryptionKey is null)
-                    return;
-
-                if (decryptionKey.PrivateKey is not null)
-                {
-                    decryptionKey.KeyPair = null;
-                    return;
-                }
-
-                if (decryptionKey.KeyPair is not null)
-                {
-                    decryptionKey.PrivateKey = null;
-                }
             }
 
         }
