@@ -14,7 +14,6 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "Tenant")]
-    [KubernetesEntityShortNames("a0tenant")]
     public partial class V1Tenant :
         CustomKubernetesEntity<V1Tenant.SpecDef, V1Tenant.StatusDef>,
         ApiEntity<V1Tenant.SpecDef, V1Tenant.StatusDef, V1TenantConf, V1TenantConf>
