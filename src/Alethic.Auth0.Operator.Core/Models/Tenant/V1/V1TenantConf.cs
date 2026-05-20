@@ -61,11 +61,11 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant.V1
 
         [JsonPropertyName("session_lifetime")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public float? SessionLifetime { get; set; }
+        public double? SessionLifetime { get; set; }
 
         [JsonPropertyName("idle_session_lifetime")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public float? IdleSessionLifetime { get; set; }
+        public double? IdleSessionLifetime { get; set; }
 
         [JsonPropertyName("sandbox_version")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

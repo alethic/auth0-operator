@@ -19,8 +19,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Newtonsoft.Json.Linq;
-
 namespace Alethic.Auth0.Operator.Controllers
 {
 
@@ -33,26 +31,42 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V1alpha1CustomText>
     {
 
-        static V1alpha1CustomTextScreen FromApiScreen(JObject source)
+        static V1alpha1CustomTextScreen FromApiScreen(Dictionary<string, object> source)
         {
             var screen = new V1alpha1CustomTextScreen();
 
-            foreach (var prop in source.Properties())
-                screen[prop.Name] = prop.Value.Value<string>() ?? string.Empty;
+            foreach (var kvp in source)
+                screen[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
 
             return screen;
         }
 
-        static Dictionary<string, V1alpha1CustomTextScreen>? FromApiScreens(object? source)
+        static Dictionary<string, V1alpha1CustomTextScreen>? FromApiScreens(Dictionary<string, object>? source)
         {
-            if (source is not JObject root)
+            if (source is null)
                 return null;
 
             var result = new Dictionary<string, V1alpha1CustomTextScreen>();
 
-            foreach (var prop in root.Properties())
-                if (prop.Value is JObject screenObj)
-                    result[prop.Name] = FromApiScreen(screenObj);
+            foreach (var kvp in source)
+                if (kvp.Value is Dictionary<string, object> screenDict)
+                    result[kvp.Key] = FromApiScreen(screenDict);
+
+            return result;
+        }
+
+        static Dictionary<string, object> ToApiScreens(Dictionary<string, V1alpha1CustomTextScreen> source)
+        {
+            var result = new Dictionary<string, object>();
+
+            foreach (var kvp in source)
+            {
+                var screen = new Dictionary<string, object>();
+                foreach (var entry in kvp.Value)
+                    screen[entry.Key] = entry.Value;
+
+                result[kvp.Key] = screen;
+            }
 
             return result;
         }
@@ -82,7 +96,10 @@ namespace Alethic.Auth0.Operator.Controllers
             if (entity.Spec.Language is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing language.");
 
-            var screens = await api.Prompts.GetCustomTextForPromptAsync(entity.Spec.Prompt, entity.Spec.Language, cancellationToken: cancellationToken);
+            var prompt = new PromptGroupNameEnum(entity.Spec.Prompt);
+            var language = new PromptLanguageEnum(entity.Spec.Language);
+
+            var screens = await api.Prompts.CustomText.GetAsync(prompt, language, cancellationToken: cancellationToken);
             if (screens is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} custom text cannot be loaded from API.");
 
@@ -93,8 +110,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf.Screens is { } newScreens)
                 {
                     // push changes to Auth0 and reload resulting configuration
-                    await api.Prompts.SetCustomTextForPromptAsync(entity.Spec.Prompt, entity.Spec.Language, newScreens, cancellationToken);
-                    screens = await api.Prompts.GetCustomTextForPromptAsync(entity.Spec.Prompt, entity.Spec.Language, cancellationToken: cancellationToken);
+                    await api.Prompts.CustomText.SetAsync(prompt, language, ToApiScreens(newScreens), cancellationToken: cancellationToken);
+                    screens = await api.Prompts.CustomText.GetAsync(prompt, language, cancellationToken: cancellationToken);
                 }
             }
 

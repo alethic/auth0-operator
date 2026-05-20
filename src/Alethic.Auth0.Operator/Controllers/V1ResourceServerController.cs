@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
@@ -12,7 +11,6 @@ using Alethic.Auth0.Operator.Options;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Models;
 
 using k8s.Models;
 
@@ -40,25 +38,77 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Transforms the Auth0 Management API resource server model to the operator's resource server configuration model.
         /// </summary>
         [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerConf? FromApi(GetResourceServerResponseContent? source) => source is null ? null : new()
+        {
+            Id = source.Id,
+            Identifier = source.Identifier,
+            Name = source.Name,
+            Scopes = source.Scopes?.Select(FromApi).ToArray(),
+            SigningAlgorithm = FromApi(source.SigningAlg),
+            SigningSecret = source.SigningSecret,
+            TokenLifetime = source.TokenLifetime,
+            TokenLifetimeForWeb = source.TokenLifetimeForWeb,
+            AllowOfflineAccess = source.AllowOfflineAccess,
+            AllowOnlineAccess = source.AllowOnlineAccess,
+            AllowOnlineAccessWithEphemeralSessions = source.AllowOnlineAccessWithEphemeralSessions,
+            SkipConsentForVerifiableFirstPartyClients = source.SkipConsentForVerifiableFirstPartyClients,
+            TokenDialect = source.TokenDialect is { } td ? FromApi(td) : null,
+            EnforcePolicies = source.EnforcePolicies,
+            ConsentPolicy = source.ConsentPolicy.IsDefined && source.ConsentPolicy.Value is { } cp ? FromApi(cp) : null,
+            AuthorizationDetails = null,
+            AuthorizationPolicy = source.AuthorizationPolicy.IsDefined && source.AuthorizationPolicy.Value is { } ap ? FromApi(ap) : null,
+            SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
+            TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
+            ProofOfPossession = source.ProofOfPossession.IsDefined && source.ProofOfPossession.Value is { } pop ? FromApi(pop) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
         internal static V1ResourceServerConf? FromApi(ResourceServer? source) => source is null ? null : new()
         {
             Id = source.Id,
             Identifier = source.Identifier,
             Name = source.Name,
-            Scopes = source.Scopes?.Select(FromApi).ToList(),
-            SigningAlgorithm = FromApi(source.SigningAlgorithm),
+            Scopes = source.Scopes?.Select(FromApi).ToArray(),
+            SigningAlgorithm = FromApi(source.SigningAlg),
             SigningSecret = source.SigningSecret,
             TokenLifetime = source.TokenLifetime,
             TokenLifetimeForWeb = source.TokenLifetimeForWeb,
             AllowOfflineAccess = source.AllowOfflineAccess,
+            AllowOnlineAccess = source.AllowOnlineAccess,
+            AllowOnlineAccessWithEphemeralSessions = source.AllowOnlineAccessWithEphemeralSessions,
             SkipConsentForVerifiableFirstPartyClients = source.SkipConsentForVerifiableFirstPartyClients,
-            VerificationLocation = source.VerificationLocation,
-            TokenDialect = FromApi(source.TokenDialect),
+            TokenDialect = source.TokenDialect is { } td ? FromApi(td) : null,
             EnforcePolicies = source.EnforcePolicies,
-            ConsentPolicy = FromApi(source.ConsentPolicy),
-            AuthorizationDetails = source.AuthorizationDetails?.Select(FromApi).ToList(),
-            TokenEncryption = FromApi(source.TokenEncryption),
-            ProofOfPossession = FromApi(source.ProofOfPossession),
+            ConsentPolicy = source.ConsentPolicy.IsDefined && source.ConsentPolicy.Value is { } cp ? FromApi(cp) : null,
+            AuthorizationPolicy = source.AuthorizationPolicy.IsDefined && source.AuthorizationPolicy.Value is { } ap ? FromApi(ap) : null,
+            SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
+            TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
+            ProofOfPossession = source.ProofOfPossession.IsDefined && source.ProofOfPossession.Value is { } pop ? FromApi(pop) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerAuthorizationPolicy? FromApi(ResourceServerAuthorizationPolicy? source) => source is null ? null : new()
+        {
+            PolicyId = source.PolicyId,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorization? FromApi(ResourceServerSubjectTypeAuthorization? source) => source is null ? null : new()
+        {
+            Client = FromApi(source.Client),
+            User = FromApi(source.User),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorizationClient? FromApi(ResourceServerSubjectTypeAuthorizationClient? source) => source is null ? null : new()
+        {
+            Policy = source.Policy is { } policy ? FromApi(policy) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V1ResourceServerSubjectTypeAuthorizationUser? FromApi(ResourceServerSubjectTypeAuthorizationUser? source) => source is null ? null : new()
+        {
+            Policy = source.Policy is { } policy ? FromApi(policy) : null,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -69,109 +119,173 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerSigningAlgorithm? FromApi(SigningAlgorithm? source) => source switch
+        internal static V1ResourceServerSigningAlgorithm? FromApi(SigningAlgorithmEnum? source) => source?.Value switch
         {
-            SigningAlgorithm.HS256 => V1ResourceServerSigningAlgorithm.HS256,
-            SigningAlgorithm.RS256 => V1ResourceServerSigningAlgorithm.RS256,
-            SigningAlgorithm.PS256 => V1ResourceServerSigningAlgorithm.PS256,
+            SigningAlgorithmEnum.Values.Hs256 => V1ResourceServerSigningAlgorithm.HS256,
+            SigningAlgorithmEnum.Values.Rs256 => V1ResourceServerSigningAlgorithm.RS256,
+            SigningAlgorithmEnum.Values.Ps256 => V1ResourceServerSigningAlgorithm.PS256,
             null => null,
             _ => throw new NotImplementedException(),
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerTokenDialect? FromApi(TokenDialect? source) => source switch
+        internal static V1ResourceServerTokenDialect? FromApi(ResourceServerTokenDialectResponseEnum source) => source.Value switch
         {
-            TokenDialect.AccessToken => V1ResourceServerTokenDialect.AccessToken,
-            TokenDialect.AccessTokenAuthZ => V1ResourceServerTokenDialect.AccessTokenAuthZ,
-            TokenDialect.Rfc9068Profile => V1ResourceServerTokenDialect.Rfc9068Profile,
-            TokenDialect.Rfc9068ProfileAuthz => V1ResourceServerTokenDialect.Rfc9068ProfileAuthz,
-            null => null,
+            ResourceServerTokenDialectResponseEnum.Values.AccessToken => V1ResourceServerTokenDialect.AccessToken,
+            ResourceServerTokenDialectResponseEnum.Values.AccessTokenAuthz => V1ResourceServerTokenDialect.AccessTokenAuthZ,
+            ResourceServerTokenDialectResponseEnum.Values.Rfc9068Profile => V1ResourceServerTokenDialect.Rfc9068Profile,
+            ResourceServerTokenDialectResponseEnum.Values.Rfc9068ProfileAuthz => V1ResourceServerTokenDialect.Rfc9068ProfileAuthz,
             _ => throw new NotImplementedException(),
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerConsentPolicy? FromApi(ConsentPolicy? source) => source switch
+        internal static V1ResourceServerConsentPolicy? FromApi(ResourceServerConsentPolicyEnum source) => source.Value switch
         {
-            ConsentPolicy.TransactionalAuthorizationWithMfa => V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa,
-            null => null,
+            ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa => V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa,
             _ => throw new NotImplementedException(),
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerAuthorizationDetail? FromApi(ResourceServerAuthorizationDetail? source) => source is null ? null : new()
-        {
-            Type = source.Type,
-        };
-
-        [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerTokenEncryption? FromApi(TokenEncryption? source) => source is null ? null : new()
+        internal static V1ResourceServerTokenEncryption? FromApi(ResourceServerTokenEncryption? source) => source is null ? null : new()
         {
             Format = FromApi(source.Format),
             EncryptionKey = FromApi(source.EncryptionKey),
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerTokenFormat? FromApi(TokenFormat source) => source switch
+        internal static V1ResourceServerTokenFormat? FromApi(ResourceServerTokenEncryptionFormatEnum source) => source.Value switch
         {
-            TokenFormat.CompactNestedJwe => V1ResourceServerTokenFormat.CompactNestedJwe,
+            ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe => V1ResourceServerTokenFormat.CompactNestedJwe,
             _ => throw new NotImplementedException(),
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerTokenEncryptionKey? FromApi(TokenEncryptionKey? source) => source is null ? null : new()
+        internal static V1ResourceServerTokenEncryptionKey? FromApi(ResourceServerTokenEncryptionKey? source) => source is null ? null : new()
         {
             Name = source.Name,
-            Algorithm = source.Algorithm,
+            Algorithm = source.Alg?.Value,
             Kid = source.Kid,
             Pem = source.Pem,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V1ResourceServerProofOfPossession? FromApi(ProofOfPossession? source) => source is null ? null : new()
+        internal static V1ResourceServerProofOfPossession? FromApi(ResourceServerProofOfPossession? source) => source is null ? null : new()
         {
             Required = source.Required,
             Mechanism = FromApi(source.Mechanism),
         };
 
-        internal static V1ResourceServerMechanism? FromApi(Mechanism source) => source switch
+        internal static V1ResourceServerMechanism? FromApi(ResourceServerProofOfPossessionMechanismEnum source) => source.Value switch
         {
-            Mechanism.Mtls => V1ResourceServerMechanism.Mtls,
+            ResourceServerProofOfPossessionMechanismEnum.Values.Dpop => V1ResourceServerMechanism.Dpop,
+            ResourceServerProofOfPossessionMechanismEnum.Values.Mtls => V1ResourceServerMechanism.Mtls,
             _ => throw new NotImplementedException(),
         };
 
-        internal static SigningAlgorithm ToApi(V1ResourceServerSigningAlgorithm source) => source switch
+        internal static V1ResourceServerSubjectTypeAuthorizationClientPolicy? FromApi(ResourceServerSubjectTypeAuthorizationClientPolicyEnum source) => source.Value switch
         {
-            V1ResourceServerSigningAlgorithm.HS256 => SigningAlgorithm.HS256,
-            V1ResourceServerSigningAlgorithm.RS256 => SigningAlgorithm.RS256,
-            V1ResourceServerSigningAlgorithm.PS256 => SigningAlgorithm.PS256,
+            ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.DenyAll => V1ResourceServerSubjectTypeAuthorizationClientPolicy.DenyAll,
+            ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant => V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant,
             _ => throw new NotImplementedException(),
         };
 
-        internal static TokenDialect ToApi(V1ResourceServerTokenDialect source) => source switch
+        internal static V1ResourceServerSubjectTypeAuthorizationUserPolicy? FromApi(ResourceServerSubjectTypeAuthorizationUserPolicyEnum source) => source.Value switch
         {
-            V1ResourceServerTokenDialect.AccessToken => TokenDialect.AccessToken,
-            V1ResourceServerTokenDialect.AccessTokenAuthZ => TokenDialect.AccessTokenAuthZ,
-            V1ResourceServerTokenDialect.Rfc9068Profile => TokenDialect.Rfc9068Profile,
-            V1ResourceServerTokenDialect.Rfc9068ProfileAuthz => TokenDialect.Rfc9068ProfileAuthz,
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll => V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll,
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.DenyAll => V1ResourceServerSubjectTypeAuthorizationUserPolicy.DenyAll,
+            ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.RequireClientGrant => V1ResourceServerSubjectTypeAuthorizationUserPolicy.RequireClientGrant,
             _ => throw new NotImplementedException(),
         };
 
-        internal static ConsentPolicy ToApi(V1ResourceServerConsentPolicy source) => source switch
+        internal static SigningAlgorithmEnum ToApi(V1ResourceServerSigningAlgorithm source) => source switch
         {
-            V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa => ConsentPolicy.TransactionalAuthorizationWithMfa,
+            V1ResourceServerSigningAlgorithm.HS256 => new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Hs256),
+            V1ResourceServerSigningAlgorithm.RS256 => new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Rs256),
+            V1ResourceServerSigningAlgorithm.PS256 => new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Ps256),
             _ => throw new NotImplementedException(),
         };
 
-        internal static TokenFormat ToApi(V1ResourceServerTokenFormat source) => source switch
+        internal static ResourceServerTokenDialectSchemaEnum ToApi(V1ResourceServerTokenDialect source) => source switch
         {
-            V1ResourceServerTokenFormat.CompactNestedJwe => TokenFormat.CompactNestedJwe,
+            V1ResourceServerTokenDialect.AccessToken => new ResourceServerTokenDialectSchemaEnum(ResourceServerTokenDialectSchemaEnum.Values.AccessToken),
+            V1ResourceServerTokenDialect.AccessTokenAuthZ => new ResourceServerTokenDialectSchemaEnum(ResourceServerTokenDialectSchemaEnum.Values.AccessTokenAuthz),
+            V1ResourceServerTokenDialect.Rfc9068Profile => new ResourceServerTokenDialectSchemaEnum(ResourceServerTokenDialectSchemaEnum.Values.Rfc9068Profile),
+            V1ResourceServerTokenDialect.Rfc9068ProfileAuthz => new ResourceServerTokenDialectSchemaEnum(ResourceServerTokenDialectSchemaEnum.Values.Rfc9068ProfileAuthz),
             _ => throw new NotImplementedException(),
         };
 
-        internal static Mechanism ToApi(V1ResourceServerMechanism source) => source switch
+        internal static ResourceServerConsentPolicyEnum ToApi(V1ResourceServerConsentPolicy source) => source switch
         {
-            V1ResourceServerMechanism.Mtls => Mechanism.Mtls,
+            V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa => new ResourceServerConsentPolicyEnum(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa),
             _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerAuthorizationPolicy ToApi(V1ResourceServerAuthorizationPolicy source) => new()
+        {
+            PolicyId = source.PolicyId,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorization ToApi(V1ResourceServerSubjectTypeAuthorization source) => new()
+        {
+            Client = source.Client is { } client ? ToApi(client) : null,
+            User = source.User is { } user ? ToApi(user) : null,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationClient ToApi(V1ResourceServerSubjectTypeAuthorizationClient source) => new()
+        {
+            Policy = source.Policy is { } policy ? ToApi(policy) : null,
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationUser ToApi(V1ResourceServerSubjectTypeAuthorizationUser source) => new()
+        {
+            Policy = source.Policy is { } policy ? ToApi(policy) : null,
+        };
+
+        internal static ResourceServerTokenEncryptionFormatEnum ToApi(V1ResourceServerTokenFormat source) => source switch
+        {
+            V1ResourceServerTokenFormat.CompactNestedJwe => new ResourceServerTokenEncryptionFormatEnum(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerTokenEncryption ToApi(V1ResourceServerTokenEncryption source) => new()
+        {
+            Format = ToApi(source.Format ?? default),
+            EncryptionKey = source.EncryptionKey is { } key ? ToApi(key) : null,
+        };
+
+        internal static ResourceServerTokenEncryptionKey ToApi(V1ResourceServerTokenEncryptionKey source) => new()
+        {
+            Name = source.Name,
+            Kid = source.Kid,
+            Pem = source.Pem,
+        };
+
+        internal static ResourceServerProofOfPossessionMechanismEnum ToApi(V1ResourceServerMechanism source) => source switch
+        {
+            V1ResourceServerMechanism.Dpop => new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop),
+            V1ResourceServerMechanism.Mtls => new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationClientPolicyEnum ToApi(V1ResourceServerSubjectTypeAuthorizationClientPolicy source) => source switch
+        {
+            V1ResourceServerSubjectTypeAuthorizationClientPolicy.DenyAll => new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.DenyAll),
+            V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant => new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerSubjectTypeAuthorizationUserPolicyEnum ToApi(V1ResourceServerSubjectTypeAuthorizationUserPolicy source) => source switch
+        {
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll),
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.DenyAll => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.DenyAll),
+            V1ResourceServerSubjectTypeAuthorizationUserPolicy.RequireClientGrant => new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.RequireClientGrant),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ResourceServerProofOfPossession ToApi(V1ResourceServerProofOfPossession source) => new()
+        {
+            Required = source.Required ?? false,
+            Mechanism = source.Mechanism is { } mech ? ToApi(mech) : default!,
         };
 
         internal static ResourceServerScope ToApi(V1ResourceServerScope source) => new()
@@ -180,21 +294,19 @@ namespace Alethic.Auth0.Operator.Controllers
             Description = source.Description,
         };
 
-        internal static ResourceServerAuthorizationDetail ToApi(V1ResourceServerAuthorizationDetail source) => new()
+        internal static void ApplyToApi(V1ResourceServerConf conf, CreateResourceServerRequestContent request)
         {
-            Type = source.Type,
-        };
+            if (conf.Identifier is not null)
+                request.Identifier = conf.Identifier;
 
-        internal static void ApplyToApi(V1ResourceServerConf conf, ResourceServerBase request)
-        {
             if (conf.Name is not null)
                 request.Name = conf.Name;
 
             if (conf.Scopes is not null)
                 request.Scopes = conf.Scopes.Select(ToApi).ToList();
 
-            if (conf.SigningAlgorithm is { } signing_alg)
-                request.SigningAlgorithm = ToApi(signing_alg);
+            if (conf.SigningAlgorithm is { } signingAlg)
+                request.SigningAlg = ToApi(signingAlg);
 
             if (conf.SigningSecret is not null)
                 request.SigningSecret = conf.SigningSecret;
@@ -202,66 +314,89 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.TokenLifetime is not null)
                 request.TokenLifetime = conf.TokenLifetime;
 
-            if (conf.TokenLifetimeForWeb is not null)
-                request.TokenLifetimeForWeb = conf.TokenLifetimeForWeb;
-
             if (conf.AllowOfflineAccess is not null)
                 request.AllowOfflineAccess = conf.AllowOfflineAccess;
+
+            if (conf.AllowOnlineAccess is not null)
+                request.AllowOnlineAccess = conf.AllowOnlineAccess;
+
+            if (conf.AllowOnlineAccessWithEphemeralSessions is not null)
+                request.AllowOnlineAccessWithEphemeralSessions = conf.AllowOnlineAccessWithEphemeralSessions;
 
             if (conf.SkipConsentForVerifiableFirstPartyClients is not null)
                 request.SkipConsentForVerifiableFirstPartyClients = conf.SkipConsentForVerifiableFirstPartyClients;
 
-            if (conf.VerificationLocation is not null)
-                request.VerificationLocation = conf.VerificationLocation;
-
-            if (conf.TokenDialect is { } token_dialect)
-                request.TokenDialect = ToApi(token_dialect);
+            if (conf.TokenDialect is { } tokenDialect)
+                request.TokenDialect = ToApi(tokenDialect);
 
             if (conf.EnforcePolicies is not null)
                 request.EnforcePolicies = conf.EnforcePolicies;
 
-            if (conf.ConsentPolicy is { } consent_policy)
-                request.ConsentPolicy = ToApi(consent_policy);
+            if (conf.ConsentPolicy is { } consentPolicy)
+                request.ConsentPolicy = ToApi(consentPolicy);
 
-            if (conf.AuthorizationDetails is not null)
-                request.AuthorizationDetails = conf.AuthorizationDetails.Select(ToApi).ToList<ResourceServerAuthorizationDetail>();
+            if (conf.AuthorizationPolicy is { } authorizationPolicy)
+                request.AuthorizationPolicy = ToApi(authorizationPolicy);
 
-            if (conf.TokenEncryption is { } token_encryption)
-            {
-                request.TokenEncryption = new TokenEncryption
-                {
-                    Format = ToApi(token_encryption.Format ?? default),
-                    EncryptionKey = token_encryption.EncryptionKey is { } key ? new TokenEncryptionKey
-                    {
-                        Name = key.Name,
-                        Algorithm = key.Algorithm,
-                        Kid = key.Kid,
-                        Pem = key.Pem,
-                    } : null,
-                };
-            }
+            if (conf.SubjectTypeAuthorization is { } subjectTypeAuthorization)
+                request.SubjectTypeAuthorization = ToApi(subjectTypeAuthorization);
+
+            if (conf.TokenEncryption is { } tokenEncryption)
+                request.TokenEncryption = ToApi(tokenEncryption);
 
             if (conf.ProofOfPossession is { } pop)
-            {
-                request.ProofOfPossession = new ProofOfPossession
-                {
-                    Required = pop.Required,
-                    Mechanism = pop.Mechanism is { } mech ? ToApi(mech) : default,
-                };
-            }
+                request.ProofOfPossession = ToApi(pop);
         }
 
-        internal static void ApplyToApi(V1ResourceServerConf conf, ResourceServerCreateRequest request)
+        internal static void ApplyToApi(V1ResourceServerConf conf, UpdateResourceServerRequestContent request)
         {
-            if (conf.Identifier is not null)
-                request.Identifier = conf.Identifier;
+            if (conf.Name is not null)
+                request.Name = conf.Name;
 
-            ApplyToApi(conf, (ResourceServerBase)request);
-        }
+            if (conf.Scopes is not null)
+                request.Scopes = conf.Scopes.Select(ToApi).ToList();
 
-        internal static void ApplyToApi(V1ResourceServerConf conf, ResourceServerUpdateRequest request)
-        {
-            ApplyToApi(conf, (ResourceServerBase)request);
+            if (conf.SigningAlgorithm is { } signingAlg)
+                request.SigningAlg = ToApi(signingAlg);
+
+            if (conf.SigningSecret is not null)
+                request.SigningSecret = conf.SigningSecret;
+
+            if (conf.TokenLifetime is not null)
+                request.TokenLifetime = conf.TokenLifetime;
+
+            if (conf.AllowOfflineAccess is not null)
+                request.AllowOfflineAccess = conf.AllowOfflineAccess;
+
+            if (conf.AllowOnlineAccess is not null)
+                request.AllowOnlineAccess = conf.AllowOnlineAccess;
+
+            if (conf.AllowOnlineAccessWithEphemeralSessions is not null)
+                request.AllowOnlineAccessWithEphemeralSessions = conf.AllowOnlineAccessWithEphemeralSessions;
+
+            if (conf.SkipConsentForVerifiableFirstPartyClients is not null)
+                request.SkipConsentForVerifiableFirstPartyClients = conf.SkipConsentForVerifiableFirstPartyClients;
+
+            if (conf.TokenDialect is { } tokenDialect)
+                request.TokenDialect = ToApi(tokenDialect);
+
+            if (conf.EnforcePolicies is not null)
+                request.EnforcePolicies = conf.EnforcePolicies;
+
+            if (conf.ConsentPolicy is { } consentPolicy)
+                request.ConsentPolicy = ToApi(consentPolicy);
+
+            if (conf.AuthorizationPolicy is { } authorizationPolicy)
+                request.AuthorizationPolicy = ToApi(authorizationPolicy);
+
+            if (conf.SubjectTypeAuthorization is { } subjectTypeAuthorization)
+                request.SubjectTypeAuthorization = ToApi(subjectTypeAuthorization);
+
+            if (conf.TokenEncryption is { } tokenEncryption)
+                request.TokenEncryption = ToApi(tokenEncryption);
+
+            if (conf.ProofOfPossession is { } pop)
+                request.ProofOfPossession = ToApi(pop);
         }
 
         /// <summary>
@@ -285,7 +420,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             try
             {
-                return FromApi(await api.ResourceServers.GetAsync(id, cancellationToken: cancellationToken));
+                return FromApi(await api.ResourceServers.GetAsync(id, new GetResourceServerRequestParameters(), null, cancellationToken));
             }
             catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -300,8 +435,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf is null)
                 return null;
 
-            var list = await api.ResourceServers.GetAllAsync(new ResourceServerGetRequest() { }, cancellationToken: cancellationToken);
-            var self = list.FirstOrDefault(i => i.Identifier == conf.Identifier);
+            var pager = await api.ResourceServers.ListAsync(new ListResourceServerRequestParameters(), null, cancellationToken);
+            var self = pager.CurrentPage.Items?.FirstOrDefault(i => i.Identifier == conf.Identifier);
             return self?.Id;
         }
 
@@ -314,18 +449,18 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, V1ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var req = new ResourceServerCreateRequest();
+            var req = new CreateResourceServerRequestContent { Identifier = conf.Identifier ?? throw new InvalidOperationException("Identifier is required.") };
             ApplyToApi(conf, req);
-            var self = await api.ResourceServers.CreateAsync(req, cancellationToken);
+            var self = await api.ResourceServers.CreateAsync(req, null, cancellationToken);
             return self.Id;
         }
 
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, V1ResourceServerConf? last, V1ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var req = new ResourceServerUpdateRequest();
+            var req = new UpdateResourceServerRequestContent();
             ApplyToApi(conf, req);
-            await api.ResourceServers.UpdateAsync(id, req, cancellationToken);
+            await api.ResourceServers.UpdateAsync(id, req, null, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -341,7 +476,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
-            return api.ResourceServers.DeleteAsync(id, cancellationToken);
+            return api.ResourceServers.DeleteAsync(id, null, cancellationToken);
         }
 
     }

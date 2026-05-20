@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Net;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Alethic.Auth0.Operator.Core.Extensions;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
@@ -30,8 +26,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Newtonsoft.Json;
-
 namespace Alethic.Auth0.Operator.Controllers
 {
 
@@ -44,9 +38,6 @@ namespace Alethic.Auth0.Operator.Controllers
         where TConf : class
         where TLastConf : class
     {
-
-        static readonly Newtonsoft.Json.JsonSerializer _newtonsoftJsonSerializer = Newtonsoft.Json.JsonSerializer.CreateDefault();
-        static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web) { Converters = { new SimplePrimitiveHashtableConverter() } };
 
         readonly IKubernetesClient _kube;
         readonly IMemoryCache _cache;
@@ -242,7 +233,7 @@ namespace Alethic.Auth0.Operator.Controllers
             // id is specified by reference, lookup identifier
             if (reference.Id is { } id && string.IsNullOrWhiteSpace(id) == false)
             {
-                var self = await api.ResourceServers.GetAsync(id, cancellationToken);
+                var self = await api.ResourceServers.GetAsync(id, new GetResourceServerRequestParameters(), null, cancellationToken);
                 if (self is null)
                     throw new RetryException($"Failed to resolve ResourceServer reference {id}.");
 
@@ -304,7 +295,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} failed to retrieve management API token.");
 
                 // contact API using token and domain
-                var api = new ManagementApiClient(authToken.AccessToken, new Uri($"https://{domain}/api/v2/"), new HttpClientManagementConnection());
+                var api = new ManagementApiClient(authToken.AccessToken, new ClientOptions { BaseUrl = $"https://{domain}/api/v2/" });
 
                 // expire cache entry slightly before token expiration to allow for refresh
                 var expire = TimeSpan.FromSeconds(authToken.ExpiresIn);
@@ -436,52 +427,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 Reason = reason,
                 Note = note
             }, cancellationToken);
-        }
-
-        /// <summary>
-        /// Transforms the given Newtonsoft JSON serializable object to a System.Text.Json serializable object.
-        /// </summary>
-        /// <typeparam name="TFrom"></typeparam>
-        /// <typeparam name="TTo"></typeparam>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(from))]
-        protected static TTo? TransformToNewtonsoftJson<TFrom, TTo>(TFrom? from)
-            where TFrom : class
-            where TTo : class
-        {
-            if (from == null)
-                return null;
-
-            var to = _newtonsoftJsonSerializer.Deserialize<TTo>(new JsonTextReader(new StringReader(System.Text.Json.JsonSerializer.Serialize(from, _jsonSerializerOptions))));
-            if (to is null)
-                throw new InvalidOperationException();
-
-            return to;
-        }
-
-        /// <summary>
-        /// Transforms the given Newtonsoft JSON serializable object to a System.Text.Json serializable object.
-        /// </summary>
-        /// <typeparam name="TTo"></typeparam>
-        /// <param name="from"></param>
-        /// <returns></returns>
-        [return: NotNullIfNotNull(nameof(from))]
-        protected static TTo? TransformToSystemTextJson<TTo>(object? from)
-            where TTo : class
-        {
-            if (from == null)
-                return null;
-
-            using var w = new StringWriter();
-            _newtonsoftJsonSerializer.Serialize(w, from);
-
-            var to = System.Text.Json.JsonSerializer.Deserialize<TTo>(w.ToString(), _jsonSerializerOptions);
-            if (to is null)
-                throw new InvalidOperationException();
-
-            return to;
         }
 
         /// <summary>

@@ -1,7 +1,9 @@
+using System.Linq;
+
 using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.ResourceServer.V1;
 
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -29,43 +31,25 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_SigningAlgorithm_Null_Returns_Null()
         {
-            Assert.IsNull(V1ResourceServerController.FromApi((SigningAlgorithm?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_TokenDialect_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ResourceServerController.FromApi((TokenDialect?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_ConsentPolicy_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ResourceServerController.FromApi((ConsentPolicy?)null));
-        }
-
-        [TestMethod]
-        public void FromApi_AuthorizationDetail_Null_Returns_Null()
-        {
-            Assert.IsNull(V1ResourceServerController.FromApi((ResourceServerAuthorizationDetail?)null));
+            Assert.IsNull(V1ResourceServerController.FromApi((SigningAlgorithmEnum?)null));
         }
 
         [TestMethod]
         public void FromApi_TokenEncryption_Null_Returns_Null()
         {
-            Assert.IsNull(V1ResourceServerController.FromApi((TokenEncryption?)null));
+            Assert.IsNull(V1ResourceServerController.FromApi((ResourceServerTokenEncryption?)null));
         }
 
         [TestMethod]
         public void FromApi_TokenEncryptionKey_Null_Returns_Null()
         {
-            Assert.IsNull(V1ResourceServerController.FromApi((TokenEncryptionKey?)null));
+            Assert.IsNull(V1ResourceServerController.FromApi((ResourceServerTokenEncryptionKey?)null));
         }
 
         [TestMethod]
         public void FromApi_ProofOfPossession_Null_Returns_Null()
         {
-            Assert.IsNull(V1ResourceServerController.FromApi((ProofOfPossession?)null));
+            Assert.IsNull(V1ResourceServerController.FromApi((ResourceServerProofOfPossession?)null));
         }
 
         // ──────────────────────── FromApi property-mapping tests ────────────────────────
@@ -83,7 +67,6 @@ namespace Alethic.Auth0.Operator.Tests
                 TokenLifetimeForWeb = 7200,
                 AllowOfflineAccess = true,
                 SkipConsentForVerifiableFirstPartyClients = false,
-                VerificationLocation = "https://verify.example.com",
                 EnforcePolicies = true,
             };
 
@@ -97,7 +80,6 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(7200, result.TokenLifetimeForWeb);
             Assert.IsTrue(result.AllowOfflineAccess);
             Assert.IsFalse(result.SkipConsentForVerifiableFirstPartyClients);
-            Assert.AreEqual("https://verify.example.com", result.VerificationLocation);
             Assert.IsTrue(result.EnforcePolicies);
         }
 
@@ -121,32 +103,22 @@ namespace Alethic.Auth0.Operator.Tests
 
             var result = V1ResourceServerController.FromApi(source)!;
 
-            Assert.AreEqual(2, result.Scopes!.Count);
+            Assert.AreEqual(2, result.Scopes!.Length);
             Assert.AreEqual("read:data", result.Scopes[0].Value);
             Assert.AreEqual("write:data", result.Scopes[1].Value);
         }
 
         [TestMethod]
-        public void FromApi_AuthorizationDetail_MapsType()
-        {
-            var result = V1ResourceServerController.FromApi(new ResourceServerAuthorizationDetail { Type = "payment_initiation" })!;
-
-            Assert.AreEqual("payment_initiation", result.Type);
-        }
-
-        [TestMethod]
         public void FromApi_TokenEncryptionKey_MapsProperties()
         {
-            var result = V1ResourceServerController.FromApi(new TokenEncryptionKey
+            var result = V1ResourceServerController.FromApi(new ResourceServerTokenEncryptionKey
             {
                 Name = "mykey",
-                Algorithm = "RSA-OAEP",
                 Kid = "kid-1",
                 Pem = "-----BEGIN PUBLIC KEY-----",
             })!;
 
             Assert.AreEqual("mykey", result.Name);
-            Assert.AreEqual("RSA-OAEP", result.Algorithm);
             Assert.AreEqual("kid-1", result.Kid);
             Assert.AreEqual("-----BEGIN PUBLIC KEY-----", result.Pem);
         }
@@ -154,10 +126,10 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_TokenEncryption_MapsFormatAndKey()
         {
-            var result = V1ResourceServerController.FromApi(new TokenEncryption
+            var result = V1ResourceServerController.FromApi(new ResourceServerTokenEncryption
             {
-                Format = TokenFormat.CompactNestedJwe,
-                EncryptionKey = new TokenEncryptionKey { Name = "k1" },
+                Format = new ResourceServerTokenEncryptionFormatEnum(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe),
+                EncryptionKey = new ResourceServerTokenEncryptionKey { Name = "k1" },
             })!;
 
             Assert.AreEqual(V1ResourceServerTokenFormat.CompactNestedJwe, result.Format);
@@ -167,98 +139,137 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_ProofOfPossession_MapsProperties()
         {
-            var result = V1ResourceServerController.FromApi(new ProofOfPossession
+            var result = V1ResourceServerController.FromApi(new ResourceServerProofOfPossession
             {
                 Required = true,
-                Mechanism = Mechanism.Mtls,
+                Mechanism = new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls),
             })!;
 
             Assert.IsTrue(result.Required);
             Assert.AreEqual(V1ResourceServerMechanism.Mtls, result.Mechanism);
         }
 
+        [TestMethod]
+        public void FromApi_ResourceServer_MapsNewRequestBackedProperties()
+        {
+            var source = new ResourceServer
+            {
+                Identifier = "https://api.example.com",
+                AllowOnlineAccess = true,
+                AllowOnlineAccessWithEphemeralSessions = false,
+                AuthorizationPolicy = new ResourceServerAuthorizationPolicy { PolicyId = "pol_123" },
+                SubjectTypeAuthorization = new ResourceServerSubjectTypeAuthorization
+                {
+                    Client = new ResourceServerSubjectTypeAuthorizationClient
+                    {
+                        Policy = new ResourceServerSubjectTypeAuthorizationClientPolicyEnum(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant),
+                    },
+                    User = new ResourceServerSubjectTypeAuthorizationUser
+                    {
+                        Policy = new ResourceServerSubjectTypeAuthorizationUserPolicyEnum(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll),
+                    },
+                },
+            };
+
+            var result = V1ResourceServerController.FromApi(source)!;
+
+            Assert.IsTrue(result.AllowOnlineAccess);
+            Assert.IsFalse(result.AllowOnlineAccessWithEphemeralSessions);
+            Assert.AreEqual("pol_123", result.AuthorizationPolicy!.PolicyId);
+            Assert.AreEqual(V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant, result.SubjectTypeAuthorization!.Client!.Policy);
+            Assert.AreEqual(V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll, result.SubjectTypeAuthorization.User!.Policy);
+        }
+
         // ──────────────────────── FromApi enum tests ────────────────────────
 
         [TestMethod]
-        [DataRow(SigningAlgorithm.HS256, V1ResourceServerSigningAlgorithm.HS256)]
-        [DataRow(SigningAlgorithm.RS256, V1ResourceServerSigningAlgorithm.RS256)]
-        [DataRow(SigningAlgorithm.PS256, V1ResourceServerSigningAlgorithm.PS256)]
-        public void FromApi_SigningAlgorithm_MapsCorrectly(SigningAlgorithm input, V1ResourceServerSigningAlgorithm expected)
-        {
-            Assert.AreEqual(expected, V1ResourceServerController.FromApi((SigningAlgorithm?)input));
-        }
+        public void FromApi_SigningAlgorithm_Hs256() => Assert.AreEqual(V1ResourceServerSigningAlgorithm.HS256, V1ResourceServerController.FromApi(new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Hs256)));
+        [TestMethod]
+        public void FromApi_SigningAlgorithm_Rs256() => Assert.AreEqual(V1ResourceServerSigningAlgorithm.RS256, V1ResourceServerController.FromApi(new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Rs256)));
+        [TestMethod]
+        public void FromApi_SigningAlgorithm_Ps256() => Assert.AreEqual(V1ResourceServerSigningAlgorithm.PS256, V1ResourceServerController.FromApi(new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Ps256)));
 
         [TestMethod]
-        [DataRow(TokenDialect.AccessToken, V1ResourceServerTokenDialect.AccessToken)]
-        [DataRow(TokenDialect.AccessTokenAuthZ, V1ResourceServerTokenDialect.AccessTokenAuthZ)]
-        [DataRow(TokenDialect.Rfc9068Profile, V1ResourceServerTokenDialect.Rfc9068Profile)]
-        [DataRow(TokenDialect.Rfc9068ProfileAuthz, V1ResourceServerTokenDialect.Rfc9068ProfileAuthz)]
-        public void FromApi_TokenDialect_MapsCorrectly(TokenDialect input, V1ResourceServerTokenDialect expected)
-        {
-            Assert.AreEqual(expected, V1ResourceServerController.FromApi((TokenDialect?)input));
-        }
+        public void FromApi_TokenDialect_AccessToken() => Assert.AreEqual(V1ResourceServerTokenDialect.AccessToken, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(ResourceServerTokenDialectResponseEnum.Values.AccessToken)));
+        [TestMethod]
+        public void FromApi_TokenDialect_AccessTokenAuthz() => Assert.AreEqual(V1ResourceServerTokenDialect.AccessTokenAuthZ, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(ResourceServerTokenDialectResponseEnum.Values.AccessTokenAuthz)));
+        [TestMethod]
+        public void FromApi_TokenDialect_Rfc9068Profile() => Assert.AreEqual(V1ResourceServerTokenDialect.Rfc9068Profile, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(ResourceServerTokenDialectResponseEnum.Values.Rfc9068Profile)));
+        [TestMethod]
+        public void FromApi_TokenDialect_Rfc9068ProfileAuthz() => Assert.AreEqual(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(ResourceServerTokenDialectResponseEnum.Values.Rfc9068ProfileAuthz)));
 
         [TestMethod]
         public void FromApi_ConsentPolicy_TransactionalAuthorizationWithMfa_MapsCorrectly()
         {
             Assert.AreEqual(V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa,
-                V1ResourceServerController.FromApi((ConsentPolicy?)ConsentPolicy.TransactionalAuthorizationWithMfa));
+                V1ResourceServerController.FromApi(new ResourceServerConsentPolicyEnum(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa)));
         }
 
         [TestMethod]
         public void FromApi_TokenFormat_CompactNestedJwe_MapsCorrectly()
         {
             Assert.AreEqual(V1ResourceServerTokenFormat.CompactNestedJwe,
-                V1ResourceServerController.FromApi(TokenFormat.CompactNestedJwe));
+                V1ResourceServerController.FromApi(new ResourceServerTokenEncryptionFormatEnum(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe)));
         }
 
         [TestMethod]
         public void FromApi_Mechanism_Mtls_MapsCorrectly()
         {
             Assert.AreEqual(V1ResourceServerMechanism.Mtls,
-                V1ResourceServerController.FromApi(Mechanism.Mtls));
+                V1ResourceServerController.FromApi(new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls)));
+        }
+
+        [TestMethod]
+        public void FromApi_Mechanism_Dpop_MapsCorrectly()
+        {
+            Assert.AreEqual(V1ResourceServerMechanism.Dpop,
+                V1ResourceServerController.FromApi(new ResourceServerProofOfPossessionMechanismEnum(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop)));
         }
 
         // ──────────────────────── ToApi enum tests ────────────────────────
 
         [TestMethod]
-        [DataRow(V1ResourceServerSigningAlgorithm.HS256, SigningAlgorithm.HS256)]
-        [DataRow(V1ResourceServerSigningAlgorithm.RS256, SigningAlgorithm.RS256)]
-        [DataRow(V1ResourceServerSigningAlgorithm.PS256, SigningAlgorithm.PS256)]
-        public void ToApi_SigningAlgorithm_MapsCorrectly(V1ResourceServerSigningAlgorithm input, SigningAlgorithm expected)
-        {
-            Assert.AreEqual(expected, V1ResourceServerController.ToApi(input));
-        }
+        public void ToApi_SigningAlgorithm_Hs256() => Assert.AreEqual(SigningAlgorithmEnum.Values.Hs256, V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.HS256).Value);
+        [TestMethod]
+        public void ToApi_SigningAlgorithm_Rs256() => Assert.AreEqual(SigningAlgorithmEnum.Values.Rs256, V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.RS256).Value);
+        [TestMethod]
+        public void ToApi_SigningAlgorithm_Ps256() => Assert.AreEqual(SigningAlgorithmEnum.Values.Ps256, V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.PS256).Value);
 
         [TestMethod]
-        [DataRow(V1ResourceServerTokenDialect.AccessToken, TokenDialect.AccessToken)]
-        [DataRow(V1ResourceServerTokenDialect.AccessTokenAuthZ, TokenDialect.AccessTokenAuthZ)]
-        [DataRow(V1ResourceServerTokenDialect.Rfc9068Profile, TokenDialect.Rfc9068Profile)]
-        [DataRow(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz, TokenDialect.Rfc9068ProfileAuthz)]
-        public void ToApi_TokenDialect_MapsCorrectly(V1ResourceServerTokenDialect input, TokenDialect expected)
-        {
-            Assert.AreEqual(expected, V1ResourceServerController.ToApi(input));
-        }
+        public void ToApi_TokenDialect_AccessToken() => Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.AccessToken, V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.AccessToken).Value);
+        [TestMethod]
+        public void ToApi_TokenDialect_AccessTokenAuthz() => Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.AccessTokenAuthz, V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.AccessTokenAuthZ).Value);
+        [TestMethod]
+        public void ToApi_TokenDialect_Rfc9068Profile() => Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.Rfc9068Profile, V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.Rfc9068Profile).Value);
+        [TestMethod]
+        public void ToApi_TokenDialect_Rfc9068ProfileAuthz() => Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.Rfc9068ProfileAuthz, V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz).Value);
 
         [TestMethod]
         public void ToApi_ConsentPolicy_TransactionalAuthorizationWithMfa_MapsCorrectly()
         {
-            Assert.AreEqual(ConsentPolicy.TransactionalAuthorizationWithMfa,
-                V1ResourceServerController.ToApi(V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa));
+            Assert.AreEqual(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa,
+                V1ResourceServerController.ToApi(V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa).Value);
         }
 
         [TestMethod]
         public void ToApi_TokenFormat_CompactNestedJwe_MapsCorrectly()
         {
-            Assert.AreEqual(TokenFormat.CompactNestedJwe,
-                V1ResourceServerController.ToApi(V1ResourceServerTokenFormat.CompactNestedJwe));
+            Assert.AreEqual(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe,
+                V1ResourceServerController.ToApi(V1ResourceServerTokenFormat.CompactNestedJwe).Value);
         }
 
         [TestMethod]
         public void ToApi_Mechanism_Mtls_MapsCorrectly()
         {
-            Assert.AreEqual(Mechanism.Mtls,
-                V1ResourceServerController.ToApi(V1ResourceServerMechanism.Mtls));
+            Assert.AreEqual(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls,
+                V1ResourceServerController.ToApi(V1ResourceServerMechanism.Mtls).Value);
+        }
+
+        [TestMethod]
+        public void ToApi_Mechanism_Dpop_MapsCorrectly()
+        {
+            Assert.AreEqual(ResourceServerProofOfPossessionMechanismEnum.Values.Dpop,
+                V1ResourceServerController.ToApi(V1ResourceServerMechanism.Dpop).Value);
         }
 
         [TestMethod]
@@ -270,35 +281,50 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("Read data", result.Description);
         }
 
-        [TestMethod]
-        public void ToApi_AuthorizationDetail_MapsType()
-        {
-            var result = V1ResourceServerController.ToApi(new V1ResourceServerAuthorizationDetail { Type = "payment_initiation" });
-
-            Assert.AreEqual("payment_initiation", result.Type);
-        }
-
         // ──────────────────────── Roundtrip tests ────────────────────────
 
         [TestMethod]
-        [DataRow(V1ResourceServerSigningAlgorithm.HS256)]
-        [DataRow(V1ResourceServerSigningAlgorithm.RS256)]
-        [DataRow(V1ResourceServerSigningAlgorithm.PS256)]
-        public void SigningAlgorithm_Roundtrip(V1ResourceServerSigningAlgorithm input)
+        public void SigningAlgorithm_Roundtrip_Hs256()
         {
-            var api = V1ResourceServerController.ToApi(input);
-            Assert.AreEqual(input, V1ResourceServerController.FromApi((SigningAlgorithm?)api));
+            var api = V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.HS256);
+            Assert.AreEqual(V1ResourceServerSigningAlgorithm.HS256, V1ResourceServerController.FromApi((SigningAlgorithmEnum?)api));
+        }
+        [TestMethod]
+        public void SigningAlgorithm_Roundtrip_Rs256()
+        {
+            var api = V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.RS256); 
+            Assert.AreEqual(V1ResourceServerSigningAlgorithm.RS256, V1ResourceServerController.FromApi((SigningAlgorithmEnum?)api));
+        }
+        [TestMethod]
+        public void SigningAlgorithm_Roundtrip_Ps256()
+        {
+            var api = V1ResourceServerController.ToApi(V1ResourceServerSigningAlgorithm.PS256); 
+            Assert.AreEqual(V1ResourceServerSigningAlgorithm.PS256, V1ResourceServerController.FromApi((SigningAlgorithmEnum?)api));
         }
 
         [TestMethod]
-        [DataRow(V1ResourceServerTokenDialect.AccessToken)]
-        [DataRow(V1ResourceServerTokenDialect.AccessTokenAuthZ)]
-        [DataRow(V1ResourceServerTokenDialect.Rfc9068Profile)]
-        [DataRow(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz)]
-        public void TokenDialect_Roundtrip(V1ResourceServerTokenDialect input)
+        public void TokenDialect_Roundtrip_AccessToken()
         {
-            var api = V1ResourceServerController.ToApi(input);
-            Assert.AreEqual(input, V1ResourceServerController.FromApi((TokenDialect?)api));
+            var api = V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.AccessToken); 
+            Assert.AreEqual(V1ResourceServerTokenDialect.AccessToken, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(api.Value)));
+        }
+        [TestMethod]
+        public void TokenDialect_Roundtrip_AccessTokenAuthZ()
+        {
+            var api = V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.AccessTokenAuthZ); 
+            Assert.AreEqual(V1ResourceServerTokenDialect.AccessTokenAuthZ, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(api.Value)));
+        }
+        [TestMethod]
+        public void TokenDialect_Roundtrip_Rfc9068Profile()
+        {
+            var api = V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.Rfc9068Profile); 
+            Assert.AreEqual(V1ResourceServerTokenDialect.Rfc9068Profile, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(api.Value)));
+        }
+        [TestMethod]
+        public void TokenDialect_Roundtrip_Rfc9068ProfileAuthz()
+        {
+            var api = V1ResourceServerController.ToApi(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz);
+            Assert.AreEqual(V1ResourceServerTokenDialect.Rfc9068ProfileAuthz, V1ResourceServerController.FromApi(new ResourceServerTokenDialectResponseEnum(api.Value)));
         }
 
         // ──────────────────────── ApplyToApi tests ────────────────────────
@@ -315,34 +341,48 @@ namespace Alethic.Auth0.Operator.Tests
                 TokenLifetime = 86400,
                 TokenLifetimeForWeb = 7200,
                 AllowOfflineAccess = true,
+                AllowOnlineAccess = true,
+                AllowOnlineAccessWithEphemeralSessions = false,
                 SkipConsentForVerifiableFirstPartyClients = false,
                 VerificationLocation = "https://verify.example.com",
                 TokenDialect = V1ResourceServerTokenDialect.AccessToken,
                 EnforcePolicies = true,
                 ConsentPolicy = V1ResourceServerConsentPolicy.TransactionalAuthorizationWithMfa,
                 Scopes = [new V1ResourceServerScope { Value = "read:data", Description = "Read" }],
-                AuthorizationDetails = [new V1ResourceServerAuthorizationDetail { Type = "payment_initiation" }],
+                AuthorizationPolicy = new V1ResourceServerAuthorizationPolicy { PolicyId = "pol_123" },
+                SubjectTypeAuthorization = new V1ResourceServerSubjectTypeAuthorization
+                {
+                    Client = new V1ResourceServerSubjectTypeAuthorizationClient
+                    {
+                        Policy = V1ResourceServerSubjectTypeAuthorizationClientPolicy.RequireClientGrant,
+                    },
+                    User = new V1ResourceServerSubjectTypeAuthorizationUser
+                    {
+                        Policy = V1ResourceServerSubjectTypeAuthorizationUserPolicy.AllowAll,
+                    },
+                },
             };
 
-            var req = new ResourceServerCreateRequest();
+            var req = new CreateResourceServerRequestContent { Identifier = "https://api.example.com" };
             V1ResourceServerController.ApplyToApi(conf, req);
 
             Assert.AreEqual("https://api.example.com", req.Identifier);
             Assert.AreEqual("My API", req.Name);
-            Assert.AreEqual(SigningAlgorithm.RS256, req.SigningAlgorithm);
+            Assert.AreEqual(SigningAlgorithmEnum.Values.Rs256, req.SigningAlg?.Value);
             Assert.AreEqual("secret", req.SigningSecret);
             Assert.AreEqual(86400, req.TokenLifetime);
-            Assert.AreEqual(7200, req.TokenLifetimeForWeb);
             Assert.IsTrue(req.AllowOfflineAccess);
+            Assert.IsTrue(req.AllowOnlineAccess);
+            Assert.IsFalse(req.AllowOnlineAccessWithEphemeralSessions);
             Assert.IsFalse(req.SkipConsentForVerifiableFirstPartyClients);
-            Assert.AreEqual("https://verify.example.com", req.VerificationLocation);
-            Assert.AreEqual(TokenDialect.AccessToken, req.TokenDialect);
+            Assert.AreEqual(ResourceServerTokenDialectSchemaEnum.Values.AccessToken, req.TokenDialect?.Value);
             Assert.IsTrue(req.EnforcePolicies);
-            Assert.AreEqual(ConsentPolicy.TransactionalAuthorizationWithMfa, req.ConsentPolicy);
-            Assert.AreEqual(1, req.Scopes!.Count);
-            Assert.AreEqual("read:data", req.Scopes[0].Value);
-            Assert.AreEqual(1, req.AuthorizationDetails!.Count);
-            Assert.AreEqual("payment_initiation", req.AuthorizationDetails[0].Type);
+            Assert.AreEqual(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa, req.ConsentPolicy.Value?.Value);
+            Assert.AreEqual("pol_123", req.AuthorizationPolicy.Value!.PolicyId);
+            Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant.ToString(), req.SubjectTypeAuthorization.Client!.Policy!.Value.ToString());
+            Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll.ToString(), req.SubjectTypeAuthorization.User!.Policy!.Value.ToString());
+            Assert.AreEqual(1, req.Scopes!.Count());
+            Assert.AreEqual("read:data", req.Scopes.First().Value);
         }
 
         [TestMethod]
@@ -350,7 +390,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var conf = new V1ResourceServerConf { Identifier = "https://api.example.com", Name = "My API" };
 
-            var req = new ResourceServerUpdateRequest();
+            var req = new UpdateResourceServerRequestContent();
             V1ResourceServerController.ApplyToApi(conf, req);
 
             Assert.AreEqual("My API", req.Name);
@@ -374,14 +414,13 @@ namespace Alethic.Auth0.Operator.Tests
                 },
             };
 
-            var req = new ResourceServerCreateRequest();
+            var req = new CreateResourceServerRequestContent { Identifier = "https://api.example.com" };
             V1ResourceServerController.ApplyToApi(conf, req);
 
-            Assert.AreEqual(TokenFormat.CompactNestedJwe, req.TokenEncryption!.Format);
-            Assert.AreEqual("mykey", req.TokenEncryption.EncryptionKey!.Name);
-            Assert.AreEqual("RSA-OAEP", req.TokenEncryption.EncryptionKey.Algorithm);
-            Assert.AreEqual("kid-1", req.TokenEncryption.EncryptionKey.Kid);
-            Assert.AreEqual("pem-data", req.TokenEncryption.EncryptionKey.Pem);
+            Assert.AreEqual(ResourceServerTokenEncryptionFormatEnum.Values.CompactNestedJwe, req.TokenEncryption.Value!.Format.Value);
+            Assert.AreEqual("mykey", req.TokenEncryption.Value!.EncryptionKey!.Name);
+            Assert.AreEqual("kid-1", req.TokenEncryption.Value!.EncryptionKey!.Kid);
+            Assert.AreEqual("pem-data", req.TokenEncryption.Value!.EncryptionKey!.Pem);
         }
 
         [TestMethod]
@@ -396,11 +435,9 @@ namespace Alethic.Auth0.Operator.Tests
                 },
             };
 
-            var req = new ResourceServerCreateRequest();
+            var req = new CreateResourceServerRequestContent { Identifier = "https://api.example.com" };
             V1ResourceServerController.ApplyToApi(conf, req);
-
-            Assert.IsTrue(req.ProofOfPossession!.Required);
-            Assert.AreEqual(Mechanism.Mtls, req.ProofOfPossession.Mechanism);
+            Assert.AreEqual(ResourceServerProofOfPossessionMechanismEnum.Values.Mtls, req.ProofOfPossession.Value!.Mechanism.Value);
         }
 
         [TestMethod]
@@ -408,16 +445,14 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var conf = new V1ResourceServerConf { Name = "My API" };
 
-            var req = new ResourceServerCreateRequest();
+            var req = new CreateResourceServerRequestContent { Identifier = "https://api.example.com" };
             V1ResourceServerController.ApplyToApi(conf, req);
-
-            Assert.IsNull(req.SigningAlgorithm);
             Assert.IsNull(req.TokenDialect);
-            Assert.IsNull(req.ConsentPolicy);
-            Assert.IsNull(req.TokenEncryption);
-            Assert.IsNull(req.ProofOfPossession);
+            Assert.IsFalse(req.ConsentPolicy.IsDefined);
+            Assert.IsFalse(req.TokenEncryption.IsDefined);
+            Assert.IsFalse(req.ProofOfPossession.IsDefined);
             Assert.IsNull(req.Scopes);
-            Assert.IsNull(req.AuthorizationDetails);
+            Assert.IsFalse(req.AuthorizationDetails.IsDefined);
         }
 
     }

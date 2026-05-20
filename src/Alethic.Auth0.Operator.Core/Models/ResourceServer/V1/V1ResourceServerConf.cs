@@ -21,7 +21,7 @@ namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
 
         [JsonPropertyName("scopes")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<V1ResourceServerScope>? Scopes { get; set; }
+        public V1ResourceServerScope[]? Scopes { get; set; }
 
         [JsonPropertyName("signing_alg")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -42,6 +42,14 @@ namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
         [JsonPropertyName("allow_offline_access")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? AllowOfflineAccess { get; set; }
+
+        [JsonPropertyName("allow_online_access")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? AllowOnlineAccess { get; set; }
+
+        [JsonPropertyName("allow_online_access_with_ephemeral_sessions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? AllowOnlineAccessWithEphemeralSessions { get; set; }
 
         [JsonPropertyName("skip_consent_for_verifiable_first_party_clients")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -65,7 +73,15 @@ namespace Alethic.Auth0.Operator.Core.Models.ResourceServer.V1
 
         [JsonPropertyName("authorization_details")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IList<V1ResourceServerAuthorizationDetail>? AuthorizationDetails { get; set; }
+        public V1ResourceServerAuthorizationDetail[]? AuthorizationDetails { get; set; }
+
+        [JsonPropertyName("authorization_policy")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ResourceServerAuthorizationPolicy? AuthorizationPolicy { get; set; }
+
+        [JsonPropertyName("subject_type_authorization")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V1ResourceServerSubjectTypeAuthorization? SubjectTypeAuthorization { get; set; }
 
         [JsonPropertyName("token_encryption")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

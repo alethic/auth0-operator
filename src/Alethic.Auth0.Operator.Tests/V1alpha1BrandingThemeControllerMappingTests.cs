@@ -1,7 +1,7 @@
 using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Core.Models.BrandingTheme.V1alpha1;
 
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,206 +15,198 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── ToApi CaptchaWidgetTheme ────────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemeCaptchaWidgetTheme.Light, CaptchaWidgetTheme.Light)]
-        [DataRow(V1alpha1BrandingThemeCaptchaWidgetTheme.Dark, CaptchaWidgetTheme.Dark)]
-        [DataRow(V1alpha1BrandingThemeCaptchaWidgetTheme.Auto, CaptchaWidgetTheme.Auto)]
-        public void ToApi_CaptchaWidgetTheme_MapsCorrectly(V1alpha1BrandingThemeCaptchaWidgetTheme input, CaptchaWidgetTheme expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApi_CaptchaWidgetTheme_Light() => Assert.AreEqual(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Light, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme.Light).Value);
+
+        [TestMethod]
+        public void ToApi_CaptchaWidgetTheme_Dark() => Assert.AreEqual(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Dark, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme.Dark).Value);
+
+        [TestMethod]
+        public void ToApi_CaptchaWidgetTheme_Auto() => Assert.AreEqual(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Auto, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeCaptchaWidgetTheme.Auto).Value);
 
         // ──────────────────────── ToApi SocialButtonsLayout ───────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemeSocialButtonsLayout.Top, SocialButtonsLayout.Top)]
-        [DataRow(V1alpha1BrandingThemeSocialButtonsLayout.Bottom, SocialButtonsLayout.Bottom)]
-        public void ToApi_SocialButtonsLayout_MapsCorrectly(V1alpha1BrandingThemeSocialButtonsLayout input, SocialButtonsLayout expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApi_SocialButtonsLayout_Top() => Assert.AreEqual(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Top, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeSocialButtonsLayout.Top).Value);
+
+        [TestMethod]
+        public void ToApi_SocialButtonsLayout_Bottom() => Assert.AreEqual(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeSocialButtonsLayout.Bottom).Value);
 
         // ──────────────────────── ToApi LogoPosition ──────────────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemeLogoPosition.Center, LogoPosition.Center)]
-        [DataRow(V1alpha1BrandingThemeLogoPosition.Left, LogoPosition.Left)]
-        [DataRow(V1alpha1BrandingThemeLogoPosition.Right, LogoPosition.Right)]
-        [DataRow(V1alpha1BrandingThemeLogoPosition.None, LogoPosition.None)]
-        public void ToApi_LogoPosition_MapsCorrectly(V1alpha1BrandingThemeLogoPosition input, LogoPosition expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApi_LogoPosition_Center() => Assert.AreEqual(BrandingThemeWidgetLogoPositionEnum.Values.Center, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeLogoPosition.Center).Value);
+
+        [TestMethod]
+        public void ToApi_LogoPosition_Left() => Assert.AreEqual(BrandingThemeWidgetLogoPositionEnum.Values.Left, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeLogoPosition.Left).Value);
+
+        [TestMethod]
+        public void ToApi_LogoPosition_Right() => Assert.AreEqual(BrandingThemeWidgetLogoPositionEnum.Values.Right, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeLogoPosition.Right).Value);
+
+        [TestMethod]
+        public void ToApi_LogoPosition_None() => Assert.AreEqual(BrandingThemeWidgetLogoPositionEnum.Values.None, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeLogoPosition.None).Value);
 
         // ──────────────────────── ToApi HeaderTextAlignment ───────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemeHeaderTextAlignment.Center, HeaderTextAlignment.Center)]
-        [DataRow(V1alpha1BrandingThemeHeaderTextAlignment.Left, HeaderTextAlignment.Left)]
-        [DataRow(V1alpha1BrandingThemeHeaderTextAlignment.Right, HeaderTextAlignment.Right)]
-        public void ToApi_HeaderTextAlignment_MapsCorrectly(V1alpha1BrandingThemeHeaderTextAlignment input, HeaderTextAlignment expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApi_HeaderTextAlignment_Center() => Assert.AreEqual(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeHeaderTextAlignment.Center).Value);
+
+        [TestMethod]
+        public void ToApi_HeaderTextAlignment_Left() => Assert.AreEqual(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Left, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeHeaderTextAlignment.Left).Value);
+
+        [TestMethod]
+        public void ToApi_HeaderTextAlignment_Right() => Assert.AreEqual(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Right, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeHeaderTextAlignment.Right).Value);
 
         // ──────────────────────── ToApi PageLayout ────────────────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemePageLayout.Right, PageLayout.Right)]
-        [DataRow(V1alpha1BrandingThemePageLayout.Center, PageLayout.Center)]
-        [DataRow(V1alpha1BrandingThemePageLayout.Left, PageLayout.Left)]
-        public void ToApi_PageLayout_MapsCorrectly(V1alpha1BrandingThemePageLayout input, PageLayout expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApi_PageLayout_Center() => Assert.AreEqual(BrandingThemePageBackgroundPageLayoutEnum.Values.Center, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemePageLayout.Center).Value);
+
+        [TestMethod]
+        public void ToApi_PageLayout_Left() => Assert.AreEqual(BrandingThemePageBackgroundPageLayoutEnum.Values.Left, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemePageLayout.Left).Value);
+
+        [TestMethod]
+        public void ToApi_PageLayout_Right() => Assert.AreEqual(BrandingThemePageBackgroundPageLayoutEnum.Values.Right, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemePageLayout.Right).Value);
 
         // ──────────────────────── ToApi ButtonsStyle ──────────────────────────────
 
         [TestMethod]
-        [DataRow(V1alpha1BrandingThemeButtonsStyle.Pill, ButtonsStyle.Pill)]
-        [DataRow(V1alpha1BrandingThemeButtonsStyle.Rounded, ButtonsStyle.Rounded)]
-        [DataRow(V1alpha1BrandingThemeButtonsStyle.Sharp, ButtonsStyle.Sharp)]
-        public void ToApi_ButtonsStyle_MapsCorrectly(V1alpha1BrandingThemeButtonsStyle input, ButtonsStyle expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.ToApi(input));
-        }
+        public void ToApiButtonsStyle_Pill() => Assert.AreEqual(BrandingThemeBordersButtonsStyleEnum.Values.Pill, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeButtonsStyle.Pill).Value);
+
+        [TestMethod]
+        public void ToApiButtonsStyle_Rounded() => Assert.AreEqual(BrandingThemeBordersButtonsStyleEnum.Values.Rounded, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeButtonsStyle.Rounded).Value);
+
+        [TestMethod]
+        public void ToApiButtonsStyle_Sharp() => Assert.AreEqual(BrandingThemeBordersButtonsStyleEnum.Values.Sharp, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeButtonsStyle.Sharp).Value);
 
         // ──────────────────────── FromApi CaptchaWidgetTheme ─────────────────────
 
         [TestMethod]
-        [DataRow(CaptchaWidgetTheme.Light, V1alpha1BrandingThemeCaptchaWidgetTheme.Light)]
-        [DataRow(CaptchaWidgetTheme.Dark, V1alpha1BrandingThemeCaptchaWidgetTheme.Dark)]
-        [DataRow(CaptchaWidgetTheme.Auto, V1alpha1BrandingThemeCaptchaWidgetTheme.Auto)]
-        public void FromApi_CaptchaWidgetTheme_MapsCorrectly(CaptchaWidgetTheme input, V1alpha1BrandingThemeCaptchaWidgetTheme expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_CaptchaWidgetTheme_Light() => Assert.AreEqual(V1alpha1BrandingThemeCaptchaWidgetTheme.Light, V1alpha1BrandingThemeController.FromApi(new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Light)));
+
+        [TestMethod]
+        public void FromApi_CaptchaWidgetTheme_Dark() => Assert.AreEqual(V1alpha1BrandingThemeCaptchaWidgetTheme.Dark, V1alpha1BrandingThemeController.FromApi(new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Dark)));
+
+        [TestMethod]
+        public void FromApi_CaptchaWidgetTheme_Auto() => Assert.AreEqual(V1alpha1BrandingThemeCaptchaWidgetTheme.Auto, V1alpha1BrandingThemeController.FromApi(new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Auto)));
 
         // ──────────────────────── FromApi SocialButtonsLayout ────────────────────
 
         [TestMethod]
-        [DataRow(SocialButtonsLayout.Top, V1alpha1BrandingThemeSocialButtonsLayout.Top)]
-        [DataRow(SocialButtonsLayout.Bottom, V1alpha1BrandingThemeSocialButtonsLayout.Bottom)]
-        public void FromApi_SocialButtonsLayout_MapsCorrectly(SocialButtonsLayout input, V1alpha1BrandingThemeSocialButtonsLayout expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_SocialButtonsLayout_Top() => Assert.AreEqual(V1alpha1BrandingThemeSocialButtonsLayout.Top, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Top)));
+
+        [TestMethod]
+        public void FromApi_SocialButtonsLayout_Bottom() => Assert.AreEqual(V1alpha1BrandingThemeSocialButtonsLayout.Bottom, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom)));
 
         // ──────────────────────── FromApi LogoPosition ───────────────────────────
 
         [TestMethod]
-        [DataRow(LogoPosition.Center, V1alpha1BrandingThemeLogoPosition.Center)]
-        [DataRow(LogoPosition.Left, V1alpha1BrandingThemeLogoPosition.Left)]
-        [DataRow(LogoPosition.Right, V1alpha1BrandingThemeLogoPosition.Right)]
-        [DataRow(LogoPosition.None, V1alpha1BrandingThemeLogoPosition.None)]
-        public void FromApi_LogoPosition_MapsCorrectly(LogoPosition input, V1alpha1BrandingThemeLogoPosition expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_LogoPosition_Center() => Assert.AreEqual(V1alpha1BrandingThemeLogoPosition.Center, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Center)));
+
+        [TestMethod]
+        public void FromApi_LogoPosition_Left() => Assert.AreEqual(V1alpha1BrandingThemeLogoPosition.Left, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Left)));
+
+        [TestMethod]
+        public void FromApi_LogoPosition_Right() => Assert.AreEqual(V1alpha1BrandingThemeLogoPosition.Right, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Right)));
+
+        [TestMethod]
+        public void FromApi_LogoPosition_None() => Assert.AreEqual(V1alpha1BrandingThemeLogoPosition.None, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.None)));
 
         // ──────────────────────── FromApi HeaderTextAlignment ────────────────────
 
         [TestMethod]
-        [DataRow(HeaderTextAlignment.Center, V1alpha1BrandingThemeHeaderTextAlignment.Center)]
-        [DataRow(HeaderTextAlignment.Left, V1alpha1BrandingThemeHeaderTextAlignment.Left)]
-        [DataRow(HeaderTextAlignment.Right, V1alpha1BrandingThemeHeaderTextAlignment.Right)]
-        public void FromApi_HeaderTextAlignment_MapsCorrectly(HeaderTextAlignment input, V1alpha1BrandingThemeHeaderTextAlignment expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_HeaderTextAlignment_Center() => Assert.AreEqual(V1alpha1BrandingThemeHeaderTextAlignment.Center, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center)));
+
+        [TestMethod]
+        public void FromApi_HeaderTextAlignment_Left() => Assert.AreEqual(V1alpha1BrandingThemeHeaderTextAlignment.Left, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Left)));
+
+        [TestMethod]
+        public void FromApi_HeaderTextAlignment_Right() => Assert.AreEqual(V1alpha1BrandingThemeHeaderTextAlignment.Right, V1alpha1BrandingThemeController.FromApi(new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Right)));
 
         // ──────────────────────── FromApi PageLayout ─────────────────────────────
 
         [TestMethod]
-        [DataRow(PageLayout.Center, V1alpha1BrandingThemePageLayout.Center)]
-        [DataRow(PageLayout.Left, V1alpha1BrandingThemePageLayout.Left)]
-        [DataRow(PageLayout.Right, V1alpha1BrandingThemePageLayout.Right)]
-        public void FromApi_PageLayout_MapsCorrectly(PageLayout input, V1alpha1BrandingThemePageLayout expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_PageLayout_Center() => Assert.AreEqual(V1alpha1BrandingThemePageLayout.Center, V1alpha1BrandingThemeController.FromApi(new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Center)));
+
+        [TestMethod]
+        public void FromApi_PageLayout_Left() => Assert.AreEqual(V1alpha1BrandingThemePageLayout.Left, V1alpha1BrandingThemeController.FromApi(new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Left)));
+
+        [TestMethod]
+        public void FromApi_PageLayout_Right() => Assert.AreEqual(V1alpha1BrandingThemePageLayout.Right, V1alpha1BrandingThemeController.FromApi(new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Right)));
 
         // ──────────────────────── FromApi LinksStyle ─────────────────────────────
 
         [TestMethod]
-        [DataRow(LinksStyle.Normal, V1alpha1BrandingThemeLinksStyle.Normal)]
-        [DataRow(LinksStyle.Underlined, V1alpha1BrandingThemeLinksStyle.Underlined)]
-        public void FromApi_LinksStyle_MapsCorrectly(LinksStyle input, V1alpha1BrandingThemeLinksStyle expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_LinksStyle_Normal() => Assert.AreEqual(V1alpha1BrandingThemeLinksStyle.Normal, V1alpha1BrandingThemeController.FromApi(new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Normal)));
+
+        [TestMethod]
+        public void FromApi_LinksStyle_Underlined() => Assert.AreEqual(V1alpha1BrandingThemeLinksStyle.Underlined, V1alpha1BrandingThemeController.FromApi(new BrandingThemeFontLinksStyleEnum(BrandingThemeFontLinksStyleEnum.Values.Underlined)));
 
         // ──────────────────────── FromApi ButtonsStyle ───────────────────────────
 
         [TestMethod]
-        [DataRow(ButtonsStyle.Pill, V1alpha1BrandingThemeButtonsStyle.Pill)]
-        [DataRow(ButtonsStyle.Rounded, V1alpha1BrandingThemeButtonsStyle.Rounded)]
-        [DataRow(ButtonsStyle.Sharp, V1alpha1BrandingThemeButtonsStyle.Sharp)]
-        public void FromApi_ButtonsStyle_MapsCorrectly(ButtonsStyle input, V1alpha1BrandingThemeButtonsStyle expected)
-        {
-            Assert.AreEqual(expected, V1alpha1BrandingThemeController.FromApi(input));
-        }
+        public void FromApi_ButtonsStyle_Pill() => Assert.AreEqual(V1alpha1BrandingThemeButtonsStyle.Pill, V1alpha1BrandingThemeController.FromApi(new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Pill)));
+
+        [TestMethod]
+        public void FromApi_ButtonsStyle_Rounded() => Assert.AreEqual(V1alpha1BrandingThemeButtonsStyle.Rounded, V1alpha1BrandingThemeController.FromApi(new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Rounded)));
+
+        [TestMethod]
+        public void FromApi_ButtonsStyle_Sharp() => Assert.AreEqual(V1alpha1BrandingThemeButtonsStyle.Sharp, V1alpha1BrandingThemeController.FromApi(new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Sharp)));
 
         // ──────────────────────── Roundtrip tests ─────────────────────────────────
 
         [TestMethod]
-        [DataRow(CaptchaWidgetTheme.Light)]
-        [DataRow(CaptchaWidgetTheme.Dark)]
-        [DataRow(CaptchaWidgetTheme.Auto)]
-        public void CaptchaWidgetTheme_Roundtrip(CaptchaWidgetTheme input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input)!.Value;
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void CaptchaWidgetTheme_Roundtrip_Light() { var input = new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Light); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
 
         [TestMethod]
-        [DataRow(SocialButtonsLayout.Top)]
-        [DataRow(SocialButtonsLayout.Bottom)]
-        public void SocialButtonsLayout_Roundtrip(SocialButtonsLayout input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input)!.Value;
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void CaptchaWidgetTheme_Roundtrip_Dark() { var input = new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Dark); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
 
         [TestMethod]
-        [DataRow(LogoPosition.Center)]
-        [DataRow(LogoPosition.Left)]
-        [DataRow(LogoPosition.Right)]
-        [DataRow(LogoPosition.None)]
-        public void LogoPosition_Roundtrip(LogoPosition input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input)!.Value;
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void CaptchaWidgetTheme_Roundtrip_Auto() { var input = new BrandingThemeColorsCaptchaWidgetThemeEnum(BrandingThemeColorsCaptchaWidgetThemeEnum.Values.Auto); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
 
         [TestMethod]
-        [DataRow(HeaderTextAlignment.Center)]
-        [DataRow(HeaderTextAlignment.Left)]
-        [DataRow(HeaderTextAlignment.Right)]
-        public void HeaderTextAlignment_Roundtrip(HeaderTextAlignment input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input)!.Value;
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void SocialButtonsLayout_Roundtrip_Top() { var input = new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Top); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
 
         [TestMethod]
-        [DataRow(PageLayout.Center)]
-        [DataRow(PageLayout.Left)]
-        [DataRow(PageLayout.Right)]
-        public void PageLayout_Roundtrip(PageLayout input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input)!.Value;
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void SocialButtonsLayout_Roundtrip_Bottom() { var input = new BrandingThemeWidgetSocialButtonsLayoutEnum(BrandingThemeWidgetSocialButtonsLayoutEnum.Values.Bottom); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
 
         [TestMethod]
-        [DataRow(ButtonsStyle.Pill)]
-        [DataRow(ButtonsStyle.Rounded)]
-        [DataRow(ButtonsStyle.Sharp)]
-        public void ButtonsStyle_Roundtrip(ButtonsStyle input)
-        {
-            var op = V1alpha1BrandingThemeController.FromApi(input);
-            Assert.AreEqual(input, V1alpha1BrandingThemeController.ToApi(op));
-        }
+        public void LogoPosition_Roundtrip_Center() { var input = new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Center); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void LogoPosition_Roundtrip_Left() { var input = new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Left); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void LogoPosition_Roundtrip_Right() { var input = new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.Right); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void LogoPosition_Roundtrip_None() { var input = new BrandingThemeWidgetLogoPositionEnum(BrandingThemeWidgetLogoPositionEnum.Values.None); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void HeaderTextAlignment_Roundtrip_Center() { var input = new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Center); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void HeaderTextAlignment_Roundtrip_Left() { var input = new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Left); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void HeaderTextAlignment_Roundtrip_Right() { var input = new BrandingThemeWidgetHeaderTextAlignmentEnum(BrandingThemeWidgetHeaderTextAlignmentEnum.Values.Right); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void PageLayout_Roundtrip_Center() { var input = new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Center); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void PageLayout_Roundtrip_Left() { var input = new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Left); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void PageLayout_Roundtrip_Right() { var input = new BrandingThemePageBackgroundPageLayoutEnum(BrandingThemePageBackgroundPageLayoutEnum.Values.Right); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApi(V1alpha1BrandingThemeController.FromApi(input)!.Value).Value); }
+
+        [TestMethod]
+        public void ButtonsStyle_Roundtrip_Pill() { var input = new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Pill); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeController.FromApi(input)).Value); }
+
+        [TestMethod]
+        public void ButtonsStyle_Roundtrip_Rounded() { var input = new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Rounded); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeController.FromApi(input)).Value); }
+
+        [TestMethod]
+        public void ButtonsStyle_Roundtrip_Sharp() { var input = new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Sharp); Assert.AreEqual(input.Value, V1alpha1BrandingThemeController.ToApiButtonsStyle(V1alpha1BrandingThemeController.FromApi(input)).Value); }
 
     }
 

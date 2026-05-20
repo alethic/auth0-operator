@@ -8,8 +8,8 @@ using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
-using Auth0.ManagementApi.Models;
-using Auth0.ManagementApi.Models.Prompts;
+using Auth0.ManagementApi;
+using Auth0.ManagementApi.Tenants;
 
 using k8s.Models;
 
@@ -38,27 +38,30 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API prompt configuration to convert.</param>
         /// <returns>A new <see cref="V1TenantPrompts"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantPrompts? FromApi(Prompt? source) => source is null ? null : new()
+        internal static V2alpha1TenantPrompts? FromApi(GetSettingsResponseContent? source) => source is null ? null : new()
         {
             IdentifierFirst = source.IdentifierFirst,
             UniversalLoginExperience = FromApi(source.UniversalLoginExperience),
-            WebauthnPlatformFirstFactor = source.WebAuthnPlatformFirstFactor,
+            WebauthnPlatformFirstFactor = source.WebauthnPlatformFirstFactor,
         };
 
         /// <summary>
-        /// Converts a universal login experience string to the corresponding <see cref="V1TenantUniversalLoginExperience"/> enum value.
+        /// Converts a universal login experience enum to the corresponding <see cref="V2alpha1TenantUniversalLoginExperience"/> enum value.
         /// </summary>
-        /// <param name="source">The Auth0 API universal login experience string (e.g. "new" or "classic").</param>
-        /// <returns>The matching <see cref="V1TenantUniversalLoginExperience"/> value.</returns>
-        /// <exception cref="NotImplementedException">Thrown when the value is not a recognized experience string.</exception>
+        /// <param name="source">The Auth0 API universal login experience enum value.</param>
+        /// <returns>The matching <see cref="V2alpha1TenantUniversalLoginExperience"/> value.</returns>
+        /// <exception cref="NotImplementedException">Thrown when the value is not a recognized experience.</exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantUniversalLoginExperience? FromApi(string? source) => source switch
+        internal static V2alpha1TenantUniversalLoginExperience? FromApi(UniversalLoginExperienceEnum? source)
         {
-            "new" => V2alpha1TenantUniversalLoginExperience.New,
-            "classic" => V2alpha1TenantUniversalLoginExperience.Classic,
-            null => null,
-            _ => throw new NotImplementedException(),
-        };
+            return source?.Value switch
+            {
+                UniversalLoginExperienceEnum.Values.New => V2alpha1TenantUniversalLoginExperience.New,
+                UniversalLoginExperienceEnum.Values.Classic => V2alpha1TenantUniversalLoginExperience.Classic,
+                null => null,
+                _ => throw new NotImplementedException(),
+            };
+        }
 
         /// <summary>
         /// Converts an Auth0 API <see cref="Branding"/> object to an internal <see cref="V1TenantBranding"/> model, including nested colors.
@@ -66,9 +69,9 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API branding configuration to convert.</param>
         /// <returns>A new <see cref="V1TenantBranding"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantBranding? FromApi(Branding? source) => source is null ? null : new()
+        internal static V2alpha1TenantBranding? FromApi(GetBrandingResponseContent? source) => source is null ? null : new()
         {
-            LogoUrl = source.LogoUrl, 
+            LogoUrl = source.LogoUrl,
             FaviconUrl = source.FaviconUrl,
             Colors = FromApi(source.Colors),
         };
@@ -82,7 +85,7 @@ namespace Alethic.Auth0.Operator.Controllers
         internal static V2alpha1TenantBrandingColors? FromApi(BrandingColors? source) => source is null ? null : new()
         {
             Primary = source.Primary,
-            PageBackground = source.PageBackground,
+            PageBackground = source.PageBackground?.Value?.ToString(),
         };
 
         /// <summary>
@@ -92,30 +95,30 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API tenant settings to convert.</param>
         /// <returns>A new <see cref="Core.Models.Tenant.V1.V1TenantSettings"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantSettings? FromApi(TenantSettings? source) => source is null ? null : new()
+        internal static V2alpha1TenantSettings? FromApi(GetTenantSettingsResponseContent? source) => source is null ? null : new()
         {
             FriendlyName = source.FriendlyName,
             Flags = FromApi(source.Flags),
-            AcrValuesSupported = source.AcrValuesSupported,
-            AllowedLogoutUrls = source.AllowedLogoutUrls,
-            ChangePassword = FromApi(source.ChangePassword),
-            CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostLoginAction,
+            AcrValuesSupported = source.AcrValuesSupported.IsDefined ? source.AcrValuesSupported.Value?.ToArray() : null,
+            AllowedLogoutUrls = source.AllowedLogoutUrls?.ToArray(),
+            ChangePassword = source.ChangePassword.IsDefined ? FromApi(source.ChangePassword.Value) : null,
+            CustomizeMfaInPostLoginAction = source.CustomizeMfaInPostloginAction,
             DefaultAudience = source.DefaultAudience,
             DefaultDirectory = source.DefaultDirectory,
-            DeviceFlow = FromApi(source.DeviceFlow),
-            EnabledLocales = source.EnabledLocales.ToList(),
-            ErrorPage = FromApi(source.ErrorPage),
-            GuardianMfaPage = FromApi(source.GuardianMfaPage),
+            DeviceFlow = source.DeviceFlow.IsDefined ? FromApi(source.DeviceFlow.Value) : null,
+            EnabledLocales = source.EnabledLocales?.Select(i => i.Value).ToList(),
+            ErrorPage = source.ErrorPage.IsDefined ? FromApi(source.ErrorPage.Value) : null,
+            GuardianMfaPage = source.GuardianMfaPage.IsDefined ? FromApi(source.GuardianMfaPage.Value) : null,
             IdleSessionLifetime = source.IdleSessionLifetime,
             PictureUrl = source.PictureUrl,
             SessionLifetime = source.SessionLifetime,
-            SessionCookie = FromApi(source.SessionCookie),
+            SessionCookie = source.SessionCookie.IsDefined ? FromApi(source.SessionCookie.Value) : null,
             SupportEmail = source.SupportEmail,
             SupportUrl = source.SupportUrl,
             SandboxVersion = source.SandboxVersion,
-            SandboxVersionsAvailable = source.SandboxVersionsAvailable,
+            SandboxVersionsAvailable = source.SandboxVersionsAvailable?.ToArray(),
             PushedAuthorizationRequestsSupported = source.PushedAuthorizationRequestsSupported,
-            Mtls = FromApi(source.Mtls),
+            Mtls = source.Mtls.IsDefined ? FromApi(source.Mtls.Value) : null,
         };
 
         /// <summary>
@@ -124,7 +127,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 Management API TenantMtls object to convert.</param>
         /// <returns>A new TenantMtls instance populated with values from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantMtls? FromApi(TenantMtls? source) => source is null ? null : new()
+        internal static V2alpha1TenantMtls? FromApi(TenantSettingsMtls? source) => source is null ? null : new()
         {
             EnableEndpointAliases = source.EnableEndpointAliases,
         };
@@ -135,9 +138,9 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 Management API session cookie to convert.</param>
         /// <returns>A SessionCookie instance populated with values from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantSessionCookie? FromApi(SessionCookie? source) => source is null ? null: new()
+        internal static V2alpha1TenantSessionCookie? FromApi(SessionCookieSchema? source) => source is null ? null : new()
         {
-            Mode = source.Mode,
+            Mode = source.Mode.Value,
         };
 
         /// <summary>
@@ -146,7 +149,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API Guardian MFA page configuration to convert.</param>
         /// <returns>A new <see cref="Core.Models.Tenant.V1.V1TenantGuardianMfaPage"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantGuardianMfaPage? FromApi(TenantGuardianMfaPage? source) => source is null ? null : new()
+        internal static V2alpha1TenantGuardianMfaPage? FromApi(TenantSettingsGuardianPage? source) => source is null ? null : new()
         {
             Html = source.Html,
             Enabled = source.Enabled,
@@ -158,7 +161,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API error page configuration to convert.</param>
         /// <returns>A new <see cref="Core.Models.Tenant.V1.V1TenantErrorPage"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantErrorPage? FromApi(TenantErrorPage? source) => source is null ? null : new()
+        internal static V2alpha1TenantErrorPage? FromApi(TenantSettingsErrorPage? source) => source is null ? null : new()
         {
             ShowLogLink = source.ShowLogLink,
             Url = source.Url,
@@ -171,7 +174,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API device flow configuration to convert.</param>
         /// <returns>A new <see cref="Core.Models.Tenant.V2alpha1.V2alpha1TenantDeviceFlow"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantDeviceFlow? FromApi(TenantDeviceFlow? source) => source is null ? null : new()
+        internal static V2alpha1TenantDeviceFlow? FromApi(TenantSettingsDeviceFlow? source) => source is null ? null : new()
         {
             Charset = FromApi(source.Charset),
             Mask = source.Mask,
@@ -184,13 +187,16 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns>The matching <see cref="V1TenantCharset"/> value.</returns>
         /// <exception cref="NotImplementedException">Thrown when the charset value is not recognized.</exception>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantCharset? FromApi(TenantDeviceFlowCharset? source) => source switch
+        internal static V2alpha1TenantCharset? FromApi(TenantSettingsDeviceFlowCharset? source)
         {
-            TenantDeviceFlowCharset.Base20 => V2alpha1TenantCharset.Base20,
-            TenantDeviceFlowCharset.Digits => V2alpha1TenantCharset.Digits,
-            null => null,
-            _ => throw new NotImplementedException(),
-        };
+            return source?.Value switch
+            {
+                TenantSettingsDeviceFlowCharset.Values.Base20 => V2alpha1TenantCharset.Base20,
+                TenantSettingsDeviceFlowCharset.Values.Digits => V2alpha1TenantCharset.Digits,
+                null => null,
+                _ => throw new NotImplementedException(),
+            };
+        }
 
         /// <summary>
         /// Converts an Auth0 API TenantChangePassword to an internal <see cref="V2alpha1TenantChangePassword"/> model.
@@ -198,7 +204,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API change password page configuration to convert.</param>
         /// <returns>A new <see cref="V2alpha1vTenantChangePassword"/> instance mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantChangePassword? FromApi(TenantChangePassword? source) => source is null ? null : new()
+        internal static V2alpha1TenantChangePassword? FromApi(TenantSettingsPasswordPage? source) => source is null ? null : new()
         {
             Enabled = source.Enabled,
             Html = source.Html,
@@ -210,7 +216,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="source">The Auth0 API tenant feature flags to convert.</param>
         /// <returns>A new <see cref="Core.Models.Tenant.V1.V1TenantFlags"/> instance with all flag values mapped from the specified API model.</returns>
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1TenantFlags? FromApi(TenantFlags? source) => source is null ? null : new()
+        internal static V2alpha1TenantFlags? FromApi(TenantSettingsFlags? source) => source is null ? null : new()
         {
             AllowLegacyDelegationGrantTypes = source.AllowLegacyDelegationGrantTypes,
             AllowLegacyRoGrantTypes = source.AllowLegacyRoGrantTypes,
@@ -219,19 +225,17 @@ namespace Alethic.Auth0.Operator.Controllers
             DisableClickjackProtectionHeaders = source.DisableClickjackProtectionHeaders,
             DisableManagementApiSmsObfuscation = source.DisableManagementApiSmsObfuscation,
             EnableAdfsWaadEmailVerification = source.EnableAdfsWaadEmailVerification,
-            EnableAPIsSection = source.EnableAPIsSection,
+            EnableAPIsSection = source.EnableApisSection,
             EnableClientConnections = source.EnableClientConnections,
-            EnableCustomDomainInEmails = source.EnableCustomDomainInEmails,
             EnableDynamicClientRegistration = source.EnableDynamicClientRegistration,
-            EnableIdTokenApi2 = source.EnableIdTokenApi2,
+            EnableIdTokenApi2 = source.EnableIdtokenApi2,
             EnableLegacyProfile = source.EnableLegacyProfile,
             EnablePipeline2 = source.EnablePipeline2,
             EnablePublicSignupUserExistsError = source.EnablePublicSignupUserExistsError,
-            EnableSSO = source.EnableSSO,
+            EnableSSO = source.EnableSso,
             EnforceClientAuthenticationOnPasswordlessStart = source.EnforceClientAuthenticationOnPasswordlessStart,
             NoDiscloseEnterpriseConnections = source.NoDiscloseEnterpriseConnections,
             RemoveAlgFromJwks = source.RemoveAlgFromJwks,
-            RequirePushedAuthorizationRequests = source.RequirePushedAuthorizationRequests,
             RevokeRefreshTokenGrant = source.RevokeRefreshTokenGrant,
             TrustAzureAdfsEmailVerifiedConnectionProperty = source.TrustAzureAdfsEmailVerifiedConnectionProperty,
             DashboardInsightsView = source.DashboardInsightsView,
@@ -243,7 +247,7 @@ namespace Alethic.Auth0.Operator.Controllers
             CustomDomainsProvisioning = source.CustomDomainsProvisioning,
         };
 
-        internal static void ApplyToApi(V2alpha1TenantSettings source, TenantSettingsUpdateRequest target)
+        internal static void ApplyToApi(V2alpha1TenantSettings source, UpdateTenantSettingsRequestContent target)
         {
             if (source.AcrValuesSupported is { } acr_values_supported)
                 target.AcrValuesSupported = acr_values_supported;
@@ -252,10 +256,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.AllowedLogoutUrls = allowed_logout_urls;
 
             if (source.ChangePassword is { } change_password)
-                ApplyToApi(change_password, target.ChangePassword = new());
+            {
+                var v = new TenantSettingsPasswordPage();
+                ApplyToApi(change_password, v);
+                target.ChangePassword = v;
+            }
 
             if (source.CustomizeMfaInPostLoginAction is { } customize_mfa_in_postlogin_action)
-                target.CustomizeMfaInPostLoginAction = customize_mfa_in_postlogin_action;
+                target.CustomizeMfaInPostloginAction = customize_mfa_in_postlogin_action;
 
             if (source.DefaultAudience is { } default_audience)
                 target.DefaultAudience = default_audience;
@@ -264,13 +272,21 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.DefaultDirectory = default_directory;
 
             if (source.DeviceFlow is { } device_flow)
-                ApplyToApi(device_flow, target.DeviceFlow = new());
+            {
+                var v = new TenantSettingsDeviceFlow();
+                ApplyToApi(device_flow, v);
+                target.DeviceFlow = v;
+            }
 
             if (source.EnabledLocales is { } enabled_locales)
-                target.EnabledLocales = enabled_locales.ToArray();
+                target.EnabledLocales = enabled_locales.Select(i => TenantSettingsSupportedLocalesEnum.FromCustom(i)).ToArray();
 
             if (source.ErrorPage is { } error_page)
-                ApplyToApi(error_page, target.ErrorPage = new());
+            {
+                var v = new TenantSettingsErrorPage();
+                ApplyToApi(error_page, v);
+                target.ErrorPage = v;
+            }
 
             if (source.Flags is { } flags)
                 ApplyToApi(flags, target.Flags = new());
@@ -279,13 +295,21 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.FriendlyName = friendly_name;
 
             if (source.GuardianMfaPage is { } guardian_mfa_page)
-                ApplyToApi(guardian_mfa_page, target.GuardianMfaPage = new());
+            {
+                var v = new TenantSettingsGuardianPage();
+                ApplyToApi(guardian_mfa_page, v);
+                target.GuardianMfaPage = v;
+            }
 
             if (source.IdleSessionLifetime is { } idle_session_lifetime)
-                target.IdleSessionLifetime = idle_session_lifetime;
+                target.IdleSessionLifetime = (int?)idle_session_lifetime;
 
             if (source.Mtls is { } mtls)
-                ApplyToApi(mtls, target.Mtls = new());
+            {
+                var v = new TenantSettingsMtls();
+                ApplyToApi(mtls, v);
+                target.Mtls = v;
+            }
 
             if (source.PictureUrl is { } picture_url)
                 target.PictureUrl = picture_url;
@@ -296,14 +320,16 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.SandboxVersion is { } sandbox_version)
                 target.SandboxVersion = sandbox_version;
 
-            if (source.SandboxVersionsAvailable is { } sandbox_versions_available)
-                target.SandboxVersionsAvailable = sandbox_versions_available;
-
             if (source.SessionCookie is { } session_cookie)
-                ApplyToApi(session_cookie, target.SessionCookie = new());
+            {
+                if (session_cookie.Mode is { } mode)
+                {
+                    target.SessionCookie = new SessionCookieSchema() { Mode = SessionCookieModeEnum.FromCustom(mode) };
+                }
+            }
 
             if (source.SessionLifetime is { } session_lifetime)
-                target.SessionLifetime = session_lifetime;
+                target.SessionLifetime = (int?)session_lifetime;
 
             if (source.SupportEmail is { } support_email)
                 target.SupportEmail = support_email;
@@ -312,7 +338,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SupportUrl = support_url;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantChangePassword source, TenantChangePassword target)
+        internal static void ApplyToApi(V2alpha1TenantChangePassword source, TenantSettingsPasswordPage target)
         {
             if (source.Enabled is { } enabled)
                 target.Enabled = enabled;
@@ -321,7 +347,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Html = html;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantDeviceFlow source, TenantDeviceFlow target)
+        internal static void ApplyToApi(V2alpha1TenantDeviceFlow source, TenantSettingsDeviceFlow target)
         {
             if (source.Charset is { } charset)
                 target.Charset = ToApi(charset);
@@ -330,14 +356,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Mask = mask;
         }
 
-        internal static TenantDeviceFlowCharset ToApi(V2alpha1TenantCharset charset) => charset switch
+        internal static TenantSettingsDeviceFlowCharset ToApi(V2alpha1TenantCharset charset) => charset switch
         {
-            V2alpha1TenantCharset.Base20 => TenantDeviceFlowCharset.Base20,
-            V2alpha1TenantCharset.Digits => TenantDeviceFlowCharset.Digits,
+            V2alpha1TenantCharset.Base20 => TenantSettingsDeviceFlowCharset.Base20,
+            V2alpha1TenantCharset.Digits => TenantSettingsDeviceFlowCharset.Digits,
             _ => throw new NotImplementedException(),
         };
 
-        internal static void ApplyToApi(V2alpha1TenantErrorPage source, TenantErrorPage target)
+        internal static void ApplyToApi(V2alpha1TenantErrorPage source, TenantSettingsErrorPage target)
         {
             if (source.ShowLogLink is { } show_log_link)
                 target.ShowLogLink = show_log_link;
@@ -349,7 +375,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Html = html;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantFlags source, TenantFlags target)
+        internal static void ApplyToApi(V2alpha1TenantFlags source, TenantSettingsFlags target)
         {
             if (source.AllowLegacyDelegationGrantTypes is { } allow_legacy_delegation_grant_types)
                 target.AllowLegacyDelegationGrantTypes = allow_legacy_delegation_grant_types;
@@ -373,19 +399,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.EnableAdfsWaadEmailVerification = enable_adfs_waad_email_verification;
 
             if (source.EnableAPIsSection is { } enable_apis_section)
-                target.EnableAPIsSection = enable_apis_section;
+                target.EnableApisSection = enable_apis_section;
 
             if (source.EnableClientConnections is { } enable_client_connections)
                 target.EnableClientConnections = enable_client_connections;
-
-            if (source.EnableCustomDomainInEmails is { } enable_custom_domain_in_emails)
-                target.EnableCustomDomainInEmails = enable_custom_domain_in_emails;
 
             if (source.EnableDynamicClientRegistration is { } enable_dynamic_client_registration)
                 target.EnableDynamicClientRegistration = enable_dynamic_client_registration;
 
             if (source.EnableIdTokenApi2 is { } enable_id_token_api2)
-                target.EnableIdTokenApi2 = enable_id_token_api2;
+                target.EnableIdtokenApi2 = enable_id_token_api2;
 
             if (source.EnableLegacyProfile is { } enable_legacy_profile)
                 target.EnableLegacyProfile = enable_legacy_profile;
@@ -397,7 +420,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.EnablePublicSignupUserExistsError = enable_public_signup_user_exists_error;
 
             if (source.EnableSSO is { } enable_sso)
-                target.EnableSSO = enable_sso;
+                target.EnableSso = enable_sso;
 
             if (source.EnforceClientAuthenticationOnPasswordlessStart is { } enforce_client_authentication_on_passwordless_start)
                 target.EnforceClientAuthenticationOnPasswordlessStart = enforce_client_authentication_on_passwordless_start;
@@ -407,9 +430,6 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.RemoveAlgFromJwks is { } remove_alg_from_jwks)
                 target.RemoveAlgFromJwks = remove_alg_from_jwks;
-
-            if (source.RequirePushedAuthorizationRequests is { } require_pushed_authorization_requests)
-                target.RequirePushedAuthorizationRequests = require_pushed_authorization_requests;
 
             if (source.RevokeRefreshTokenGrant is { } revoke_refresh_token_grant)
                 target.RevokeRefreshTokenGrant = revoke_refresh_token_grant;
@@ -439,7 +459,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.CustomDomainsProvisioning = custom_domains_provisioning;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantGuardianMfaPage source, TenantGuardianMfaPage target)
+        internal static void ApplyToApi(V2alpha1TenantGuardianMfaPage source, TenantSettingsGuardianPage target)
         {
             if (source.Enabled is { } enabled)
                 target.Enabled = enabled;
@@ -448,19 +468,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Html = html;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantMtls source, TenantMtls target)
+        internal static void ApplyToApi(V2alpha1TenantMtls source, TenantSettingsMtls target)
         {
             if (source.EnableEndpointAliases is { } enable_endpoint_aliases)
                 target.EnableEndpointAliases = enable_endpoint_aliases;
         }
 
-        internal static void ApplyToApi(V2alpha1TenantSessionCookie source, SessionCookie target)
+        internal static void ApplyToApi(V2alpha1TenantSessionCookie source, SessionCookieSchema target)
         {
             if (source.Mode is { } mode)
-                target.Mode = mode;
+                target.Mode = SessionCookieModeEnum.FromCustom(mode);
         }
 
-        internal static void ApplyToApi(V2alpha1TenantPrompts source, PromptUpdateRequest target)
+        internal static void ApplyToApi(V2alpha1TenantPrompts source, UpdateSettingsRequestContent target)
         {
             if (source.IdentifierFirst is { } identifier_first)
                 target.IdentifierFirst = identifier_first;
@@ -469,14 +489,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.UniversalLoginExperience = ToApi(universal_login_experience);
         }
 
-        internal static string ToApi(V2alpha1TenantUniversalLoginExperience source) => source switch
+        internal static UniversalLoginExperienceEnum ToApi(V2alpha1TenantUniversalLoginExperience source) => source switch
         {
-            V2alpha1TenantUniversalLoginExperience.New => "new",
-            V2alpha1TenantUniversalLoginExperience.Classic => "classic",
+            V2alpha1TenantUniversalLoginExperience.New => UniversalLoginExperienceEnum.FromCustom(UniversalLoginExperienceEnum.Values.New),
+            V2alpha1TenantUniversalLoginExperience.Classic => UniversalLoginExperienceEnum.FromCustom(UniversalLoginExperienceEnum.Values.Classic),
             _ => throw new NotImplementedException(),
         };
 
-        internal static void ApplyToApi(V2alpha1TenantBranding source, BrandingUpdateRequest target)
+        internal static void ApplyToApi(V2alpha1TenantBranding source, UpdateBrandingRequestContent target)
         {
             if (source.LogoUrl is { } logo_url)
                 target.LogoUrl = logo_url;
@@ -485,16 +505,20 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.FaviconUrl = favicon_url;
 
             if (source.Colors is { } colors)
-                ApplyToApi(colors, target.Colors = new());
+            {
+                var v = new UpdateBrandingColors();
+                ApplyToApi(colors, v);
+                target.Colors = v;
+            }
         }
 
-        internal static void ApplyToApi(V2alpha1TenantBrandingColors source, BrandingColors target)
+        internal static void ApplyToApi(V2alpha1TenantBrandingColors source, UpdateBrandingColors target)
         {
             if (source.Primary is { } primary)
                 target.Primary = primary;
 
             if (source.PageBackground is { } page_background)
-                target.PageBackground = page_background;
+                target.PageBackground = UpdateBrandingPageBackground.FromString(page_background);
         }
 
         /// <summary>
@@ -520,7 +544,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (api == null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}:{entity.Name()} failed to retrieve API client.");
 
-            var settings = await api.TenantSettings.GetAsync(cancellationToken: cancellationToken);
+            var settings = await api.Tenants.Settings.GetAsync(new GetTenantSettingsRequestParameters() { }, cancellationToken: cancellationToken);
             if (settings is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} settings cannot be loaded from API.");
 
@@ -528,7 +552,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (branding is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} branding cannot be loaded from API.");
 
-            var prompts = await api.Prompts.GetAsync(cancellationToken: cancellationToken);
+            var prompts = await api.Prompts.GetSettingsAsync(cancellationToken: cancellationToken);
             if (prompts is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} prompts cannot be loaded from API.");
 
@@ -539,32 +563,35 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf.Settings is { } newSettings)
                 {
                     // verify that no changes to enable_sso are being made
-                    if (newSettings.Flags != null && newSettings.Flags.EnableSSO != null && settings.Flags.EnableSSO != null && newSettings.Flags.EnableSSO != settings.Flags.EnableSSO)
+                    if (newSettings.Flags != null && newSettings.Flags.EnableSSO != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSSO != settings.Flags.EnableSso)
                         throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
 
                     // push update to Auth0
-                    var req = new TenantSettingsUpdateRequest();
+                    var req = new UpdateTenantSettingsRequestContent();
                     ApplyToApi(newSettings, req);
-                    req.Flags.EnableSSO = null; // this can never be passed
-                    settings = await api.TenantSettings.UpdateAsync(req, cancellationToken);
+                    req.Flags.EnableSso = null; // this can never be passed
+                    var res = await api.Tenants.Settings.UpdateAsync(req, cancellationToken: cancellationToken);
+                    settings = await api.Tenants.Settings.GetAsync(new GetTenantSettingsRequestParameters() { }, cancellationToken: cancellationToken);
                 }
 
                 // branding may not be specified
                 if (conf.Branding is { } newBranding)
                 {
                     // push update to Auth0
-                    var req = new BrandingUpdateRequest();
+                    var req = new UpdateBrandingRequestContent();
                     ApplyToApi(newBranding, req);
-                    branding = await api.Branding.UpdateAsync(req, cancellationToken);
+                    var res = await api.Branding.UpdateAsync(req, cancellationToken: cancellationToken);
+                    branding = await api.Branding.GetAsync(cancellationToken: cancellationToken);
                 }
 
                 // prompts may not be specified
                 if (conf.Prompts is { } newPrompts)
                 {
                     // push update to Auth0
-                    var req = new PromptUpdateRequest();
+                    var req = new UpdateSettingsRequestContent();
                     ApplyToApi(newPrompts, req);
-                    prompts = await api.Prompts.UpdateAsync(req, cancellationToken);
+                    await api.Prompts.UpdateSettingsAsync(req, cancellationToken: cancellationToken);
+                    prompts = await api.Prompts.GetSettingsAsync(cancellationToken: cancellationToken);
                 }
             }
 

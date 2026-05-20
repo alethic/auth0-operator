@@ -13,13 +13,13 @@ public record V1ClientAddonSharePointExternalUrl
     /// </summary>
     [JsonPropertyName("type")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Type { get; internal set; }
+    public string? Type { get; set; }
 
     /// <summary>
     /// Union value
     /// </summary>
     [JsonPropertyName("value")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object? Value { get; internal set; }
+    public object? Value { get; set; }
 
 }

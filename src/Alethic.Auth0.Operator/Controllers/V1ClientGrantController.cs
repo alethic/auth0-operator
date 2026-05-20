@@ -8,7 +8,7 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.ClientGrants;
 
 using k8s.Models;
 
@@ -47,23 +47,35 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Converts from an API <see cref="OrganizationUsage"/> to a local <see cref="V1ClientGrantOrganizationUsage"/>.
+        /// Converts from an API <see cref="ClientGrantOrganizationNullableUsageEnum"/> to a local <see cref="V1ClientGrantOrganizationUsage"/>.
         /// </summary>
-        internal static V1ClientGrantOrganizationUsage? FromApi(OrganizationUsage? source) => source switch
+        internal static V1ClientGrantOrganizationUsage? FromApi(ClientGrantOrganizationNullableUsageEnum? source) => source?.Value switch
         {
-            OrganizationUsage.Deny => V1ClientGrantOrganizationUsage.Deny,
-            OrganizationUsage.Allow => V1ClientGrantOrganizationUsage.Allow,
-            OrganizationUsage.Require => V1ClientGrantOrganizationUsage.Require,
+            ClientGrantOrganizationNullableUsageEnum.Values.Deny => V1ClientGrantOrganizationUsage.Deny,
+            ClientGrantOrganizationNullableUsageEnum.Values.Allow => V1ClientGrantOrganizationUsage.Allow,
+            ClientGrantOrganizationNullableUsageEnum.Values.Require => V1ClientGrantOrganizationUsage.Require,
             null => null,
             _ => throw new InvalidOperationException(),
         };
 
         /// <summary>
-        /// Converts relevant fields from a <see cref="ClientGrant"/> API response to a <see cref="V1ClientGrantConf"/>.
+        /// Converts from an API <see cref="ClientGrantOrganizationUsageEnum"/> to a local <see cref="V1ClientGrantOrganizationUsage"/>.
+        /// </summary>
+        internal static V1ClientGrantOrganizationUsage? FromApi(ClientGrantOrganizationUsageEnum? source) => source?.Value switch
+        {
+            ClientGrantOrganizationUsageEnum.Values.Deny => V1ClientGrantOrganizationUsage.Deny,
+            ClientGrantOrganizationUsageEnum.Values.Allow => V1ClientGrantOrganizationUsage.Allow,
+            ClientGrantOrganizationUsageEnum.Values.Require => V1ClientGrantOrganizationUsage.Require,
+            null => null,
+            _ => throw new InvalidOperationException(),
+        };
+
+        /// <summary>
+        /// Converts relevant fields from a <see cref="ClientGrantResponseContent"/> API response to a <see cref="V1ClientGrantConf"/>.
         /// Note: <see cref="V1ClientGrantConf.ClientRef"/> and <see cref="V1ClientGrantConf.Audience"/> cannot be
         /// populated from the API response and are left null.
         /// </summary>
-        internal static V1ClientGrantConf? FromApi(ClientGrant? source)
+        internal static V1ClientGrantConf? FromApi(GetClientGrantResponseContent? source)
         {
             if (source is null)
                 return null;
@@ -77,35 +89,48 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Converts from a local <see cref="V1ClientGrantOrganizationUsage"/> to an API <see cref="OrganizationUsage"/>.
+        /// Converts from a local <see cref="V1ClientGrantOrganizationUsage"/> to an API <see cref="ClientGrantOrganizationUsageEnum"/>.
         /// </summary>
-        internal static OrganizationUsage? ToApi(V1ClientGrantOrganizationUsage? source) => source switch
+        internal static ClientGrantOrganizationUsageEnum? ToApi(V1ClientGrantOrganizationUsage? source) => source switch
         {
-            V1ClientGrantOrganizationUsage.Deny => OrganizationUsage.Deny,
-            V1ClientGrantOrganizationUsage.Allow => OrganizationUsage.Allow,
-            V1ClientGrantOrganizationUsage.Require => OrganizationUsage.Require,
+            V1ClientGrantOrganizationUsage.Deny => new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Deny),
+            V1ClientGrantOrganizationUsage.Allow => new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Allow),
+            V1ClientGrantOrganizationUsage.Require => new ClientGrantOrganizationUsageEnum(ClientGrantOrganizationUsageEnum.Values.Require),
             null => null,
             _ => throw new InvalidOperationException(),
         };
 
         /// <summary>
-        /// Applies the fields of <paramref name="conf"/> to a <see cref="ClientGrantBase"/> (create request).
+        /// Applies the fields of <paramref name="conf"/> to a <see cref="CreateClientGrantRequestContent"/>.
         /// </summary>
-        internal static void ApplyToApi(V1ClientGrantConf conf, ClientGrantBase request)
+        internal static void ApplyToApi(V1ClientGrantConf conf, CreateClientGrantRequestContent request)
         {
-            request.Scope = conf.Scope?.ToList() ?? null!;
+            request.Scope = conf.Scope;
             request.AllowAnyOrganization = conf.AllowAnyOrganization;
             request.OrganizationUsage = ToApi(conf.OrganizationUsage);
         }
 
         /// <summary>
-        /// Applies the fields of <paramref name="conf"/> to a <see cref="ClientGrantUpdateRequest"/>.
+        /// Converts from a local <see cref="V1ClientGrantOrganizationUsage"/> to an API <see cref="ClientGrantOrganizationNullableUsageEnum"/>.
         /// </summary>
-        internal static void ApplyToApi(V1ClientGrantConf conf, ClientGrantUpdateRequest request)
+        internal static ClientGrantOrganizationNullableUsageEnum? ToApiNullable(V1ClientGrantOrganizationUsage? source) => source switch
         {
-            request.Scope = conf.Scope?.ToList() ?? null!;
+            V1ClientGrantOrganizationUsage.Deny => new ClientGrantOrganizationNullableUsageEnum(ClientGrantOrganizationNullableUsageEnum.Values.Deny),
+            V1ClientGrantOrganizationUsage.Allow => new ClientGrantOrganizationNullableUsageEnum(ClientGrantOrganizationNullableUsageEnum.Values.Allow),
+            V1ClientGrantOrganizationUsage.Require => new ClientGrantOrganizationNullableUsageEnum(ClientGrantOrganizationNullableUsageEnum.Values.Require),
+            null => null,
+            _ => throw new InvalidOperationException(),
+        };
+
+        /// <summary>
+        /// Applies the fields of <paramref name="conf"/> to a <see cref="UpdateClientGrantRequestContent"/>.
+        /// </summary>
+        internal static void ApplyToApi(V1ClientGrantConf conf, UpdateClientGrantRequestContent request)
+        {
+            request.Scope = conf.Scope;
             request.AllowAnyOrganization = conf.AllowAnyOrganization;
-            request.OrganizationUsage = ToApi(conf.OrganizationUsage);
+            if (conf.OrganizationUsage is not null)
+                request.OrganizationUsage = ToApiNullable(conf.OrganizationUsage);
         }
 
         /// <inheritdoc />
@@ -114,9 +139,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<V1ClientGrantConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var list = await api.ClientGrants.GetAllAsync(new GetClientGrantsRequest(), cancellationToken: cancellationToken);
-            var self = list.FirstOrDefault(i => i.Id == id);
-            return FromApi(self);
+            var self = await api.ClientGrants.GetAsync(id, null, cancellationToken);
+            return FromApi((GetClientGrantResponseContent?)self);
         }
 
         /// <inheritdoc />
@@ -140,8 +164,8 @@ namespace Alethic.Auth0.Operator.Controllers
             if (string.IsNullOrWhiteSpace(audience))
                 throw new InvalidOperationException();
 
-            var list = await api.ClientGrants.GetAllAsync(new GetClientGrantsRequest() { ClientId = clientId }, null!, cancellationToken);
-            return list.Where(i => i.ClientId == clientId && i.Audience == audience).Select(i => i.Id).FirstOrDefault();
+            var pager = await api.ClientGrants.ListAsync(new ListClientGrantsRequestParameters { ClientId = clientId }, null, cancellationToken);
+            return pager.CurrentPage.Items?.Where(i => i.ClientId == clientId && i.Audience == audience).Select(i => i.Id).FirstOrDefault();
         }
 
         /// <inheritdoc />
@@ -160,12 +184,12 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var req = new ClientGrantCreateRequest();
-            req.ClientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken) ?? null!;
-            req.Audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken) ?? null!;
+            var clientId = await ResolveClientRefToId(api, conf.ClientRef, defaultNamespace, cancellationToken) ?? null!;
+            var audience = await ResolveResourceServerRefToIdentifier(api, conf.Audience, defaultNamespace, cancellationToken) ?? null!;
+            var req = new CreateClientGrantRequestContent { ClientId = clientId, Audience = audience };
             ApplyToApi(conf, req);
 
-            var self = await api.ClientGrants.CreateAsync(req, cancellationToken);
+            var self = await api.ClientGrants.CreateAsync(req, null, cancellationToken);
             if (self is null)
                 throw new InvalidOperationException();
 
@@ -175,16 +199,16 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, V1ClientGrantConf? last, V1ClientGrantConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var req = new ClientGrantUpdateRequest();
+            var req = new UpdateClientGrantRequestContent();
             ApplyToApi(conf, req);
 
-            await api.ClientGrants.UpdateAsync(id, req, cancellationToken);
+            await api.ClientGrants.UpdateAsync(id, req, null, cancellationToken);
         }
 
         /// <inheritdoc />
         protected override Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
         {
-            return api.ClientGrants.DeleteAsync(id, cancellationToken);
+            return api.ClientGrants.DeleteAsync(id, null, cancellationToken);
         }
 
     }
