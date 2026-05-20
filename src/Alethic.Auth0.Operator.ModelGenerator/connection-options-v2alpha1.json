@@ -17,10 +17,12 @@
     "Auth0.ManagementApi"
   ],
   "excludeTypeNames": [
+    "AdditionalProperties",
     "ConnectionDecryptionKeySaml",
     "ConnectionFieldsMapSamlValue",
     "ConnectionOptionsIdpInitiatedClientProtocolEnumSamlSerializer",
     "ConnectionOptionsProtocolEnumTwitterSerializer",
+    "ReadOnlyAdditionalProperties",
     "ConnectionReadOnlyAdditionalProperties",
     "ConnectionUpstreamAdditionalProperties",
     "SelfServiceProfileSsoTicketConnectionOptions",

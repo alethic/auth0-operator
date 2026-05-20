@@ -254,6 +254,36 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
+        public void FromApi_SharePointAddon_MapsExternalUrlAsArray()
+        {
+            var source = new ClientAddonSharePoint
+            {
+                Url = "https://sharepoint.example.com",
+                ExternalUrl = ClientAddonSharePointExternalUrl.FromListOfString(["https://external.example.com", "https://external2.example.com"]),
+            };
+
+            var result = V2alpha1ClientController.FromApi(source);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("https://sharepoint.example.com", result.Url);
+            CollectionAssert.AreEqual(new[] { "https://external.example.com", "https://external2.example.com" }, result.ExternalUrl);
+        }
+
+        [TestMethod]
+        public void FromApi_SharePointAddon_StringExternalUrl_MapsToSingleItemArray()
+        {
+            var source = new ClientAddonSharePoint
+            {
+                ExternalUrl = ClientAddonSharePointExternalUrl.FromString("https://external.example.com"),
+            };
+
+            var result = V2alpha1ClientController.FromApi(source);
+
+            Assert.IsNotNull(result);
+            CollectionAssert.AreEqual(new[] { "https://external.example.com" }, result.ExternalUrl);
+        }
+
+        [TestMethod]
         public void FromApi_Mobile_WithIosAndAndroid_MapsProperties()
         {
             var source = new ClientMobile
@@ -365,6 +395,33 @@ namespace Alethic.Auth0.Operator.Tests
             CollectionAssert.AreEqual(
                 new[] { ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials },
                 request.DefaultOrganization.Value?.Flows?.Select(static i => i.Value).ToArray());
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_MapsSharePointAddonExternalUrlAsList()
+        {
+            var conf = new V2alpha1ClientConf
+            {
+                Name = "my-app",
+                ApplicationType = V2alpha1ClientAppTypeEnum.RegularWeb,
+                AddOns = new V2alpha1ClientAddons
+                {
+                    Sharepoint = new V2alpha1ClientAddonSharePoint
+                    {
+                        Url = "https://sharepoint.example.com",
+                        ExternalUrl = ["https://external.example.com", "https://external2.example.com"],
+                    },
+                },
+            };
+
+            var request = new CreateClientRequestContent { Name = conf.Name! };
+            V2alpha1ClientController.ApplyToApi(conf, request);
+
+            Assert.IsNotNull(request.Addons?.Sharepoint);
+            Assert.AreEqual("https://sharepoint.example.com", request.Addons.Sharepoint.Url);
+            Assert.IsNotNull(request.Addons.Sharepoint.ExternalUrl);
+            Assert.IsTrue(request.Addons.Sharepoint.ExternalUrl.TryGetListOfString(out var values));
+            CollectionAssert.AreEqual(new[] { "https://external.example.com", "https://external2.example.com" }, values?.ToArray());
         }
 
         [TestMethod]

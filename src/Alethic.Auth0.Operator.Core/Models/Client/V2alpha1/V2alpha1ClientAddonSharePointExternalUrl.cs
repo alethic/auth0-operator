@@ -6,9 +6,9 @@ public record V2alpha1ClientAddonSharePointExternalUrl
 {
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Type { get; }
+    public string? Type { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object? Value { get; }
+    public object? Value { get; set; }
 
 }

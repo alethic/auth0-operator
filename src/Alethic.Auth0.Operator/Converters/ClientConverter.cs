@@ -92,7 +92,7 @@ namespace Alethic.Auth0.Operator.Converters
                     RequirePushedAuthorizationRequests = source.RequirePushedAuthorizationRequests,
                     RequireProofOfPossession = source.RequireProofOfPossession,
                     ResourceServers = null,
-                    AddOns = source.AddOns is { } addons ? ConvertWithAuth0<V1ClientAddons, ClientAddons, V2alpha1ClientAddons>(addons, V2alpha1ClientController.FromApi) : null,
+                    AddOns = source.AddOns is { } addons ? ConvertAddons(addons) : null,
                     ApplicationType = source.ApplicationType is { } applicationType ? ConvertApplicationType(applicationType) : null,
                     ComplianceLevel = source.ComplianceLevel is { } complianceLevel ? ConvertComplianceLevel(complianceLevel) : null,
                     DefaultOrganization = source.DefaultOrganization is { } defaultOrganization ? ConvertWithAuth0<V1ClientDefaultOrganization, ClientDefaultOrganization, V2alpha1ClientDefaultOrganization>(defaultOrganization, V2alpha1ClientController.FromApi) : null,
@@ -138,7 +138,7 @@ namespace Alethic.Auth0.Operator.Converters
                     RequirePushedAuthorizationRequests = source.RequirePushedAuthorizationRequests,
                     RequireProofOfPossession = source.RequireProofOfPossession,
                     ResourceServers = null,
-                    AddOns = source.AddOns is { } addons ? RevertWithAuth0<V2alpha1ClientAddons, ClientAddons, V1ClientAddons>(addons, static value => V2alpha1ClientController.JsonConvertTo<ClientAddons>(value)!) : null,
+                    AddOns = source.AddOns is { } addons ? RevertAddons(addons) : null,
                     ApplicationType = source.ApplicationType is { } applicationType ? RevertApplicationType(applicationType) : null,
                     ComplianceLevel = source.ComplianceLevel is { } complianceLevel ? RevertComplianceLevel(complianceLevel) : null,
                     DefaultOrganization = source.DefaultOrganization is { } defaultOrganization ? RevertWithAuth0<V2alpha1ClientDefaultOrganization, ClientDefaultOrganization, V1ClientDefaultOrganization>(defaultOrganization, ToApi) : null,
@@ -342,6 +342,23 @@ namespace Alethic.Auth0.Operator.Converters
                 };
 
                 return SerializeAndDeserialize<V1ClientSigningKey>(api);
+            }
+
+            static V2alpha1ClientAddons? ConvertAddons(V1ClientAddons? source)
+            {
+                if (source is null)
+                    return null;
+
+                var api = Deserialize<ClientAddons>(source);
+                return V2alpha1ClientController.FromApi(api);
+            }
+
+            static V1ClientAddons? RevertAddons(V2alpha1ClientAddons? source)
+            {
+                if (source is null)
+                    return null;
+
+                return SerializeAndDeserialize<V1ClientAddons>(V2alpha1ClientController.ToApi(source));
             }
 
             static TTarget? ConvertWithAuth0<TSource, TApi, TTarget>(TSource? source, Func<TApi?, TTarget?> converter)

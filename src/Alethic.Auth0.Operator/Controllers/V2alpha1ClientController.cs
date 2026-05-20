@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,22 +27,15 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    using V2alpha1ClientEntity = Models.V2alpha1Client;
-
-    [EntityRbac(typeof(V2alpha1ClientEntity), Verbs = RbacVerb.All)]
+    [EntityRbac(typeof(V2alpha1Client), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
     [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public class V2alpha1ClientController :
-        V1TenantEntityInstanceController<V2alpha1ClientEntity, V2alpha1ClientEntity.SpecDef, V2alpha1ClientEntity.StatusDef, V2alpha1ClientConf, V2alpha1ClientConf>,
-        IEntityController<V2alpha1ClientEntity>
+        V1TenantEntityInstanceController<V2alpha1Client, V2alpha1Client.SpecDef, V2alpha1Client.StatusDef, V2alpha1ClientConf, V2alpha1ClientConf>,
+        IEntityController<V2alpha1Client>
     {
-
-        internal static TTo? JsonConvertTo<TTo>(object? source)
-        {
-            return JsonSerializer.Deserialize<TTo>(JsonSerializer.Serialize(source));
-        }
 
         [return: NotNullIfNotNull(nameof(source))]
         internal static V2alpha1ClientConf? FromApi(GetClientResponseContent? source) => source is null ? null : new()
@@ -159,8 +151,14 @@ namespace Alethic.Auth0.Operator.Controllers
             BackchannelLogoutUrls = source.BackchannelLogoutUrls?.ToArray(),
             BackchannelLogoutInitiators = source.BackchannelLogoutInitiators is { } initiators ? FromApi(initiators) : null,
             BackchannelLogoutSessionMetadata = source.BackchannelLogoutSessionMetadata.IsDefined && source.BackchannelLogoutSessionMetadata.Value is { } sessionMetadata
-                ? JsonConvertTo<V2alpha1ClientOidcBackchannelLogoutSessionMetadata>(sessionMetadata)
+                ? FromApi(sessionMetadata)
                 : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientOidcBackchannelLogoutSessionMetadata? FromApi(ClientOidcBackchannelLogoutSessionMetadata? source) => source is null ? null : new()
+        {
+            Include = source.Include,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -308,7 +306,257 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         [return: NotNullIfNotNull(nameof(source))]
-        internal static V2alpha1ClientAddons? FromApi(ClientAddons? source) => JsonConvertTo<V2alpha1ClientAddons>(source);
+        internal static V2alpha1ClientAddons? FromApi(ClientAddons? source) => source is null ? null : new()
+        {
+            Aws = source.Aws is { } aws ? FromApi(aws) : null,
+            AzureBlob = source.AzureBlob is { } azureBlob ? FromApi(azureBlob) : null,
+            AzureSb = source.AzureSb is { } azureSb ? FromApi(azureSb) : null,
+            Rms = source.Rms is { } rms ? FromApi(rms) : null,
+            Mscrm = source.Mscrm is { } mscrm ? FromApi(mscrm) : null,
+            Slack = source.Slack is { } slack ? FromApi(slack) : null,
+            Sentry = source.Sentry is { } sentry ? FromApi(sentry) : null,
+            Box = source.Box,
+            Cloudbees = source.Cloudbees,
+            Concur = source.Concur,
+            Dropbox = source.Dropbox,
+            Echosign = source.Echosign is { } echosign ? FromApi(echosign) : null,
+            Egnyte = source.Egnyte is { } egnyte ? FromApi(egnyte) : null,
+            Firebase = source.Firebase is { } firebase ? FromApi(firebase) : null,
+            Newrelic = source.Newrelic is { } newrelic ? FromApi(newrelic) : null,
+            Office365 = source.Office365 is { } office365 ? FromApi(office365) : null,
+            Salesforce = source.Salesforce is { } salesforce ? FromApi(salesforce) : null,
+            SalesforceApi = source.SalesforceApi is { } salesforceApi ? FromApi(salesforceApi) : null,
+            SalesforceSandboxApi = source.SalesforceSandboxApi is { } salesforceSandboxApi ? FromApi(salesforceSandboxApi) : null,
+            Samlp = source.Samlp is { } samlp ? FromApi(samlp) : null,
+            Layer = source.Layer is { } layer ? FromApi(layer) : null,
+            SapApi = source.SapApi is { } sapApi ? FromApi(sapApi) : null,
+            Sharepoint = source.Sharepoint is { } sharepoint ? FromApi(sharepoint) : null,
+            Springcm = source.Springcm is { } springcm ? FromApi(springcm) : null,
+            Wams = source.Wams is { } wams ? FromApi(wams) : null,
+            Wsfed = source.Wsfed,
+            Zendesk = source.Zendesk is { } zendesk ? FromApi(zendesk) : null,
+            Zoom = source.Zoom is { } zoom ? FromApi(zoom) : null,
+            SsoIntegration = source.SsoIntegration is { } ssoIntegration ? FromApi(ssoIntegration) : null,
+            Oag = source.Oag.IsDefined && source.Oag.Value is { } oag ? FromApi(oag) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonAws? FromApi(ClientAddonAws? source) => source is null ? null : new()
+        {
+            Principal = source.Principal,
+            Role = source.Role,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonAzureBlob? FromApi(ClientAddonAzureBlob? source) => source is null ? null : new()
+        {
+            AccountName = source.AccountName,
+            StorageAccessKey = source.StorageAccessKey,
+            ContainerName = source.ContainerName,
+            BlobName = source.BlobName,
+            Expiration = source.Expiration,
+            SignedIdentifier = source.SignedIdentifier,
+            BlobRead = source.BlobRead,
+            BlobWrite = source.BlobWrite,
+            BlobDelete = source.BlobDelete,
+            ContainerRead = source.ContainerRead,
+            ContainerWrite = source.ContainerWrite,
+            ContainerDelete = source.ContainerDelete,
+            ContainerList = source.ContainerList,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonAzureSb? FromApi(ClientAddonAzureSb? source) => source is null ? null : new()
+        {
+            Namespace = source.Namespace,
+            SasKeyName = source.SasKeyName,
+            SasKey = source.SasKey,
+            EntityPath = source.EntityPath,
+            Expiration = source.Expiration,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonRms? FromApi(ClientAddonRms? source) => source is null ? null : new()
+        {
+            Url = source.Url,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonMscrm? FromApi(ClientAddonMscrm? source) => source is null ? null : new()
+        {
+            Url = source.Url,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSlack? FromApi(ClientAddonSlack? source) => source is null ? null : new()
+        {
+            Team = source.Team,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSentry? FromApi(ClientAddonSentry? source) => source is null ? null : new()
+        {
+            OrgSlug = source.OrgSlug,
+            BaseUrl = source.BaseUrl,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonEchoSign? FromApi(ClientAddonEchoSign? source) => source is null ? null : new()
+        {
+            Domain = source.Domain,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonEgnyte? FromApi(ClientAddonEgnyte? source) => source is null ? null : new()
+        {
+            Domain = source.Domain,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonFirebase? FromApi(ClientAddonFirebase? source) => source is null ? null : new()
+        {
+            Secret = source.Secret,
+            PrivateKeyId = source.PrivateKeyId,
+            PrivateKey = source.PrivateKey,
+            ClientEmail = source.ClientEmail,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonNewRelic? FromApi(ClientAddonNewRelic? source) => source is null ? null : new()
+        {
+            Account = source.Account,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonOffice365? FromApi(ClientAddonOffice365? source) => source is null ? null : new()
+        {
+            Domain = source.Domain,
+            Connection = source.Connection,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSalesforce? FromApi(ClientAddonSalesforce? source) => source is null ? null : new()
+        {
+            EntityId = source.EntityId,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSalesforceApi? FromApi(ClientAddonSalesforceApi? source) => source is null ? null : new()
+        {
+            Clientid = source.Clientid,
+            Principal = source.Principal,
+            CommunityName = source.CommunityName,
+            CommunityUrlSection = source.CommunityUrlSection,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSalesforceSandboxApi? FromApi(ClientAddonSalesforceSandboxApi? source) => source is null ? null : new()
+        {
+            Clientid = source.Clientid,
+            Principal = source.Principal,
+            CommunityName = source.CommunityName,
+            CommunityUrlSection = source.CommunityUrlSection,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSaml? FromApi(ClientAddonSaml? source) => source is null ? null : new()
+        {
+            Mappings = source.Mappings,
+            Audience = source.Audience,
+            Recipient = source.Recipient,
+            CreateUpnClaim = source.CreateUpnClaim,
+            MapUnknownClaimsAsIs = source.MapUnknownClaimsAsIs,
+            PassthroughClaimsWithNoMapping = source.PassthroughClaimsWithNoMapping,
+            MapIdentities = source.MapIdentities,
+            SignatureAlgorithm = source.SignatureAlgorithm,
+            DigestAlgorithm = source.DigestAlgorithm,
+            Issuer = source.Issuer,
+            Destination = source.Destination,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+            SignResponse = source.SignResponse,
+            NameIdentifierFormat = source.NameIdentifierFormat,
+            NameIdentifierProbes = source.NameIdentifierProbes?.ToArray(),
+            AuthnContextClassRef = source.AuthnContextClassRef,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonLayer? FromApi(ClientAddonLayer? source) => source is null ? null : new()
+        {
+            ProviderId = source.ProviderId,
+            KeyId = source.KeyId,
+            PrivateKey = source.PrivateKey,
+            Principal = source.Principal,
+            Expiration = source.Expiration,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSapapi? FromApi(ClientAddonSapapi? source) => source is null ? null : new()
+        {
+            Clientid = source.Clientid,
+            UsernameAttribute = source.UsernameAttribute,
+            TokenEndpointUrl = source.TokenEndpointUrl,
+            Scope = source.Scope,
+            ServicePassword = source.ServicePassword,
+            NameIdentifierFormat = source.NameIdentifierFormat,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSharePoint? FromApi(ClientAddonSharePoint? source) => source is null ? null : new()
+        {
+            Url = source.Url,
+            ExternalUrl = source.ExternalUrl is { } externalUrl ? FromApi(externalUrl) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static string[]? FromApi(ClientAddonSharePointExternalUrl? source)
+        {
+            if (source is null)
+                return null;
+
+            if (source.TryGetListOfString(out var values))
+                return values?.ToArray();
+
+            if (source.TryGetString(out var value))
+                return value is null ? null : [value];
+
+            throw new NotImplementedException();
+        }
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSpringCm? FromApi(ClientAddonSpringCm? source) => source is null ? null : new()
+        {
+            Acsurl = source.Acsurl,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonWams? FromApi(ClientAddonWams? source) => source is null ? null : new()
+        {
+            Masterkey = source.Masterkey,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonZendesk? FromApi(ClientAddonZendesk? source) => source is null ? null : new()
+        {
+            AccountName = source.AccountName,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonZoom? FromApi(ClientAddonZoom? source) => source is null ? null : new()
+        {
+            Account = source.Account,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonSsoIntegration? FromApi(ClientAddonSsoIntegration? source) => source is null ? null : new()
+        {
+            Name = source.Name,
+            Version = source.Version,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha1ClientAddonOag? FromApi(ClientAddonOag? source) => source is null ? null : new();
 
         internal static ClientTokenEndpointAuthMethodEnum ToApi(V2alpha1ClientTokenEndpointAuthMethodEnum source) => source switch
         {
@@ -437,6 +685,249 @@ namespace Alethic.Auth0.Operator.Controllers
             _ => throw new NotImplementedException(),
         };
 
+        static ClientOidcBackchannelLogoutSessionMetadata ToApi(V2alpha1ClientOidcBackchannelLogoutSessionMetadata source) => new()
+        {
+            Include = source.Include,
+        };
+
+        static ClientDefaultOrganization ToApi(V2alpha1ClientDefaultOrganization source) => new()
+        {
+            OrganizationId = source.OrganizationId,
+            Flows = source.Flows?.Select(ToApi).ToArray(),
+        };
+
+        static ClientDefaultOrganizationFlowsEnum ToApi(V2alpha1ClientDefaultOrganizationFlowsEnum source) => source switch
+        {
+            V2alpha1ClientDefaultOrganizationFlowsEnum.ClientCredentials => new ClientDefaultOrganizationFlowsEnum(ClientDefaultOrganizationFlowsEnum.Values.ClientCredentials),
+            _ => throw new NotImplementedException(),
+        };
+
+        internal static ClientAddons ToApi(V2alpha1ClientAddons source) => new()
+        {
+            Aws = source.Aws is { } aws ? ToApi(aws) : null,
+            AzureBlob = source.AzureBlob is { } azureBlob ? ToApi(azureBlob) : null,
+            AzureSb = source.AzureSb is { } azureSb ? ToApi(azureSb) : null,
+            Rms = source.Rms is { } rms ? ToApi(rms) : null,
+            Mscrm = source.Mscrm is { } mscrm ? ToApi(mscrm) : null,
+            Slack = source.Slack is { } slack ? ToApi(slack) : null,
+            Sentry = source.Sentry is { } sentry ? ToApi(sentry) : null,
+            Box = source.Box,
+            Cloudbees = source.Cloudbees,
+            Concur = source.Concur,
+            Dropbox = source.Dropbox,
+            Echosign = source.Echosign is { } echosign ? ToApi(echosign) : null,
+            Egnyte = source.Egnyte is { } egnyte ? ToApi(egnyte) : null,
+            Firebase = source.Firebase is { } firebase ? ToApi(firebase) : null,
+            Newrelic = source.Newrelic is { } newrelic ? ToApi(newrelic) : null,
+            Office365 = source.Office365 is { } office365 ? ToApi(office365) : null,
+            Salesforce = source.Salesforce is { } salesforce ? ToApi(salesforce) : null,
+            SalesforceApi = source.SalesforceApi is { } salesforceApi ? ToApi(salesforceApi) : null,
+            SalesforceSandboxApi = source.SalesforceSandboxApi is { } salesforceSandboxApi ? ToApi(salesforceSandboxApi) : null,
+            Samlp = source.Samlp is { } samlp ? ToApi(samlp) : null,
+            Layer = source.Layer is { } layer ? ToApi(layer) : null,
+            SapApi = source.SapApi is { } sapApi ? ToApi(sapApi) : null,
+            Sharepoint = source.Sharepoint is { } sharepoint ? ToApi(sharepoint) : null,
+            Springcm = source.Springcm is { } springcm ? ToApi(springcm) : null,
+            Wams = source.Wams is { } wams ? ToApi(wams) : null,
+            Wsfed = source.Wsfed,
+            Zendesk = source.Zendesk is { } zendesk ? ToApi(zendesk) : null,
+            Zoom = source.Zoom is { } zoom ? ToApi(zoom) : null,
+            SsoIntegration = source.SsoIntegration is { } ssoIntegration ? ToApi(ssoIntegration) : null,
+            Oag = source.Oag is { } oag ? ToApi(oag) : null,
+        };
+
+        static ClientAddonAws ToApi(V2alpha1ClientAddonAws source) => new()
+        {
+            Principal = source.Principal,
+            Role = source.Role,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+        };
+
+        static ClientAddonAzureBlob ToApi(V2alpha1ClientAddonAzureBlob source) => new()
+        {
+            AccountName = source.AccountName,
+            StorageAccessKey = source.StorageAccessKey,
+            ContainerName = source.ContainerName,
+            BlobName = source.BlobName,
+            Expiration = source.Expiration,
+            SignedIdentifier = source.SignedIdentifier,
+            BlobRead = source.BlobRead,
+            BlobWrite = source.BlobWrite,
+            BlobDelete = source.BlobDelete,
+            ContainerRead = source.ContainerRead,
+            ContainerWrite = source.ContainerWrite,
+            ContainerDelete = source.ContainerDelete,
+            ContainerList = source.ContainerList,
+        };
+
+        static ClientAddonAzureSb ToApi(V2alpha1ClientAddonAzureSb source) => new()
+        {
+            Namespace = source.Namespace,
+            SasKeyName = source.SasKeyName,
+            SasKey = source.SasKey,
+            EntityPath = source.EntityPath,
+            Expiration = source.Expiration,
+        };
+
+        static ClientAddonRms ToApi(V2alpha1ClientAddonRms source) => new()
+        {
+            Url = source.Url,
+        };
+
+        static ClientAddonMscrm ToApi(V2alpha1ClientAddonMscrm source) => new()
+        {
+            Url = source.Url,
+        };
+
+        static ClientAddonSlack ToApi(V2alpha1ClientAddonSlack source) => new()
+        {
+            Team = source.Team,
+        };
+
+        static ClientAddonSentry ToApi(V2alpha1ClientAddonSentry source) => new()
+        {
+            OrgSlug = source.OrgSlug,
+            BaseUrl = source.BaseUrl,
+        };
+
+        static ClientAddonEchoSign ToApi(V2alpha1ClientAddonEchoSign source) => new()
+        {
+            Domain = source.Domain,
+        };
+
+        static ClientAddonEgnyte ToApi(V2alpha1ClientAddonEgnyte source) => new()
+        {
+            Domain = source.Domain,
+        };
+
+        static ClientAddonFirebase ToApi(V2alpha1ClientAddonFirebase source) => new()
+        {
+            Secret = source.Secret,
+            PrivateKeyId = source.PrivateKeyId,
+            PrivateKey = source.PrivateKey,
+            ClientEmail = source.ClientEmail,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+        };
+
+        static ClientAddonNewRelic ToApi(V2alpha1ClientAddonNewRelic source) => new()
+        {
+            Account = source.Account,
+        };
+
+        static ClientAddonOffice365 ToApi(V2alpha1ClientAddonOffice365 source) => new()
+        {
+            Domain = source.Domain,
+            Connection = source.Connection,
+        };
+
+        static ClientAddonSalesforce ToApi(V2alpha1ClientAddonSalesforce source) => new()
+        {
+            EntityId = source.EntityId,
+        };
+
+        static ClientAddonSalesforceApi ToApi(V2alpha1ClientAddonSalesforceApi source) => new()
+        {
+            Clientid = source.Clientid,
+            Principal = source.Principal,
+            CommunityName = source.CommunityName,
+            CommunityUrlSection = source.CommunityUrlSection,
+        };
+
+        static ClientAddonSalesforceSandboxApi ToApi(V2alpha1ClientAddonSalesforceSandboxApi source) => new()
+        {
+            Clientid = source.Clientid,
+            Principal = source.Principal,
+            CommunityName = source.CommunityName,
+            CommunityUrlSection = source.CommunityUrlSection,
+        };
+
+        static ClientAddonSaml ToApi(V2alpha1ClientAddonSaml source) => new()
+        {
+            Mappings = source.Mappings,
+            Audience = source.Audience,
+            Recipient = source.Recipient,
+            CreateUpnClaim = source.CreateUpnClaim,
+            MapUnknownClaimsAsIs = source.MapUnknownClaimsAsIs,
+            PassthroughClaimsWithNoMapping = source.PassthroughClaimsWithNoMapping,
+            MapIdentities = source.MapIdentities,
+            SignatureAlgorithm = source.SignatureAlgorithm,
+            DigestAlgorithm = source.DigestAlgorithm,
+            Issuer = source.Issuer,
+            Destination = source.Destination,
+            LifetimeInSeconds = source.LifetimeInSeconds,
+            SignResponse = source.SignResponse,
+            NameIdentifierFormat = source.NameIdentifierFormat,
+            NameIdentifierProbes = source.NameIdentifierProbes,
+            AuthnContextClassRef = source.AuthnContextClassRef,
+        };
+
+        static ClientAddonLayer ToApi(V2alpha1ClientAddonLayer source) => new()
+        {
+            ProviderId = source.ProviderId,
+            KeyId = source.KeyId,
+            PrivateKey = source.PrivateKey,
+            Principal = source.Principal,
+            Expiration = source.Expiration,
+        };
+
+        static ClientAddonSapapi ToApi(V2alpha1ClientAddonSapapi source) => new()
+        {
+            Clientid = source.Clientid,
+            UsernameAttribute = source.UsernameAttribute,
+            TokenEndpointUrl = source.TokenEndpointUrl,
+            Scope = source.Scope,
+            ServicePassword = source.ServicePassword,
+            NameIdentifierFormat = source.NameIdentifierFormat,
+        };
+
+        static ClientAddonSharePoint ToApi(V2alpha1ClientAddonSharePoint source)
+        {
+            var target = new ClientAddonSharePoint
+            {
+                Url = source.Url,
+            };
+
+            if (source.ExternalUrl is not null)
+            {
+                target.ExternalUrl = ToApi(source.ExternalUrl);
+            }
+
+            return target;
+        }
+
+        static ClientAddonSharePointExternalUrl ToApi(string[] source)
+        {
+            return ClientAddonSharePointExternalUrl.FromListOfString(source);
+        }
+
+        static ClientAddonSpringCm ToApi(V2alpha1ClientAddonSpringCm source) => new()
+        {
+            Acsurl = source.Acsurl,
+        };
+
+        static ClientAddonWams ToApi(V2alpha1ClientAddonWams source) => new()
+        {
+            Masterkey = source.Masterkey,
+        };
+
+        static ClientAddonZendesk ToApi(V2alpha1ClientAddonZendesk source) => new()
+        {
+            AccountName = source.AccountName,
+        };
+
+        static ClientAddonZoom ToApi(V2alpha1ClientAddonZoom source) => new()
+        {
+            Account = source.Account,
+        };
+
+        static ClientAddonSsoIntegration ToApi(V2alpha1ClientAddonSsoIntegration source) => new()
+        {
+            Name = source.Name,
+            Version = source.Version,
+        };
+
+        static ClientAddonOag ToApi(V2alpha1ClientAddonOag source) => new();
+
         internal static void ApplyToApi(V2alpha1ClientRefreshTokenConfiguration source, ClientRefreshTokenConfiguration target)
         {
             if (source.RotationType is { } rotationType)
@@ -479,7 +970,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 ApplyToApi(initiators, target.BackchannelLogoutInitiators ??= new());
 
             if (source.BackchannelLogoutSessionMetadata is { } sessionMetadata)
-                target.BackchannelLogoutSessionMetadata = JsonConvertTo<ClientOidcBackchannelLogoutSessionMetadata>(sessionMetadata);
+                target.BackchannelLogoutSessionMetadata = ToApi(sessionMetadata);
         }
 
         internal static void ApplyToApi(V2alpha1ClientEncryptionKey source, ClientEncryptionKey target)
@@ -558,7 +1049,7 @@ namespace Alethic.Auth0.Operator.Controllers
         internal static void ApplyToApiBase(V2alpha1ClientConf conf, CreateClientRequestContent request)
         {
             if (conf.AddOns is { } addons)
-                request.Addons = JsonConvertTo<ClientAddons>(addons);
+                request.Addons = ToApi(addons);
 
             if (conf.AllowedClients is not null)
                 request.AllowedClients = conf.AllowedClients;
@@ -662,7 +1153,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.RequirePushedAuthorizationRequests = conf.RequirePushedAuthorizationRequests;
 
             if (conf.DefaultOrganization is { } defaultOrganization)
-                request.DefaultOrganization = JsonConvertTo<ClientDefaultOrganization>(defaultOrganization);
+                request.DefaultOrganization = ToApi(defaultOrganization);
 
             if (conf.ComplianceLevel is { } complianceLevel)
                 request.ComplianceLevel = ToApi(complianceLevel);
@@ -674,7 +1165,7 @@ namespace Alethic.Auth0.Operator.Controllers
         internal static void ApplyToApiBase(V2alpha1ClientConf conf, UpdateClientRequestContent request)
         {
             if (conf.AddOns is { } addons)
-                request.Addons = JsonConvertTo<ClientAddons>(addons);
+                request.Addons = ToApi(addons);
 
             if (conf.AllowedClients is not null)
                 request.AllowedClients = conf.AllowedClients;
@@ -778,7 +1269,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.RequirePushedAuthorizationRequests = conf.RequirePushedAuthorizationRequests;
 
             if (conf.DefaultOrganization is { } defaultOrganization)
-                request.DefaultOrganization = JsonConvertTo<ClientDefaultOrganization>(defaultOrganization);
+                request.DefaultOrganization = ToApi(defaultOrganization);
 
             if (conf.ComplianceLevel is { } complianceLevel)
                 request.ComplianceLevel = ToApi(complianceLevel);
@@ -806,7 +1297,7 @@ namespace Alethic.Auth0.Operator.Controllers
             }
         }
 
-        protected override async Task<string?> Find(IManagementApiClient api, V2alpha1ClientEntity entity, V2alpha1ClientEntity.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task<string?> Find(IManagementApiClient api, V2alpha1Client entity, V2alpha1Client.SpecDef spec, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (spec.Find is not null)
             {
@@ -881,7 +1372,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Logger.LogInformation("{EntityTypeName} successfully updated client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);
         }
 
-        protected override async Task ApplyStatus(IManagementApiClient api, V2alpha1ClientEntity entity, V2alpha1ClientConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override async Task ApplyStatus(IManagementApiClient api, V2alpha1Client entity, V2alpha1ClientConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (entity.Spec.SecretRef is not null && entity.Status.Id is not null)
             {
@@ -892,7 +1383,7 @@ namespace Alethic.Auth0.Operator.Controllers
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
 
-        async Task ApplySecret(V2alpha1ClientEntity entity, string? clientId, string? clientSecret, string defaultNamespace, CancellationToken cancellationToken)
+        async Task ApplySecret(V2alpha1Client entity, string? clientId, string? clientSecret, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (entity.Spec.SecretRef is null)
                 return;

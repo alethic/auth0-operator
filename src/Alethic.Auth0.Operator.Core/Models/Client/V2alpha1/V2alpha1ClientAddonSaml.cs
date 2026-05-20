@@ -9,7 +9,7 @@ public record V2alpha1ClientAddonSaml
 
     [JsonPropertyName("mappings")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Mappings { get; set; }
+    public Dictionary<string, object?>? Mappings { get; set; }
 
     [JsonPropertyName("audience")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

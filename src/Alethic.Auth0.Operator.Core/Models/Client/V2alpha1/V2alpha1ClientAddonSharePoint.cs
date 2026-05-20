@@ -11,6 +11,6 @@ public record V2alpha1ClientAddonSharePoint
 
     [JsonPropertyName("external_url")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha1ClientAddonSharePointExternalUrl? ExternalUrl { get; set; }
+    public string[]? ExternalUrl { get; set; }
 
 }

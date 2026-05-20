@@ -76,7 +76,10 @@
       "replacement": "Client$1"
     }
   ],
-  "typeReplacements": {},
+  "typeReplacements": {
+    "Auth0.ManagementApi.ClientAddonSharePointExternalUrl": "string[]?",
+    "ClientAddonSharePointExternalUrl": "string[]?"
+  },
   "emitRecords": true,
   "useNamespaceSubdirectories": false,
   "overwriteExistingFiles": true

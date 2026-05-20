@@ -9,6 +9,8 @@ namespace Alethic.Auth0.Operator.ModelGenerator.Discovery;
 
 public sealed class AssemblyTypeDiscoverer
 {
+    private static readonly NullabilityInfoContext NullabilityContext = new();
+
     public DiscoveryResult Discover(string assemblyPath, GeneratorConfiguration configuration)
     {
         var fullAssemblyPath = Path.GetFullPath(assemblyPath);
@@ -359,10 +361,12 @@ public sealed class AssemblyTypeDiscoverer
 
     private static DiscoveredProperty MapProperty(PropertyInfo property)
     {
+        var nullability = NullabilityContext.Create(property);
+
         return new DiscoveredProperty
         {
             Name = property.Name,
-            Type = DiscoveredTypeReference.FromType(property.PropertyType),
+            Type = DiscoveredTypeReference.FromType(property.PropertyType, nullability),
             HasPublicSetter = property.SetMethod?.IsPublic == true,
             Attributes = [.. CustomAttributeData.GetCustomAttributes(property).Select(MapAttribute)],
         };

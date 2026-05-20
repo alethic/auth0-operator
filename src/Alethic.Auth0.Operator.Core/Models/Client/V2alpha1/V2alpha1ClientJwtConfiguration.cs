@@ -16,7 +16,7 @@ public record V2alpha1ClientJwtConfiguration
 
     [JsonPropertyName("scopes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Scopes { get; set; }
+    public Dictionary<string, object?>? Scopes { get; set; }
 
     [JsonPropertyName("alg")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

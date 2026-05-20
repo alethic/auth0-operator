@@ -36,19 +36,19 @@ public record V2alpha1ClientAddons
 
     [JsonPropertyName("box")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Box { get; set; }
+    public Dictionary<string, object?>? Box { get; set; }
 
     [JsonPropertyName("cloudbees")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Cloudbees { get; set; }
+    public Dictionary<string, object?>? Cloudbees { get; set; }
 
     [JsonPropertyName("concur")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Concur { get; set; }
+    public Dictionary<string, object?>? Concur { get; set; }
 
     [JsonPropertyName("dropbox")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Dropbox { get; set; }
+    public Dictionary<string, object?>? Dropbox { get; set; }
 
     [JsonPropertyName("echosign")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -108,7 +108,7 @@ public record V2alpha1ClientAddons
 
     [JsonPropertyName("wsfed")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Wsfed { get; set; }
+    public Dictionary<string, object?>? Wsfed { get; set; }
 
     [JsonPropertyName("zendesk")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

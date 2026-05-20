@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Alethic.Auth0.Operator.ModelGenerator.Discovery;
 
 public sealed class DiscoveredTypeReference
@@ -32,9 +34,14 @@ public sealed class DiscoveredTypeReference
 
     public static DiscoveredTypeReference FromType(Type type)
     {
+        return FromType(type, null);
+    }
+
+    public static DiscoveredTypeReference FromType(Type type, NullabilityInfo? nullability)
+    {
         if (type.IsByRef)
         {
-            return FromType(type.GetElementType()!);
+            return FromType(type.GetElementType()!, nullability?.ElementType);
         }
 
         if (type.IsArray)
@@ -52,14 +59,14 @@ public sealed class DiscoveredTypeReference
                 IsOptionalWrapper = false,
                 IsArray = true,
                 ArrayRank = type.GetArrayRank(),
-                ElementType = FromType(type.GetElementType()!),
+                ElementType = FromType(type.GetElementType()!, nullability?.ElementType),
             };
         }
 
         var underlyingNullableType = Nullable.GetUnderlyingType(type);
         if (underlyingNullableType is not null)
         {
-            var nullableTypeReference = FromType(underlyingNullableType);
+            var nullableTypeReference = FromType(underlyingNullableType, nullability?.GenericTypeArguments.FirstOrDefault());
             return new DiscoveredTypeReference
             {
                 Name = nullableTypeReference.Name,
@@ -96,7 +103,7 @@ public sealed class DiscoveredTypeReference
 
         if (type.IsGenericType && string.Equals(type.GetGenericTypeDefinition().FullName, OptionalGenericTypeFullName, StringComparison.Ordinal))
         {
-            var optionalValueType = FromType(type.GetGenericArguments()[0]);
+            var optionalValueType = FromType(type.GetGenericArguments()[0], nullability?.GenericTypeArguments.FirstOrDefault());
             return new DiscoveredTypeReference
             {
                 Name = optionalValueType.Name,
@@ -115,8 +122,12 @@ public sealed class DiscoveredTypeReference
             };
         }
 
+        var nullabilityGenericArguments = nullability?.GenericTypeArguments?.ToArray() ?? [];
         var genericArguments = type.IsGenericType
-            ? type.GetGenericArguments().Select(FromType).ToList()
+            ? type.GetGenericArguments().Select((argument, index) =>
+                FromType(argument, index < nullabilityGenericArguments.Length
+                    ? nullabilityGenericArguments[index]
+                    : null)).ToList()
             : [];
 
         return new DiscoveredTypeReference
@@ -126,7 +137,7 @@ public sealed class DiscoveredTypeReference
             FullName = type.FullName,
             Alias = TypeAliasMap.TryGetValue(type.FullName ?? string.Empty, out var alias) ? alias : null,
             IsReferenceType = !type.IsValueType,
-            IsNullableReferenceType = false,
+            IsNullableReferenceType = !type.IsValueType && nullability?.ReadState == NullabilityState.Nullable,
             IsValueType = type.IsValueType,
             IsNullableValueType = false,
             IsOptionalWrapper = false,
