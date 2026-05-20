@@ -68,7 +68,43 @@ namespace Alethic.Auth0.Operator.Converters
                 if (source is null)
                     return null;
 
-                var strategy = source.Strategy is { } s ? JsonSerializer.Deserialize<V2alpha1ConnectionStrategy?>(JsonSerializer.Serialize(s)) : null;
+                var strategy = source.Strategy switch
+                {
+                    "auth0" => V2alpha1ConnectionStrategy.Auth0,
+                    "ad" => V2alpha1ConnectionStrategy.Ad,
+                    "adfs" => V2alpha1ConnectionStrategy.Adfs,
+                    "auth0-oidc" => V2alpha1ConnectionStrategy.Auth0Oidc,
+                    "waad" => V2alpha1ConnectionStrategy.AzureAd,
+                    "bitbucket" => V2alpha1ConnectionStrategy.Bitbucket,
+                    "box" => V2alpha1ConnectionStrategy.Box,
+                    "dropbox" => V2alpha1ConnectionStrategy.Dropbox,
+                    "email" => V2alpha1ConnectionStrategy.Email,
+                    "evernote" => V2alpha1ConnectionStrategy.Evernote,
+                    "evernote-sandbox" => V2alpha1ConnectionStrategy.EvernoteSandbox,
+                    "exact" => V2alpha1ConnectionStrategy.Exact,
+                    "facebook" => V2alpha1ConnectionStrategy.Facebook,
+                    "github" => V2alpha1ConnectionStrategy.GitHub,
+                    "google-apps" => V2alpha1ConnectionStrategy.GoogleApps,
+                    "google-oauth2" => V2alpha1ConnectionStrategy.GoogleOAuth2,
+                    "linkedin" => V2alpha1ConnectionStrategy.Linkedin,
+                    "oauth1" => V2alpha1ConnectionStrategy.OAuth1,
+                    "oauth2" => V2alpha1ConnectionStrategy.OAuth2,
+                    "office365" => V2alpha1ConnectionStrategy.Office365,
+                    "oidc" => V2alpha1ConnectionStrategy.Oidc,
+                    "okta" => V2alpha1ConnectionStrategy.Okta,
+                    "paypal" => V2alpha1ConnectionStrategy.Paypal,
+                    "paypal-sandbox" => V2alpha1ConnectionStrategy.PaypalSandbox,
+                    "pingfederate" => V2alpha1ConnectionStrategy.PingFederate,
+                    "salesforce" => V2alpha1ConnectionStrategy.Salesforce,
+                    "salesforce-community" => V2alpha1ConnectionStrategy.SalesforceCommunity,
+                    "salesforce-sandbox" => V2alpha1ConnectionStrategy.SalesforceSandbox,
+                    "samlp" => V2alpha1ConnectionStrategy.Saml,
+                    "sms" => V2alpha1ConnectionStrategy.Sms,
+                    "twitter" => V2alpha1ConnectionStrategy.Twitter,
+                    "windowslive" => V2alpha1ConnectionStrategy.WindowsLive,
+                    "yahoo" => V2alpha1ConnectionStrategy.Yahoo,
+                    _ => (V2alpha1ConnectionStrategy?)null,
+                };
 
                 return new V2alpha1ConnectionConf
                 {
@@ -81,7 +117,7 @@ namespace Alethic.Auth0.Operator.Converters
                     EnabledClients = source.EnabledClients,
                     ShowAsButton = source.ShowAsButton,
                     IsDomainConnection = source.IsDomainConnection,
-                    Options = ConvertOptions(strategy, source.Options),
+                    Options = strategy is { } s ? ConvertOptions(s, source.Options) : null,
                 };
             }
 
@@ -106,7 +142,7 @@ namespace Alethic.Auth0.Operator.Converters
                 };
             }
 
-            static V2alpha1ConnectionOptions? ConvertOptions(V2alpha1ConnectionStrategy? strategy, V1ConnectionOptions? source)
+            static V2alpha1ConnectionOptions? ConvertOptions(V2alpha1ConnectionStrategy strategy, V1ConnectionOptions? source)
             {
                 if (source is null)
                     return null;
