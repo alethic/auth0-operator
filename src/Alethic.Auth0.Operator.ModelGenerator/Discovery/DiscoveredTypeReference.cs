@@ -174,4 +174,5 @@ public sealed class DiscoveredTypeReference
         [typeof(ushort).FullName!] = "ushort",
         [typeof(void).FullName!] = "void",
     };
+
 }
