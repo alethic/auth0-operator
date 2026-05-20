@@ -3,6 +3,7 @@
 namespace Alethic.Auth0.Operator.Core.Models
 {
 
+    [JsonConverter(typeof(V1ClientReferenceConverter))]
     public record V1ClientReference
     {
 
