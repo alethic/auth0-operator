@@ -35,7 +35,7 @@ namespace Alethic.Auth0.Operator.Tests
             {
                 Name = "test-conn",
                 DisplayName = "Test Connection",
-                Strategy = "auth0",
+                Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
                 Realms = ["realm1", "realm2"],
                 IsDomainConnection = true,
                 ShowAsButton = false,
@@ -55,7 +55,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_EnabledClientsIsNull()
         {
-            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
+            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
             Assert.IsNotNull(result);
             Assert.IsNull(result.EnabledClients);
         }
@@ -63,7 +63,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_NullStrategyOptions_AllStrategySpecificPropertiesNull()
         {
-            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = "auth0" });
+            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
             Assert.IsNotNull(result);
             Assert.IsNull(result.Options?.Auth0);
             Assert.IsNull(result.Options?.Oidc);
@@ -76,7 +76,7 @@ namespace Alethic.Auth0.Operator.Tests
             var source = new GetConnectionResponseContent
             {
                 Name = "x",
-                Strategy = "auth0",
+                Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
                 Metadata = new System.Collections.Generic.Dictionary<string, string> { ["env"] = "prod" },
             };
 
@@ -98,7 +98,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsName()
         {
             var conf = new V2alpha1ConnectionConf { Name = "my-conn" };
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "placeholder" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "placeholder" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("my-conn", req.Name);
         }
@@ -107,7 +107,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsDisplayName()
         {
             var conf = new V2alpha1ConnectionConf { DisplayName = "My Conn" };
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "conn" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("My Conn", req.DisplayName);
         }
@@ -116,7 +116,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsRealms()
         {
             var conf = new V2alpha1ConnectionConf { Realms = ["r1"] };
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "conn" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             CollectionAssert.AreEqual(new[] { "r1" }, req.Realms?.ToList());
         }
@@ -125,7 +125,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsIsDomainConnection()
         {
             var conf = new V2alpha1ConnectionConf { IsDomainConnection = true };
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "conn" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual(true, req.IsDomainConnection);
         }
@@ -134,7 +134,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_MapsShowAsButton()
         {
             var conf = new V2alpha1ConnectionConf { ShowAsButton = true };
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "conn" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "conn" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual(true, req.ShowAsButton);
         }
@@ -143,7 +143,7 @@ namespace Alethic.Auth0.Operator.Tests
         public void ApplyToApi_ConnectionBase_NullFieldsLeaveTargetUnchanged()
         {
             var conf = new V2alpha1ConnectionConf();
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum("auth0"), Name = "original" };
+            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(ConnectionResponseContentAuth0Strategy.Values.Auth0), Name = "original" };
             V2alpha1ConnectionController.ApplyToApi(conf, req);
             Assert.AreEqual("original", req.Name);
         }
@@ -365,7 +365,7 @@ namespace Alethic.Auth0.Operator.Tests
                     Conf = new V1ConnectionConf
                     {
                         Name = "saml-conn",
-                        Strategy = "samlp",
+                        Strategy = ConnectionResponseContentSamlStrategy.Values.Samlp,
                         Options = JsonSerializer.Deserialize<V1ConnectionOptions>("""
                         {
                           "decryptionKey": "pem-value"
@@ -540,7 +540,7 @@ namespace Alethic.Auth0.Operator.Tests
             {
                 Name = "roundtrip",
                 DisplayName = "Roundtrip",
-                Strategy = "auth0",
+                Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
                 IsDomainConnection = false,
                 ShowAsButton = true,
             };
