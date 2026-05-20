@@ -8,13 +8,13 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V1
     {
 
         [JsonStringEnumMemberName("none")]
-        NONE,
+        None,
 
         [JsonStringEnumMemberName("fapi1_adv_pkj_par")]
-        FAPI1_ADV_PKJ_PAR,
+        Fapi1AdvPkjPar,
 
         [JsonStringEnumMemberName("fapi1_adv_mtls_par")]
-        FAPI1_ADV_MTLS_PAR
+        Fapi1AdvMtlsPar
 
     }
 
