@@ -11,22 +11,22 @@ using KubeOps.Abstractions.Reconciliation.Finalizer;
 namespace Alethic.Auth0.Operator.Finalizers
 {
 
-    public class V1ClientFinalizer : IEntityFinalizer<V1Client>
+    public class V2alpha1ClientFinalizer : IEntityFinalizer<V2alpha1Client>
     {
 
-        readonly IEntityController<V1Client> _controller;
+        readonly IEntityController<V2alpha1Client> _controller;
 
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="controller"></param>
-        public V1ClientFinalizer(IEntityController<V1Client> controller)
+        public V2alpha1ClientFinalizer(IEntityController<V2alpha1Client> controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
         /// <inheritdoc />
-        public async Task<ReconciliationResult<V1Client>> FinalizeAsync(V1Client entity, CancellationToken cancellationToken)
+        public async Task<ReconciliationResult<V2alpha1Client>> FinalizeAsync(V2alpha1Client entity, CancellationToken cancellationToken)
         {
             return await _controller.DeletedAsync(entity, cancellationToken);
         }
