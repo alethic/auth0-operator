@@ -22,9 +22,21 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonStringEnumMemberName("adfs")]
         Adfs,
 
+        /// <summary>Amazon social connection.</summary>
+        [JsonStringEnumMemberName("amazon")]
+        Amazon,
+
+        /// <summary>Apple social connection.</summary>
+        [JsonStringEnumMemberName("apple")]
+        Apple,
+
         /// <summary>Auth0 tenant as OIDC provider connection.</summary>
         [JsonStringEnumMemberName("auth0-oidc")]
         Auth0Oidc,
+
+        /// <summary>Baidu social connection.</summary>
+        [JsonStringEnumMemberName("baidu")]
+        Baidu,
 
         /// <summary>Azure Active Directory (Microsoft Entra ID) connection.</summary>
         [JsonStringEnumMemberName("waad")]
@@ -34,13 +46,25 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonStringEnumMemberName("bitbucket")]
         Bitbucket,
 
+        /// <summary>Bitly social connection.</summary>
+        [JsonStringEnumMemberName("bitly")]
+        Bitly,
+
         /// <summary>Box social connection.</summary>
         [JsonStringEnumMemberName("box")]
         Box,
 
+        /// <summary>DAccount social connection.</summary>
+        [JsonStringEnumMemberName("daccount")]
+        Daccount,
+
         /// <summary>Dropbox social connection.</summary>
         [JsonStringEnumMemberName("dropbox")]
         Dropbox,
+
+        /// <summary>Dwolla social connection.</summary>
+        [JsonStringEnumMemberName("dwolla")]
+        Dwolla,
 
         /// <summary>Email passwordless connection.</summary>
         [JsonStringEnumMemberName("email")]
@@ -62,6 +86,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonStringEnumMemberName("facebook")]
         Facebook,
 
+        /// <summary>Fitbit social connection.</summary>
+        [JsonStringEnumMemberName("fitbit")]
+        Fitbit,
+
         /// <summary>GitHub social connection.</summary>
         [JsonStringEnumMemberName("github")]
         GitHub,
@@ -73,6 +101,14 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         /// <summary>Google OAuth2 social connection.</summary>
         [JsonStringEnumMemberName("google-oauth2")]
         GoogleOAuth2,
+
+        /// <summary>Instagram social connection.</summary>
+        [JsonStringEnumMemberName("instagram")]
+        Instagram,
+
+        /// <summary>LINE social connection.</summary>
+        [JsonStringEnumMemberName("line")]
+        Line,
 
         /// <summary>LinkedIn social connection.</summary>
         [JsonStringEnumMemberName("linkedin")]
@@ -110,6 +146,10 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonStringEnumMemberName("pingfederate")]
         PingFederate,
 
+        /// <summary>Planning Center social connection.</summary>
+        [JsonStringEnumMemberName("planningcenter")]
+        PlanningCenter,
+
         /// <summary>Salesforce social connection.</summary>
         [JsonStringEnumMemberName("salesforce")]
         Salesforce,
@@ -126,21 +166,61 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha1
         [JsonStringEnumMemberName("samlp")]
         Saml,
 
+        /// <summary>SharePoint social connection.</summary>
+        [JsonStringEnumMemberName("sharepoint")]
+        Sharepoint,
+
+        /// <summary>Shop social connection.</summary>
+        [JsonStringEnumMemberName("shop")]
+        Shop,
+
+        /// <summary>Shopify social connection.</summary>
+        [JsonStringEnumMemberName("shopify")]
+        Shopify,
+
         /// <summary>SMS passwordless connection.</summary>
         [JsonStringEnumMemberName("sms")]
         Sms,
+
+        /// <summary>SoundCloud social connection.</summary>
+        [JsonStringEnumMemberName("soundcloud")]
+        Soundcloud,
+
+        /// <summary>37signals social connection.</summary>
+        [JsonStringEnumMemberName("thirtysevensignals")]
+        ThirtySevenSignals,
 
         /// <summary>Twitter social connection.</summary>
         [JsonStringEnumMemberName("twitter")]
         Twitter,
 
+        /// <summary>Untappd social connection.</summary>
+        [JsonStringEnumMemberName("untappd")]
+        Untappd,
+
+        /// <summary>VKontakte social connection.</summary>
+        [JsonStringEnumMemberName("vkontakte")]
+        Vkontakte,
+
+        /// <summary>Weibo social connection.</summary>
+        [JsonStringEnumMemberName("weibo")]
+        Weibo,
+
         /// <summary>Windows Live social connection.</summary>
         [JsonStringEnumMemberName("windowslive")]
         WindowsLive,
 
+        /// <summary>WordPress social connection.</summary>
+        [JsonStringEnumMemberName("wordpress")]
+        Wordpress,
+
         /// <summary>Yahoo social connection.</summary>
         [JsonStringEnumMemberName("yahoo")]
         Yahoo,
+
+        /// <summary>Yandex social connection.</summary>
+        [JsonStringEnumMemberName("yandex")]
+        Yandex,
 
     }
 

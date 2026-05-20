@@ -114,28 +114,34 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.Adfs = FromApi(JsonConvertTo<ConnectionResponseContentAdfs>(source)?.Options);
                     break;
                 case ConnectionResponseContentAmazonStrategy.Values.Amazon:
+                    conf.Options.Amazon = FromApi(JsonConvertTo<ConnectionResponseContentAmazon>(source)?.Options);
                     break;
                 case ConnectionResponseContentAppleStrategy.Values.Apple:
+                    conf.Options.Apple = FromApi(JsonConvertTo<ConnectionResponseContentApple>(source)?.Options);
                     break;
                 case ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc:
                     conf.Options.Auth0Oidc = FromApi(JsonConvertTo<ConnectionResponseContentAuth0Oidc>(source)?.Options);
                     break;
                 case ConnectionResponseContentBaiduStrategy.Values.Baidu:
+                    conf.Options.Baidu = FromApi(JsonConvertTo<ConnectionResponseContentBaidu>(source)?.Options);
                     break;
                 case ConnectionResponseContentBitbucketStrategy.Values.Bitbucket:
                     conf.Options.Bitbucket = FromApi(JsonConvertTo<ConnectionResponseContentBitbucket>(source)?.Options);
                     break;
                 case ConnectionResponseContentBitlyStrategy.Values.Bitly:
+                    conf.Options.Bitly = FromApi(JsonConvertTo<ConnectionResponseContentBitly>(source)?.Options);
                     break;
                 case ConnectionResponseContentBoxStrategy.Values.Box:
                     conf.Options.Box = FromApi(JsonConvertTo<ConnectionResponseContentBox>(source)?.Options);
                     break;
                 case ConnectionResponseContentDaccountStrategy.Values.Daccount:
+                    conf.Options.Daccount = FromApi(JsonConvertTo<ConnectionResponseContentDaccount>(source)?.Options);
                     break;
                 case ConnectionResponseContentDropboxStrategy.Values.Dropbox:
                     conf.Options.Dropbox = FromApi(JsonConvertTo<ConnectionResponseContentDropbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentDwollaStrategy.Values.Dwolla:
+                    conf.Options.Dwolla = FromApi(JsonConvertTo<ConnectionResponseContentDwolla>(source)?.Options);
                     break;
                 case ConnectionResponseContentEmailStrategy.Values.Email:
                     conf.Options.Email = FromApi(JsonConvertTo<ConnectionResponseContentEmail>(source)?.Options);
@@ -153,6 +159,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.Facebook = FromApi(JsonConvertTo<ConnectionResponseContentFacebook>(source)?.Options);
                     break;
                 case ConnectionResponseContentFitbitStrategy.Values.Fitbit:
+                    conf.Options.Fitbit = FromApi(JsonConvertTo<ConnectionResponseContentFitbit>(source)?.Options);
                     break;
                 case ConnectionResponseContentGitHubStrategy.Values.Github:
                     conf.Options.GitHub = FromApi(JsonConvertTo<ConnectionResponseContentGitHub>(source)?.Options);
@@ -164,8 +171,10 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.GoogleOAuth2 = FromApi(JsonConvertTo<ConnectionResponseContentGoogleOAuth2>(source)?.Options);
                     break;
                 case ConnectionResponseContentInstagramStrategy.Values.Instagram:
+                    conf.Options.Instagram = FromApi(JsonConvertTo<ConnectionResponseContentInstagram>(source)?.Options);
                     break;
                 case ConnectionResponseContentLineStrategy.Values.Line:
+                    conf.Options.Line = FromApi(JsonConvertTo<ConnectionResponseContentLine>(source)?.Options);
                     break;
                 case ConnectionResponseContentLinkedinStrategy.Values.Linkedin:
                     conf.Options.Linkedin = FromApi(JsonConvertTo<ConnectionResponseContentLinkedin>(source)?.Options);
@@ -195,6 +204,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.PingFederate = FromApi(JsonConvertTo<ConnectionResponseContentPingFederate>(source)?.Options);
                     break;
                 case ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter:
+                    conf.Options.PlanningCenter = FromApi(JsonConvertTo<ConnectionResponseContentPlanningCenter>(source)?.Options);
                     break;
                 case ConnectionResponseContentSalesforceStrategy.Values.Salesforce:
                     conf.Options.Salesforce = FromApi(JsonConvertTo<ConnectionResponseContentSalesforce>(source)?.Options);
@@ -209,39 +219,49 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.Saml = FromApi(JsonConvertTo<ConnectionResponseContentSaml>(source)?.Options);
                     break;
                 case ConnectionResponseContentSharepointStrategy.Values.Sharepoint:
+                    conf.Options.Sharepoint = FromApi(JsonConvertTo<ConnectionResponseContentSharepoint>(source)?.Options);
                     break;
                 case ConnectionResponseContentShopifyStrategy.Values.Shopify:
+                    conf.Options.Shopify = FromApi(JsonConvertTo<ConnectionResponseContentShopify>(source)?.Options);
                     break;
                 case ConnectionResponseContentShopStrategy.Values.Shop:
+                    conf.Options.Shop = FromApi(JsonConvertTo<ConnectionResponseContentShop>(source)?.Options);
                     break;
                 case ConnectionResponseContentSmsStrategy.Values.Sms:
                     conf.Options.Sms = FromApi(JsonConvertTo<ConnectionResponseContentSms>(source)?.Options);
                     break;
                 case ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud:
+                    conf.Options.Soundcloud = FromApi(JsonConvertTo<ConnectionResponseContentSoundcloud>(source)?.Options);
                     break;
                 case ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals:
+                    conf.Options.ThirtySevenSignals = FromApi(JsonConvertTo<ConnectionResponseContentThirtySevenSignals>(source)?.Options);
                     break;
                 case ConnectionResponseContentTwitterStrategy.Values.Twitter:
                     conf.Options.Twitter = FromApi(JsonConvertTo<ConnectionResponseContentTwitter>(source)?.Options);
                     break;
                 case ConnectionResponseContentUntappdStrategy.Values.Untappd:
+                    conf.Options.Untappd = FromApi(JsonConvertTo<ConnectionResponseContentUntappd>(source)?.Options);
                     break;
                 case ConnectionResponseContentVkontakteStrategy.Values.Vkontakte:
+                    conf.Options.Vkontakte = FromApi(JsonConvertTo<ConnectionResponseContentVkontakte>(source)?.Options);
                     break;
                 case ConnectionResponseContentAzureAdStrategy.Values.Waad:
                     conf.Options.AzureAd = FromApi(JsonConvertTo<ConnectionResponseContentAzureAd>(source)?.Options);
                     break;
                 case ConnectionResponseContentWeiboStrategy.Values.Weibo:
+                    conf.Options.Weibo = FromApi(JsonConvertTo<ConnectionResponseContentWeibo>(source)?.Options);
                     break;
                 case ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive:
                     conf.Options.WindowsLive = FromApi(JsonConvertTo<ConnectionResponseContentWindowsLive>(source)?.Options);
                     break;
                 case ConnectionResponseContentWordpressStrategy.Values.Wordpress:
+                    conf.Options.Wordpress = FromApi(JsonConvertTo<ConnectionResponseContentWordpress>(source)?.Options);
                     break;
                 case ConnectionResponseContentYahooStrategy.Values.Yahoo:
                     conf.Options.Yahoo = FromApi(JsonConvertTo<ConnectionResponseContentYahoo>(source)?.Options);
                     break;
                 case ConnectionResponseContentYandexStrategy.Values.Yandex:
+                    conf.Options.Yandex = FromApi(JsonConvertTo<ConnectionResponseContentYandex>(source)?.Options);
                     break;
                 default:
                     break;
@@ -347,6 +367,46 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V2alpha1ConnectionOptionsAmazon? FromApi(ConnectionOptionsAmazon? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsAmazon
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
+                PostalCode = source.PostalCode,
+                Profile = source.Profile,
+                Scope = source.Scope?.ToArray(),
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsApple? FromApi(ConnectionOptionsApple? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsApple
+            {
+                AppSecret = source.AppSecret.IsDefined ? source.AppSecret.Value : null,
+                ClientId = source.ClientId.IsDefined ? source.ClientId.Value : null,
+                Email = source.Email,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
+                Kid = source.Kid.IsDefined ? source.Kid.Value : null,
+                Name = source.Name,
+                Scope = source.Scope,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                TeamId = source.TeamId.IsDefined ? source.TeamId.Value : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
         internal static V2alpha1ConnectionOptionsAuth0Oidc? FromApi(ConnectionOptionsAuth0Oidc? source)
         {
             if (source is null)
@@ -356,6 +416,22 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 ClientId = source.ClientId,
                 ClientSecret = source.ClientSecret,
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsBaidu? FromApi(ConnectionOptionsBaidu? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsBaidu
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
             };
         }
 
@@ -478,6 +554,22 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V2alpha1ConnectionOptionsBitly? FromApi(ConnectionOptionsBitly? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsBitly
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
         internal static V2alpha1ConnectionOptionsBox? FromApi(ConnectionOptionsBox? source)
         {
             if (source is null)
@@ -493,6 +585,22 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static V2alpha1ConnectionOptionsDaccount? FromApi(ConnectionOptionsDaccount? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsDaccount
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
         internal static V2alpha1ConnectionOptionsDropbox? FromApi(ConnectionOptionsDropbox? source)
         {
             if (source is null)
@@ -505,6 +613,22 @@ namespace Alethic.Auth0.Operator.Controllers
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 UpstreamParams = FromApi(source.UpstreamParams),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsDwolla? FromApi(ConnectionOptionsDwolla? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsDwolla
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
             };
         }
 
@@ -546,6 +670,22 @@ namespace Alethic.Auth0.Operator.Controllers
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 UpstreamParams = FromApi(source.UpstreamParams),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsFitbit? FromApi(ConnectionOptionsFitbit? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsFitbit
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
             };
         }
 
@@ -777,6 +917,217 @@ namespace Alethic.Auth0.Operator.Controllers
                 YoutubeUpload = source.YoutubeUpload,
                 Youtubepartner = source.Youtubepartner,
                 UpstreamParams = FromApi(source.UpstreamParams),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsInstagram? FromApi(ConnectionOptionsInstagram? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsInstagram
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsLine? FromApi(ConnectionOptionsLine? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsLine
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                FreeformScopes = source.FreeformScopes?.ToArray(),
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                Email = source.Email,
+                Profile = source.Profile,
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsPlanningCenter? FromApi(ConnectionOptionsPlanningCenter? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsPlanningCenter
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsSharepoint? FromApi(ConnectionOptionsSharepoint? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsSharepoint
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsShop? FromApi(ConnectionOptionsShop? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsShop
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsShopify? FromApi(ConnectionOptionsShopify? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsShopify
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsSoundcloud? FromApi(ConnectionOptionsSoundcloud? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsSoundcloud
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsThirtySevenSignals? FromApi(ConnectionOptionsThirtySevenSignals? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsThirtySevenSignals
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsUntappd? FromApi(ConnectionOptionsUntappd? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsUntappd
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsVkontakte? FromApi(ConnectionOptionsVkontakte? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsVkontakte
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsWeibo? FromApi(ConnectionOptionsWeibo? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsWeibo
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsWordpress? FromApi(ConnectionOptionsWordpress? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsWordpress
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
+            };
+        }
+
+        internal static V2alpha1ConnectionOptionsYandex? FromApi(ConnectionOptionsYandex? source)
+        {
+            if (source is null)
+                return null;
+
+            return new V2alpha1ConnectionOptionsYandex
+            {
+                ClientId = source.ClientId,
+                ClientSecret = source.ClientSecret,
+                Scope = source.Scope is not null ? source.Scope.ToString()!.Split(' ', StringSplitOptions.RemoveEmptyEntries) : null,
+                SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
+                UpstreamParams = FromApi(source.UpstreamParams),
+                NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
             };
         }
 
@@ -2945,11 +3296,68 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
+        internal static ConnectionOptionsAmazon ToApi(V2alpha1ConnectionOptionsAmazon source)
+        {
+            var target = new ConnectionOptionsAmazon();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            target.PostalCode = source.PostalCode;
+            target.Profile = source.Profile;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsApple ToApi(V2alpha1ConnectionOptionsApple source)
+        {
+            var target = new ConnectionOptionsApple();
+            target.AppSecret = source.AppSecret;
+            target.ClientId = source.ClientId;
+            target.Email = source.Email;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            target.Kid = source.Kid;
+            target.Name = source.Name;
+            target.Scope = source.Scope;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            target.TeamId = source.TeamId;
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
         internal static ConnectionOptionsAuth0Oidc ToApi(V2alpha1ConnectionOptionsAuth0Oidc source)
         {
             var target = new ConnectionOptionsAuth0Oidc();
             target.ClientId = source.ClientId;
             target.ClientSecret = source.ClientSecret;
+            return target;
+        }
+
+        internal static ConnectionOptionsBaidu ToApi(V2alpha1ConnectionOptionsBaidu source)
+        {
+            var target = new ConnectionOptionsBaidu();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             return target;
         }
 
@@ -3053,6 +3461,22 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
+        internal static ConnectionOptionsBitly ToApi(V2alpha1ConnectionOptionsBitly source)
+        {
+            var target = new ConnectionOptionsBitly();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
         internal static ConnectionOptionsBox ToApi(V2alpha1ConnectionOptionsBox source)
         {
             var target = new ConnectionOptionsBox();
@@ -3067,6 +3491,22 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
+        internal static ConnectionOptionsDaccount ToApi(V2alpha1ConnectionOptionsDaccount source)
+        {
+            var target = new ConnectionOptionsDaccount();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
         internal static ConnectionOptionsDropbox ToApi(V2alpha1ConnectionOptionsDropbox source)
         {
             var target = new ConnectionOptionsDropbox();
@@ -3078,6 +3518,22 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             if (source.UpstreamParams is { } up)
                 target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            return target;
+        }
+
+        internal static ConnectionOptionsDwolla ToApi(V2alpha1ConnectionOptionsDwolla source)
+        {
+            var target = new ConnectionOptionsDwolla();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             return target;
         }
 
@@ -3191,6 +3647,22 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
+        internal static ConnectionOptionsFitbit ToApi(V2alpha1ConnectionOptionsFitbit source)
+        {
+            var target = new ConnectionOptionsFitbit();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
         internal static ConnectionOptionsGitHub ToApi(V2alpha1ConnectionOptionsGitHub source)
         {
             var target = new ConnectionOptionsGitHub();
@@ -3229,6 +3701,42 @@ namespace Alethic.Auth0.Operator.Controllers
             return target;
         }
 
+        internal static ConnectionOptionsInstagram ToApi(V2alpha1ConnectionOptionsInstagram source)
+        {
+            var target = new ConnectionOptionsInstagram();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsLine ToApi(V2alpha1ConnectionOptionsLine source)
+        {
+            var target = new ConnectionOptionsLine();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.FreeformScopes is { } ffs)
+                target.FreeformScopes = ffs;
+            if (source.Scope is { } scope)
+                target.Scope = scope;
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            target.Email = source.Email;
+            target.Profile = source.Profile;
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
         internal static ConnectionOptionsGoogleApps ToApi(V2alpha1ConnectionOptionsGoogleApps source)
         {
             var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
@@ -3262,6 +3770,182 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
             if (source.UpstreamParams is { } up)
                 target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            return target;
+        }
+
+        internal static ConnectionOptionsPlanningCenter ToApi(V2alpha1ConnectionOptionsPlanningCenter source)
+        {
+            var target = new ConnectionOptionsPlanningCenter();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsSharepoint ToApi(V2alpha1ConnectionOptionsSharepoint source)
+        {
+            var target = new ConnectionOptionsSharepoint();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsShop ToApi(V2alpha1ConnectionOptionsShop source)
+        {
+            var target = new ConnectionOptionsShop();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsShopify ToApi(V2alpha1ConnectionOptionsShopify source)
+        {
+            var target = new ConnectionOptionsShopify();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsSoundcloud ToApi(V2alpha1ConnectionOptionsSoundcloud source)
+        {
+            var target = new ConnectionOptionsSoundcloud();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsThirtySevenSignals ToApi(V2alpha1ConnectionOptionsThirtySevenSignals source)
+        {
+            var target = new ConnectionOptionsThirtySevenSignals();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsUntappd ToApi(V2alpha1ConnectionOptionsUntappd source)
+        {
+            var target = new ConnectionOptionsUntappd();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsVkontakte ToApi(V2alpha1ConnectionOptionsVkontakte source)
+        {
+            var target = new ConnectionOptionsVkontakte();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsWeibo ToApi(V2alpha1ConnectionOptionsWeibo source)
+        {
+            var target = new ConnectionOptionsWeibo();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsWordpress ToApi(V2alpha1ConnectionOptionsWordpress source)
+        {
+            var target = new ConnectionOptionsWordpress();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
+            return target;
+        }
+
+        internal static ConnectionOptionsYandex ToApi(V2alpha1ConnectionOptionsYandex source)
+        {
+            var target = new ConnectionOptionsYandex();
+            target.ClientId = source.ClientId;
+            target.ClientSecret = source.ClientSecret;
+            if (source.Scope is { } scope)
+                target.Scope = ConnectionScopeOAuth2.FromListOfString(scope);
+            if (source.SetUserRootAttributes is not null)
+                target.SetUserRootAttributes = ToApi(source.SetUserRootAttributes);
+            if (source.UpstreamParams is { } up)
+                target.UpstreamParams = ToApiUpstreamAdditionalProperties(up);
+            if (source.NonPersistentAttrs is { } npa)
+                target.NonPersistentAttrs = npa;
             return target;
         }
 
@@ -3955,19 +4639,28 @@ namespace Alethic.Auth0.Operator.Controllers
             V2alpha1ConnectionStrategy.Auth0 when options?.Auth0 is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Ad when options?.Ad is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Adfs when options?.Adfs is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Amazon when options?.Amazon is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Apple when options?.Apple is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Auth0Oidc when options?.Auth0Oidc is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.AzureAd when options?.AzureAd is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Baidu when options?.Baidu is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Bitbucket when options?.Bitbucket is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Bitly when options?.Bitly is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Box when options?.Box is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Daccount when options?.Daccount is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Dropbox when options?.Dropbox is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Dwolla when options?.Dwolla is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Email when options?.Email is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Evernote when options?.Evernote is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.EvernoteSandbox when options?.EvernoteSandbox is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Exact when options?.Exact is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Facebook when options?.Facebook is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Fitbit when options?.Fitbit is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.GitHub when options?.GitHub is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.GoogleApps when options?.GoogleApps is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.GoogleOAuth2 when options?.GoogleOAuth2 is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Instagram when options?.Instagram is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Line when options?.Line is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Linkedin when options?.Linkedin is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.OAuth1 when options?.OAuth1 is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.OAuth2 when options?.OAuth2 is { } o => ToApi(o),
@@ -3977,14 +4670,25 @@ namespace Alethic.Auth0.Operator.Controllers
             V2alpha1ConnectionStrategy.Paypal when options?.Paypal is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.PaypalSandbox when options?.PaypalSandbox is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.PingFederate when options?.PingFederate is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.PlanningCenter when options?.PlanningCenter is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Salesforce when options?.Salesforce is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.SalesforceCommunity when options?.SalesforceCommunity is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.SalesforceSandbox when options?.SalesforceSandbox is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Saml when options?.Saml is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Sharepoint when options?.Sharepoint is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Shop when options?.Shop is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Shopify when options?.Shopify is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Sms when options?.Sms is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Soundcloud when options?.Soundcloud is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.ThirtySevenSignals when options?.ThirtySevenSignals is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Twitter when options?.Twitter is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Untappd when options?.Untappd is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Vkontakte when options?.Vkontakte is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Weibo when options?.Weibo is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.WindowsLive when options?.WindowsLive is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Wordpress when options?.Wordpress is { } o => ToApi(o),
             V2alpha1ConnectionStrategy.Yahoo when options?.Yahoo is { } o => ToApi(o),
+            V2alpha1ConnectionStrategy.Yandex when options?.Yandex is { } o => ToApi(o),
             _ => null,
         };
 
