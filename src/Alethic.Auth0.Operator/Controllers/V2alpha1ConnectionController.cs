@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +42,17 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V2alpha1Connection>
     {
 
+        static JsonSerializerOptions GetAuth0JsonSerializerOptions()
+        {
+            var type = typeof(ConnectionOptionsAuth0).Assembly.GetType("Auth0.ManagementApi.Core.JsonOptions")
+                ?? throw new InvalidOperationException("Unable to locate Auth0.ManagementApi.Core.JsonOptions.");
+
+            return type.GetField("JsonSerializerOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as JsonSerializerOptions
+                ?? throw new InvalidOperationException("Unable to resolve Auth0 JSON serializer options.");
+        }
+
+        static readonly JsonSerializerOptions Auth0JsonSerializerOptions = GetAuth0JsonSerializerOptions();
+
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
@@ -65,7 +77,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         internal static TTo? JsonConvertTo<TTo>(object? source)
         {
-            return JsonSerializer.Deserialize<TTo>(JsonSerializer.Serialize(source));
+            return JsonSerializer.Deserialize<TTo>(JsonSerializer.Serialize(source, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
         }
 
         /// <summary>
@@ -4003,7 +4015,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
-                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options));
+                target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
         }
 
         internal static void ApplyToApi(V2alpha1ConnectionConf source, UpdateConnectionRequestContent target)
@@ -4025,7 +4037,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
-                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options));
+                target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
         }
 
         static void ApplyToApi(V2alpha1ConnectionOptionsEmailAttribute source, EmailAttribute target)
