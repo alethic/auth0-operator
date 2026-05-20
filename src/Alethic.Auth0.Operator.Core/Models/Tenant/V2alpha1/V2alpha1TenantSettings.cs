@@ -51,6 +51,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha1TenantErrorPage? ErrorPage { get; set; }
 
+        [JsonPropertyName("default_token_quota")]
         [JsonPropertyName("picture_url")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PictureUrl { get; set; }
