@@ -75,21 +75,23 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
-        public void FromApi_ClientGrant_ClientRef_IsNull()
+        public void FromApi_ClientGrant_ClientRef_IsMapped()
         {
             var source = new GetClientGrantResponseContent { ClientId = "some-client-id" };
             var result = V1ClientGrantController.FromApi(source);
             Assert.IsNotNull(result);
-            Assert.IsNull(result.ClientRef);
+            Assert.IsNotNull(result.ClientRef);
+            Assert.AreEqual("some-client-id", result.ClientRef.Id);
         }
 
         [TestMethod]
-        public void FromApi_ClientGrant_Audience_IsNull()
+        public void FromApi_ClientGrant_Audience_IsMapped()
         {
             var source = new GetClientGrantResponseContent { Audience = "https://api.example.com/" };
             var result = V1ClientGrantController.FromApi(source);
             Assert.IsNotNull(result);
-            Assert.IsNull(result.Audience);
+            Assert.IsNotNull(result.Audience);
+            Assert.AreEqual("https://api.example.com/", result.Audience.Identifier);
         }
 
         // ──────────────────────── ToApi OrganizationUsage ────────────────────────

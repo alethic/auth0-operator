@@ -33,6 +33,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var source = new GetConnectionResponseContent
             {
+                Id = "con_test_conn",
                 Name = "test-conn",
                 DisplayName = "Test Connection",
                 Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
@@ -55,7 +56,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_EnabledClientsIsNull()
         {
-            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
+            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Id = "con_x", Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
             Assert.IsNotNull(result);
             Assert.IsNull(result.EnabledClients);
         }
@@ -63,7 +64,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void FromApi_Connection_NullStrategyOptions_AllStrategySpecificPropertiesNull()
         {
-            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
+            var result = V2alpha1ConnectionController.FromApi(new GetConnectionResponseContent { Id = "con_x", Name = "x", Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0 });
             Assert.IsNotNull(result);
             Assert.IsNull(result.Options?.Auth0);
             Assert.IsNull(result.Options?.Oidc);
@@ -75,6 +76,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var source = new GetConnectionResponseContent
             {
+                Id = "con_metadata",
                 Name = "x",
                 Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
                 Metadata = new System.Collections.Generic.Dictionary<string, string> { ["env"] = "prod" },
@@ -538,6 +540,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var source = new GetConnectionResponseContent
             {
+                Id = "con_roundtrip",
                 Name = "roundtrip",
                 DisplayName = "Roundtrip",
                 Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
