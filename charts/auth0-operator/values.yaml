@@ -100,8 +100,8 @@ operator:
   # The `Requests or Limits <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>`__ for resources to associate to Operator pods.
   resources:
     requests:
-      cpu: 50m
-      memory: 64Mi
+      cpu: 10m
+      memory: 128Mi
 
 # Various configuration options.
 options:
