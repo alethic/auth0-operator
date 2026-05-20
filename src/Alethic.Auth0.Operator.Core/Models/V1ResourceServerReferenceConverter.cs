@@ -11,7 +11,7 @@ namespace Alethic.Auth0.Operator.Core.Models
         public override V1ResourceServerReference? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType == JsonTokenType.String)
-                return new V1ResourceServerReference { Id = reader.GetString() };
+                return new V1ResourceServerReference { Identifier = reader.GetString() };
 
             if (reader.TokenType == JsonTokenType.StartObject)
             {
