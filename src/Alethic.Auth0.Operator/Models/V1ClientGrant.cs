@@ -13,7 +13,6 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "ClientGrant")]
-    [KubernetesEntityShortNames("a0cgr")]
     public partial class V1ClientGrant :
         CustomKubernetesEntity<V1ClientGrant.SpecDef, V1ClientGrant.StatusDef>,
         V1TenantEntityInstance<V1ClientGrant.SpecDef, V1ClientGrant.StatusDef, V1ClientGrantConf, V1ClientGrantConf>

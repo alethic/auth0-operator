@@ -13,7 +13,6 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v2alpha1", Kind = "Role")]
-    [KubernetesEntityShortNames("a0role")]
     public partial class V2alpha1Role :
         CustomKubernetesEntity<V2alpha1Role.SpecDef, V2alpha1Role.StatusDef>,
         V1TenantEntityInstance<V2alpha1Role.SpecDef, V2alpha1Role.StatusDef, V2alpha1RoleConf, V2alpha1RoleConf>

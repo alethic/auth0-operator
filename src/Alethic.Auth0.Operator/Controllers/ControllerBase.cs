@@ -112,7 +112,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<V2alpha1Tenant?> ResolveV2alpha1TenantRef(V1TenantReference? tenantRef, string defaultNamespace, CancellationToken cancellationToken)
+        public async Task<V2alpha3Tenant?> ResolveV2alpha3TenantRef(V1TenantReference? tenantRef, string defaultNamespace, CancellationToken cancellationToken)
         {
             if (tenantRef is null)
                 return null;
@@ -124,7 +124,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (string.IsNullOrWhiteSpace(ns))
                 throw new InvalidOperationException($"Tenant reference {tenantRef} has no discovered namesace.");
 
-            var tenant = await _kube.GetAsync<V2alpha1Tenant>(tenantRef.Name, ns, cancellationToken);
+            var tenant = await _kube.GetAsync<V2alpha3Tenant>(tenantRef.Name, ns, cancellationToken);
             if (tenant is null)
                 throw new RetryException($"Tenant reference {tenantRef} cannot be resolved.");
 
@@ -259,7 +259,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="tenant"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected async Task<IManagementApiClient> GetTenantApiClientAsync(V2alpha1Tenant tenant, CancellationToken cancellationToken)
+        protected async Task<IManagementApiClient> GetTenantApiClientAsync(V2alpha3Tenant tenant, CancellationToken cancellationToken)
         {
             var api = await _cache.GetOrCreateAsync((tenant.Namespace(), tenant.Name()), async entry =>
             {
@@ -324,7 +324,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <exception cref="InvalidOperationException"></exception>
         protected async Task<IManagementApiClient> GetTenantApiClientAsync(TEntity entity, V1TenantReference tenantRef, CancellationToken cancellationToken)
         {
-            var v2alpha1Tenant = await ResolveV2alpha1TenantRef(tenantRef, entity.Namespace(), cancellationToken);
+            var v2alpha1Tenant = await ResolveV2alpha3TenantRef(tenantRef, entity.Namespace(), cancellationToken);
             if (v2alpha1Tenant is not null)
             {
                 var api = await GetTenantApiClientAsync(v2alpha1Tenant, cancellationToken);

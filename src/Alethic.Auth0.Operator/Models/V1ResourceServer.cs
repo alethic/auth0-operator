@@ -13,7 +13,6 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "ResourceServer")]
-    [KubernetesEntityShortNames("a0api")]
     public partial class V1ResourceServer :
         CustomKubernetesEntity<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef>,
         V1TenantEntityInstance<V1ResourceServer.SpecDef, V1ResourceServer.StatusDef, V1ResourceServerConf, V1ResourceServerConf>

@@ -5,7 +5,8 @@ using System.Runtime.Versioning;
 using Auth0.ManagementApi;
 
 using Alethic.Auth0.Operator.Core.Models.Tenant.V1;
-using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1;
+using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha3;
+using Alethic.Auth0.Operator.Converters.Generated;
 using Alethic.Auth0.Operator.Models;
 
 using KubeOps.Operator.Web.Webhooks.Conversion;
@@ -14,26 +15,27 @@ namespace Alethic.Auth0.Operator.Converters
 {
 
     /// <summary>
-    /// Provides conversions targeting <see cref="V2alpha1Tenant"/>.
+    /// Provides conversions targeting <see cref="V2alpha3Tenant"/>.
     /// </summary>
     [RequiresPreviewFeatures]
-    [ConversionWebhook(typeof(V2alpha1Tenant))]
-    public class TenantConverter : ConversionWebhook<V2alpha1Tenant>
+    [ConversionWebhook(typeof(V2alpha3Tenant))]
+    public class TenantConverter : ConversionWebhook<V2alpha3Tenant>
     {
 
-        protected override IEnumerable<IEntityConverter<V2alpha1Tenant>> Converters => [
-            new V1ToV2alpha1()
+        protected override IEnumerable<IEntityConverter<V2alpha3Tenant>> Converters => [
+            new V1ToV2alpha3(),
+            new V2alpha1ToV2alpha3()
         ];
 
         /// <summary>
-        /// Converts from <see cref="V2alpha1Tenant"/> to <see cref="V1Tenant"/>.
+        /// Converts from <see cref="V2alpha3Tenant"/> to <see cref="V1Tenant"/>.
         /// </summary>
-        class V1ToV2alpha1 : IEntityConverter<V1Tenant, V2alpha1Tenant>
+        class V1ToV2alpha3 : IEntityConverter<V1Tenant, V2alpha3Tenant>
         {
 
-            public V2alpha1Tenant Convert(V1Tenant from)
+            public V2alpha3Tenant Convert(V1Tenant from)
             {
-                var result = new V2alpha1Tenant { Metadata = from.Metadata };
+                var result = new V2alpha3Tenant { Metadata = from.Metadata };
                 result.Spec.Policy = from.Spec.Policy;
                 result.Spec.Name = from.Spec.Name;
                 result.Spec.Auth = from.Spec.Auth is { } auth ? new() { SecretRef = auth.SecretRef, Domain = auth.Domain } : null;
@@ -43,7 +45,7 @@ namespace Alethic.Auth0.Operator.Converters
                 return result;
             }
 
-            V2alpha1TenantSettings? Convert(V1TenantConf? conf)
+            V2alpha3TenantSettings? Convert(V1TenantConf? conf)
             {
                 if (conf is null)
                     return null;
@@ -126,22 +128,22 @@ namespace Alethic.Auth0.Operator.Converters
                 };
             }
 
-            V2alpha1TenantCharset? Convert(V1TenantCharset? source) => source switch
+            V2alpha3TenantCharset? Convert(V1TenantCharset? source) => source switch
             {
-                V1TenantCharset.Base20 => V2alpha1TenantCharset.Base20,
-                V1TenantCharset.Digits => V2alpha1TenantCharset.Digits,
+                V1TenantCharset.Base20 => V2alpha3TenantCharset.Base20,
+                V1TenantCharset.Digits => V2alpha3TenantCharset.Digits,
                 _ => null
             };
 
-            V2alpha1TenantSessionCookieModeEnum? Convert(string? source) => source switch
+            V2alpha3TenantSessionCookieModeEnum? Convert(string? source) => source switch
             {
-                SessionCookieModeEnum.Values.Persistent => V2alpha1TenantSessionCookieModeEnum.Persistent,
-                SessionCookieModeEnum.Values.NonPersistent => V2alpha1TenantSessionCookieModeEnum.NonPersistent,
+                SessionCookieModeEnum.Values.Persistent => V2alpha3TenantSessionCookieModeEnum.Persistent,
+                SessionCookieModeEnum.Values.NonPersistent => V2alpha3TenantSessionCookieModeEnum.NonPersistent,
                 null => null,
                 _ => null
             };
 
-            public V1Tenant Revert(V2alpha1Tenant source)
+            public V1Tenant Revert(V2alpha3Tenant source)
             {
                 var result = new V1Tenant { Metadata = source.Metadata };
                 result.Spec.Policy = source.Spec.Policy;
@@ -157,7 +159,7 @@ namespace Alethic.Auth0.Operator.Converters
                 return result;
             }
 
-            V1TenantConf? Revert(V2alpha1TenantSettings? source)
+            V1TenantConf? Revert(V2alpha3TenantSettings? source)
             {
                 if (source is null)
                     return null;
@@ -240,23 +242,54 @@ namespace Alethic.Auth0.Operator.Converters
                 };
             }
 
-            V1TenantCharset? Revert(V2alpha1TenantCharset source) => source switch
+            V1TenantCharset? Revert(V2alpha3TenantCharset source) => source switch
             {
-                V2alpha1TenantCharset.Base20 => V1TenantCharset.Base20,
-                V2alpha1TenantCharset.Digits => V1TenantCharset.Digits,
+                V2alpha3TenantCharset.Base20 => V1TenantCharset.Base20,
+                V2alpha3TenantCharset.Digits => V1TenantCharset.Digits,
                 _ => null
             };
 
-            string? Revert(V2alpha1TenantSessionCookieModeEnum? source) => source switch
+            string? Revert(V2alpha3TenantSessionCookieModeEnum? source) => source switch
             {
-                V2alpha1TenantSessionCookieModeEnum.Persistent => SessionCookieModeEnum.Values.Persistent,
-                V2alpha1TenantSessionCookieModeEnum.NonPersistent => SessionCookieModeEnum.Values.NonPersistent,
+                V2alpha3TenantSessionCookieModeEnum.Persistent => SessionCookieModeEnum.Values.Persistent,
+                V2alpha3TenantSessionCookieModeEnum.NonPersistent => SessionCookieModeEnum.Values.NonPersistent,
                 null => null,
                 _ => null
             };
 
         }
 
+
+        /// <summary>Structural (property-copy) conversion between the
+        /// structurally-identical V2alpha1 and V2alpha3 Tenant models.</summary>
+        class V2alpha1ToV2alpha3 : IEntityConverter<Models.V2alpha1Tenant, Models.V2alpha3Tenant>
+        {
+
+            public Models.V2alpha3Tenant Convert(Models.V2alpha1Tenant from)
+            {
+                var result = new Models.V2alpha3Tenant { Metadata = from.Metadata };
+                result.Spec.Policy = from.Spec.Policy;
+                result.Spec.Name = from.Spec.Name;
+                result.Spec.Auth = from.Spec.Auth is { } auth ? new() { Domain = auth.Domain, SecretRef = auth.SecretRef } : null;
+                result.Spec.Init = TenantCopy.Convert(from.Spec.Init);
+                result.Spec.Conf = TenantCopy.Convert(from.Spec.Conf);
+                result.Status.LastConf = TenantCopy.Convert(from.Status.LastConf);
+                return result;
+            }
+
+            public Models.V2alpha1Tenant Revert(Models.V2alpha3Tenant source)
+            {
+                var result = new Models.V2alpha1Tenant { Metadata = source.Metadata };
+                result.Spec.Policy = source.Spec.Policy;
+                result.Spec.Name = source.Spec.Name;
+                result.Spec.Auth = source.Spec.Auth is { } auth ? new() { Domain = auth.Domain, SecretRef = auth.SecretRef } : null;
+                result.Spec.Init = TenantCopy.Revert(source.Spec.Init);
+                result.Spec.Conf = TenantCopy.Revert(source.Spec.Conf);
+                result.Status.LastConf = TenantCopy.Revert(source.Status.LastConf);
+                return result;
+            }
+
+        }
     }
 
 }

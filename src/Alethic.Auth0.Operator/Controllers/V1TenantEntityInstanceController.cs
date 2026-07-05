@@ -30,7 +30,7 @@ namespace Alethic.Auth0.Operator.Controllers
     /// <typeparam name="TStatus"></typeparam>
     /// <typeparam name="TConf"></typeparam>
     /// <typeparam name="TLastConf"></typeparam>
-    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V2alpha3Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public abstract class V1TenantEntityInstanceController<TEntity, TSpec, TStatus, TConf, TLastConf> : V1TenantEntityController<TEntity, TSpec, TStatus, TConf, TLastConf>
@@ -105,7 +105,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected abstract Task Update(IManagementApiClient api, string id, TLastConf? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken)
+        protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)
         {
             if (entity.Spec.Conf is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
@@ -205,7 +205,7 @@ namespace Alethic.Auth0.Operator.Controllers
         protected abstract Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        protected override async Task DeletedAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken)
+        protected override async Task DeletedAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(entity.Status.Id))
             {

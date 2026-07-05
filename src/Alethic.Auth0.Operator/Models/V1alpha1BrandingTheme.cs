@@ -13,7 +13,6 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1alpha1", Kind = "BrandingTheme")]
-    [KubernetesEntityShortNames("a0theme")]
     public partial class V1alpha1BrandingTheme :
         CustomKubernetesEntity<V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef>,
         V1TenantEntityInstance<V1alpha1BrandingTheme.SpecDef, V1alpha1BrandingTheme.StatusDef, V1alpha1BrandingThemeConf, V1alpha1BrandingThemeConf>

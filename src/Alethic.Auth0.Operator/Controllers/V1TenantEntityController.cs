@@ -21,7 +21,7 @@ using Microsoft.Extensions.Options;
 namespace Alethic.Auth0.Operator.Controllers
 {
 
-    [EntityRbac(typeof(V2alpha1Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
+    [EntityRbac(typeof(V2alpha3Tenant), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.List | RbacVerb.Get)]
     [EntityRbac(typeof(Eventsv1Event), Verbs = RbacVerb.All)]
     public abstract class V1TenantEntityController<TEntity, TSpec, TStatus, TConf, TLastConf> : ControllerBase<TEntity, TSpec, TStatus, TConf, TLastConf>
@@ -54,7 +54,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous reconciliation operation. The task result contains the reconciled
         /// entity reflecting the current state after reconciliation.</returns>
-        protected abstract Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken);
+        protected abstract Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken);
 
         /// <inheritdoc />
         protected sealed override async Task Reconcile(TEntity entity, CancellationToken cancellationToken)
@@ -63,7 +63,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing a tenant reference.");
 
             // resolve the tenant object
-            var tenant = await ResolveV2alpha1TenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
+            var tenant = await ResolveV2alpha3TenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
             if (tenant is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
 
@@ -92,7 +92,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="entity">The entity instance that was deleted. Cannot be null.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        protected abstract Task DeletedAsync(IManagementApiClient api, V2alpha1Tenant tenant, TEntity entity, CancellationToken cancellationToken);
+        protected abstract Task DeletedAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken);
 
         /// <inheritdoc />
         protected sealed override async Task DeletedAsync(TEntity entity, CancellationToken cancellationToken)
@@ -101,7 +101,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant reference.");
 
             // resolve the tenant object
-            var tenant = await ResolveV2alpha1TenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
+            var tenant = await ResolveV2alpha3TenantRef(entity.Spec.TenantRef, entity.Namespace(), cancellationToken);
             if (tenant is null)
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} is missing a tenant.");
 

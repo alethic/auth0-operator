@@ -30,52 +30,61 @@ Since the entire API is derived from the Auth0 Management API their documentatio
 
 ## Supported Resources
 
-- [x] kubernetes.auth0.com/v1:Tenant `a0tenant`
-- [x] kubernetes.auth0.com/v2alpha1:Tenant `a0tenant`
-- [x] kubernetes.auth0.com/v1:Client `a0app`
-- [x] kubernetes.auth0.com/v1:ClientGrant `a0cgr`
-- [x] kubernetes.auth0.com/v1:ResourceServer `a0api`
-- [x] kubernetes.auth0.com/v1:Connection `a0con`
-- [x] kubernetes.auth0.com/v2alpha1:Role `a0role`
-- [x] kubernetes.auth0.com/v1alpha1:BrandingTheme `a0theme`
-- [x] kubernetes.auth0.com/v1alpha1:CustomDomain `a0domain`
-- [x] kubernetes.auth0.com/v1alpha1:CustomText `a0customtext`
+`v2alpha3` is the current (storage) version of every resource. Its schema follows
+Kubernetes-standard **camelCase** naming (e.g. `allowedClients`, `appType`, `regularWeb`) as
+preparation for the V2 release — a departure from the Auth0 Management API's `snake_case`. The
+older versions listed below remain **served but deprecated**; the operator automatically
+converts them to `v2alpha3` via conversion webhooks, so existing manifests continue to work.
+The older versions will be removed in a future release — migrate to `v2alpha3` when convenient.
+
+| Kind | Current version | Short name | Deprecated versions (served) |
+|---|---|---|---|
+| Tenant | `v2alpha3` | `a0tenant` | `v2alpha1`, `v1` |
+| Client | `v2alpha3` | `a0app` | `v2alpha1`, `v1` |
+| Connection | `v2alpha3` | `a0con` | `v2alpha1`, `v1` |
+| Role | `v2alpha3` | `a0role` | `v2alpha1` |
+| ClientGrant | `v2alpha3` | `a0cgr` | `v1` |
+| ResourceServer | `v2alpha3` | `a0api` | `v1` |
+| BrandingTheme | `v2alpha3` | `a0theme` | `v1alpha1` |
+| CustomDomain | `v2alpha3` | `a0domain` | `v1alpha1` |
+| CustomText | `v2alpha3` | `a0customtext` | `v1alpha1` |
+
+> Note: KubeOps requires short names to be unique across a resource's versions, so the short
+> names above are defined only on `v2alpha3`. All examples below use `v2alpha3`. Manifests that
+> still target an older served version continue to work — the operator converts them
+> automatically — but the field names in those older schemas use `snake_case`.
+
+## Naming Conventions
+
+The `v2alpha3` schema favors Kubernetes conventions over the Auth0 Management API's:
+
+- **Field names are `camelCase`.** Where the Auth0 API uses `snake_case` (or `kebab-case`),
+  `v2alpha3` uses camelCase — `allowed_clients` → `allowedClients`, `app_type` → `appType`,
+  `google-oauth2` → `googleOauth2`.
+- **Descriptive enum values are `camelCase` too** — `regular_web` → `regularWeb`,
+  `sso_integration` → `ssoIntegration`, `non_rotating` → `nonRotating`,
+  `access_token` → `accessToken`.
+- **Meaningful external constants keep their canonical Auth0 form.** Standardized
+  identifiers are *not* camelCased, because their exact spelling carries meaning:
+  - JOSE/JWA algorithms: `HS256`, `RS256`, `RS512`, `PS256`, `ES256`, `Ed25519`, `S256`
+  - SAML signature/digest algorithms: `rsa-sha256`, `sha256`; OAuth 1.0: `RSA-SHA1`
+  - SAML binding URNs: `urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST`
+  - Protocol / API-version identifiers: `azure-active-directory-v1.0`,
+    `microsoft-identity-platform-v2.0`, `v2026-1`
+
+You never need to know the Auth0 wire value — the operator translates between the `v2alpha3`
+representation and the Auth0 Management API during reconciliation.
 
 ## Examples
 
 The following examples demonstrate each resource type. All resources are namespaced.
 
-### Tenant (v1)
+### Tenant
 
-The `v1` Tenant schema stores all tenant settings as flat properties directly under `spec.conf`.
-
-```yaml
-apiVersion: kubernetes.auth0.com/v1
-kind: Tenant
-metadata:
-  name: example-tenant
-  namespace: example
-spec:
-  name: example-tenant
-  auth:
-    domain: example-tenant.us.auth0.com
-    secretRef:
-      name: example-tenant
-  policy:
-    - Create
-    - Update
-  conf:
-    friendly_name: My Tenant
-    session_lifetime: 168
-    idle_session_lifetime: 72
-```
-
-### Tenant (v2alpha1)
-
-The `v2alpha1` Tenant schema organises configuration into `settings`, `branding`, and `prompts` subsections under `spec.conf`.
+The Tenant schema organises configuration into `settings`, `branding`, and `prompts` subsections under `spec.conf`.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v2alpha1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: Tenant
 metadata:
   name: example-tenant
@@ -91,31 +100,31 @@ spec:
     - Update
   conf:
     settings:
-      friendly_name: My Tenant
-      session_lifetime: 168
-      idle_session_lifetime: 72
-      allowed_logout_urls:
+      friendlyName: My Tenant
+      sessionLifetime: 168
+      idleSessionLifetime: 72
+      allowedLogoutUrls:
         - "https://yourapp.com/callback"
-      enabled_locales:
+      enabledLocales:
         - "en"
         - "es"
     branding:
-      logo_url: https://example.com/logo.png
-      favicon_url: https://example.com/favicon.ico
+      logoUrl: https://example.com/logo.png
+      faviconUrl: https://example.com/favicon.ico
       colors:
         primary: "#0059d6"
-        page_background: "#ffffff"
+        pageBackground: "#ffffff"
     prompts:
-      universal_login_experience: new
-      identifier_first: true
+      universalLoginExperience: new
+      identifierFirst: true
 ```
 
 ### Client (App)
 
-The `Client` resource manages an Auth0 [application](https://auth0.com/docs/get-started/applications). An optional `spec.find` entry can locate an existing client by `client_id` or `name`. An optional `spec.secretRef` can point to a Kubernetes secret to create or reference containing the `client_id` and `client_secret` values.
+The `Client` resource manages an Auth0 [application](https://auth0.com/docs/get-started/applications). An optional `spec.find` entry can locate an existing client by `clientId` or `name`. An optional `spec.secretRef` can point to a Kubernetes secret to create or reference containing the `clientId` and `clientSecret` values.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: Client
 metadata:
   name: example-client
@@ -131,17 +140,17 @@ spec:
   find:
     name: example-client
   init:
-    app_type: spa
+    appType: spa
   conf:
     name: example-client
-    app_type: spa
-    grant_types:
+    appType: spa
+    grantTypes:
       - authorization_code
     callbacks:
       - https://example.com/callback
-    allowed_logout_urls:
+    allowedLogoutUrls:
       - https://example.com
-    web_origins:
+    webOrigins:
       - https://example.com
 ```
 
@@ -150,7 +159,7 @@ spec:
 The `ResourceServer` resource manages an Auth0 [API (resource server)](https://auth0.com/docs/get-started/apis).
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: ResourceServer
 metadata:
   name: example-api
@@ -164,12 +173,12 @@ spec:
   conf:
     identifier: https://example.com/
     name: Example API
-    allow_offline_access: false
-    skip_consent_for_verifiable_first_party_clients: true
-    token_lifetime: 86400
-    token_lifetime_for_web: 7200
-    signing_alg: RS256
-    token_dialect: access_token
+    allowOfflineAccess: false
+    skipConsentForVerifiableFirstPartyClients: true
+    tokenLifetime: 86400
+    tokenLifetimeForWeb: 7200
+    signingAlg: RS256
+    tokenDialect: accessToken
     scopes:
       - value: read:data
         description: Read data
@@ -180,7 +189,7 @@ spec:
 Grants permission for a `Client` to access a `ResourceServer`. See the [Client Grants API reference](https://auth0.com/docs/api/management/v2/client-grants). The `clientRef` and `audience` fields reference other operator-managed resources by name or directly by Auth0 ID/identifier.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: ClientGrant
 metadata:
   name: example-app-api
@@ -202,10 +211,10 @@ spec:
 
 ### Connection
 
-The `Connection` resource manages an Auth0 [connection (identity provider)](https://auth0.com/docs/authenticate/identity-providers). An optional `spec.find` entry can locate an existing connection by its Auth0 `id`. The `enabled_clients` field accepts references to operator-managed `Client` resources by name or directly by Auth0 client ID.
+The `Connection` resource manages an Auth0 [connection (identity provider)](https://auth0.com/docs/authenticate/identity-providers). An optional `spec.find` entry can locate an existing connection by its Auth0 `id`. The `enabledClients` field accepts references to operator-managed `Client` resources by name or directly by Auth0 client ID.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: Connection
 metadata:
   name: example-connection
@@ -220,13 +229,13 @@ spec:
     id: con_abc123
   conf:
     name: example-connection
-    display_name: Example Connection
+    displayName: Example Connection
     strategy: auth0
-    enabled_clients:
+    enabledClients:
       - name: example-client
     options:
-      requires_username: false
-      brute_force_protection: true
+      requiresUsername: false
+      bruteForceProtection: true
 ```
 
 ### Role
@@ -234,7 +243,7 @@ spec:
 The `Role` resource manages an Auth0 [role](https://auth0.com/docs/manage-users/access-control/rbac) and its associated permissions. See the [Roles API reference](https://auth0.com/docs/api/management/v2/roles). Each entry under `permissions` associates a permission (scope) defined on a `ResourceServer` with the role; the `resourceServerRef` field references an operator-managed `ResourceServer` by name or directly by Auth0 ID/identifier. When `permissions` is set, the operator reconciles the role's permissions to exactly match the list; omit it to leave permissions unmanaged.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v2alpha1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: Role
 metadata:
   name: example-role
@@ -262,7 +271,7 @@ spec:
 The `BrandingTheme` resource manages the [branding theme](https://auth0.com/docs/customize/branding/branding-themes) for a tenant, controlling the visual appearance of login pages and other Auth0-hosted screens. An optional `spec.find` entry can locate an existing theme by its Auth0 `id`.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1alpha1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: BrandingTheme
 metadata:
   name: example-theme
@@ -278,62 +287,62 @@ spec:
   conf:
     displayName: Example Theme
     borders:
-      button_border_radius: 3
-      button_border_weight: 1
-      buttons_style: rounded
-      input_border_radius: 3
-      input_border_weight: 1
-      inputs_style: rounded
-      show_widget_shadow: true
-      widget_border_weight: 0
-      widget_corner_radius: 5
+      buttonBorderRadius: 3
+      buttonBorderWeight: 1
+      buttonsStyle: rounded
+      inputBorderRadius: 3
+      inputBorderWeight: 1
+      inputsStyle: rounded
+      showWidgetShadow: true
+      widgetBorderWeight: 0
+      widgetCornerRadius: 5
     colors:
-      primary_button: "#0059d6"
-      primary_button_label: "#ffffff"
-      body_text: "#1e212a"
+      primaryButton: "#0059d6"
+      primaryButtonLabel: "#ffffff"
+      bodyText: "#1e212a"
       header: "#1e212a"
       icons: "#65676e"
-      input_background: "#ffffff"
-      input_border: "#c9cace"
-      input_filled_text: "#1e212a"
-      input_labels_placeholders: "#65676e"
-      links_focused_components: "#0059d6"
-      widget_background: "#ffffff"
-      widget_border: "#c9cace"
+      inputBackground: "#ffffff"
+      inputBorder: "#c9cace"
+      inputFilledText: "#1e212a"
+      inputLabelsPlaceholders: "#65676e"
+      linksFocusedComponents: "#0059d6"
+      widgetBackground: "#ffffff"
+      widgetBorder: "#c9cace"
       error: "#d03c38"
       success: "#13a688"
     fonts:
-      font_url: https://fonts.googleapis.com/css2?family=Inter
-      reference_text_size: 16
+      fontUrl: https://fonts.googleapis.com/css2?family=Inter
+      referenceTextSize: 16
       title:
         bold: true
         size: 150
       subtitle:
         bold: false
         size: 100
-      body_text:
+      bodyText:
         bold: false
         size: 87.5
-      buttons_text:
+      buttonsText:
         bold: false
         size: 100
-      input_labels:
+      inputLabels:
         bold: false
         size: 100
       links:
         bold: true
         size: 87.5
-      links_style: normal
-    page_background:
-      background_color: "#f0f0f0"
-      background_image_url: https://example.com/bg.png
-      page_layout: center
+      linksStyle: normal
+    pageBackground:
+      backgroundColor: "#f0f0f0"
+      backgroundImageUrl: https://example.com/bg.png
+      pageLayout: center
     widget:
-      header_text_alignment: center
-      logo_height: 52
-      logo_position: center
-      logo_url: https://example.com/logo.png
-      social_buttons_layout: bottom
+      headerTextAlignment: center
+      logoHeight: 52
+      logoPosition: center
+      logoUrl: https://example.com/logo.png
+      socialButtonsLayout: bottom
 ```
 
 ### CustomDomain
@@ -341,7 +350,7 @@ spec:
 The `CustomDomain` resource manages Auth0 [custom domains](https://auth0.com/docs/customize/custom-domains). The operator finds existing custom domains by matching on the `domain` field. An optional `spec.secretRef` can reference a Kubernetes secret.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1alpha1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: CustomDomain
 metadata:
   name: example-domain
@@ -354,11 +363,11 @@ spec:
     - Update
   conf:
     domain: login.example.com
-    type: auth0_managed_certs
-    verification_method: txt
+    type: auth0ManagedCerts
+    verificationMethod: txt
     primary: true
-    tls_policy: recommended
-    custom_client_ip_header: X-Forwarded-For
+    tlsPolicy: recommended
+    customClientIpHeader: X-Forwarded-For
 ```
 
 ### CustomText
@@ -366,7 +375,7 @@ spec:
 The `CustomText` resource manages Auth0 custom text [localization](https://auth0.com/docs/customize/ui-features/localization) for a tenant. The operator finds existing custom text entries by matching on the `prompt` and `language` fields.
 
 ```yaml
-apiVersion: kubernetes.auth0.com/v1alpha1
+apiVersion: kubernetes.auth0.com/v2alpha3
 kind: CustomText
 metadata:
   name: example-login-text
@@ -410,7 +419,7 @@ Available on `Client`, `Connection`, and `BrandingTheme` resources to locate an 
 
 | Field     | Description                         |
 |-----------|-------------------------------------|
-| `client_id`| Match by Auth0 client ID            |
+| `clientId`| Match by Auth0 client ID            |
 | `name`    | Match by Auth0 client name          |
 
 ### spec.policy
@@ -430,5 +439,5 @@ Used by `Client` and `CustomDomain` resources to refer to a Kubernetes secret co
 - `tenantRef`: References the owning `Tenant` resource.
 - `clientRef`: References a `Client` resource, used in `ClientGrant` and `Connection` resources.
 - `audience`: References a `ResourceServer` resource, used in `ClientGrant` resources.
-- `enabled_clients`: References `Client` resources by name, used in `Connection` resources.
+- `enabledClients`: References `Client` resources by name, used in `Connection` resources.
 - `resourceServerRef`: References a `ResourceServer` resource, used in `Role` permissions.
