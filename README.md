@@ -36,6 +36,7 @@ Since the entire API is derived from the Auth0 Management API their documentatio
 - [x] kubernetes.auth0.com/v1:ClientGrant `a0cgr`
 - [x] kubernetes.auth0.com/v1:ResourceServer `a0api`
 - [x] kubernetes.auth0.com/v1:Connection `a0con`
+- [x] kubernetes.auth0.com/v2alpha1:Role `a0role`
 - [x] kubernetes.auth0.com/v1alpha1:BrandingTheme `a0theme`
 - [x] kubernetes.auth0.com/v1alpha1:CustomDomain `a0domain`
 - [x] kubernetes.auth0.com/v1alpha1:CustomText `a0customtext`
@@ -228,6 +229,34 @@ spec:
       brute_force_protection: true
 ```
 
+### Role
+
+The `Role` resource manages an Auth0 [role](https://auth0.com/docs/manage-users/access-control/rbac) and its associated permissions. See the [Roles API reference](https://auth0.com/docs/api/management/v2/roles). Each entry under `permissions` associates a permission (scope) defined on a `ResourceServer` with the role; the `resourceServerRef` field references an operator-managed `ResourceServer` by name or directly by Auth0 ID/identifier. When `permissions` is set, the operator reconciles the role's permissions to exactly match the list; omit it to leave permissions unmanaged.
+
+```yaml
+apiVersion: kubernetes.auth0.com/v2alpha1
+kind: Role
+metadata:
+  name: example-role
+  namespace: example
+spec:
+  tenantRef:
+    name: example-tenant
+  policy:
+    - Create
+    - Update
+  conf:
+    name: admin
+    description: Administrator role
+    permissions:
+      - resourceServerRef:
+          name: example-api
+        name: read:data
+      - resourceServerRef:
+          name: example-api
+        name: write:data
+```
+
 ### BrandingTheme
 
 The `BrandingTheme` resource manages the [branding theme](https://auth0.com/docs/customize/branding/branding-themes) for a tenant, controlling the visual appearance of login pages and other Auth0-hosted screens. An optional `spec.find` entry can locate an existing theme by its Auth0 `id`.
@@ -402,3 +431,4 @@ Used by `Client` and `CustomDomain` resources to refer to a Kubernetes secret co
 - `clientRef`: References a `Client` resource, used in `ClientGrant` and `Connection` resources.
 - `audience`: References a `ResourceServer` resource, used in `ClientGrant` resources.
 - `enabled_clients`: References `Client` resources by name, used in `Connection` resources.
+- `resourceServerRef`: References a `ResourceServer` resource, used in `Role` permissions.

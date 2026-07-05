@@ -14,15 +14,16 @@ rules:
   - customdomains
   - customtexts
   - clientgrants
+  - clients
   - connections
-  - resourceservers
+  - roles
   verbs:
   - '*'
 - apiGroups:
   - kubernetes.auth0.com
   resources:
   - tenants
-  - clients
+  - resourceservers
   verbs:
   - '*'
 - apiGroups:
@@ -37,6 +38,13 @@ rules:
   - events
   verbs:
   - '*'
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - clients
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -93,6 +101,14 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - clientgrants/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
   - clients/status
   verbs:
   - get
@@ -101,7 +117,15 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - clientgrants/status
+  - resourceservers/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - clients/status
   verbs:
   - get
   - update
@@ -117,7 +141,7 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - resourceservers/status
+  - roles/status
   verbs:
   - get
   - update
