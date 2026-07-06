@@ -213,12 +213,13 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source is null)
                 return null;
-            if (source.AppPackageName is null)
+            if (source.AppPackageName is null && source.Sha256CertFingerprints is null)
                 return null;
 
             return new()
             {
                 AppPackageName = source.AppPackageName,
+                Sha256CertFingerprints = source.Sha256CertFingerprints?.ToArray(),
             };
         }
 
@@ -1006,6 +1007,9 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.AppPackageName is { } appPackageName)
                 target.AppPackageName = appPackageName;
+
+            if (source.Sha256CertFingerprints is { } sha256CertFingerprints)
+                target.Sha256CertFingerprints = sha256CertFingerprints;
         }
 
         internal static void ApplyToApi(V2alpha3ClientMobileiOs source, ClientMobileiOs target)
@@ -1019,7 +1023,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static void ApplyToApi(V2alpha3ClientMobile source, ClientMobile target)
         {
-            if (source.Android is { } android && android.AppPackageName is not null)
+            if (source.Android is { } android && (android.AppPackageName is not null || android.Sha256CertFingerprints is not null))
                 ApplyToApi(android, target.Android ??= new ClientMobileAndroid());
 
             if (source.Ios is { } ios && (ios.AppBundleIdentifier is not null || ios.TeamId is not null))
