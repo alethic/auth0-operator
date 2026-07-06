@@ -1405,9 +1405,20 @@ namespace Alethic.Auth0.Operator.Controllers
                     cancellationToken);
             }
 
-            if (secret.IsOwnedBy(entity))
+            if (IsOwnedBySelf(secret, entity))
             {
                 Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} referenced secret {SecretName}: updating.", EntityTypeName, entity.Namespace(), entity.Name(), entity.Spec.SecretRef.Name);
+
+                // Heal owner references written by an earlier storage/hub version (e.g. v1 -> v2alpha3): the recorded
+                // apiVersion/kind/name are refreshed to the current entity so external tooling and eventual removal of
+                // the old served version keep a valid reference.
+                foreach (var owner in secret.Metadata.OwnerReferences.Where(r => r.Uid == entity.Uid()))
+                {
+                    owner.ApiVersion = entity.ApiVersion;
+                    owner.Kind = entity.Kind;
+                    owner.Name = entity.Name();
+                }
+
                 secret.StringData ??= new Dictionary<string, string>();
 
                 if (clientId is not null)
@@ -1426,6 +1437,23 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} secret {SecretName} exists but is not owned by this client, skipping update", EntityTypeName, entity.Namespace(), entity.Name(), entity.Spec.SecretRef.Name);
             }
+        }
+
+        /// <summary>
+        /// Determines whether <paramref name="secret"/> is owned by <paramref name="entity"/>, matching on UID only.
+        /// The built-in <see cref="k8s.Models.ModelExtensions.IsOwnedBy"/> also compares the owner reference's
+        /// apiVersion (and kind/name), which drifts when the entity's storage/hub version changes: an existing secret
+        /// keeps the apiVersion written by the operator generation that created it (e.g. <c>v1</c>), so a strict match
+        /// would treat the operator's own secret as foreign and refuse to update it. The UID is the stable identity
+        /// Kubernetes garbage collection itself keys on, so matching on UID alone is both correct and version-agnostic.
+        /// </summary>
+        static bool IsOwnedBySelf(V1Secret secret, V2alpha3Client entity)
+        {
+            var uid = entity.Uid();
+            if (string.IsNullOrEmpty(uid))
+                return false;
+
+            return secret.Metadata?.OwnerReferences?.Any(r => r.Uid == uid) ?? false;
         }
 
         protected override async Task DeletedAsync(IManagementApiClient api, string id, CancellationToken cancellationToken)
