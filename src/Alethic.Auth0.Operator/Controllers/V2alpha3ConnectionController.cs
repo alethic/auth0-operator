@@ -5053,9 +5053,14 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         async Task ApplyEnabledClientsAsync(IManagementApiClient api, V2alpha3Connection entity, string defaultNamespace, CancellationToken cancellationToken)
         {
-            // a null enabledClients means this Connection does not manage enabled clients at all
+            // a null enabledClients means this Connection does not manage enabled clients at all;
+            // clear any previously-tracked managed set so the hand-off is clean and a later
+            // re-adoption starts from an empty scope (never disabling clients out of a stale set)
             if (entity.Spec.Conf?.EnabledClients is not { } enabledClients)
+            {
+                entity.Status.ManagedEnabledClientIds = null;
                 return;
+            }
 
             var id = entity.Status.Id;
             if (string.IsNullOrWhiteSpace(id))
