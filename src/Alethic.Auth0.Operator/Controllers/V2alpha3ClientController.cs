@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Alethic.Auth0.Operator.Core.Models.Client.V2alpha3;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
@@ -1285,8 +1286,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 request.RequireProofOfPossession = conf.RequireProofOfPossession;
         }
 
-        public V2alpha3ClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V2alpha3ClientController> logger) :
-            base(kube, cache, options, logger)
+        public V2alpha3ClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3ClientController> logger) :
+            base(kube, cache, options, httpClientProvider, logger)
         {
         }
 

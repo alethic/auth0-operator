@@ -3,39 +3,36 @@ using System.Threading.RateLimiting;
 
 using Alethic.Auth0.Operator.Options;
 
+using Microsoft.Extensions.Options;
+
 namespace Alethic.Auth0.Operator.RateLimiting
 {
 
     /// <summary>
-    /// Builds the process-wide <see cref="HttpClient"/> used for all Auth0 Management API traffic. A single client is
-    /// shared across tenants: the Auth0 SDK attaches the per-tenant bearer token on each request, so the transport
-    /// carries no tenant-specific state. Requests are throttled with a token bucket partitioned by Auth0 domain, so
-    /// each tenant is limited independently (Auth0 rate limits are per-tenant).
+    /// Provides the process-wide, rate-limited <see cref="HttpClient"/> used for all Auth0 Management API traffic.
+    /// Registered as a singleton so a single client — and its per-domain token bucket — is shared across every
+    /// controller. The Auth0 SDK attaches the per-tenant bearer token on each request, so the transport carries no
+    /// tenant-specific state and is safe to share.
     /// </summary>
-    static class Auth0HttpClientFactory
+    public sealed class Auth0HttpClientProvider
     {
 
-        static HttpClient? _shared;
-        static readonly object _lock = new();
-
         /// <summary>
-        /// Returns the process-wide shared <see cref="HttpClient"/>, building it once from <paramref name="options"/>
-        /// on first use. This memoization lives in this non-generic type deliberately: a static field on the generic
-        /// <c>ControllerBase&lt;...&gt;</c> would be duplicated per closed generic type (one per entity kind), giving
-        /// each kind its own limiter rather than a single shared budget.
+        /// Initializes a new instance.
         /// </summary>
         /// <param name="options"></param>
-        public static HttpClient GetOrCreate(RateLimitOptions options)
+        public Auth0HttpClientProvider(IOptions<OperatorOptions> options)
         {
-            if (_shared is { } c)
-                return c;
-
-            lock (_lock)
-                return _shared ??= Create(options);
+            Client = Create(options.Value.RateLimit);
         }
 
         /// <summary>
-        /// Creates the shared <see cref="HttpClient"/>, applying the rate limiter when enabled.
+        /// Gets the shared, rate-limited <see cref="HttpClient"/> for Auth0 Management API traffic.
+        /// </summary>
+        public HttpClient Client { get; }
+
+        /// <summary>
+        /// Builds the <see cref="HttpClient"/>, applying the rate limiter when enabled.
         /// </summary>
         /// <param name="options"></param>
         static HttpClient Create(RateLimitOptions options)

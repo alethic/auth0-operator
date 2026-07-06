@@ -44,6 +44,7 @@ namespace Alethic.Auth0.Operator.Controllers
         readonly IKubernetesClient _kube;
         readonly IMemoryCache _cache;
         readonly IOptions<OperatorOptions> _options;
+        readonly Auth0HttpClientProvider _httpClientProvider;
         readonly ILogger _logger;
 
         /// <summary>
@@ -52,12 +53,14 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="kube"></param>
         /// <param name="cache"></param>
         /// <param name="options"></param>
+        /// <param name="httpClientProvider"></param>
         /// <param name="logger"></param>
-        public ControllerBase(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger)
+        public ControllerBase(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger logger)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _kube = kube ?? throw new ArgumentNullException(nameof(kube));
             _options = options ?? throw new ArgumentNullException(nameof(options));
+            _httpClientProvider = httpClientProvider ?? throw new ArgumentNullException(nameof(httpClientProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -86,7 +89,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// is built once from the configured <see cref="RateLimitOptions"/> and shared across tenants: the Auth0 SDK
         /// attaches the per-tenant bearer token on each request, so the transport holds no tenant-specific state.
         /// </summary>
-        HttpClient Auth0HttpClient => Auth0HttpClientFactory.GetOrCreate(Options.RateLimit);
+        HttpClient Auth0HttpClient => _httpClientProvider.Client;
 
         /// <summary>
         /// Attempts to resolve the secret document referenced by the secret reference.

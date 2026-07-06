@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using KubeOps.Operator;
 
@@ -20,6 +21,7 @@ namespace Alethic.Auth0.Operator
 
             var operatorOptions = builder.Configuration.GetSection("Auth0:Operator").Get<OperatorOptions>() ?? new OperatorOptions();
             builder.Services.AddKubernetesOperator(s => s.ParallelReconciliation.MaxParallelReconciliations = operatorOptions.Reconciliation.MaxParallelReconciliations).RegisterComponents();
+            builder.Services.AddSingleton<Auth0HttpClientProvider>();
             builder.Services.AddMemoryCache();
             builder.Services.AddRouting();
             builder.Services.AddControllers();

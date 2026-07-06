@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha3;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Tenants;
@@ -739,8 +740,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V2alpha3TenantController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V2alpha3TenantController> logger) :
-            base(kube, cache, options, logger)
+        public V2alpha3TenantController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3TenantController> logger) :
+            base(kube, cache, options, httpClientProvider, logger)
         {
 
         }

@@ -12,6 +12,7 @@ using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Core.Models.Connection.V2alpha3;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
@@ -60,8 +61,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V2alpha3ConnectionController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger<V2alpha3ConnectionController> logger) :
-            base(kube, cache, options, logger)
+        public V2alpha3ConnectionController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3ConnectionController> logger) :
+            base(kube, cache, options, httpClientProvider, logger)
         {
 
         }

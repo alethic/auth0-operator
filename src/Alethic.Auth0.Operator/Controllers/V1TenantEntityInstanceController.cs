@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.ManagementApi;
 
@@ -48,8 +49,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
-        public V1TenantEntityInstanceController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, ILogger logger) :
-            base(kube, cache, options, logger)
+        public V1TenantEntityInstanceController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger logger) :
+            base(kube, cache, options, httpClientProvider, logger)
         {
 
         }
