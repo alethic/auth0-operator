@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Alethic.Auth0.Operator.Core.Models;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
+using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
@@ -78,6 +80,13 @@ namespace Alethic.Auth0.Operator.Controllers
         /// Gets operator options.
         /// </summary>
         protected OperatorOptions Options => _options.Value;
+
+        /// <summary>
+        /// Gets the process-wide, rate-limited <see cref="HttpClient"/> used for all Auth0 Management API traffic. It
+        /// is built once from the configured <see cref="RateLimitOptions"/> and shared across tenants: the Auth0 SDK
+        /// attaches the per-tenant bearer token on each request, so the transport holds no tenant-specific state.
+        /// </summary>
+        HttpClient Auth0HttpClient => Auth0HttpClientFactory.GetOrCreate(Options.RateLimit);
 
         /// <summary>
         /// Attempts to resolve the secret document referenced by the secret reference.
@@ -350,7 +359,7 @@ namespace Alethic.Auth0.Operator.Controllers
                     throw new RetryException($"Tenant {tenant.Namespace()}/{tenant.Name()} failed to retrieve management API token.");
 
                 // contact API using token and domain
-                var api = new ManagementApiClient(authToken.AccessToken, new ClientOptions { BaseUrl = $"https://{domain}/api/v2/" });
+                var api = new ManagementApiClient(authToken.AccessToken, new ClientOptions { BaseUrl = $"https://{domain}/api/v2/", HttpClient = Auth0HttpClient });
 
                 // expire cache entry slightly before token expiration to allow for refresh
                 var expire = TimeSpan.FromSeconds(authToken.ExpiresIn);

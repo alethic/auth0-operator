@@ -5,6 +5,7 @@ using Alethic.Auth0.Operator.Options;
 using KubeOps.Operator;
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alethic.Auth0.Operator
@@ -16,7 +17,9 @@ namespace Alethic.Auth0.Operator
         public static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddKubernetesOperator().RegisterComponents();
+
+            var operatorOptions = builder.Configuration.GetSection("Auth0:Operator").Get<OperatorOptions>() ?? new OperatorOptions();
+            builder.Services.AddKubernetesOperator(s => s.ParallelReconciliation.MaxParallelReconciliations = operatorOptions.Reconciliation.MaxParallelReconciliations).RegisterComponents();
             builder.Services.AddMemoryCache();
             builder.Services.AddRouting();
             builder.Services.AddControllers();
