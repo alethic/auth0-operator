@@ -100,7 +100,7 @@ namespace Alethic.Auth0.Operator.Converters
                     DefaultOrganization = source.DefaultOrganization is { } defaultOrganization ? ConvertWithAuth0<V1ClientDefaultOrganization, ClientDefaultOrganization, V2alpha3ClientDefaultOrganization>(defaultOrganization, V2alpha3ClientController.FromApi) : null,
                     EncryptionKey = source.EncryptionKey is { } encryptionKey ? ConvertWithAuth0<V1ClientEncryptionKey, ClientEncryptionKey, V2alpha3ClientEncryptionKey>(encryptionKey, V2alpha3ClientController.FromApi) : null,
                     JwtConfiguration = source.JwtConfiguration is { } jwtConfiguration ? ConvertWithAuth0<V1ClientJwtConfiguration, ClientJwtConfiguration, V2alpha3ClientJwtConfiguration>(jwtConfiguration, V2alpha3ClientController.FromApi) : null,
-                    Mobile = source.Mobile is { } mobile ? ConvertWithAuth0<V1ClientMobile, ClientMobile, V2alpha3ClientMobile>(mobile, V2alpha3ClientController.FromApi) : null,
+                    Mobile = ConvertMobile(source.Mobile),
                     OidcLogout = source.OidcLogout is { } oidcLogout ? ConvertWithAuth0<V1ClientOidcLogoutConfig, ClientOidcBackchannelLogoutSettings, V2alpha3ClientOidcBackchannelLogoutSettings>(oidcLogout, V2alpha3ClientController.FromApi) : null,
                     OrganizationRequireBehavior = source.OrganizationRequireBehavior is { } organizationRequireBehavior ? ConvertOrganizationRequireBehavior(organizationRequireBehavior) : null,
                     OrganizationUsage = source.OrganizationUsage is { } organizationUsage ? ConvertOrganizationUsage(organizationUsage) : null,
@@ -146,7 +146,7 @@ namespace Alethic.Auth0.Operator.Converters
                     DefaultOrganization = source.DefaultOrganization is { } defaultOrganization ? RevertWithAuth0<V2alpha3ClientDefaultOrganization, ClientDefaultOrganization, V1ClientDefaultOrganization>(defaultOrganization, ToApi) : null,
                     EncryptionKey = source.EncryptionKey is { } encryptionKey ? RevertWithAuth0<V2alpha3ClientEncryptionKey, ClientEncryptionKey, V1ClientEncryptionKey>(encryptionKey, ToApi) : null,
                     JwtConfiguration = source.JwtConfiguration is { } jwtConfiguration ? RevertWithAuth0<V2alpha3ClientJwtConfiguration, ClientJwtConfiguration, V1ClientJwtConfiguration>(jwtConfiguration, ToApi) : null,
-                    Mobile = source.Mobile is { } mobile ? RevertWithAuth0<V2alpha3ClientMobile, ClientMobile, V1ClientMobile>(mobile, ToApi) : null,
+                    Mobile = RevertMobile(source.Mobile),
                     OidcLogout = source.OidcLogout is { } oidcLogout ? RevertWithAuth0<V2alpha3ClientOidcBackchannelLogoutSettings, ClientOidcBackchannelLogoutSettings, V1ClientOidcLogoutConfig>(oidcLogout, ToApi) : null,
                     OrganizationRequireBehavior = source.OrganizationRequireBehavior is { } organizationRequireBehavior ? RevertOrganizationRequireBehavior(organizationRequireBehavior) : null,
                     OrganizationUsage = source.OrganizationUsage is { } organizationUsage ? RevertOrganizationUsage(organizationUsage) : null,
@@ -309,11 +309,79 @@ namespace Alethic.Auth0.Operator.Converters
                 return result;
             }
 
-            static ClientMobile ToApi(V2alpha3ClientMobile source)
+            // Mobile is mapped by hand rather than through the Auth0 SDK round-trip: v1 stores the
+            // Android signing hash as the legacy scalar `keystore_hash`, whereas v2alpha3 (and the
+            // Auth0 8.x SDK) model it as the `sha256CertFingerprints` array, so the shapes differ.
+            static V2alpha3ClientMobile? ConvertMobile(V1ClientMobile? source)
             {
-                var result = new ClientMobile();
-                V2alpha3ClientController.ApplyToApi(source, result);
-                return result;
+                if (source is null)
+                    return null;
+
+                return new V2alpha3ClientMobile
+                {
+                    Android = ConvertMobileAndroid(source.Android),
+                    Ios = ConvertMobileIos(source.Ios),
+                };
+            }
+
+            static V2alpha3ClientMobileAndroid? ConvertMobileAndroid(V1ClientMobile.MobileAndroid? source)
+            {
+                if (source is null)
+                    return null;
+
+                return new V2alpha3ClientMobileAndroid
+                {
+                    AppPackageName = source.AppPackageName,
+                    Sha256CertFingerprints = source.KeystoreHash is { } keystoreHash ? [keystoreHash] : null,
+                };
+            }
+
+            static V2alpha3ClientMobileiOs? ConvertMobileIos(V1ClientMobile.MobileIos? source)
+            {
+                if (source is null)
+                    return null;
+
+                return new V2alpha3ClientMobileiOs
+                {
+                    AppBundleIdentifier = source.AppBundleIdentifier,
+                    TeamId = source.TeamId,
+                };
+            }
+
+            static V1ClientMobile? RevertMobile(V2alpha3ClientMobile? source)
+            {
+                if (source is null)
+                    return null;
+
+                return new V1ClientMobile
+                {
+                    Android = RevertMobileAndroid(source.Android),
+                    Ios = RevertMobileIos(source.Ios),
+                };
+            }
+
+            static V1ClientMobile.MobileAndroid? RevertMobileAndroid(V2alpha3ClientMobileAndroid? source)
+            {
+                if (source is null)
+                    return null;
+
+                return new V1ClientMobile.MobileAndroid
+                {
+                    AppPackageName = source.AppPackageName,
+                    KeystoreHash = source.Sha256CertFingerprints is { Length: > 0 } fingerprints ? fingerprints[0] : null,
+                };
+            }
+
+            static V1ClientMobile.MobileIos? RevertMobileIos(V2alpha3ClientMobileiOs? source)
+            {
+                if (source is null)
+                    return null;
+
+                return new V1ClientMobile.MobileIos
+                {
+                    AppBundleIdentifier = source.AppBundleIdentifier,
+                    TeamId = source.TeamId,
+                };
             }
 
             static ClientOidcBackchannelLogoutSettings ToApi(V2alpha3ClientOidcBackchannelLogoutSettings source)

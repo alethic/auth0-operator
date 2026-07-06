@@ -298,6 +298,7 @@ namespace Alethic.Auth0.Operator.Tests
                 Android = new ClientMobileAndroid
                 {
                     AppPackageName = "com.example.android",
+                    Sha256CertFingerprints = ["AA:BB:CC", "DD:EE:FF"],
                 },
             };
 
@@ -309,6 +310,7 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("TEAM123", result.Ios.TeamId);
             Assert.IsNotNull(result.Android);
             Assert.AreEqual("com.example.android", result.Android.AppPackageName);
+            CollectionAssert.AreEqual(new[] { "AA:BB:CC", "DD:EE:FF" }, result.Android.Sha256CertFingerprints);
         }
 
         [TestMethod]
@@ -373,6 +375,34 @@ namespace Alethic.Auth0.Operator.Tests
                 request.OidcLogout.BackchannelLogoutInitiators.SelectedInitiators?.Select(static i => i.Value).ToArray());
             Assert.IsTrue(request.OidcLogout.BackchannelLogoutSessionMetadata.IsDefined);
             Assert.AreEqual(true, request.OidcLogout.BackchannelLogoutSessionMetadata.Value?.Include);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_MapsAndroidMobile()
+        {
+            var conf = new V2alpha3ClientConf
+            {
+                Name = "my-app",
+                ApplicationType = V2alpha3ClientAppTypeEnum.Native,
+                Mobile = new V2alpha3ClientMobile
+                {
+                    Android = new V2alpha3ClientMobileAndroid
+                    {
+                        AppPackageName = "com.example.android",
+                        Sha256CertFingerprints = ["AA:BB:CC", "DD:EE:FF"],
+                    },
+                },
+            };
+
+            var request = new CreateClientRequestContent { Name = conf.Name! };
+            V2alpha3ClientController.ApplyToApi(conf, request);
+
+            Assert.IsNotNull(request.Mobile);
+            Assert.IsNotNull(request.Mobile.Android);
+            Assert.AreEqual("com.example.android", request.Mobile.Android.AppPackageName);
+            CollectionAssert.AreEqual(
+                new[] { "AA:BB:CC", "DD:EE:FF" },
+                request.Mobile.Android.Sha256CertFingerprints?.ToArray());
         }
 
         [TestMethod]
@@ -684,6 +714,14 @@ namespace Alethic.Auth0.Operator.Tests
                                 SelectedInitiators = [V1ClientLogoutInitiators.RpLogout],
                             },
                         },
+                        Mobile = new V1ClientMobile
+                        {
+                            Android = new V1ClientMobile.MobileAndroid
+                            {
+                                AppPackageName = "com.example.android",
+                                KeystoreHash = "AA:BB:CC",
+                            },
+                        },
                     },
                 },
                 Status =
@@ -713,6 +751,9 @@ namespace Alethic.Auth0.Operator.Tests
             CollectionAssert.AreEqual(new[] { "https://example.com/logout" }, result.Spec.Conf.OidcLogout.BackchannelLogoutUrls);
             Assert.AreEqual(V2alpha3ClientOidcBackchannelLogoutInitiatorsModeEnum.Custom, result.Spec.Conf.OidcLogout.BackchannelLogoutInitiators?.Mode);
             CollectionAssert.AreEqual(new[] { V2alpha3ClientOidcBackchannelLogoutInitiatorsEnum.RpLogout }, result.Spec.Conf.OidcLogout.BackchannelLogoutInitiators?.SelectedInitiators);
+            Assert.IsNotNull(result.Spec.Conf.Mobile?.Android);
+            Assert.AreEqual("com.example.android", result.Spec.Conf.Mobile!.Android!.AppPackageName);
+            CollectionAssert.AreEqual(new[] { "AA:BB:CC" }, result.Spec.Conf.Mobile.Android.Sha256CertFingerprints);
         }
 
         [TestMethod]
@@ -761,6 +802,14 @@ namespace Alethic.Auth0.Operator.Tests
                             Pub = "pub",
                             Subject = "subject",
                         },
+                        Mobile = new V2alpha3ClientMobile
+                        {
+                            Android = new V2alpha3ClientMobileAndroid
+                            {
+                                AppPackageName = "com.example.android",
+                                Sha256CertFingerprints = ["AA:BB:CC", "DD:EE:FF"],
+                            },
+                        },
                     },
                 },
                 Status =
@@ -794,6 +843,9 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("cert", result.Spec.Conf.EncryptionKey.Certificate);
             Assert.AreEqual("pub", result.Spec.Conf.EncryptionKey.PublicKey);
             Assert.AreEqual("subject", result.Spec.Conf.EncryptionKey.Subject);
+            Assert.IsNotNull(result.Spec.Conf.Mobile?.Android);
+            Assert.AreEqual("com.example.android", result.Spec.Conf.Mobile!.Android!.AppPackageName);
+            Assert.AreEqual("AA:BB:CC", result.Spec.Conf.Mobile.Android.KeystoreHash);
         }
 
         static V2alpha3ClientEntity InvokeConvert(V1Client source)
