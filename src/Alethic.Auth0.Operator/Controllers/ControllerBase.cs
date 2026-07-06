@@ -549,6 +549,28 @@ namespace Alethic.Auth0.Operator.Controllers
                 Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", interval);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
+            catch (TooManyRequestsError e)
+            {
+                // the 8.x Auth0 SDK surfaces 429s as TooManyRequestsError (not the older RateLimitApiException), and it
+                // does not carry a Retry-After/reset, so reschedule on the configured retry interval, floored to a minute
+                Logger.LogError(e, "Rate limit hit reconciling {EntityTypeName} {EntityNamespace}/{EntityName}", EntityTypeName, entity.Namespace(), entity.Name());
+
+                try
+                {
+                    await ReconcileWarningAsync(entity, "RateLimit", e.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                var interval = Options.Reconciliation.RetryInterval;
+                if (interval < TimeSpan.FromMinutes(1))
+                    interval = TimeSpan.FromMinutes(1);
+
+                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
             catch (RetryException e)
             {
                 Logger.LogError(e, "Retry exception reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
