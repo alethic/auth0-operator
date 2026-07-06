@@ -11,11 +11,12 @@ rules:
   - kubernetes.auth0.com
   resources:
   - brandingthemes
+  - clients
+  - clientgrants
+  - connectionclients
   - customdomains
   - customtexts
-  - clientgrants
-  - clients
-  - connections
+  - resourceservers
   - roles
   verbs:
   - '*'
@@ -23,7 +24,7 @@ rules:
   - kubernetes.auth0.com
   resources:
   - tenants
-  - resourceservers
+  - connections
   verbs:
   - '*'
 - apiGroups:
@@ -42,6 +43,7 @@ rules:
   - kubernetes.auth0.com
   resources:
   - clients
+  - resourceservers
   verbs:
   - get
   - list
@@ -85,15 +87,7 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - customdomains/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - customtexts/status
+  - clients/status
   verbs:
   - get
   - update
@@ -117,15 +111,7 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - resourceservers/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - clients/status
+  - connectionclients/status
   verbs:
   - get
   - update
@@ -141,7 +127,39 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - customdomains/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - customtexts/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - resourceservers/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
   - roles/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - resourceservers/status
   verbs:
   - get
   - update

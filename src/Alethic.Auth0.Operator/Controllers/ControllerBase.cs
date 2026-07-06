@@ -254,6 +254,61 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
+        /// Attempts to resolve the connection document referenced by the connection reference.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="connectionRef"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<V2alpha3Connection?> ResolveConnectionRef(IManagementApiClient api, V1ConnectionReference? connectionRef, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            if (connectionRef is null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(connectionRef.Name))
+                throw new InvalidOperationException($"Connection reference has no name.");
+
+            var ns = connectionRef.Namespace ?? defaultNamespace;
+            if (string.IsNullOrWhiteSpace(ns))
+                throw new InvalidOperationException($"Connection reference has no discovered namesace.");
+
+            var connection = await _kube.GetAsync<V2alpha3Connection>(connectionRef.Name, ns, cancellationToken);
+            if (connection is null)
+                throw new RetryException($"Connection reference cannot be resolved.");
+
+            return connection;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the connection reference to a connection ID.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="connectionRef"></param>
+        /// <param name="defaultNamespace"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected async Task<string?> ResolveConnectionRefToId(IManagementApiClient api, V1ConnectionReference? connectionRef, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            if (connectionRef is null)
+                return null;
+
+            if (connectionRef.Id is { } id && string.IsNullOrWhiteSpace(id) == false)
+                return id;
+
+            Logger.LogDebug("Attempting to resolve ConnectionRef {Namespace}/{Name}.", connectionRef.Namespace, connectionRef.Name);
+
+            var connection = await ResolveConnectionRef(api, connectionRef, defaultNamespace, cancellationToken);
+            if (connection is null)
+                throw new RetryException($"Could not resolve ConnectionRef {connectionRef}.");
+            if (string.IsNullOrWhiteSpace(connection.Status.Id))
+                throw new RetryException($"Referenced Connection {connection.Namespace()}/{connection.Name()} has not been reconciled.");
+
+            Logger.LogDebug("Resolved ConnectionRef {Namespace}/{Name} to {Id}.", connectionRef.Namespace, connectionRef.Name, connection.Status.Id);
+            return connection.Status.Id;
+        }
+
+        /// <summary>
         /// Gets an active <see cref="ManagementApiClient"/> for the specified tenant.
         /// </summary>
         /// <param name="tenant"></param>

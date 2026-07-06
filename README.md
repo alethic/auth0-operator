@@ -44,6 +44,7 @@ The older versions will be removed in a future release — migrate to `v2alpha3`
 | Connection | `v2alpha3` | `a0con` | `v2alpha1`, `v1` |
 | Role | `v2alpha3` | `a0role` | `v2alpha1` |
 | ClientGrant | `v2alpha3` | `a0cgr` | `v1` |
+| ConnectionClient | `v2alpha3` | `a0cc` | — |
 | ResourceServer | `v2alpha3` | `a0api` | `v1` |
 | BrandingTheme | `v2alpha3` | `a0theme` | `v1alpha1` |
 | CustomDomain | `v2alpha3` | `a0domain` | `v1alpha1` |
@@ -213,6 +214,8 @@ spec:
 
 The `Connection` resource manages an Auth0 [connection (identity provider)](https://auth0.com/docs/authenticate/identity-providers). An optional `spec.find` entry can locate an existing connection by its Auth0 `id`. The `enabledClients` field accepts references to operator-managed `Client` resources by name or directly by Auth0 client ID.
 
+Auth0 has deprecated the `enabled_clients` field on the connection object. The operator continues to support `enabledClients` here, but manages it **additively and scoped**: on each reconcile it enables every client listed and only disables clients it previously enabled itself (tracked in `status.managedEnabledClientIds`). Clients enabled through a separate [`ConnectionClient`](#connectionclient) resource are never disabled by the `Connection`, so the two mechanisms can be combined on the same connection. To manage client enablement one entry at a time, prefer `ConnectionClient`.
+
 ```yaml
 apiVersion: kubernetes.auth0.com/v2alpha3
 kind: Connection
@@ -236,6 +239,32 @@ spec:
     options:
       requiresUsername: false
       bruteForceProtection: true
+```
+
+### ConnectionClient
+
+The `ConnectionClient` resource enables a single `Client` on a single `Connection`, replacing the deprecated `enabled_clients` field with per-entry tracking. Each resource represents exactly one `(connection, client)` enablement, so clients are added and removed individually by creating and deleting `ConnectionClient` resources. It is **additive**: creating one enables the client on the connection, deleting one disables it, and it never affects any other client's enablement — including clients managed by the `Connection`'s own `enabledClients` field.
+
+Both `connectionRef` and `clientRef` accept an operator-managed resource by name (optionally with `namespace`) or a direct Auth0 `id`.
+
+```yaml
+apiVersion: kubernetes.auth0.com/v2alpha3
+kind: ConnectionClient
+metadata:
+  name: example-connection-client
+  namespace: example
+spec:
+  tenantRef:
+    name: example-tenant
+  policy:
+    - Create
+    - Update
+    - Delete
+  conf:
+    connectionRef:
+      name: example-connection
+    clientRef:
+      name: example-client
 ```
 
 ### Role
@@ -437,7 +466,8 @@ Used by `Client` and `CustomDomain` resources to refer to a Kubernetes secret co
 ### Cross-resource references
 
 - `tenantRef`: References the owning `Tenant` resource.
-- `clientRef`: References a `Client` resource, used in `ClientGrant` and `Connection` resources.
+- `clientRef`: References a `Client` resource, used in `ClientGrant`, `Connection`, and `ConnectionClient` resources.
+- `connectionRef`: References a `Connection` resource, used in `ConnectionClient` resources.
 - `audience`: References a `ResourceServer` resource, used in `ClientGrant` resources.
 - `enabledClients`: References `Client` resources by name, used in `Connection` resources.
 - `resourceServerRef`: References a `ResourceServer` resource, used in `Role` permissions.

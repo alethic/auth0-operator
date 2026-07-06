@@ -11,6 +11,7 @@ using Alethic.Auth0.Operator.Core.Models.Connection.V2alpha3;
 using Alethic.Auth0.Operator.Models;
 
 using Auth0.ManagementApi;
+using Auth0.ManagementApi.Connections;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -556,6 +557,55 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(source.DisplayName, req.DisplayName);
             Assert.AreEqual(source.IsDomainConnection, req.IsDomainConnection);
             Assert.AreEqual(source.ShowAsButton, req.ShowAsButton);
+        }
+
+        // ──────────────────────── enabledClients scoped/additive update ──────────
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_EnablesAllDesired()
+        {
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string> { "a", "b" },
+                System.Array.Empty<string>());
+
+            CollectionAssert.AreEquivalent(new[] { "a", "b" }, req.Select(static i => i.ClientId).ToArray());
+            Assert.IsTrue(req.All(static i => i.Status == true));
+        }
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_DisablesOnlyPreviouslyManagedNoLongerDesired()
+        {
+            // previously managed a and b; now only a is desired => b gets disabled, a stays enabled
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string> { "a" },
+                new[] { "a", "b" });
+
+            var byId = req.ToDictionary(static i => i.ClientId!, static i => i.Status);
+            Assert.AreEqual(true, byId["a"]);
+            Assert.AreEqual(false, byId["b"]);
+        }
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_LeavesUnmanagedClientsUntouched()
+        {
+            // "c" was never managed by this Connection (e.g. enabled via a ConnectionClient resource)
+            // and is not desired => it must not appear in the request at all.
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string> { "a" },
+                new[] { "a" });
+
+            Assert.IsFalse(req.Any(static i => i.ClientId == "c"));
+            CollectionAssert.AreEqual(new[] { "a" }, req.Select(static i => i.ClientId).ToArray());
+        }
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_NoDesiredNoManaged_ProducesEmpty()
+        {
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string>(),
+                System.Array.Empty<string>());
+
+            Assert.AreEqual(0, req.Count);
         }
 
         static V2alpha3Connection InvokeConvert(V1Connection source)

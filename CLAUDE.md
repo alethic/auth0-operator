@@ -39,6 +39,18 @@ Currently the hub is **`v2alpha3`** for every Kind; older versions (`v1`, `v1alp
 - CRDs are **generated** by `KubeOps.Generator` at build into
   `src/Alethic.Auth0.Operator/config/*.yaml` and consumed by the Helm chart
   (`charts/auth0-operator`). They are gitignored — never hand-edit them.
+- **RBAC is generated but NOT auto-consumed.** The build also emits the operator ClusterRole to
+  `src/Alethic.Auth0.Operator/config/operator-role.yaml` (gitignored) from the `[EntityRbac]`
+  attributes. The chart's `charts/auth0-operator/templates/clusterrole.yaml` is committed and is
+  the source of truth, so it must be **manually synced** whenever you add/remove a Kind or change
+  an `[EntityRbac]`. Sync by copying the generated file's **entire `rules:` section verbatim**
+  over the chart's `rules:` section (keep the chart's templated `metadata:` header — name/labels/
+  annotations — unchanged).
+- **The generated `config/` files (CRDs + role) only regenerate reliably in a Release build.** The
+  KubeOps generator target runs only when the operator assembly actually recompiled *or*
+  `Configuration == Release`; an up-to-date/incremental **Debug** build skips generation, so the
+  `config/*.yaml` can be stale. Before syncing the chart (or trusting the transpiled CRDs), run
+  `dotnet build -c Release src/Alethic.Auth0.Operator` (or clean-build) to force regeneration.
 
 ## How conversion works (`Converters/<Kind>Converter.cs`)
 

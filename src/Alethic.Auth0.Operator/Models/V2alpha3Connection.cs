@@ -83,6 +83,14 @@ namespace Alethic.Auth0.Operator.Models
             [JsonPropertyName("lastConf")]
             public V2alpha3ConnectionConf? LastConf { get; set; }
 
+            /// <summary>
+            /// The Auth0 client IDs this Connection last enabled via <c>conf.enabledClients</c>. Used to scope disabling so
+            /// the Connection only disables clients it previously enabled itself, leaving clients enabled through
+            /// <c>ConnectionClient</c> resources untouched.
+            /// </summary>
+            [JsonPropertyName("managedEnabledClientIds")]
+            public string[]? ManagedEnabledClientIds { get; set; }
+
         }
 
     }
