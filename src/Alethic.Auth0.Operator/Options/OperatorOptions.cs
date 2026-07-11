@@ -15,6 +15,11 @@
         /// </summary>
         public ReconciliationOptions Reconciliation { get; set; } = new ReconciliationOptions();
 
+        /// <summary>
+        /// Options related to client-side rate limiting of Auth0 Management API requests.
+        /// </summary>
+        public RateLimitOptions RateLimit { get; set; } = new RateLimitOptions();
+
     }
 
 }

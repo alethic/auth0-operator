@@ -1,0 +1,112 @@
+{
+  "classPrefix": "V2alpha1",
+  "sourceNamespacePrefix": "Auth0.ManagementApi",
+  "targetNamespacePrefix": "Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1",
+  "rootTypeNames": [
+    "UpdateTenantSettingsRequestContent"
+  ],
+  "followReferencedTypes": true,
+  "resolverAssemblyPaths": [
+    "D:\\packages\\NuGet\\cache\\auth0.core\\7.45.1\\lib\\netstandard2.0\\Auth0.Core.dll",
+    "D:\\packages\\NuGet\\cache\\auth0.authenticationapi\\7.45.1\\lib\\netstandard2.0\\Auth0.AuthenticationApi.dll",
+    "D:\\packages\\NuGet\\cache\\portable.system.datetimeonly\\9.0.1\\lib\\netstandard2.0\\Portable.System.DateTimeOnly.dll"
+  ],
+  "sourceTypeNamePrefixes": [],
+  "includeNamespaces": [
+    "Auth0.ManagementApi"
+  ],
+  "excludeTypeNames": [
+    "AdditionalProperties",
+    "ReadOnlyAdditionalProperties"
+  ],
+  "ignoredPropertyNames": [
+    "AdditionalProperties"
+  ],
+  "ignoredPropertiesByType": {},
+  "removedAttributeTypeNames": [
+    "JsonConverterAttribute",
+    "System.Text.Json.Serialization.JsonConverterAttribute",
+    "OptionalAttribute",
+    "Auth0.ManagementApi.Core.OptionalAttribute",
+    "JsonIgnoreAttribute",
+    "System.Text.Json.Serialization.JsonIgnoreAttribute",
+    "NullableAttribute",
+    "System.Runtime.CompilerServices.NullableAttribute",
+    "NullableContext",
+    "NullableContextAttribute",
+    "System.Runtime.CompilerServices.NullableContextAttribute",
+    "IsReadOnly",
+    "IsReadOnlyAttribute",
+    "System.Runtime.CompilerServices.IsReadOnlyAttribute",
+    "RequiredMember",
+    "RequiredMemberAttribute",
+    "System.Runtime.CompilerServices.RequiredMemberAttribute",
+    "CompilerFeatureRequired",
+    "CompilerFeatureRequiredAttribute",
+    "System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute",
+    "JsonAccess",
+    "JsonAccessAttribute",
+    "Auth0.ManagementApi.Core.JsonAccessAttribute",
+    "RequiredAttribute",
+    "System.ComponentModel.DataAnnotations.RequiredAttribute"
+  ],
+  "addedTypeAttributes": [],
+  "addedPropertyAttributes": [],
+  "standardProperties": [],
+  "namespaceMappings": {
+    "Auth0.ManagementApi.Tenants": "Alethic.Auth0.Operator.Core.Models.Tenant.V2alpha1"
+  },
+  "typeNameRewriteRules": [
+    {
+      "pattern": "^UpdateTenantSettingsRequestContent$",
+      "replacement": "TenantSettings"
+    },
+    {
+      "pattern": "^TenantSettingsPasswordPage$",
+      "replacement": "TenantChangePassword"
+    },
+    {
+      "pattern": "^TenantSettingsGuardianPage$",
+      "replacement": "TenantGuardianMfaPage"
+    },
+    {
+      "pattern": "^TenantSettingsDeviceFlowCharset$",
+      "replacement": "TenantCharset"
+    },
+    {
+      "pattern": "^SessionCookieSchema$",
+      "replacement": "TenantSessionCookie"
+    },
+    {
+      "pattern": "^TenantOidcLogoutSettings$",
+      "replacement": "TenantOidcLogout"
+    },
+    {
+      "pattern": "^DefaultTokenQuota$",
+      "replacement": "TenantDefaultTokenQuota"
+    },
+    {
+      "pattern": "^TokenQuotaConfiguration$",
+      "replacement": "TenantTokenQuotaConfiguration"
+    },
+    {
+      "pattern": "^TokenQuotaClientCredentials$",
+      "replacement": "TenantTokenQuotaClientCredentials"
+    },
+    {
+      "pattern": "^TenantSettings(.+)$",
+      "replacement": "Tenant$1"
+    },
+    {
+      "pattern": "^(?!Tenant)(.+)$",
+      "replacement": "Tenant$1"
+    }
+  ],
+  "typeReplacements": {
+    "Auth0.ManagementApi.TenantSettingsSupportedLocalesEnum": "string",
+    "TenantSettingsSupportedLocalesEnum": "string"
+  },
+  "emitRecords": true,
+  "useNamespaceSubdirectories": false,
+  "overwriteExistingFiles": true
+}

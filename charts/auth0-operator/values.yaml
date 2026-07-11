@@ -1,11 +1,37 @@
+_: {}
+
+## @param nameOverride String to partially override common.names.fullname
+##
+nameOverride: ""
+
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param clusterDomain Kubernetes cluster domain name
+##
+clusterDomain: cluster.local
+
+## @param crds Options for installing Custom Resource Definitions (CRDs)
+crds:
+  ## @param enabled Whether to install the Custom Resource Definitions (CRDs) during chart installation.
+  enabled: true
+  ## @param keep Whether to retain CRDs when the chart is uninstalled.
+  keep: false
+
 operator:
   env: []
 
   # An array of additional annotations to be applied to the operator service account
   serviceAccountAnnotations: []
-
-  # additional labels to be applied to operator resources
-  additionalLabels: {}
 
   # Specify the Operator container image to use for the deployment.
   image:
@@ -42,10 +68,10 @@ operator:
       type: RuntimeDefault
 
   # The volumes must exist *and* be accessible to the Operator pods.
-  volumes: [ ]
+  volumes: []
 
   # An array of volume mount points associated to each Operator container.
-  volumeMounts: [ ]
+  volumeMounts: []
 
   # Any `Node Selectors <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>`__ to apply to Operator pods.
   nodeSelector: { }
@@ -74,8 +100,8 @@ operator:
   # The `Requests or Limits <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>`__ for resources to associate to Operator pods.
   resources:
     requests:
-      cpu: 50m
-      memory: 64Mi
+      cpu: 10m
+      memory: 128Mi
 
 # Various configuration options.
 options:
@@ -84,3 +110,19 @@ options:
     #namespace:
   reconciliation:
     interval:
+    retryInterval:
+    # The maximum number of resources reconciled in parallel. Bounds the burst of Auth0 API calls on startup. Default: 4.
+    maxParallelReconciliations:
+  # Client-side rate limiting of Auth0 Management API requests (a per-domain token bucket). Keeps the operator within
+  # Auth0's per-tenant rate limits and backpressures the reconcile loop. Leave values empty to use the defaults below.
+  rateLimit:
+    # Whether client-side rate limiting is applied. Default: true.
+    enabled:
+    # Burst capacity: requests allowed immediately before throttling. Default: 10.
+    tokenLimit:
+    # Sustained rate: tokens (requests) replenished each replenishmentPeriod. Default: 5.
+    tokensPerPeriod:
+    # How often tokens replenish, as a duration (e.g. "00:00:01"). Default: 1s.
+    replenishmentPeriod:
+    # Maximum requests allowed to wait for a token before failing fast. Default: 10000.
+    queueLimit:

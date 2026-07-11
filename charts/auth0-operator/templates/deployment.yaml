@@ -1,9 +1,13 @@
+{{- template "auth0-operator.selfsignedcerts" . -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth0-operator
-  namespace: {{ .Release.Namespace }}
-  labels: {{- include "auth0-operator.labels" . | nindent 4 }}
+  name: {{ include "auth0-operator.fullname" . }}
+  labels:
+    {{- include "auth0-operator.labels" . | nindent 4 }}
+  annotations:
+    {{- include "auth0-operator.annotations" . | nindent 4 }}
 spec:
   replicas: {{ .Values.operator.replicaCount }}
   selector:
@@ -12,7 +16,9 @@ spec:
     metadata:
       labels:
         {{- include "auth0-operator.labels" . | nindent 8 }}
-        {{- include "auth0-operator.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/ca-cert:  {{ .Values._.selfsignedcerts.cacrt  | sha256sum }}
+        checksum/tls-cert: {{ .Values._.selfsignedcerts.tlscrt | sha256sum }}
     spec:
       {{- with .Values.operator.imagePullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8 }}
@@ -20,7 +26,7 @@ spec:
       {{- with .Values.operator.runtimeClassName }}
       runtimeClassName: {{ . }}
       {{- end }}
-      serviceAccountName: auth0-operator
+      serviceAccountName: {{ include "auth0-operator.fullname" . }}
       {{- with .Values.operator.securityContext }}
       securityContext: {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -39,14 +45,42 @@ spec:
       {{- with .Values.operator.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      {{- with .Values.operator.initContainers }}
-      initContainers: {{- toYaml . | nindent 8 }}
-      {{- end }}
+      initContainers:
+        {{- with .Values.operator.initContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: update-ca-certificates
+          image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            runAsGroup: 0
+          command:
+            - /usr/sbin/update-ca-certificates
+          volumeMounts:
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
+            - mountPath: /usr/local/share/ca-certificates/ca.crt
+              name: certs
+              subPath: ca.crt
+              readOnly: true
       containers:
-        - name: {{ .Chart.Name }}
+        - name: auth0-operator
           image: {{ .Values.operator.image.repository }}:{{ .Values.operator.image.digest | default .Values.operator.image.tag | default $.Chart.AppVersion }}
           imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
           env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            # Configure Kestrel to use the TLS certificate mounted from the secret.
+            - name: Kestrel__Certificates__Default__Path
+              value: /certs/tls.crt
+            - name: Kestrel__Certificates__Default__KeyPath
+              value: /certs/tls.key
+
             # By default we want to use a formatter more suited to Kubernetes.
             - name: Logging__Console__FormatterName
               value: "simple"
@@ -54,25 +88,80 @@ spec:
               value: "yyyy-MM-dd HH:mm:ss "
             - name: Logging__Console__FormatterOptions__SingleLine
               value: 'true'
-{{ if .Values.options.namespace }}
+
+{{- if .Values.options.namespace }}
             - name: Auth0__Operator__Namespace
               value: {{ .Values.options.namespace | quote }}
-{{ end }}
-{{ if .Values.options.reconciliation.interval }}
+{{- end }}
+
+{{- if .Values.options.reconciliation.interval }}
             - name: Auth0__Operator__Reconciliation__Interval
               value: {{ .Values.options.reconciliation.interval | quote }}
-{{ end }}
-{{ range .Values.operator.env }}
+{{- end }}
+
+{{- if .Values.options.reconciliation.retryInterval }}
+            - name: Auth0__Operator__Reconciliation__RetryInterval
+              value: {{ .Values.options.reconciliation.retryInterval | quote }}
+{{- end }}
+
+{{- if .Values.options.reconciliation.maxParallelReconciliations }}
+            - name: Auth0__Operator__Reconciliation__MaxParallelReconciliations
+              value: {{ .Values.options.reconciliation.maxParallelReconciliations | quote }}
+{{- end }}
+
+{{- if not (kindIs "invalid" .Values.options.rateLimit.enabled) }}
+            - name: Auth0__Operator__RateLimit__Enabled
+              value: {{ .Values.options.rateLimit.enabled | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.tokenLimit }}
+            - name: Auth0__Operator__RateLimit__TokenLimit
+              value: {{ .Values.options.rateLimit.tokenLimit | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.tokensPerPeriod }}
+            - name: Auth0__Operator__RateLimit__TokensPerPeriod
+              value: {{ .Values.options.rateLimit.tokensPerPeriod | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.replenishmentPeriod }}
+            - name: Auth0__Operator__RateLimit__ReplenishmentPeriod
+              value: {{ .Values.options.rateLimit.replenishmentPeriod | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.queueLimit }}
+            - name: Auth0__Operator__RateLimit__QueueLimit
+              value: {{ .Values.options.rateLimit.queueLimit | quote }}
+{{- end }}
+
+{{- range .Values.operator.env }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
-{{ end }}
+{{- end }}
+          ports:
+            - containerPort: 8443
+              name: https
           resources: {{- toYaml .Values.operator.resources | nindent 12 }}
           {{- with .Values.operator.containerSecurityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}
+          volumeMounts:
           {{- with .Values.operator.volumeMounts }}
-          volumeMounts: {{- toYaml . | nindent 12 }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
+              readOnly: true
+            - mountPath: /usr/local/share/ca-certificates/ca.crt
+              name: certs
+              subPath: ca.crt
+              readOnly: true
+            - mountPath: /certs
+              name: certs
+              readOnly: true
+      volumes:
       {{- with .Values.operator.volumes }}
-      volumes: {{- toYaml . | nindent 8 }}
+      {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: ssl-certs
+          emptyDir: {}
+        - name: certs
+          secret:
+            defaultMode: 420
+            secretName: {{ include "auth0-operator.fullname" . }}-tls

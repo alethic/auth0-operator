@@ -23,30 +23,21 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Setup .NET 8.0
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-    - name: Setup .NET 9.0
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.101
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3
-      with:
-        versionSpec: 5.x
-    - name: Execute GitVersion
-      uses: gittools/actions/gitversion/execute@v3
-      with:
-        useConfigFile: true
-        configFilePath: GitVersion.yml
+        dotnet-version: 10.x
     - name: Add NuGet Source (GitHub)
       shell: pwsh
       run: dotnet nuget add source --username USERNAME --password $env:GITHUB_TOKEN --store-password-in-clear-text --name alethic $env:GITHUB_REPOS
       env:
         GITHUB_REPOS: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: NuGet Restore
+    - name: DotNet Tool Restore
+      run: dotnet tool restore
+    - name: Execute GitVersion
+      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
+    - name: DotNet Package Restore
       run: dotnet restore Alethic.Auth0.Operator.sln
     - name: Build
       run: |
@@ -74,14 +65,14 @@ jobs:
       with:
         name: msbuild.binlog
         path: msbuild.binlog
-    - name: Package Containers
-      run: tar czvf /tmp/containers.tar.gz containers
+    - name: Package Images
+      run: tar czvf /tmp/images.tar.gz images
       working-directory: dist
-    - name: Upload Containers
+    - name: Upload Images
       uses: actions/upload-artifact@v4
       with:
-        name: containers
-        path: /tmp/containers.tar.gz
+        name: images
+        path: /tmp/images.tar.gz
     - name: Package Charts
       run: tar czvf /tmp/charts.tar.gz charts
       working-directory: dist
@@ -109,26 +100,21 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Setup .NET 9.0
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.101
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3
-      with:
-        versionSpec: 5.x
+        dotnet-version: 10.x
+    - name: DotNet Tool Restore
+      run: dotnet tool restore
     - name: Execute GitVersion
-      id: GitVersion
-      uses: gittools/actions/gitversion/execute@v3
-      with:
-        useConfigFile: true
-    - name: Download Containers
+      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
+    - name: Download Images
       uses: actions/download-artifact@v4
       with:
-        name: containers
+        name: images
         path: dist
-    - name: Restore Containers
-      run: tar xzvf containers.tar.gz
+    - name: Restore Images
+      run: tar xzvf images.tar.gz
       working-directory: dist
     - name: Download Charts
       uses: actions/download-artifact@v4
@@ -145,7 +131,7 @@ jobs:
         tag: ${{ steps.GitVersion.outputs.semVer }}
         allowUpdates: true
         omitBodyDuringUpdate: true
-        artifacts: dist/containers/*.tar,dist/charts/*.tgz
+        artifacts: dist/images/*.tar,dist/charts/*.tgz
         makeLatest: true
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login To Repository (GitHub)
@@ -154,11 +140,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
         registry: ghcr.io/${{ github.repository_owner }}
-    - name: Push Containers (GitHub)
+    - name: Push Images (GitHub)
       if: github.event_name != 'pull_request'
       uses: docker://quay.io/skopeo/stable:latest
       with:
-        args: copy "--dest-creds=${{ github.actor }}:${{ github.token }}" docker-archive:/github/workspace/dist/containers/auth0-operator-image.tar docker://ghcr.io/${{ github.repository_owner }}/auth0-operator-image:${{ steps.GitVersion.outputs.semVer }}
+        args: copy "--dest-creds=${{ github.actor }}:${{ github.token }}" docker-archive:/github/workspace/dist/images/auth0-operator-image.tar docker://ghcr.io/${{ github.repository_owner }}/auth0-operator-image:${{ env.GitVersion_SemVer }}
     - name: Push Charts (GitHub)
       if: github.event_name != 'pull_request'
       run: helm push dist/charts/*.tgz oci://ghcr.io/${{ github.repository_owner }}

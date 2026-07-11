@@ -1,20 +1,21 @@
-﻿<Project Sdk="MSTest.Sdk/3.6.1">
+﻿<Project Sdk="MSTest.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Auth0.AuthenticationApi" Version="7.40.0" />
-        <PackageReference Include="Auth0.ManagementApi" Version="7.40.0" />
-        <PackageReference Include="System.Text.Json" Version="9.0.0" />
+        <PackageReference Include="Auth0.AuthenticationApi" Version="7.46.0" />
+        <PackageReference Include="Auth0.ManagementApi" Version="8.3.0" />
+        <PackageReference Include="System.Text.Json" Version="10.0.5" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Alethic.Auth0.Operator.Core\Alethic.Auth0.Operator.Core.csproj" />
+      <ProjectReference Include="..\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" />
     </ItemGroup>
 
 </Project>

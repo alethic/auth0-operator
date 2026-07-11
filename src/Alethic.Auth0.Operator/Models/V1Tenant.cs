@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 
 using Alethic.Auth0.Operator.Core.Extensions;
-using Alethic.Auth0.Operator.Core.Models.Tenant;
+using Alethic.Auth0.Operator.Core.Models.Tenant.V1;
 
 using k8s.Models;
 
@@ -14,13 +14,12 @@ namespace Alethic.Auth0.Operator.Models
 
     [EntityScope(EntityScope.Namespaced)]
     [KubernetesEntity(Group = "kubernetes.auth0.com", ApiVersion = "v1", Kind = "Tenant")]
-    [KubernetesEntityShortNames("a0tenant")]
     public partial class V1Tenant :
         CustomKubernetesEntity<V1Tenant.SpecDef, V1Tenant.StatusDef>,
-        V1Entity<V1Tenant.SpecDef, V1Tenant.StatusDef, TenantConf>
+        ApiEntity<V1Tenant.SpecDef, V1Tenant.StatusDef, V1TenantConf, V1TenantConf>
     {
 
-        public class SpecDef : V1EntitySpec<TenantConf>
+        public class SpecDef : ApiEntitySpec<V1TenantConf>
         {
 
             public class AuthDef
@@ -48,20 +47,19 @@ namespace Alethic.Auth0.Operator.Models
             public AuthDef? Auth { get; set; }
 
             [JsonPropertyName("init")]
-            public TenantConf? Init { get; set; }
+            public V1TenantConf? Init { get; set; }
 
             [JsonPropertyName("conf")]
             [Required]
-            public TenantConf? Conf { get; set; }
+            public V1TenantConf? Conf { get; set; }
 
         }
 
-        public class StatusDef : V1EntityStatus
+        public class StatusDef : ApiEntityStatus<V1TenantConf>
         {
 
             [JsonPropertyName("lastConf")]
-            [JsonConverter(typeof(SimplePrimitiveHashtableConverter))]
-            public Hashtable? LastConf { get; set; }
+            public V1TenantConf? LastConf { get; set; }
 
         }
 

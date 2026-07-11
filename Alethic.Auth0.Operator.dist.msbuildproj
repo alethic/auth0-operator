@@ -9,9 +9,23 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <TargetsForPrePrepare Include="$(SolutionFile)">
+            <Targets>Alethic_Auth0_Operator</Targets>
+            <Properties>Configuration=Debug;GenerateOperatorResources=false</Properties>
+        </TargetsForPrePrepare>
+    </ItemGroup>
+
+    <ItemGroup>
+        <TargetsForPrepare Include="$(SolutionFile)">
+            <Targets>Alethic_Auth0_Operator</Targets>
+            <Properties>Configuration=Release;GenerateOperatorResources=true</Properties>
+        </TargetsForPrepare>
+    </ItemGroup>
+
+    <ItemGroup>
         <TargetsForPublish Include="$(SolutionFile)">
-            <Targets>dist%5Cdist-containers:Publish</Targets>
-            <Properties>PublishDir=$(DistDir)\containers</Properties>
+            <Targets>dist%5Cdist-images:Publish</Targets>
+            <Properties>PublishDir=$(DistDir)\images</Properties>
         </TargetsForPublish>
         <TargetsForPublish Include="$(SolutionFile)">
             <Targets>dist%5Cdist-charts:Publish</Targets>
@@ -23,7 +37,27 @@
         </TargetsForPublish>
     </ItemGroup>
 
-    <Target Name="Publish">
+    <Target Name="PrePrepare">
+        <ItemGroup>
+            <_TargetsForPrePrepare Include="@(TargetsForPrePrepare)">
+                <Properties>%(TargetsForPrePrepare.Properties)</Properties>
+            </_TargetsForPrePrepare>
+        </ItemGroup>
+
+        <MSBuild BuildInParallel="False" ContinueOnError="false" Projects="@(_TargetsForPrePrepare)" Targets="%(_TargetsForPrePrepare.Targets)" />
+    </Target>
+
+    <Target Name="Prepare" DependsOnTargets="PrePrepare">
+        <ItemGroup>
+            <_TargetsForPrepare Include="@(TargetsForPrepare)">
+                <Properties>%(TargetsForPrepare.Properties)</Properties>
+            </_TargetsForPrepare>
+        </ItemGroup>
+
+        <MSBuild BuildInParallel="False" ContinueOnError="false" Projects="@(_TargetsForPrepare)" Targets="%(_TargetsForPrepare.Targets)" />
+    </Target>
+
+    <Target Name="Publish" DependsOnTargets="Prepare">
         <ItemGroup>
             <_TargetsForPublish Include="@(TargetsForPublish)">
                 <Properties>%(TargetsForPublish.Properties)</Properties>

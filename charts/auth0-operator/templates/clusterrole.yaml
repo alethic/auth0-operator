@@ -2,14 +2,29 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: auth0-operator-role
-  labels: {{- include "auth0-operator.labels" . | nindent 4 }}
+  labels:
+    {{- include "auth0-operator.labels" . | nindent 4 }}
+  annotations:
+    {{- include "auth0-operator.annotations" . | nindent 4 }}
 rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - tenants
+  - brandingthemes
   - clients
+  - clientgrants
+  - connectionclients
+  - customdomains
+  - customtexts
   - resourceservers
+  - roles
+  verbs:
+  - '*'
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - tenants
+  - connections
   verbs:
   - '*'
 - apiGroups:
@@ -27,10 +42,11 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - clientgrants
-  - connections
+  - clients
+  - resourceservers
   verbs:
-  - '*'
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -45,7 +61,21 @@ rules:
   resources:
   - leases
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - brandingthemes/status
+  verbs:
+  - get
+  - update
+  - patch
 - apiGroups:
   - kubernetes.auth0.com
   resources:
@@ -65,14 +95,6 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - resourceservers/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
   - clientgrants/status
   verbs:
   - get
@@ -81,7 +103,63 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - clients/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - connectionclients/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
   - connections/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - customdomains/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - customtexts/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - resourceservers/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - roles/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - resourceservers/status
   verbs:
   - get
   - update
