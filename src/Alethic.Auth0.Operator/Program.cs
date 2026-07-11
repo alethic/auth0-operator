@@ -21,7 +21,6 @@ namespace Alethic.Auth0.Operator
 
             var operatorOptions = builder.Configuration.GetSection("Auth0:Operator").Get<OperatorOptions>() ?? new OperatorOptions();
             builder.Services.AddKubernetesOperator(s => s.ParallelReconciliation.MaxParallelReconciliations = operatorOptions.Reconciliation.MaxParallelReconciliations).RegisterComponents();
-            builder.Services.AddHostedService<StorageVersionMigrationService>();
             builder.Services.AddSingleton<Auth0HttpClientProvider>();
             builder.Services.AddMemoryCache();
             builder.Services.AddRouting();
