@@ -5,7 +5,7 @@ rules (manual Auth0 mapping, two-line `if` statements, etc.) apply here too.
 
 ## What this is
 
-A Kubernetes operator (KubeOps 10.x, .NET 10) that manages Auth0 Management API resources —
+A Kubernetes operator (KubeOps 12.x, .NET 10) that manages Auth0 Management API resources —
 Tenant, Client, Connection, ResourceServer, ClientGrant, Role, BrandingTheme, CustomDomain,
 CustomText — as namespaced CRDs under group `kubernetes.auth0.com`.
 
