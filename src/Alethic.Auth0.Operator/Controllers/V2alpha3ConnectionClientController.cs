@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +10,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Connections;
 
@@ -124,7 +122,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (await IsClientEnabledAsync(api, connectionId, clientId, cancellationToken) == false)
                     return null;
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 // connection no longer exists
                 return null;
@@ -157,7 +155,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (await IsClientEnabledAsync(api, connectionId, clientId, cancellationToken))
                     return BuildId(connectionId, clientId);
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
@@ -210,7 +208,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 await SetClientEnabledAsync(api, connectionId, clientId, false, cancellationToken);
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 // connection already gone; nothing to disable
             }
