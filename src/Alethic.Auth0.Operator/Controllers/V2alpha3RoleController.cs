@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +11,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Roles;
 
@@ -110,7 +108,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 self = await api.Roles.GetAsync(id, null, cancellationToken);
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +10,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 
 using k8s.Models;
@@ -1303,7 +1301,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 return FromApi(await api.Clients.GetAsync(id, new GetClientRequestParameters(), null, cancellationToken));
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
@@ -1321,7 +1319,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing client: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), client.Name);
                         return client.ClientId;
                     }
-                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                    catch (NotFoundError)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find client with id {ClientId}.", EntityTypeName, entity.Namespace(), entity.Name(), clientId);
                     }

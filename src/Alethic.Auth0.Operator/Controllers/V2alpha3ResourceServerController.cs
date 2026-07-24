@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +9,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 
 using k8s.Models;
@@ -423,7 +421,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 return FromApi(await api.ResourceServers.GetAsync(id, new GetResourceServerRequestParameters(), null, cancellationToken));
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
