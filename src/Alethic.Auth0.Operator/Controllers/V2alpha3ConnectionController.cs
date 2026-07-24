@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
@@ -14,7 +13,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Connections;
 using Auth0.ManagementApi.Core;
@@ -4520,7 +4518,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 conf.EnabledClients = (await GetEnabledClientsAsync(api, id, cancellationToken)).Select(i => new V1ClientReference() { Id = i }).ToArray();
                 return conf;
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
@@ -4539,7 +4537,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing connection: {Name}", EntityTypeName, entity.Namespace(), entity.Name(), connection.Name);
                         return connection.Id;
                     }
-                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                    catch (NotFoundError)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find connection with id {ConnectionId}.", EntityTypeName, entity.Namespace(), entity.Name(), connectionId);
                         return null;

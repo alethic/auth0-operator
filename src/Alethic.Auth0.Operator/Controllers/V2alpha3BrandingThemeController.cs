@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +7,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Branding;
 
@@ -612,7 +610,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 return FromApi(await api.Branding.Themes.GetAsync(id, cancellationToken: cancellationToken));
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
@@ -631,7 +629,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing theme: {DisplayName}", EntityTypeName, entity.Namespace(), entity.Name(), theme.DisplayName);
                         return theme.ThemeId;
                     }
-                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                    catch (NotFoundError)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find theme with id {ThemeId}.", EntityTypeName, entity.Namespace(), entity.Name(), id);
                         return null;
