@@ -208,6 +208,21 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void ButtonsStyle_Roundtrip_Sharp() { var input = new BrandingThemeBordersButtonsStyleEnum(BrandingThemeBordersButtonsStyleEnum.Values.Sharp); Assert.AreEqual(input.Value, V2alpha3BrandingThemeController.ToApiButtonsStyle(V2alpha3BrandingThemeController.FromApi(input)).Value); }
 
+        // DisplayName defaulting: Auth0 omits displayName on read-back when a theme has none, and the SDK
+        // response models mark it required, so the create/update requests must always send a non-null value.
+
+        [TestMethod]
+        public void ToCreateRequest_DisplayName_DefaultsWhenNull() => Assert.AreEqual(V2alpha3BrandingThemeController.DefaultDisplayName, V2alpha3BrandingThemeController.ToCreateRequest(new V2alpha3BrandingThemeConf { DisplayName = null }).DisplayName);
+
+        [TestMethod]
+        public void ToCreateRequest_DisplayName_PreservedWhenSet() => Assert.AreEqual("Custom Theme", V2alpha3BrandingThemeController.ToCreateRequest(new V2alpha3BrandingThemeConf { DisplayName = "Custom Theme" }).DisplayName);
+
+        [TestMethod]
+        public void ToUpdateRequest_DisplayName_UsesExistingWhenConfNull() => Assert.AreEqual("Existing Theme", V2alpha3BrandingThemeController.ToUpdateRequest(new V2alpha3BrandingThemeConf { DisplayName = null }, new GetBrandingThemeResponseContent { Borders = null!, Colors = null!, DisplayName = "Existing Theme", Fonts = null!, PageBackground = null!, ThemeId = null!, Widget = null! }).DisplayName);
+
+        [TestMethod]
+        public void ToUpdateRequest_DisplayName_DefaultsWhenConfAndExistingNull() => Assert.AreEqual(V2alpha3BrandingThemeController.DefaultDisplayName, V2alpha3BrandingThemeController.ToUpdateRequest(new V2alpha3BrandingThemeConf { DisplayName = null }, new GetBrandingThemeResponseContent { Borders = null!, Colors = null!, DisplayName = null!, Fonts = null!, PageBackground = null!, ThemeId = null!, Widget = null! }).DisplayName);
+
     }
 
 }
