@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +7,6 @@ using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
-using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Branding;
 
@@ -281,11 +279,18 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         /// <summary>
+        /// Default display name applied when none is configured. Auth0 assigns this same value to themes created
+        /// without a display name; sending it explicitly ensures the created/updated theme always carries a
+        /// <c>displayName</c>, which the Management API (and SDK response models) treat as required on read-back.
+        /// </summary>
+        internal const string DefaultDisplayName = "Unnamed Theme";
+
+        /// <summary>
         /// Converts the specified configuration to a new <see cref="CreateBrandingThemeRequestContent"/>.
         /// </summary>
         internal static CreateBrandingThemeRequestContent ToCreateRequest(V2alpha3BrandingThemeConf conf) => new()
         {
-            DisplayName = conf.DisplayName,
+            DisplayName = conf.DisplayName ?? DefaultDisplayName,
             Borders = ToApi(conf.Borders),
             Colors = ToApi(conf.Colors),
             Fonts = ToApi(conf.Fonts),
@@ -299,7 +304,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         internal static UpdateBrandingThemeRequestContent ToUpdateRequest(V2alpha3BrandingThemeConf conf, GetBrandingThemeResponseContent existing) => new()
         {
-            DisplayName = conf.DisplayName ?? existing?.DisplayName,
+            DisplayName = conf.DisplayName ?? existing?.DisplayName ?? DefaultDisplayName,
             Borders = ToApi(conf.Borders, existing?.Borders),
             Colors = ToApi(conf.Colors, existing?.Colors),
             Fonts = ToApi(conf.Fonts, existing?.Fonts),
@@ -612,7 +617,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 return FromApi(await api.Branding.Themes.GetAsync(id, cancellationToken: cancellationToken));
             }
-            catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (NotFoundError)
             {
                 return null;
             }
@@ -631,7 +636,7 @@ namespace Alethic.Auth0.Operator.Controllers
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} found existing theme: {DisplayName}", EntityTypeName, entity.Namespace(), entity.Name(), theme.DisplayName);
                         return theme.ThemeId;
                     }
-                    catch (ErrorApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                    catch (NotFoundError)
                     {
                         Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} could not find theme with id {ThemeId}.", EntityTypeName, entity.Namespace(), entity.Name(), id);
                         return null;

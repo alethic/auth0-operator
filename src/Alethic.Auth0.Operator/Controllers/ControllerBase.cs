@@ -610,6 +610,27 @@ namespace Alethic.Auth0.Operator.Controllers
                 Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", interval);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
+            catch (ManagementApiException e)
+            {
+                // the 8.x Auth0 Management SDK surfaces API errors as ManagementApiException subtypes (NotFoundError,
+                // BadRequestError, ForbiddenError, etc.), not the legacy ErrorApiException which only the AuthenticationApi
+                // token path throws; must be caught after the more-derived TooManyRequestsError above
+                Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+
+                try
+                {
+                    await ReconcileWarningAsync(entity, "ApiError", e.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                // retry after the retry interval
+                var interval = Options.Reconciliation.RetryInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next reconciliation in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
             catch (RetryException e)
             {
                 Logger.LogError(e, "Retry exception reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
@@ -703,6 +724,26 @@ namespace Alethic.Auth0.Operator.Controllers
                     interval = TimeSpan.FromMinutes(1);
 
                 Logger.LogInformation("Rescheduling deletion after {TimeSpan}.", interval);
+                return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
+            }
+            catch (ManagementApiException e)
+            {
+                // the 8.x Auth0 Management SDK surfaces API errors as ManagementApiException subtypes (NotFoundError,
+                // TooManyRequestsError, etc.), not the legacy ErrorApiException which only the AuthenticationApi token path throws
+                Logger.LogError(e, "API error deleting {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.Message);
+
+                try
+                {
+                    await DeletingWarningAsync(entity, "ApiError", e.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
+                // retry after the retry interval
+                var interval = Options.Reconciliation.RetryInterval;
+                Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} scheduling next deletion in {IntervalSeconds}s", EntityTypeName, entity.Namespace(), entity.Name(), interval.TotalSeconds);
                 return ReconciliationResult<TEntity>.Failure(entity, e.Message, e, interval);
             }
             catch (RetryException e)
