@@ -133,6 +133,28 @@ src/Alethic.Auth0.Operator.Tests/bin/Debug/net10.0/Alethic.Auth0.Operator.Tests.
 Mapping/round-trip tests live per Kind as `V2alpha3<Kind>ControllerMappingTests.cs` and
 `V2alpha3ClientCopyTests.cs`. Reproduce tests when migrating; keep coverage.
 
+## Versioning & releases
+
+Versions come from **GitVersion 6** (`GitVersion.yml`), never from a checked-in version number.
+The CI workflow feeds `GitVersion_FullSemVer` into `/p:Version`, which flows to the assembly
+version, the container tag (`ContainerImageTag`), and the Helm chart (`helm package --version`).
+
+| build | version |
+|---|---|
+| push to `main` | `1.4.4-pre.7` — prerelease, pushed to ghcr as a preview |
+| push to `develop` | `1.5.0-dev.3` |
+| GitHub Release created on a tag | `1.4.3` — clean, attached to the release |
+| PR / feature branch | `1.5.0-<branch>.1+1`, never published |
+
+Every branch must set `mode: ContinuousDelivery` explicitly. GitVersion 6's
+`ContinuousDeployment` mode **strips** the prerelease label, so a root-level
+`mode: ContinuousDeployment` (which branches inherit) silently produces clean `1.4.4` versions on
+`main` even though `label: pre` is set. That was the cause of `main` never building `-pre`.
+
+A release is cut by tagging a commit and creating a GitHub Release; the workflow's `release` job
+attaches the image and chart. Note that a push build of a commit that *is* the release tag
+resolves to the clean version rather than `-pre` — harmless, since that build is the release.
+
 ## Adding a new storage version (e.g. `v2alpha4`)
 
 Per Kind: clone the model tree into `Models/<Kind>/V2alpha4/` (rename type prefix + namespace,
