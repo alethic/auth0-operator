@@ -151,12 +151,20 @@ version, the container tag (`ContainerImageTag`), and the Helm chart (`helm pack
 | push to `main` | `1.4.4-pre.7` — prerelease, pushed to ghcr as a preview |
 | push to `develop` | `1.5.0-dev.3` |
 | GitHub Release created on a tag | `1.4.3` — clean, attached to the release |
-| PR / feature branch | `1.5.0-<branch>.1+1`, never published |
+| pull request | `1.4.4-PullRequest22.9`, never published |
+| feature branch | `1.4.4-<branch>.1+9`, never published |
 
-Every branch must set `mode: ContinuousDelivery` explicitly. GitVersion 6's
-`ContinuousDeployment` mode **strips** the prerelease label, so a root-level
-`mode: ContinuousDeployment` (which branches inherit) silently produces clean `1.4.4` versions on
-`main` even though `label: pre` is set. That was the cause of `main` never building `-pre`.
+Two settings are load bearing and both default to something wrong for this repo:
+
+- **`mode: ContinuousDelivery` on every branch.** GitVersion 6's `ContinuousDeployment` mode
+  **strips** the prerelease label, so a root-level `mode: ContinuousDeployment` (which branches
+  inherit) silently produces clean `1.4.4` versions on `main` even though `label: pre` is set.
+  That was why `main` never built `-pre`.
+- **`increment: Patch` on `feature`/`pull-request`/`hotfix`/`unknown`.** These default to
+  `Inherit`, which resolves through `develop` and adopts its `Minor` increment — so a branch cut
+  from `main` previewed as `1.5.0` instead of the next patch. Setting the *root* `increment` does
+  not fix this; the inheritance chain reaches `develop` first, so each branch type must be pinned.
+  `develop` keeps `Minor` deliberately.
 
 A release is cut by tagging a commit and creating a GitHub Release; the workflow's `release` job
 attaches the image and chart. Note that a push build of a commit that *is* the release tag
