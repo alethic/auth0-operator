@@ -1,0 +1,32 @@
+<Solution>
+  <Folder Name="/charts/">
+    <Project Path="charts/auth0-operator/auth0-operator.msbuildproj" Type="13b669be-bb05-4ddf-9536-439f39a36129" />
+  </Folder>
+  <Folder Name="/dist/">
+    <Project Path="src/dist-charts/dist-charts.msbuildproj" Type="13b669be-bb05-4ddf-9536-439f39a36129" />
+    <Project Path="src/dist-images/dist-images.msbuildproj" Type="13b669be-bb05-4ddf-9536-439f39a36129" />
+    <Project Path="src/dist-tests/dist-tests.msbuildproj" Type="13b669be-bb05-4ddf-9536-439f39a36129" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".github/workflows/Alethic.Auth0.Operator.yml" />
+    <File Path=".gitignore" />
+    <File Path="Alethic.Auth0.Operator.dist.msbuildproj" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="FUNDING.yml" />
+    <File Path="GitVersion.yml" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/targets/">
+    <File Path="targets/PublishContainer.targets" />
+    <File Path="targets/PublishContainerProjectReferences.targets" />
+  </Folder>
+  <Project Path="src/Alethic.Auth0.Operator.Core/Alethic.Auth0.Operator.Core.csproj" />
+  <Project Path="src/Alethic.Auth0.Operator.ModelGenerator/Alethic.Auth0.Operator.ModelGenerator.csproj" />
+  <Project Path="src/Alethic.Auth0.Operator.Tests/Alethic.Auth0.Operator.Tests.csproj" />
+  <Project Path="src/Alethic.Auth0.Operator/Alethic.Auth0.Operator.csproj" />
+</Solution>

@@ -35,10 +35,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: DotNet Tool Restore
       run: dotnet tool restore
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: 6.x
     - name: Execute GitVersion
-      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
+      id: GitVersion
+      uses: gittools/actions/gitversion/execute@v4
     - name: DotNet Package Restore
-      run: dotnet restore Alethic.Auth0.Operator.sln
+      run: dotnet restore Alethic.Auth0.Operator.slnx
     - name: Build
       run: |
         dotnet msbuild /m /bl \
@@ -104,10 +109,13 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.x
-    - name: DotNet Tool Restore
-      run: dotnet tool restore
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: 6.x
     - name: Execute GitVersion
-      run: dotnet tool run dotnet-gitversion /output buildserver /config GitVersion.yml
+      id: GitVersion
+      uses: gittools/actions/gitversion/execute@v4
     - name: Download Images
       uses: actions/download-artifact@v4
       with:

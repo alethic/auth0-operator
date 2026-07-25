@@ -123,7 +123,7 @@ served version (it would break existing manifests).
 ## Build & Test
 
 ```sh
-dotnet build Alethic.Auth0.Operator.sln           # builds all + generates CRDs into config/
+dotnet build Alethic.Auth0.Operator.slnx          # builds all + generates CRDs into config/
 # The chart's RewriteCrd step can hit a transient file lock; just re-run the build.
 
 # Tests use Microsoft.Testing.Platform — run the produced executable, not `dotnet test`:
@@ -132,6 +132,43 @@ src/Alethic.Auth0.Operator.Tests/bin/Debug/net10.0/Alethic.Auth0.Operator.Tests.
 
 Mapping/round-trip tests live per Kind as `V2alpha3<Kind>ControllerMappingTests.cs` and
 `V2alpha3ClientCopyTests.cs`. Reproduce tests when migrating; keep coverage.
+
+The solution is **`Alethic.Auth0.Operator.slnx`** (the XML solution format); there is no `.sln`.
+Beyond being the current format, it keeps `Alethic.Auth0.Operator.dist.msbuildproj` the *only*
+`*.*proj` file in the repository root — building a `.sln` writes a generated
+`<name>.sln.metaproj` next to it, and a second root project file makes `dotnet` commands that
+discover a project (notably `dotnet tool install`, which the GitVersion action runs) fail with
+"contains more than one project file". `*.metaproj` is gitignored for the same reason.
+
+## Versioning & releases
+
+Versions come from **GitVersion 6** (`GitVersion.yml`), never from a checked-in version number.
+The CI workflow feeds `GitVersion_FullSemVer` into `/p:Version`, which flows to the assembly
+version, the container tag (`ContainerImageTag`), and the Helm chart (`helm package --version`).
+
+| build | version |
+|---|---|
+| push to `main` | `1.4.4-pre.7` — prerelease, pushed to ghcr as a preview |
+| push to `develop` | `1.5.0-dev.3` |
+| GitHub Release created on a tag | `1.4.3` — clean, attached to the release |
+| pull request | `1.4.4-PullRequest22.9`, never published |
+| feature branch | `1.4.4-<branch>.1+9`, never published |
+
+Two settings are load bearing and both default to something wrong for this repo:
+
+- **`mode: ContinuousDelivery` on every branch.** GitVersion 6's `ContinuousDeployment` mode
+  **strips** the prerelease label, so a root-level `mode: ContinuousDeployment` (which branches
+  inherit) silently produces clean `1.4.4` versions on `main` even though `label: pre` is set.
+  That was why `main` never built `-pre`.
+- **`increment: Patch` on `feature`/`pull-request`/`hotfix`/`unknown`.** These default to
+  `Inherit`, which resolves through `develop` and adopts its `Minor` increment — so a branch cut
+  from `main` previewed as `1.5.0` instead of the next patch. Setting the *root* `increment` does
+  not fix this; the inheritance chain reaches `develop` first, so each branch type must be pinned.
+  `develop` keeps `Minor` deliberately.
+
+A release is cut by tagging a commit and creating a GitHub Release; the workflow's `release` job
+attaches the image and chart. Note that a push build of a commit that *is* the release tag
+resolves to the clean version rather than `-pre` — harmless, since that build is the release.
 
 ## Adding a new storage version (e.g. `v2alpha4`)
 
