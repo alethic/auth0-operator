@@ -18,7 +18,9 @@ CustomText — as namespaced CRDs under group `kubernetes.auth0.com`.
   shared `ControllerBase`, `V1TenantEntityController`, `V1TenantEntityInstanceController` bases.
 - `src/Alethic.Auth0.Operator/Converters/` — conversion webhooks (one per Kind).
   `Converters/Generated/<Kind>Copy.cs` — structural property-copy converters (see below).
-- `src/Alethic.Auth0.Operator/Finalizers/` — one finalizer per storage version.
+- `src/Alethic.Auth0.Operator/Finalizers/` — one finalizer per Kind, **named without a version**
+  (`ClientFinalizer`, not `V2alpha3ClientFinalizer`). `Finalizers/Legacy/` holds shims for retired
+  identifiers and `EntityFinalizers.cs` is the identifier table. See Finalizers below.
 - `src/Alethic.Auth0.Operator.Tests/` — MSTest, run via the **Microsoft.Testing.Platform**
   executable (NOT `dotnet test` — that fails on .NET 10). See Build & Test.
 
@@ -30,10 +32,11 @@ Currently the hub is **`v2alpha3`** for every Kind; older versions (`v1`, `v1alp
 
 - The **hub version = the `ConversionWebhook<T>` target type**. KubeOps marks it as the
   CRD storage version. There is no `[StorageVersion]` attribute in this repo.
-- **Only the storage version has a controller + finalizer.** The API server stores everything
+- **Only the storage version has a controller.** The API server stores everything
   as the hub version and converts other served versions via the operator's conversion webhook;
   the operator watches only the hub. So old versions keep their entity class (for the served
-  CRD version + as a conversion source) but have **no** controller/finalizer.
+  CRD version + as a conversion source) but have **no** controller. Finalizers are per Kind, not
+  per version — see Finalizers.
 - **Short names must be unique across a Kind's versions** (KubeOps requirement). Define
   `[KubernetesEntityShortNames(...)]` only on the storage version; strip it from older ones.
 - CRDs are **generated** by `KubeOps.Generator` at build into
@@ -134,8 +137,40 @@ Mapping/round-trip tests live per Kind as `V2alpha3<Kind>ControllerMappingTests.
 
 Per Kind: clone the model tree into `Models/<Kind>/V2alpha4/` (rename type prefix + namespace,
 apply the naming rules above); add the entity class (move the short name to it, strip from the
-old); add controller + finalizer targeting the new version; retarget the `ConversionWebhook` to
+old); add a controller targeting the new version; retarget the `ConversionWebhook` to
 the new hub and add converters (structural copy from the predecessor, plus retargeted reshaping
 converters where they exist); clone the tests; update `ControllerBase` tenant resolution if the
 Tenant hub moved; update `README.md`. Build, run tests, and inspect the transpiled CRDs to
 confirm the new version is `storage: true`, older versions `served`, `conversion: Webhook`.
+
+**Do not add or rename a finalizer for the new version.** Retarget the existing
+`<Kind>Finalizer` at the new entity type and update its entry in `EntityFinalizers`. See
+Finalizers.
+
+## Finalizers
+
+KubeOps derives the finalizer identifier written into `metadata.finalizers` from the **finalizer's
+class name** — twice, and neither is overridable: `EntityFinalizerExtensions.GetIdentifierName`
+reads `GetType().Name` when attaching, and `KubeOps.Generator` computes the same string as the DI
+key used to resolve the finalizer during finalization. Passing a custom string to `AddFinalizer`
+desyncs the two, so the identifier gets written but never resolves. **The class name is the API.**
+
+This bit the repo: finalizers used to be named after the storage version, so every hub bump minted
+a new identifier and orphaned the previous one. Orphans are not cosmetic — the reconciler inspects
+`Finalizers()[0]` only and returns *without removing it* when nothing is registered under that
+identifier, so the entity is wedged in `Terminating` forever and the real finalizer never runs.
+
+The rules that follow from that:
+
+- **Current finalizer names carry no version** (`ClientFinalizer` → `kubernetes.auth0.com/clientfinalizer`)
+  and must never change again. Renaming one is a breaking change for every live object.
+- **Every identifier ever released stays registered**, as a shim in `Finalizers/Legacy/` deriving
+  from `EntityFinalizerBase<TEntity>` (so it runs the controller's idempotent `DeletedAsync`).
+  Never delete one — objects carrying it could never finish deleting.
+- **`AutoAttachFinalizers` is disabled** in `Program.cs`. KubeOps would otherwise attach the legacy
+  shims too. `ControllerBase.ReconcileFinalizers` owns attachment: it adds the current identifier
+  and strips retired ones on every live reconciliation.
+- `EntityFinalizers.cs` is the single source of truth, deriving identifiers from the finalizer
+  types themselves so a class rename can't silently desync it. `EntityFinalizersTests` pins the
+  exact wire strings and asserts every known identifier still resolves to a registered finalizer.
+- CustomText has no finalizer by design (it cannot be deleted from Auth0).

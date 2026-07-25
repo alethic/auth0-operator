@@ -1,0 +1,68 @@
+using Alethic.Auth0.Operator.Models;
+
+using KubeOps.Abstractions.Reconciliation.Controller;
+
+namespace Alethic.Auth0.Operator.Finalizers.Legacy
+{
+
+    /// <summary>
+    /// Drains <c>kubernetes.auth0.com/v1tenantfinalizer</c>, the identifier this operator wrote for
+    /// <see cref="V2alpha3Tenant"/> while the finalizer class was named <c>V1TenantFinalizer</c>. It is never attached to
+    /// new entities; it exists so that entities already carrying it can finish deleting.
+    /// </summary>
+    public class V1TenantFinalizer : EntityFinalizerBase<V2alpha3Tenant>
+    {
+
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="controller"></param>
+        public V1TenantFinalizer(IEntityController<V2alpha3Tenant> controller) :
+            base(controller)
+        {
+
+        }
+
+    }
+
+    /// <summary>
+    /// Drains <c>kubernetes.auth0.com/v2alpha1tenantfinalizer</c>, the identifier this operator wrote for
+    /// <see cref="V2alpha3Tenant"/> while the finalizer class was named <c>V2alpha1TenantFinalizer</c>. It is never attached to
+    /// new entities; it exists so that entities already carrying it can finish deleting.
+    /// </summary>
+    public class V2alpha1TenantFinalizer : EntityFinalizerBase<V2alpha3Tenant>
+    {
+
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="controller"></param>
+        public V2alpha1TenantFinalizer(IEntityController<V2alpha3Tenant> controller) :
+            base(controller)
+        {
+
+        }
+
+    }
+
+    /// <summary>
+    /// Drains <c>kubernetes.auth0.com/v2alpha3tenantfinalizer</c>, the identifier this operator wrote for
+    /// <see cref="V2alpha3Tenant"/> while the finalizer class was named <c>V2alpha3TenantFinalizer</c>. It is never attached to
+    /// new entities; it exists so that entities already carrying it can finish deleting.
+    /// </summary>
+    public class V2alpha3TenantFinalizer : EntityFinalizerBase<V2alpha3Tenant>
+    {
+
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="controller"></param>
+        public V2alpha3TenantFinalizer(IEntityController<V2alpha3Tenant> controller) :
+            base(controller)
+        {
+
+        }
+
+    }
+
+}

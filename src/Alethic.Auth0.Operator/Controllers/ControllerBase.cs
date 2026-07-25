@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Alethic.Auth0.Operator.Core.Models;
+using Alethic.Auth0.Operator.Finalizers;
 using Alethic.Auth0.Operator.Models;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
@@ -503,11 +504,46 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="cancellationToken"></param>
         protected abstract Task Reconcile(TEntity entity, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Brings the entity's finalizer list in line with <see cref="EntityFinalizers"/>: the current finalizer is
+        /// attached, and any identifier attached by a previous release is removed. Returns the entity as the API
+        /// server returned it, so the caller continues with a current resource version.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        async Task<TEntity> ReconcileFinalizers(TEntity entity, CancellationToken cancellationToken)
+        {
+            var changed = false;
+
+            foreach (var retired in EntityFinalizers.Retired<TEntity>())
+                if (entity.RemoveFinalizer(retired))
+                {
+                    Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} removing finalizer {Finalizer} (reason: retired by a previous release).", EntityTypeName, entity.Namespace(), entity.Name(), retired);
+                    changed = true;
+                }
+
+            if (EntityFinalizers.Current<TEntity>() is string current)
+                if (entity.AddFinalizer(current))
+                {
+                    Logger.LogInformation("{EntityTypeName} {EntityNamespace}/{EntityName} adding finalizer {Finalizer}.", EntityTypeName, entity.Namespace(), entity.Name(), current);
+                    changed = true;
+                }
+
+            if (changed == false)
+                return entity;
+
+            return await Kube.UpdateAsync(entity, cancellationToken);
+        }
+
         /// <inheritdoc />
         async Task<ReconciliationResult<TEntity>> IEntityController<TEntity>.ReconcileAsync(TEntity entity, CancellationToken cancellationToken)
         {
             try
             {
+                // AutoAttachFinalizers is disabled operator-wide, so this is the only place finalizers are attached
+                entity = await ReconcileFinalizers(entity, cancellationToken);
+
                 // does work of reconciling, and log success
                 await Reconcile(entity, cancellationToken);
                 await ReconcileSuccessAsync(entity, cancellationToken);
