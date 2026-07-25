@@ -3,6 +3,8 @@ major-version-bump-message: '\+semver:\s?(major)'
 minor-version-bump-message: '\+semver:\s?(minor)'
 patch-version-bump-message: '\+semver:\s?(patch)'
 branches:
+  # ContinuousDelivery has to be set on every branch. GitVersion 6's ContinuousDeployment mode
+  # strips the prerelease label, so inheriting it produces clean release versions on main.
   main:
     mode: ContinuousDelivery
     regex: ^main$
@@ -15,3 +17,13 @@ branches:
     label: dev
     increment: Minor
     is-release-branch: false
+  # These default to Inherit, which resolves through develop and picks up its Minor increment,
+  # so a branch cut from main previews as the next minor rather than the next patch. Pin them.
+  feature:
+    increment: Patch
+  pull-request:
+    increment: Patch
+  hotfix:
+    increment: Patch
+  unknown:
+    increment: Patch
