@@ -43,7 +43,7 @@ jobs:
       id: GitVersion
       uses: gittools/actions/gitversion/execute@v4
     - name: DotNet Package Restore
-      run: dotnet restore Alethic.Auth0.Operator.sln
+      run: dotnet restore Alethic.Auth0.Operator.slnx
     - name: Build
       run: |
         dotnet msbuild /m /bl \

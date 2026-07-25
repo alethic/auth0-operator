@@ -123,7 +123,7 @@ served version (it would break existing manifests).
 ## Build & Test
 
 ```sh
-dotnet build Alethic.Auth0.Operator.sln           # builds all + generates CRDs into config/
+dotnet build Alethic.Auth0.Operator.slnx          # builds all + generates CRDs into config/
 # The chart's RewriteCrd step can hit a transient file lock; just re-run the build.
 
 # Tests use Microsoft.Testing.Platform — run the produced executable, not `dotnet test`:
@@ -132,6 +132,13 @@ src/Alethic.Auth0.Operator.Tests/bin/Debug/net10.0/Alethic.Auth0.Operator.Tests.
 
 Mapping/round-trip tests live per Kind as `V2alpha3<Kind>ControllerMappingTests.cs` and
 `V2alpha3ClientCopyTests.cs`. Reproduce tests when migrating; keep coverage.
+
+The solution is **`Alethic.Auth0.Operator.slnx`** (the XML solution format); there is no `.sln`.
+Beyond being the current format, it keeps `Alethic.Auth0.Operator.dist.msbuildproj` the *only*
+`*.*proj` file in the repository root — building a `.sln` writes a generated
+`<name>.sln.metaproj` next to it, and a second root project file makes `dotnet` commands that
+discover a project (notably `dotnet tool install`, which the GitVersion action runs) fail with
+"contains more than one project file". `*.metaproj` is gitignored for the same reason.
 
 ## Versioning & releases
 
