@@ -17,14 +17,14 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Setup .NET 10
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.x
     - name: Add NuGet Source (GitHub)
@@ -66,7 +66,7 @@ jobs:
           Alethic.Auth0.Operator.dist.msbuildproj
     - name: Upload MSBuild Log
       if: ${{ always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: msbuild.binlog
         path: msbuild.binlog
@@ -74,7 +74,7 @@ jobs:
       run: tar czvf /tmp/images.tar.gz images
       working-directory: dist
     - name: Upload Images
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: images
         path: /tmp/images.tar.gz
@@ -82,7 +82,7 @@ jobs:
       run: tar czvf /tmp/charts.tar.gz charts
       working-directory: dist
     - name: Upload Charts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: charts
         path: /tmp/charts.tar.gz
@@ -90,7 +90,7 @@ jobs:
       run: tar czvf /tmp/tests.tar.gz tests
       working-directory: dist
     - name: Upload Tests
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: tests
         path: /tmp/tests.tar.gz
@@ -99,14 +99,14 @@ jobs:
     if: github.event_name != 'pull_request'
     needs:
     - build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Setup .NET 10
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.x
     - name: Install GitVersion
@@ -117,7 +117,7 @@ jobs:
       id: GitVersion
       uses: gittools/actions/gitversion/execute@v4
     - name: Download Images
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: images
         path: dist
@@ -125,7 +125,7 @@ jobs:
       run: tar xzvf images.tar.gz
       working-directory: dist
     - name: Download Charts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: charts
         path: dist
@@ -143,7 +143,7 @@ jobs:
         makeLatest: true
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login To Repository (GitHub)
-      uses: redhat-actions/podman-login@v1
+      uses: redhat-actions/podman-login@v2
       with:
         username: ${{ github.actor }}
         password: ${{ github.token }}
