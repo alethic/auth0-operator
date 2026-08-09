@@ -80,6 +80,130 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
+        /// Converts an Auth0 strategy wire value to a <see cref="V2alpha3ConnectionStrategy"/>. Returns null for
+        /// strategies not represented in the model so an unrecognized strategy cannot wedge reconciliation.
+        /// </summary>
+        internal static V2alpha3ConnectionStrategy? FromApiStrategy(string? strategy) => strategy switch
+        {
+            null => null,
+            ConnectionResponseContentAuth0Strategy.Values.Auth0 => V2alpha3ConnectionStrategy.Auth0,
+            ConnectionResponseContentAdStrategy.Values.Ad => V2alpha3ConnectionStrategy.Ad,
+            ConnectionResponseContentAdfsStrategy.Values.Adfs => V2alpha3ConnectionStrategy.Adfs,
+            ConnectionResponseContentAmazonStrategy.Values.Amazon => V2alpha3ConnectionStrategy.Amazon,
+            ConnectionResponseContentAppleStrategy.Values.Apple => V2alpha3ConnectionStrategy.Apple,
+            ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc => V2alpha3ConnectionStrategy.Auth0Oidc,
+            ConnectionResponseContentBaiduStrategy.Values.Baidu => V2alpha3ConnectionStrategy.Baidu,
+            ConnectionResponseContentAzureAdStrategy.Values.Waad => V2alpha3ConnectionStrategy.AzureAd,
+            ConnectionResponseContentBitbucketStrategy.Values.Bitbucket => V2alpha3ConnectionStrategy.Bitbucket,
+            ConnectionResponseContentBitlyStrategy.Values.Bitly => V2alpha3ConnectionStrategy.Bitly,
+            ConnectionResponseContentBoxStrategy.Values.Box => V2alpha3ConnectionStrategy.Box,
+            ConnectionResponseContentDaccountStrategy.Values.Daccount => V2alpha3ConnectionStrategy.Daccount,
+            ConnectionResponseContentDropboxStrategy.Values.Dropbox => V2alpha3ConnectionStrategy.Dropbox,
+            ConnectionResponseContentDwollaStrategy.Values.Dwolla => V2alpha3ConnectionStrategy.Dwolla,
+            ConnectionResponseContentEmailStrategy.Values.Email => V2alpha3ConnectionStrategy.Email,
+            ConnectionResponseContentEvernoteStrategy.Values.Evernote => V2alpha3ConnectionStrategy.Evernote,
+            ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox => V2alpha3ConnectionStrategy.EvernoteSandbox,
+            ConnectionResponseContentExactStrategy.Values.Exact => V2alpha3ConnectionStrategy.Exact,
+            ConnectionResponseContentFacebookStrategy.Values.Facebook => V2alpha3ConnectionStrategy.Facebook,
+            ConnectionResponseContentFitbitStrategy.Values.Fitbit => V2alpha3ConnectionStrategy.Fitbit,
+            ConnectionResponseContentGitHubStrategy.Values.Github => V2alpha3ConnectionStrategy.GitHub,
+            ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps => V2alpha3ConnectionStrategy.GoogleApps,
+            ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2 => V2alpha3ConnectionStrategy.GoogleOAuth2,
+            ConnectionResponseContentInstagramStrategy.Values.Instagram => V2alpha3ConnectionStrategy.Instagram,
+            ConnectionResponseContentLineStrategy.Values.Line => V2alpha3ConnectionStrategy.Line,
+            ConnectionResponseContentLinkedinStrategy.Values.Linkedin => V2alpha3ConnectionStrategy.Linkedin,
+            ConnectionResponseContentOAuth1Strategy.Values.Oauth1 => V2alpha3ConnectionStrategy.OAuth1,
+            ConnectionResponseContentOAuth2Strategy.Values.Oauth2 => V2alpha3ConnectionStrategy.OAuth2,
+            ConnectionResponseContentOffice365Strategy.Values.Office365 => V2alpha3ConnectionStrategy.Office365,
+            ConnectionResponseContentOidcStrategy.Values.Oidc => V2alpha3ConnectionStrategy.Oidc,
+            ConnectionResponseContentOktaStrategy.Values.Okta => V2alpha3ConnectionStrategy.Okta,
+            ConnectionResponseContentPaypalStrategy.Values.Paypal => V2alpha3ConnectionStrategy.Paypal,
+            ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox => V2alpha3ConnectionStrategy.PaypalSandbox,
+            ConnectionResponseContentPingFederateStrategy.Values.Pingfederate => V2alpha3ConnectionStrategy.PingFederate,
+            ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter => V2alpha3ConnectionStrategy.PlanningCenter,
+            ConnectionResponseContentSalesforceStrategy.Values.Salesforce => V2alpha3ConnectionStrategy.Salesforce,
+            ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity => V2alpha3ConnectionStrategy.SalesforceCommunity,
+            ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox => V2alpha3ConnectionStrategy.SalesforceSandbox,
+            ConnectionResponseContentSamlStrategy.Values.Samlp => V2alpha3ConnectionStrategy.Saml,
+            ConnectionResponseContentSharepointStrategy.Values.Sharepoint => V2alpha3ConnectionStrategy.Sharepoint,
+            ConnectionResponseContentShopStrategy.Values.Shop => V2alpha3ConnectionStrategy.Shop,
+            ConnectionResponseContentShopifyStrategy.Values.Shopify => V2alpha3ConnectionStrategy.Shopify,
+            ConnectionResponseContentSmsStrategy.Values.Sms => V2alpha3ConnectionStrategy.Sms,
+            ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud => V2alpha3ConnectionStrategy.Soundcloud,
+            ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals => V2alpha3ConnectionStrategy.ThirtySevenSignals,
+            ConnectionResponseContentTwitterStrategy.Values.Twitter => V2alpha3ConnectionStrategy.Twitter,
+            ConnectionResponseContentUntappdStrategy.Values.Untappd => V2alpha3ConnectionStrategy.Untappd,
+            ConnectionResponseContentVkontakteStrategy.Values.Vkontakte => V2alpha3ConnectionStrategy.Vkontakte,
+            ConnectionResponseContentWeiboStrategy.Values.Weibo => V2alpha3ConnectionStrategy.Weibo,
+            ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive => V2alpha3ConnectionStrategy.WindowsLive,
+            ConnectionResponseContentWordpressStrategy.Values.Wordpress => V2alpha3ConnectionStrategy.Wordpress,
+            ConnectionResponseContentYahooStrategy.Values.Yahoo => V2alpha3ConnectionStrategy.Yahoo,
+            ConnectionResponseContentYandexStrategy.Values.Yandex => V2alpha3ConnectionStrategy.Yandex,
+            _ => null,
+        };
+
+        /// <summary>
+        /// Converts a <see cref="V2alpha3ConnectionStrategy"/> to the Auth0 strategy wire value.
+        /// </summary>
+        internal static string ToApiStrategy(V2alpha3ConnectionStrategy strategy) => strategy switch
+        {
+            V2alpha3ConnectionStrategy.Auth0 => ConnectionResponseContentAuth0Strategy.Values.Auth0,
+            V2alpha3ConnectionStrategy.Ad => ConnectionResponseContentAdStrategy.Values.Ad,
+            V2alpha3ConnectionStrategy.Adfs => ConnectionResponseContentAdfsStrategy.Values.Adfs,
+            V2alpha3ConnectionStrategy.Amazon => ConnectionResponseContentAmazonStrategy.Values.Amazon,
+            V2alpha3ConnectionStrategy.Apple => ConnectionResponseContentAppleStrategy.Values.Apple,
+            V2alpha3ConnectionStrategy.Auth0Oidc => ConnectionResponseContentAuth0OidcStrategy.Values.Auth0Oidc,
+            V2alpha3ConnectionStrategy.Baidu => ConnectionResponseContentBaiduStrategy.Values.Baidu,
+            V2alpha3ConnectionStrategy.AzureAd => ConnectionResponseContentAzureAdStrategy.Values.Waad,
+            V2alpha3ConnectionStrategy.Bitbucket => ConnectionResponseContentBitbucketStrategy.Values.Bitbucket,
+            V2alpha3ConnectionStrategy.Bitly => ConnectionResponseContentBitlyStrategy.Values.Bitly,
+            V2alpha3ConnectionStrategy.Box => ConnectionResponseContentBoxStrategy.Values.Box,
+            V2alpha3ConnectionStrategy.Daccount => ConnectionResponseContentDaccountStrategy.Values.Daccount,
+            V2alpha3ConnectionStrategy.Dropbox => ConnectionResponseContentDropboxStrategy.Values.Dropbox,
+            V2alpha3ConnectionStrategy.Dwolla => ConnectionResponseContentDwollaStrategy.Values.Dwolla,
+            V2alpha3ConnectionStrategy.Email => ConnectionResponseContentEmailStrategy.Values.Email,
+            V2alpha3ConnectionStrategy.Evernote => ConnectionResponseContentEvernoteStrategy.Values.Evernote,
+            V2alpha3ConnectionStrategy.EvernoteSandbox => ConnectionResponseContentEvernoteSandboxStrategy.Values.EvernoteSandbox,
+            V2alpha3ConnectionStrategy.Exact => ConnectionResponseContentExactStrategy.Values.Exact,
+            V2alpha3ConnectionStrategy.Facebook => ConnectionResponseContentFacebookStrategy.Values.Facebook,
+            V2alpha3ConnectionStrategy.Fitbit => ConnectionResponseContentFitbitStrategy.Values.Fitbit,
+            V2alpha3ConnectionStrategy.GitHub => ConnectionResponseContentGitHubStrategy.Values.Github,
+            V2alpha3ConnectionStrategy.GoogleApps => ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps,
+            V2alpha3ConnectionStrategy.GoogleOAuth2 => ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2,
+            V2alpha3ConnectionStrategy.Instagram => ConnectionResponseContentInstagramStrategy.Values.Instagram,
+            V2alpha3ConnectionStrategy.Line => ConnectionResponseContentLineStrategy.Values.Line,
+            V2alpha3ConnectionStrategy.Linkedin => ConnectionResponseContentLinkedinStrategy.Values.Linkedin,
+            V2alpha3ConnectionStrategy.OAuth1 => ConnectionResponseContentOAuth1Strategy.Values.Oauth1,
+            V2alpha3ConnectionStrategy.OAuth2 => ConnectionResponseContentOAuth2Strategy.Values.Oauth2,
+            V2alpha3ConnectionStrategy.Office365 => ConnectionResponseContentOffice365Strategy.Values.Office365,
+            V2alpha3ConnectionStrategy.Oidc => ConnectionResponseContentOidcStrategy.Values.Oidc,
+            V2alpha3ConnectionStrategy.Okta => ConnectionResponseContentOktaStrategy.Values.Okta,
+            V2alpha3ConnectionStrategy.Paypal => ConnectionResponseContentPaypalStrategy.Values.Paypal,
+            V2alpha3ConnectionStrategy.PaypalSandbox => ConnectionResponseContentPaypalSandboxStrategy.Values.PaypalSandbox,
+            V2alpha3ConnectionStrategy.PingFederate => ConnectionResponseContentPingFederateStrategy.Values.Pingfederate,
+            V2alpha3ConnectionStrategy.PlanningCenter => ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter,
+            V2alpha3ConnectionStrategy.Salesforce => ConnectionResponseContentSalesforceStrategy.Values.Salesforce,
+            V2alpha3ConnectionStrategy.SalesforceCommunity => ConnectionResponseContentSalesforceCommunityStrategy.Values.SalesforceCommunity,
+            V2alpha3ConnectionStrategy.SalesforceSandbox => ConnectionResponseContentSalesforceSandboxStrategy.Values.SalesforceSandbox,
+            V2alpha3ConnectionStrategy.Saml => ConnectionResponseContentSamlStrategy.Values.Samlp,
+            V2alpha3ConnectionStrategy.Sharepoint => ConnectionResponseContentSharepointStrategy.Values.Sharepoint,
+            V2alpha3ConnectionStrategy.Shop => ConnectionResponseContentShopStrategy.Values.Shop,
+            V2alpha3ConnectionStrategy.Shopify => ConnectionResponseContentShopifyStrategy.Values.Shopify,
+            V2alpha3ConnectionStrategy.Sms => ConnectionResponseContentSmsStrategy.Values.Sms,
+            V2alpha3ConnectionStrategy.Soundcloud => ConnectionResponseContentSoundcloudStrategy.Values.Soundcloud,
+            V2alpha3ConnectionStrategy.ThirtySevenSignals => ConnectionResponseContentThirtySevenSignalsStrategy.Values.Thirtysevensignals,
+            V2alpha3ConnectionStrategy.Twitter => ConnectionResponseContentTwitterStrategy.Values.Twitter,
+            V2alpha3ConnectionStrategy.Untappd => ConnectionResponseContentUntappdStrategy.Values.Untappd,
+            V2alpha3ConnectionStrategy.Vkontakte => ConnectionResponseContentVkontakteStrategy.Values.Vkontakte,
+            V2alpha3ConnectionStrategy.Weibo => ConnectionResponseContentWeiboStrategy.Values.Weibo,
+            V2alpha3ConnectionStrategy.WindowsLive => ConnectionResponseContentWindowsLiveStrategy.Values.Windowslive,
+            V2alpha3ConnectionStrategy.Wordpress => ConnectionResponseContentWordpressStrategy.Values.Wordpress,
+            V2alpha3ConnectionStrategy.Yahoo => ConnectionResponseContentYahooStrategy.Values.Yahoo,
+            V2alpha3ConnectionStrategy.Yandex => ConnectionResponseContentYandexStrategy.Values.Yandex,
+            _ => throw new InvalidOperationException(),
+        };
+
+        /// <summary>
         /// Converts a <see cref="GetConnectionResponseContent"/> API response to a <see cref="V2alpha3ConnectionConf"/>.
         /// Note: <see cref="V2alpha3ConnectionConf.EnabledClients"/> is populated separately and left null here.
         /// </summary>
@@ -93,7 +217,7 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Name = source.Name,
                 DisplayName = source.DisplayName,
-                Strategy = JsonSerializer.Deserialize<V2alpha3ConnectionStrategy?>(JsonSerializer.Serialize(source.Strategy)),
+                Strategy = FromApiStrategy(source.Strategy),
                 Realms = source.Realms?.ToArray(),
                 IsDomainConnection = source.IsDomainConnection,
                 ShowAsButton = source.ShowAsButton,
@@ -4600,7 +4724,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var req = new CreateConnectionRequestContent()
             {
                 Name = conf.Name ?? throw new InvalidOperationException("Missing connection name."),
-                Strategy = ConnectionIdentityProviderEnum.FromCustom(JsonSerializer.Serialize(conf.Strategy).Trim('"')),
+                Strategy = ConnectionIdentityProviderEnum.FromCustom(ToApiStrategy(conf.Strategy.Value)),
             };
 
             ApplyToApi(conf, req);

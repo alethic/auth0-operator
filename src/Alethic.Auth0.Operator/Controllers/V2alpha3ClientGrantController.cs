@@ -148,8 +148,15 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override async Task<V2alpha3ClientGrantConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {
-            var self = await api.ClientGrants.GetAsync(id, null, cancellationToken);
-            return FromApi((GetClientGrantResponseContent?)self);
+            try
+            {
+                var self = await api.ClientGrants.GetAsync(id, null, cancellationToken);
+                return FromApi((GetClientGrantResponseContent?)self);
+            }
+            catch (NotFoundError)
+            {
+                return null;
+            }
         }
 
         /// <inheritdoc />
