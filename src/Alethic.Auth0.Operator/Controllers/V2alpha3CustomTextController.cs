@@ -56,6 +56,50 @@ namespace Alethic.Auth0.Operator.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Determines whether a desired screen differs from the screen reported by the API. SetAsync is a full
+        /// replace, so equality must be exact in both directions: the key sets must match and every value must
+        /// be equal.
+        /// </summary>
+        internal static bool ScreenRequiresUpdate(V2alpha3CustomTextScreen conf, V2alpha3CustomTextScreen last)
+        {
+            if (conf.Count != last.Count)
+                return true;
+
+            foreach (var entry in conf)
+            {
+                if (last.TryGetValue(entry.Key, out var lastValue) == false)
+                    return true;
+                if (entry.Value != lastValue)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired screens differ from the screens reported by the API. SetAsync is a
+        /// full replace, so equality must be exact in both directions: a screen or key removed from the spec
+        /// must still trigger the write.
+        /// </summary>
+        internal static bool ScreensRequireUpdate(Dictionary<string, V2alpha3CustomTextScreen> conf, Dictionary<string, V2alpha3CustomTextScreen>? last)
+        {
+            if (last is null)
+                return true;
+            if (conf.Count != last.Count)
+                return true;
+
+            foreach (var screen in conf)
+            {
+                if (last.TryGetValue(screen.Key, out var lastScreen) == false)
+                    return true;
+                if (ScreenRequiresUpdate(screen.Value, lastScreen))
+                    return true;
+            }
+
+            return false;
+        }
+
         static Dictionary<string, object> ToApiScreens(Dictionary<string, V2alpha3CustomTextScreen> source)
         {
             var result = new Dictionary<string, object>();
@@ -107,8 +151,9 @@ namespace Alethic.Auth0.Operator.Controllers
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
             {
-                // screens may not be specified
-                if (conf.Screens is { } newScreens)
+                // screens may not be specified; SetAsync is a full replace, so a screen or key removed from the
+                // spec must still be pushed — compare for exact equality rather than as a subset
+                if (conf.Screens is { } newScreens && ScreensRequireUpdate(newScreens, FromApiScreens(screens)))
                 {
                     // push changes to Auth0 and reload resulting configuration
                     await api.Prompts.CustomText.SetAsync(prompt, language, ToApiScreens(newScreens), cancellationToken: cancellationToken);

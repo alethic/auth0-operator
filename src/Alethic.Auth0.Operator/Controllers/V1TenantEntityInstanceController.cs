@@ -105,6 +105,16 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         protected abstract Task Update(IManagementApiClient api, string id, TLastConf? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Determines whether the remote entity differs from the desired configuration and requires an update.
+        /// Implementations compare the spec conf against the conf read back from Auth0 explicitly, property by
+        /// property, covering exactly the fields their update request transmits; a property left null on the spec
+        /// conf is unmanaged and must be ignored.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        protected abstract bool NeedsUpdate(TConf conf, TLastConf last);
+
         /// <inheritdoc />
         protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)
         {
@@ -164,11 +174,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} has missing API object, invalidating.");
             }
 
-            // apply updates if allowed
+            // apply updates if allowed, and only when the remote entity actually differs from the desired configuration
             if (entity.HasPolicy(V1EntityPolicyType.Update))
             {
                 if (entity.Spec.Conf is { } conf)
-                    await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                {
+                    if (NeedsUpdate(conf, lastConf))
+                        await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                    else
+                        Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} matches Auth0; skipping update.", EntityTypeName, entity.Namespace(), entity.Name());
+                }
             }
             else
             {

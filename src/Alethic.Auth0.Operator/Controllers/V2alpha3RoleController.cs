@@ -166,14 +166,45 @@ namespace Alethic.Auth0.Operator.Controllers
             return self.Id;
         }
 
+        /// <summary>
+        /// Determines whether the role differs from the desired configuration. Only name and description are sent
+        /// on the update request; permissions are reconciled separately by <see cref="ApplyPermissions"/> with
+        /// their own delta logic, so they never force the PATCH.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3RoleConf conf, V2alpha3RoleConf last)
+        {
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+            if (conf.Description is not null && conf.Description != last.Description)
+                return true;
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3RoleConf conf, V2alpha3RoleConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, V2alpha3RoleConf? last, V2alpha3RoleConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             var req = new UpdateRoleRequestContent();
             ApplyToApi(conf, req);
             await api.Roles.UpdateAsync(id, req, null, cancellationToken);
+        }
 
-            await ApplyPermissions(api, id, last, conf, defaultNamespace, cancellationToken);
+        /// <inheritdoc />
+        protected override async Task ApplyStatus(IManagementApiClient api, V2alpha3Role entity, V2alpha3RoleConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            // permissions are reconciled here rather than in Update so their delta logic still runs when the
+            // name/description PATCH is skipped; ApplyPermissions only issues API calls for actual differences
+            if (((V1TenantEntityInstance<V2alpha3Role.SpecDef, V2alpha3Role.StatusDef, V2alpha3RoleConf, V2alpha3RoleConf>)entity).HasPolicy(V1EntityPolicyType.Update))
+                if (entity.Spec.Conf is { } conf && entity.Status.Id is { } id)
+                    await ApplyPermissions(api, id, lastConf, conf, defaultNamespace, cancellationToken);
+
+            await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
 
         /// <summary>

@@ -206,6 +206,8 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <summary>
         /// Converts a <see cref="GetConnectionResponseContent"/> API response to a <see cref="V2alpha3ConnectionConf"/>.
         /// Note: <see cref="V2alpha3ConnectionConf.EnabledClients"/> is populated separately and left null here.
+        /// <see cref="V2alpha3ConnectionConf.ProvisioningTicketUrl"/> is populated for the enterprise strategies whose
+        /// response types expose it; it is read-only status enrichment and stays excluded from drift comparison.
         /// </summary>
         [return: NotNullIfNotNull(nameof(source))]
         internal static V2alpha3ConnectionConf? FromApi(GetConnectionResponseContent? source)
@@ -231,10 +233,14 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.Auth0 = FromApi(JsonConvertTo<ConnectionResponseContentAuth0>(source)?.Options);
                     break;
                 case ConnectionResponseContentAdStrategy.Values.Ad:
-                    conf.Options.Ad = FromApi(JsonConvertTo<ConnectionResponseContentAd>(source)?.Options);
+                    var ad = JsonConvertTo<ConnectionResponseContentAd>(source);
+                    conf.Options.Ad = FromApi(ad?.Options);
+                    conf.ProvisioningTicketUrl = ad?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentAdfsStrategy.Values.Adfs:
-                    conf.Options.Adfs = FromApi(JsonConvertTo<ConnectionResponseContentAdfs>(source)?.Options);
+                    var adfs = JsonConvertTo<ConnectionResponseContentAdfs>(source);
+                    conf.Options.Adfs = FromApi(adfs?.Options);
+                    conf.ProvisioningTicketUrl = adfs?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentAmazonStrategy.Values.Amazon:
                     conf.Options.Amazon = FromApi(JsonConvertTo<ConnectionResponseContentAmazon>(source)?.Options);
@@ -288,7 +294,9 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.GitHub = FromApi(JsonConvertTo<ConnectionResponseContentGitHub>(source)?.Options);
                     break;
                 case ConnectionResponseContentGoogleAppsStrategy.Values.GoogleApps:
-                    conf.Options.GoogleApps = FromApi(JsonConvertTo<ConnectionResponseContentGoogleApps>(source)?.Options);
+                    var googleApps = JsonConvertTo<ConnectionResponseContentGoogleApps>(source);
+                    conf.Options.GoogleApps = FromApi(googleApps?.Options);
+                    conf.ProvisioningTicketUrl = googleApps?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2:
                     conf.Options.GoogleOAuth2 = FromApi(JsonConvertTo<ConnectionResponseContentGoogleOAuth2>(source)?.Options);
@@ -309,7 +317,9 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.OAuth2 = FromApi(JsonConvertTo<ConnectionResponseContentOAuth2>(source)?.Options);
                     break;
                 case ConnectionResponseContentOffice365Strategy.Values.Office365:
-                    conf.Options.Office365 = FromApi(JsonConvertTo<ConnectionResponseContentOffice365>(source)?.Options);
+                    var office365 = JsonConvertTo<ConnectionResponseContentOffice365>(source);
+                    conf.Options.Office365 = FromApi(office365?.Options);
+                    conf.ProvisioningTicketUrl = office365?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentOidcStrategy.Values.Oidc:
                     conf.Options.Oidc = FromApi(JsonConvertTo<ConnectionResponseContentOidc>(source)?.Options);
@@ -324,7 +334,9 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.PaypalSandbox = FromApi(JsonConvertTo<ConnectionResponseContentPaypalSandbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentPingFederateStrategy.Values.Pingfederate:
-                    conf.Options.PingFederate = FromApi(JsonConvertTo<ConnectionResponseContentPingFederate>(source)?.Options);
+                    var pingFederate = JsonConvertTo<ConnectionResponseContentPingFederate>(source);
+                    conf.Options.PingFederate = FromApi(pingFederate?.Options);
+                    conf.ProvisioningTicketUrl = pingFederate?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentPlanningCenterStrategy.Values.Planningcenter:
                     conf.Options.PlanningCenter = FromApi(JsonConvertTo<ConnectionResponseContentPlanningCenter>(source)?.Options);
@@ -339,7 +351,9 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.SalesforceSandbox = FromApi(JsonConvertTo<ConnectionResponseContentSalesforceSandbox>(source)?.Options);
                     break;
                 case ConnectionResponseContentSamlStrategy.Values.Samlp:
-                    conf.Options.Saml = FromApi(JsonConvertTo<ConnectionResponseContentSaml>(source)?.Options);
+                    var saml = JsonConvertTo<ConnectionResponseContentSaml>(source);
+                    conf.Options.Saml = FromApi(saml?.Options);
+                    conf.ProvisioningTicketUrl = saml?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentSharepointStrategy.Values.Sharepoint:
                     conf.Options.Sharepoint = FromApi(JsonConvertTo<ConnectionResponseContentSharepoint>(source)?.Options);
@@ -369,7 +383,9 @@ namespace Alethic.Auth0.Operator.Controllers
                     conf.Options.Vkontakte = FromApi(JsonConvertTo<ConnectionResponseContentVkontakte>(source)?.Options);
                     break;
                 case ConnectionResponseContentAzureAdStrategy.Values.Waad:
-                    conf.Options.AzureAd = FromApi(JsonConvertTo<ConnectionResponseContentAzureAd>(source)?.Options);
+                    var azureAd = JsonConvertTo<ConnectionResponseContentAzureAd>(source);
+                    conf.Options.AzureAd = FromApi(azureAd?.Options);
+                    conf.ProvisioningTicketUrl = azureAd?.ProvisioningTicketUrl;
                     break;
                 case ConnectionResponseContentWeiboStrategy.Values.Weibo:
                     conf.Options.Weibo = FromApi(JsonConvertTo<ConnectionResponseContentWeibo>(source)?.Options);
@@ -4713,6 +4729,4052 @@ namespace Alethic.Auth0.Operator.Controllers
             return l.ToArray();
         }
 
+        /// <summary>
+        /// Determines whether the connection differs from the desired configuration by explicitly comparing every
+        /// property transmitted on update. Only spec-managed (non-null) properties count: values Auth0 fills in
+        /// server-side that the spec does not set can never force an update. Name and strategy are excluded because
+        /// they are create-only (never sent on update; this also prevents a known environment name skew from forcing
+        /// eternal PATCHes), provisioningTicketUrl is excluded because it is read-only and never sent on update, and
+        /// enabledClients is excluded because it is reconciled separately with its own delta logic in
+        /// ApplyEnabledClientsAsync.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3ConnectionConf conf, V2alpha3ConnectionConf last)
+        {
+            if (conf.DisplayName is not null && conf.DisplayName != last.DisplayName)
+                return true;
+
+            if (RequiresUpdate(conf.Metadata, last.Metadata))
+                return true;
+
+            if (conf.Realms is not null && (last.Realms is null || conf.Realms.ToHashSet().SetEquals(last.Realms) == false))
+                return true;
+
+            if (conf.IsDomainConnection is not null && conf.IsDomainConnection != last.IsDomainConnection)
+                return true;
+
+            if (conf.ShowAsButton is not null && conf.ShowAsButton != last.ShowAsButton)
+                return true;
+
+            if (RequiresUpdate(conf.Options, last.Options))
+                return true;
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3ConnectionConf conf, V2alpha3ConnectionConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
+        /// <summary>
+        /// Determines whether any metadata entry on the desired configuration is missing from, or differs on, the
+        /// last known configuration. Entries present only on the last known configuration are unmanaged and ignored.
+        /// </summary>
+        static bool RequiresUpdate(System.Collections.Hashtable? conf, System.Collections.Hashtable? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            foreach (System.Collections.DictionaryEntry entry in conf)
+                if (last.ContainsKey(entry.Key) == false || Equals(entry.Value?.ToString(), last[entry.Key]?.ToString()) == false)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any string dictionary entry on the desired configuration is missing from, or differs
+        /// on, the last known configuration. Entries present only on the last known configuration are ignored.
+        /// </summary>
+        static bool RequiresUpdate(Dictionary<string, string>? conf, Dictionary<string, string>? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            foreach (var entry in conf)
+                if (last.TryGetValue(entry.Key, out var value) == false || entry.Value != value)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any attribute map entry on the desired configuration is missing from, or differs on,
+        /// the last known configuration. The values are opaque JSON fragments carried through the model untyped, so
+        /// they are compared by their textual form. Entries present only on the last known configuration are ignored.
+        /// </summary>
+        static bool RequiresUpdate(Dictionary<string, object?>? conf, Dictionary<string, object?>? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            foreach (var entry in conf)
+                if (last.TryGetValue(entry.Key, out var value) == false || Equals(entry.Value?.ToString(), value?.ToString()) == false)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any fields map entry on the desired configuration is missing from, or differs on, the
+        /// last known configuration. Entries present only on the last known configuration are ignored.
+        /// </summary>
+        static bool RequiresUpdate(Dictionary<string, string[]?>? conf, Dictionary<string, string[]?>? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            foreach (var entry in conf)
+            {
+                if (last.TryGetValue(entry.Key, out var value) == false)
+                    return true;
+
+                // candidate attribute names are tried in order, so order is semantic here
+                if (entry.Value is not null && (value is null || entry.Value.SequenceEqual(value) == false))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any upstream parameter on the desired configuration is missing from, or differs on,
+        /// the last known configuration. Entries present only on the last known configuration are ignored.
+        /// </summary>
+        static bool RequiresUpdate(Dictionary<string, V2alpha3ConnectionUpstreamAdditionalProperties>? conf, Dictionary<string, V2alpha3ConnectionUpstreamAdditionalProperties>? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            foreach (var entry in conf)
+                if (last.TryGetValue(entry.Key, out var value) == false || RequiresUpdate(entry.Value, value))
+                    return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUpstreamAdditionalProperties? conf, V2alpha3ConnectionUpstreamAdditionalProperties? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Alias is not null && conf.Alias != last.Alias)
+                return true;
+
+            if (conf.Value is not null && conf.Value != last.Value)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionFederatedConnectionsAccessTokens? conf, V2alpha3ConnectionFederatedConnectionsAccessTokens? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any strategy-specific options tree present on the desired configuration differs from
+        /// the last known configuration. Each strategy member set on the spec is compared explicitly; members the
+        /// spec leaves null are unmanaged and ignored.
+        /// </summary>
+        static bool RequiresUpdate(V2alpha3ConnectionOptions? conf, V2alpha3ConnectionOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Auth0, last.Auth0))
+                return true;
+
+            if (RequiresUpdate(conf.Ad, last.Ad))
+                return true;
+
+            if (RequiresUpdate(conf.Adfs, last.Adfs))
+                return true;
+
+            if (RequiresUpdate(conf.Amazon, last.Amazon))
+                return true;
+
+            if (RequiresUpdate(conf.Apple, last.Apple))
+                return true;
+
+            if (RequiresUpdate(conf.Auth0Oidc, last.Auth0Oidc))
+                return true;
+
+            if (RequiresUpdate(conf.AzureAd, last.AzureAd))
+                return true;
+
+            if (RequiresUpdate(conf.Baidu, last.Baidu))
+                return true;
+
+            if (RequiresUpdate(conf.Bitbucket, last.Bitbucket))
+                return true;
+
+            if (RequiresUpdate(conf.Bitly, last.Bitly))
+                return true;
+
+            if (RequiresUpdate(conf.Box, last.Box))
+                return true;
+
+            if (RequiresUpdate(conf.Daccount, last.Daccount))
+                return true;
+
+            if (RequiresUpdate(conf.Dropbox, last.Dropbox))
+                return true;
+
+            if (RequiresUpdate(conf.Dwolla, last.Dwolla))
+                return true;
+
+            if (RequiresUpdate(conf.Email, last.Email))
+                return true;
+
+            if (RequiresUpdate(conf.Evernote, last.Evernote))
+                return true;
+
+            if (RequiresUpdate(conf.EvernoteSandbox, last.EvernoteSandbox))
+                return true;
+
+            if (RequiresUpdate(conf.Exact, last.Exact))
+                return true;
+
+            if (RequiresUpdate(conf.Facebook, last.Facebook))
+                return true;
+
+            if (RequiresUpdate(conf.Fitbit, last.Fitbit))
+                return true;
+
+            if (RequiresUpdate(conf.GitHub, last.GitHub))
+                return true;
+
+            if (RequiresUpdate(conf.GoogleApps, last.GoogleApps))
+                return true;
+
+            if (RequiresUpdate(conf.GoogleOAuth2, last.GoogleOAuth2))
+                return true;
+
+            if (RequiresUpdate(conf.Instagram, last.Instagram))
+                return true;
+
+            if (RequiresUpdate(conf.Line, last.Line))
+                return true;
+
+            if (RequiresUpdate(conf.Linkedin, last.Linkedin))
+                return true;
+
+            if (RequiresUpdate(conf.OAuth1, last.OAuth1))
+                return true;
+
+            if (RequiresUpdate(conf.OAuth2, last.OAuth2))
+                return true;
+
+            if (RequiresUpdate(conf.Office365, last.Office365))
+                return true;
+
+            if (RequiresUpdate(conf.Oidc, last.Oidc))
+                return true;
+
+            if (RequiresUpdate(conf.Okta, last.Okta))
+                return true;
+
+            if (RequiresUpdate(conf.Paypal, last.Paypal))
+                return true;
+
+            if (RequiresUpdate(conf.PaypalSandbox, last.PaypalSandbox))
+                return true;
+
+            if (RequiresUpdate(conf.PingFederate, last.PingFederate))
+                return true;
+
+            if (RequiresUpdate(conf.PlanningCenter, last.PlanningCenter))
+                return true;
+
+            if (RequiresUpdate(conf.Salesforce, last.Salesforce))
+                return true;
+
+            if (RequiresUpdate(conf.SalesforceCommunity, last.SalesforceCommunity))
+                return true;
+
+            if (RequiresUpdate(conf.SalesforceSandbox, last.SalesforceSandbox))
+                return true;
+
+            if (RequiresUpdate(conf.Saml, last.Saml))
+                return true;
+
+            if (RequiresUpdate(conf.Sharepoint, last.Sharepoint))
+                return true;
+
+            if (RequiresUpdate(conf.Shop, last.Shop))
+                return true;
+
+            if (RequiresUpdate(conf.Shopify, last.Shopify))
+                return true;
+
+            if (RequiresUpdate(conf.Sms, last.Sms))
+                return true;
+
+            if (RequiresUpdate(conf.Soundcloud, last.Soundcloud))
+                return true;
+
+            if (RequiresUpdate(conf.ThirtySevenSignals, last.ThirtySevenSignals))
+                return true;
+
+            if (RequiresUpdate(conf.Twitter, last.Twitter))
+                return true;
+
+            if (RequiresUpdate(conf.Untappd, last.Untappd))
+                return true;
+
+            if (RequiresUpdate(conf.Vkontakte, last.Vkontakte))
+                return true;
+
+            if (RequiresUpdate(conf.Weibo, last.Weibo))
+                return true;
+
+            if (RequiresUpdate(conf.WindowsLive, last.WindowsLive))
+                return true;
+
+            if (RequiresUpdate(conf.Wordpress, last.Wordpress))
+                return true;
+
+            if (RequiresUpdate(conf.Yahoo, last.Yahoo))
+                return true;
+
+            if (RequiresUpdate(conf.Yandex, last.Yandex))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAuth0? conf, V2alpha3ConnectionOptionsAuth0? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Attributes, last.Attributes))
+                return true;
+
+            if (RequiresUpdate(conf.AuthenticationMethods, last.AuthenticationMethods))
+                return true;
+
+            if (conf.BruteForceProtection is not null && conf.BruteForceProtection != last.BruteForceProtection)
+                return true;
+
+            if (RequiresUpdate(conf.Configuration, last.Configuration))
+                return true;
+
+            if (RequiresUpdate(conf.CustomScripts, last.CustomScripts))
+                return true;
+
+            if (conf.DisableSelfServiceChangePassword is not null && conf.DisableSelfServiceChangePassword != last.DisableSelfServiceChangePassword)
+                return true;
+
+            if (conf.DisableSignup is not null && conf.DisableSignup != last.DisableSignup)
+                return true;
+
+            if (conf.EnableScriptContext is not null && conf.EnableScriptContext != last.EnableScriptContext)
+                return true;
+
+            if (conf.EnabledDatabaseCustomization is not null && conf.EnabledDatabaseCustomization != last.EnabledDatabaseCustomization)
+                return true;
+
+            if (conf.ImportMode is not null && conf.ImportMode != last.ImportMode)
+                return true;
+
+            if (RequiresUpdate(conf.Mfa, last.Mfa))
+                return true;
+
+            if (RequiresUpdate(conf.PasskeyOptions, last.PasskeyOptions))
+                return true;
+
+            if (conf.PasswordPolicy is not null && conf.PasswordPolicy != last.PasswordPolicy)
+                return true;
+
+            if (RequiresUpdate(conf.PasswordComplexityOptions, last.PasswordComplexityOptions))
+                return true;
+
+            if (RequiresUpdate(conf.PasswordDictionary, last.PasswordDictionary))
+                return true;
+
+            if (RequiresUpdate(conf.PasswordHistory, last.PasswordHistory))
+                return true;
+
+            if (RequiresUpdate(conf.PasswordNoPersonalInfo, last.PasswordNoPersonalInfo))
+                return true;
+
+            if (RequiresUpdate(conf.PasswordOptions, last.PasswordOptions))
+                return true;
+
+            // the identifier precedence list is evaluated in order, so order is semantic here
+            if (conf.Precedence is not null && (last.Precedence is null || conf.Precedence.SequenceEqual(last.Precedence) == false))
+                return true;
+
+            if (conf.RealmFallback is not null && conf.RealmFallback != last.RealmFallback)
+                return true;
+
+            if (conf.RequiresUsername is not null && conf.RequiresUsername != last.RequiresUsername)
+                return true;
+
+            if (RequiresUpdate(conf.Validation, last.Validation))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAttributes? conf, V2alpha3ConnectionAttributes? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Email, last.Email))
+                return true;
+
+            if (RequiresUpdate(conf.PhoneNumber, last.PhoneNumber))
+                return true;
+
+            if (RequiresUpdate(conf.Username, last.Username))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionEmailAttribute? conf, V2alpha3ConnectionEmailAttribute? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Identifier, last.Identifier))
+                return true;
+
+            if (conf.Unique is not null && conf.Unique != last.Unique)
+                return true;
+
+            if (conf.ProfileRequired is not null && conf.ProfileRequired != last.ProfileRequired)
+                return true;
+
+            if (conf.VerificationMethod is not null && conf.VerificationMethod != last.VerificationMethod)
+                return true;
+
+            if (RequiresUpdate(conf.Signup, last.Signup))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPhoneAttribute? conf, V2alpha3ConnectionPhoneAttribute? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Identifier, last.Identifier))
+                return true;
+
+            if (conf.ProfileRequired is not null && conf.ProfileRequired != last.ProfileRequired)
+                return true;
+
+            if (RequiresUpdate(conf.Signup, last.Signup))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameAttribute? conf, V2alpha3ConnectionUsernameAttribute? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Identifier, last.Identifier))
+                return true;
+
+            if (conf.ProfileRequired is not null && conf.ProfileRequired != last.ProfileRequired)
+                return true;
+
+            if (RequiresUpdate(conf.Signup, last.Signup))
+                return true;
+
+            if (RequiresUpdate(conf.Validation, last.Validation))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAttributeIdentifier? conf, V2alpha3ConnectionAttributeIdentifier? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            if (conf.DefaultMethod is not null && conf.DefaultMethod != last.DefaultMethod)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionSignupVerified? conf, V2alpha3ConnectionSignupVerified? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Status is not null && conf.Status != last.Status)
+                return true;
+
+            if (RequiresUpdate(conf.Verification, last.Verification))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionSignupVerification? conf, V2alpha3ConnectionSignupVerification? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionSignupSchema? conf, V2alpha3ConnectionSignupSchema? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Status is not null && conf.Status != last.Status)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameValidation? conf, V2alpha3ConnectionUsernameValidation? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.MinLength is not null && conf.MinLength != last.MinLength)
+                return true;
+
+            if (conf.MaxLength is not null && conf.MaxLength != last.MaxLength)
+                return true;
+
+            if (RequiresUpdate(conf.AllowedTypes, last.AllowedTypes))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameAllowedTypes? conf, V2alpha3ConnectionUsernameAllowedTypes? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.PhoneNumber is not null && conf.PhoneNumber != last.PhoneNumber)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAuthenticationMethods? conf, V2alpha3ConnectionAuthenticationMethods? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Password, last.Password))
+                return true;
+
+            if (RequiresUpdate(conf.Passkey, last.Passkey))
+                return true;
+
+            if (RequiresUpdate(conf.EmailOtp, last.EmailOtp))
+                return true;
+
+            if (RequiresUpdate(conf.PhoneOtp, last.PhoneOtp))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordAuthenticationMethod? conf, V2alpha3ConnectionPasswordAuthenticationMethod? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            if (conf.ApiBehavior is not null && conf.ApiBehavior != last.ApiBehavior)
+                return true;
+
+            if (conf.SignupBehavior is not null && conf.SignupBehavior != last.SignupBehavior)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasskeyAuthenticationMethod? conf, V2alpha3ConnectionPasskeyAuthenticationMethod? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionEmailOtpAuthenticationMethod? conf, V2alpha3ConnectionEmailOtpAuthenticationMethod? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPhoneOtpAuthenticationMethod? conf, V2alpha3ConnectionPhoneOtpAuthenticationMethod? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionCustomScripts? conf, V2alpha3ConnectionCustomScripts? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Login is not null && conf.Login != last.Login)
+                return true;
+
+            if (conf.GetUser is not null && conf.GetUser != last.GetUser)
+                return true;
+
+            if (conf.Delete is not null && conf.Delete != last.Delete)
+                return true;
+
+            if (conf.ChangePassword is not null && conf.ChangePassword != last.ChangePassword)
+                return true;
+
+            if (conf.Verify is not null && conf.Verify != last.Verify)
+                return true;
+
+            if (conf.Create is not null && conf.Create != last.Create)
+                return true;
+
+            if (conf.ChangeUsername is not null && conf.ChangeUsername != last.ChangeUsername)
+                return true;
+
+            if (conf.ChangeEmail is not null && conf.ChangeEmail != last.ChangeEmail)
+                return true;
+
+            if (conf.ChangePhoneNumber is not null && conf.ChangePhoneNumber != last.ChangePhoneNumber)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionMfa? conf, V2alpha3ConnectionMfa? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            if (conf.ReturnEnrollSettings is not null && conf.ReturnEnrollSettings != last.ReturnEnrollSettings)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasskeyOptions? conf, V2alpha3ConnectionPasskeyOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ChallengeUi is not null && conf.ChallengeUi != last.ChallengeUi)
+                return true;
+
+            if (conf.ProgressiveEnrollmentEnabled is not null && conf.ProgressiveEnrollmentEnabled != last.ProgressiveEnrollmentEnabled)
+                return true;
+
+            if (conf.LocalEnrollmentEnabled is not null && conf.LocalEnrollmentEnabled != last.LocalEnrollmentEnabled)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordComplexityOptions? conf, V2alpha3ConnectionPasswordComplexityOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.MinLength is not null && conf.MinLength != last.MinLength)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordDictionaryOptions? conf, V2alpha3ConnectionPasswordDictionaryOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enable is not null && conf.Enable != last.Enable)
+                return true;
+
+            if (conf.Dictionary is not null && (last.Dictionary is null || conf.Dictionary.ToHashSet().SetEquals(last.Dictionary) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordHistoryOptions? conf, V2alpha3ConnectionPasswordHistoryOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enable is not null && conf.Enable != last.Enable)
+                return true;
+
+            if (conf.Size is not null && conf.Size != last.Size)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordNoPersonalInfoOptions? conf, V2alpha3ConnectionPasswordNoPersonalInfoOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Enable is not null && conf.Enable != last.Enable)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordOptions? conf, V2alpha3ConnectionPasswordOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Complexity, last.Complexity))
+                return true;
+
+            if (RequiresUpdate(conf.Dictionary, last.Dictionary))
+                return true;
+
+            if (RequiresUpdate(conf.History, last.History))
+                return true;
+
+            if (RequiresUpdate(conf.ProfileData, last.ProfileData))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordOptionsComplexity? conf, V2alpha3ConnectionPasswordOptionsComplexity? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.MinLength is not null && conf.MinLength != last.MinLength)
+                return true;
+
+            if (conf.CharacterTypes is not null && (last.CharacterTypes is null || conf.CharacterTypes.ToHashSet().SetEquals(last.CharacterTypes) == false))
+                return true;
+
+            if (conf.CharacterTypeRule is not null && conf.CharacterTypeRule != last.CharacterTypeRule)
+                return true;
+
+            if (conf.IdenticalCharacters is not null && conf.IdenticalCharacters != last.IdenticalCharacters)
+                return true;
+
+            if (conf.SequentialCharacters is not null && conf.SequentialCharacters != last.SequentialCharacters)
+                return true;
+
+            if (conf.MaxLengthExceeded is not null && conf.MaxLengthExceeded != last.MaxLengthExceeded)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordOptionsDictionary? conf, V2alpha3ConnectionPasswordOptionsDictionary? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            if (conf.Custom is not null && (last.Custom is null || conf.Custom.ToHashSet().SetEquals(last.Custom) == false))
+                return true;
+
+            if (conf.Default is not null && conf.Default != last.Default)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordOptionsHistory? conf, V2alpha3ConnectionPasswordOptionsHistory? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            if (conf.Size is not null && conf.Size != last.Size)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPasswordOptionsProfileData? conf, V2alpha3ConnectionPasswordOptionsProfileData? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            if (conf.BlockedFields is not null && (last.BlockedFields is null || conf.BlockedFields.ToHashSet().SetEquals(last.BlockedFields) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionValidationOptions? conf, V2alpha3ConnectionValidationOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Username, last.Username))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameValidationOptions? conf, V2alpha3ConnectionUsernameValidationOptions? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Min is not null && conf.Min != last.Min)
+                return true;
+
+            if (conf.Max is not null && conf.Max != last.Max)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAd? conf, V2alpha3ConnectionOptionsAd? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AgentIp is not null && conf.AgentIp != last.AgentIp)
+                return true;
+
+            if (conf.AgentMode is not null && conf.AgentMode != last.AgentMode)
+                return true;
+
+            if (conf.AgentVersion is not null && conf.AgentVersion != last.AgentVersion)
+                return true;
+
+            if (conf.BruteForceProtection is not null && conf.BruteForceProtection != last.BruteForceProtection)
+                return true;
+
+            if (conf.CertAuth is not null && conf.CertAuth != last.CertAuth)
+                return true;
+
+            if (conf.Certs is not null && (last.Certs is null || conf.Certs.ToHashSet().SetEquals(last.Certs) == false))
+                return true;
+
+            if (conf.DisableCache is not null && conf.DisableCache != last.DisableCache)
+                return true;
+
+            if (conf.DisableSelfServiceChangePassword is not null && conf.DisableSelfServiceChangePassword != last.DisableSelfServiceChangePassword)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.Ips is not null && (last.Ips is null || conf.Ips.ToHashSet().SetEquals(last.Ips) == false))
+                return true;
+
+            if (conf.Kerberos is not null && conf.Kerberos != last.Kerberos)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.SignInEndpoint is not null && conf.SignInEndpoint != last.SignInEndpoint)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.Thumbprints is not null && (last.Thumbprints is null || conf.Thumbprints.ToHashSet().SetEquals(last.Thumbprints) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAdfs? conf, V2alpha3ConnectionOptionsAdfs? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AdfsServer is not null && conf.AdfsServer != last.AdfsServer)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.EntityId is not null && conf.EntityId != last.EntityId)
+                return true;
+
+            if (conf.FedMetadataXml is not null && conf.FedMetadataXml != last.FedMetadataXml)
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.PrevThumbprints is not null && (last.PrevThumbprints is null || conf.PrevThumbprints.ToHashSet().SetEquals(last.PrevThumbprints) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.ShouldTrustEmailVerifiedConnection is not null && conf.ShouldTrustEmailVerifiedConnection != last.ShouldTrustEmailVerifiedConnection)
+                return true;
+
+            if (conf.SignInEndpoint is not null && conf.SignInEndpoint != last.SignInEndpoint)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.Thumbprints is not null && (last.Thumbprints is null || conf.Thumbprints.ToHashSet().SetEquals(last.Thumbprints) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UserIdAttribute is not null && conf.UserIdAttribute != last.UserIdAttribute)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAmazon? conf, V2alpha3ConnectionOptionsAmazon? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.PostalCode is not null && conf.PostalCode != last.PostalCode)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsApple? conf, V2alpha3ConnectionOptionsApple? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AppSecret is not null && conf.AppSecret != last.AppSecret)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Kid is not null && conf.Kid != last.Kid)
+                return true;
+
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+
+            if (conf.Scope is not null && conf.Scope != last.Scope)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.TeamId is not null && conf.TeamId != last.TeamId)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAuth0Oidc? conf, V2alpha3ConnectionOptionsAuth0Oidc? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsAzureAd? conf, V2alpha3ConnectionOptionsAzureAd? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ApiEnableUsers is not null && conf.ApiEnableUsers != last.ApiEnableUsers)
+                return true;
+
+            if (conf.AppDomain is not null && conf.AppDomain != last.AppDomain)
+                return true;
+
+            if (conf.AppId is not null && conf.AppId != last.AppId)
+                return true;
+
+            if (conf.BasicProfile is not null && conf.BasicProfile != last.BasicProfile)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.ExtAccessToken is not null && conf.ExtAccessToken != last.ExtAccessToken)
+                return true;
+
+            if (conf.ExtAccountEnabled is not null && conf.ExtAccountEnabled != last.ExtAccountEnabled)
+                return true;
+
+            if (conf.ExtAdmin is not null && conf.ExtAdmin != last.ExtAdmin)
+                return true;
+
+            if (conf.ExtAgreedTerms is not null && conf.ExtAgreedTerms != last.ExtAgreedTerms)
+                return true;
+
+            if (conf.ExtAssignedLicenses is not null && conf.ExtAssignedLicenses != last.ExtAssignedLicenses)
+                return true;
+
+            if (conf.ExtAssignedPlans is not null && conf.ExtAssignedPlans != last.ExtAssignedPlans)
+                return true;
+
+            if (conf.ExtAzureId is not null && conf.ExtAzureId != last.ExtAzureId)
+                return true;
+
+            if (conf.ExtCity is not null && conf.ExtCity != last.ExtCity)
+                return true;
+
+            if (conf.ExtCountry is not null && conf.ExtCountry != last.ExtCountry)
+                return true;
+
+            if (conf.ExtDepartment is not null && conf.ExtDepartment != last.ExtDepartment)
+                return true;
+
+            if (conf.ExtDirSyncEnabled is not null && conf.ExtDirSyncEnabled != last.ExtDirSyncEnabled)
+                return true;
+
+            if (conf.ExtEmail is not null && conf.ExtEmail != last.ExtEmail)
+                return true;
+
+            if (conf.ExtExpiresIn is not null && conf.ExtExpiresIn != last.ExtExpiresIn)
+                return true;
+
+            if (conf.ExtFamilyName is not null && conf.ExtFamilyName != last.ExtFamilyName)
+                return true;
+
+            if (conf.ExtFax is not null && conf.ExtFax != last.ExtFax)
+                return true;
+
+            if (conf.ExtGivenName is not null && conf.ExtGivenName != last.ExtGivenName)
+                return true;
+
+            if (conf.ExtGroupIds is not null && conf.ExtGroupIds != last.ExtGroupIds)
+                return true;
+
+            if (conf.ExtGroups is not null && conf.ExtGroups != last.ExtGroups)
+                return true;
+
+            if (conf.ExtIsSuspended is not null && conf.ExtIsSuspended != last.ExtIsSuspended)
+                return true;
+
+            if (conf.ExtJobTitle is not null && conf.ExtJobTitle != last.ExtJobTitle)
+                return true;
+
+            if (conf.ExtLastSync is not null && conf.ExtLastSync != last.ExtLastSync)
+                return true;
+
+            if (conf.ExtMobile is not null && conf.ExtMobile != last.ExtMobile)
+                return true;
+
+            if (conf.ExtName is not null && conf.ExtName != last.ExtName)
+                return true;
+
+            if (conf.ExtNestedGroups is not null && conf.ExtNestedGroups != last.ExtNestedGroups)
+                return true;
+
+            if (conf.ExtNickname is not null && conf.ExtNickname != last.ExtNickname)
+                return true;
+
+            if (conf.ExtOid is not null && conf.ExtOid != last.ExtOid)
+                return true;
+
+            if (conf.ExtPhone is not null && conf.ExtPhone != last.ExtPhone)
+                return true;
+
+            if (conf.ExtPhysicalDeliveryOfficeName is not null && conf.ExtPhysicalDeliveryOfficeName != last.ExtPhysicalDeliveryOfficeName)
+                return true;
+
+            if (conf.ExtPostalCode is not null && conf.ExtPostalCode != last.ExtPostalCode)
+                return true;
+
+            if (conf.ExtPreferredLanguage is not null && conf.ExtPreferredLanguage != last.ExtPreferredLanguage)
+                return true;
+
+            if (conf.ExtProfile is not null && conf.ExtProfile != last.ExtProfile)
+                return true;
+
+            if (conf.ExtProvisionedPlans is not null && conf.ExtProvisionedPlans != last.ExtProvisionedPlans)
+                return true;
+
+            if (conf.ExtProvisioningErrors is not null && conf.ExtProvisioningErrors != last.ExtProvisioningErrors)
+                return true;
+
+            if (conf.ExtProxyAddresses is not null && conf.ExtProxyAddresses != last.ExtProxyAddresses)
+                return true;
+
+            if (conf.ExtPuid is not null && conf.ExtPuid != last.ExtPuid)
+                return true;
+
+            if (conf.ExtRefreshToken is not null && conf.ExtRefreshToken != last.ExtRefreshToken)
+                return true;
+
+            if (conf.ExtRoles is not null && conf.ExtRoles != last.ExtRoles)
+                return true;
+
+            if (conf.ExtState is not null && conf.ExtState != last.ExtState)
+                return true;
+
+            if (conf.ExtStreet is not null && conf.ExtStreet != last.ExtStreet)
+                return true;
+
+            if (conf.ExtTelephoneNumber is not null && conf.ExtTelephoneNumber != last.ExtTelephoneNumber)
+                return true;
+
+            if (conf.ExtTenantid is not null && conf.ExtTenantid != last.ExtTenantid)
+                return true;
+
+            if (conf.ExtUpn is not null && conf.ExtUpn != last.ExtUpn)
+                return true;
+
+            if (conf.ExtUsageLocation is not null && conf.ExtUsageLocation != last.ExtUsageLocation)
+                return true;
+
+            if (conf.ExtUserId is not null && conf.ExtUserId != last.ExtUserId)
+                return true;
+
+            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
+                return true;
+
+            if (conf.Granted is not null && conf.Granted != last.Granted)
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.IdentityApi is not null && conf.IdentityApi != last.IdentityApi)
+                return true;
+
+            if (conf.MaxGroupsToRetrieve is not null && conf.MaxGroupsToRetrieve != last.MaxGroupsToRetrieve)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.ShouldTrustEmailVerifiedConnection is not null && conf.ShouldTrustEmailVerifiedConnection != last.ShouldTrustEmailVerifiedConnection)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.TenantId is not null && conf.TenantId != last.TenantId)
+                return true;
+
+            if (conf.Thumbprints is not null && (last.Thumbprints is null || conf.Thumbprints.ToHashSet().SetEquals(last.Thumbprints) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UseWsfed is not null && conf.UseWsfed != last.UseWsfed)
+                return true;
+
+            if (conf.UseCommonEndpoint is not null && conf.UseCommonEndpoint != last.UseCommonEndpoint)
+                return true;
+
+            if (conf.UseridAttribute is not null && conf.UseridAttribute != last.UseridAttribute)
+                return true;
+
+            if (conf.WaadProtocol is not null && conf.WaadProtocol != last.WaadProtocol)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsBaidu? conf, V2alpha3ConnectionOptionsBaidu? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsBitbucket? conf, V2alpha3ConnectionOptionsBitbucket? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsBitly? conf, V2alpha3ConnectionOptionsBitly? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsBox? conf, V2alpha3ConnectionOptionsBox? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsDaccount? conf, V2alpha3ConnectionOptionsDaccount? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsDropbox? conf, V2alpha3ConnectionOptionsDropbox? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsDwolla? conf, V2alpha3ConnectionOptionsDwolla? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsEmail? conf, V2alpha3ConnectionOptionsEmail? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AuthParams is not null && conf.AuthParams != last.AuthParams)
+                return true;
+
+            if (conf.BruteForceProtection is not null && conf.BruteForceProtection != last.BruteForceProtection)
+                return true;
+
+            if (conf.DisableSignup is not null && conf.DisableSignup != last.DisableSignup)
+                return true;
+
+            if (RequiresUpdate(conf.Email, last.Email))
+                return true;
+
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+
+            if (RequiresUpdate(conf.Totp, last.Totp))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionEmailEmail? conf, V2alpha3ConnectionEmailEmail? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Body is not null && conf.Body != last.Body)
+                return true;
+
+            if (conf.From is not null && conf.From != last.From)
+                return true;
+
+            if (conf.Subject is not null && conf.Subject != last.Subject)
+                return true;
+
+            if (conf.Syntax is not null && conf.Syntax != last.Syntax)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionTotpEmail? conf, V2alpha3ConnectionTotpEmail? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Length is not null && conf.Length != last.Length)
+                return true;
+
+            if (conf.TimeStep is not null && conf.TimeStep != last.TimeStep)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsEvernote? conf, V2alpha3ConnectionOptionsEvernote? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsExact? conf, V2alpha3ConnectionOptionsExact? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.BaseUrl is not null && conf.BaseUrl != last.BaseUrl)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsFacebook? conf, V2alpha3ConnectionOptionsFacebook? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.Scope is not null && conf.Scope != last.Scope)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.AdsManagement is not null && conf.AdsManagement != last.AdsManagement)
+                return true;
+
+            if (conf.AdsRead is not null && conf.AdsRead != last.AdsRead)
+                return true;
+
+            if (conf.AllowContextProfileField is not null && conf.AllowContextProfileField != last.AllowContextProfileField)
+                return true;
+
+            if (conf.BusinessManagement is not null && conf.BusinessManagement != last.BusinessManagement)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.GroupsAccessMemberInfo is not null && conf.GroupsAccessMemberInfo != last.GroupsAccessMemberInfo)
+                return true;
+
+            if (conf.LeadsRetrieval is not null && conf.LeadsRetrieval != last.LeadsRetrieval)
+                return true;
+
+            if (conf.ManageNotifications is not null && conf.ManageNotifications != last.ManageNotifications)
+                return true;
+
+            if (conf.ManagePages is not null && conf.ManagePages != last.ManagePages)
+                return true;
+
+            if (conf.PagesManageCta is not null && conf.PagesManageCta != last.PagesManageCta)
+                return true;
+
+            if (conf.PagesManageInstantArticles is not null && conf.PagesManageInstantArticles != last.PagesManageInstantArticles)
+                return true;
+
+            if (conf.PagesMessaging is not null && conf.PagesMessaging != last.PagesMessaging)
+                return true;
+
+            if (conf.PagesMessagingPhoneNumber is not null && conf.PagesMessagingPhoneNumber != last.PagesMessagingPhoneNumber)
+                return true;
+
+            if (conf.PagesMessagingSubscriptions is not null && conf.PagesMessagingSubscriptions != last.PagesMessagingSubscriptions)
+                return true;
+
+            if (conf.PagesShowList is not null && conf.PagesShowList != last.PagesShowList)
+                return true;
+
+            if (conf.PublicProfile is not null && conf.PublicProfile != last.PublicProfile)
+                return true;
+
+            if (conf.PublishActions is not null && conf.PublishActions != last.PublishActions)
+                return true;
+
+            if (conf.PublishPages is not null && conf.PublishPages != last.PublishPages)
+                return true;
+
+            if (conf.PublishToGroups is not null && conf.PublishToGroups != last.PublishToGroups)
+                return true;
+
+            if (conf.PublishVideo is not null && conf.PublishVideo != last.PublishVideo)
+                return true;
+
+            if (conf.ReadAudienceNetworkInsights is not null && conf.ReadAudienceNetworkInsights != last.ReadAudienceNetworkInsights)
+                return true;
+
+            if (conf.ReadInsights is not null && conf.ReadInsights != last.ReadInsights)
+                return true;
+
+            if (conf.ReadMailbox is not null && conf.ReadMailbox != last.ReadMailbox)
+                return true;
+
+            if (conf.ReadPageMailboxes is not null && conf.ReadPageMailboxes != last.ReadPageMailboxes)
+                return true;
+
+            if (conf.ReadStream is not null && conf.ReadStream != last.ReadStream)
+                return true;
+
+            if (conf.UserAgeRange is not null && conf.UserAgeRange != last.UserAgeRange)
+                return true;
+
+            if (conf.UserBirthday is not null && conf.UserBirthday != last.UserBirthday)
+                return true;
+
+            if (conf.UserEvents is not null && conf.UserEvents != last.UserEvents)
+                return true;
+
+            if (conf.UserFriends is not null && conf.UserFriends != last.UserFriends)
+                return true;
+
+            if (conf.UserGender is not null && conf.UserGender != last.UserGender)
+                return true;
+
+            if (conf.UserGroups is not null && conf.UserGroups != last.UserGroups)
+                return true;
+
+            if (conf.UserHometown is not null && conf.UserHometown != last.UserHometown)
+                return true;
+
+            if (conf.UserLikes is not null && conf.UserLikes != last.UserLikes)
+                return true;
+
+            if (conf.UserLink is not null && conf.UserLink != last.UserLink)
+                return true;
+
+            if (conf.UserLocation is not null && conf.UserLocation != last.UserLocation)
+                return true;
+
+            if (conf.UserManagedGroups is not null && conf.UserManagedGroups != last.UserManagedGroups)
+                return true;
+
+            if (conf.UserPhotos is not null && conf.UserPhotos != last.UserPhotos)
+                return true;
+
+            if (conf.UserPosts is not null && conf.UserPosts != last.UserPosts)
+                return true;
+
+            if (conf.UserStatus is not null && conf.UserStatus != last.UserStatus)
+                return true;
+
+            if (conf.UserTaggedPlaces is not null && conf.UserTaggedPlaces != last.UserTaggedPlaces)
+                return true;
+
+            if (conf.UserVideos is not null && conf.UserVideos != last.UserVideos)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsFitbit? conf, V2alpha3ConnectionOptionsFitbit? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsGitHub? conf, V2alpha3ConnectionOptionsGitHub? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.AdminOrg is not null && conf.AdminOrg != last.AdminOrg)
+                return true;
+
+            if (conf.AdminPublicKey is not null && conf.AdminPublicKey != last.AdminPublicKey)
+                return true;
+
+            if (conf.AdminRepoHook is not null && conf.AdminRepoHook != last.AdminRepoHook)
+                return true;
+
+            if (conf.DeleteRepo is not null && conf.DeleteRepo != last.DeleteRepo)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.Follow is not null && conf.Follow != last.Follow)
+                return true;
+
+            if (conf.Gist is not null && conf.Gist != last.Gist)
+                return true;
+
+            if (conf.Notifications is not null && conf.Notifications != last.Notifications)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.PublicRepo is not null && conf.PublicRepo != last.PublicRepo)
+                return true;
+
+            if (conf.ReadOrg is not null && conf.ReadOrg != last.ReadOrg)
+                return true;
+
+            if (conf.ReadPublicKey is not null && conf.ReadPublicKey != last.ReadPublicKey)
+                return true;
+
+            if (conf.ReadRepoHook is not null && conf.ReadRepoHook != last.ReadRepoHook)
+                return true;
+
+            if (conf.ReadUser is not null && conf.ReadUser != last.ReadUser)
+                return true;
+
+            if (conf.Repo is not null && conf.Repo != last.Repo)
+                return true;
+
+            if (conf.RepoDeployment is not null && conf.RepoDeployment != last.RepoDeployment)
+                return true;
+
+            if (conf.RepoStatus is not null && conf.RepoStatus != last.RepoStatus)
+                return true;
+
+            if (conf.WriteOrg is not null && conf.WriteOrg != last.WriteOrg)
+                return true;
+
+            if (conf.WritePublicKey is not null && conf.WritePublicKey != last.WritePublicKey)
+                return true;
+
+            if (conf.WriteRepoHook is not null && conf.WriteRepoHook != last.WriteRepoHook)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsGoogleApps? conf, V2alpha3ConnectionOptionsGoogleApps? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AdminAccessToken is not null && conf.AdminAccessToken != last.AdminAccessToken)
+                return true;
+
+            if (conf.AdminAccessTokenExpiresin is not null && conf.AdminAccessTokenExpiresin != last.AdminAccessTokenExpiresin)
+                return true;
+
+            if (conf.AdminRefreshToken is not null && conf.AdminRefreshToken != last.AdminRefreshToken)
+                return true;
+
+            if (conf.AllowSettingLoginScopes is not null && conf.AllowSettingLoginScopes != last.AllowSettingLoginScopes)
+                return true;
+
+            if (conf.ApiEnableGroups is not null && conf.ApiEnableGroups != last.ApiEnableGroups)
+                return true;
+
+            if (conf.ApiEnableUsers is not null && conf.ApiEnableUsers != last.ApiEnableUsers)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Domain is not null && conf.Domain != last.Domain)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.ExtAgreedTerms is not null && conf.ExtAgreedTerms != last.ExtAgreedTerms)
+                return true;
+
+            if (conf.ExtGroups is not null && conf.ExtGroups != last.ExtGroups)
+                return true;
+
+            if (conf.ExtGroupsExtended is not null && conf.ExtGroupsExtended != last.ExtGroupsExtended)
+                return true;
+
+            if (conf.ExtIsAdmin is not null && conf.ExtIsAdmin != last.ExtIsAdmin)
+                return true;
+
+            if (conf.ExtIsSuspended is not null && conf.ExtIsSuspended != last.ExtIsSuspended)
+                return true;
+
+            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
+                return true;
+
+            if (conf.HandleLoginFromSocial is not null && conf.HandleLoginFromSocial != last.HandleLoginFromSocial)
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.MapUserIdToId is not null && conf.MapUserIdToId != last.MapUserIdToId)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsGoogleOAuth2? conf, V2alpha3ConnectionOptionsGoogleOAuth2? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AllowedAudiences is not null && (last.AllowedAudiences is null || conf.AllowedAudiences.ToHashSet().SetEquals(last.AllowedAudiences) == false))
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.AdsenseManagement is not null && conf.AdsenseManagement != last.AdsenseManagement)
+                return true;
+
+            if (conf.Analytics is not null && conf.Analytics != last.Analytics)
+                return true;
+
+            if (conf.Blogger is not null && conf.Blogger != last.Blogger)
+                return true;
+
+            if (conf.Calendar is not null && conf.Calendar != last.Calendar)
+                return true;
+
+            if (conf.CalendarAddonsExecute is not null && conf.CalendarAddonsExecute != last.CalendarAddonsExecute)
+                return true;
+
+            if (conf.CalendarEvents is not null && conf.CalendarEvents != last.CalendarEvents)
+                return true;
+
+            if (conf.CalendarEventsReadonly is not null && conf.CalendarEventsReadonly != last.CalendarEventsReadonly)
+                return true;
+
+            if (conf.CalendarSettingsReadonly is not null && conf.CalendarSettingsReadonly != last.CalendarSettingsReadonly)
+                return true;
+
+            if (conf.ChromeWebStore is not null && conf.ChromeWebStore != last.ChromeWebStore)
+                return true;
+
+            if (conf.Contacts is not null && conf.Contacts != last.Contacts)
+                return true;
+
+            if (conf.ContactsNew is not null && conf.ContactsNew != last.ContactsNew)
+                return true;
+
+            if (conf.ContactsOtherReadonly is not null && conf.ContactsOtherReadonly != last.ContactsOtherReadonly)
+                return true;
+
+            if (conf.ContactsReadonly is not null && conf.ContactsReadonly != last.ContactsReadonly)
+                return true;
+
+            if (conf.ContentApiForShopping is not null && conf.ContentApiForShopping != last.ContentApiForShopping)
+                return true;
+
+            if (conf.Coordinate is not null && conf.Coordinate != last.Coordinate)
+                return true;
+
+            if (conf.CoordinateReadonly is not null && conf.CoordinateReadonly != last.CoordinateReadonly)
+                return true;
+
+            if (conf.DirectoryReadonly is not null && conf.DirectoryReadonly != last.DirectoryReadonly)
+                return true;
+
+            if (conf.DocumentList is not null && conf.DocumentList != last.DocumentList)
+                return true;
+
+            if (conf.Drive is not null && conf.Drive != last.Drive)
+                return true;
+
+            if (conf.DriveActivity is not null && conf.DriveActivity != last.DriveActivity)
+                return true;
+
+            if (conf.DriveActivityReadonly is not null && conf.DriveActivityReadonly != last.DriveActivityReadonly)
+                return true;
+
+            if (conf.DriveAppdata is not null && conf.DriveAppdata != last.DriveAppdata)
+                return true;
+
+            if (conf.DriveAppsReadonly is not null && conf.DriveAppsReadonly != last.DriveAppsReadonly)
+                return true;
+
+            if (conf.DriveFile is not null && conf.DriveFile != last.DriveFile)
+                return true;
+
+            if (conf.DriveMetadata is not null && conf.DriveMetadata != last.DriveMetadata)
+                return true;
+
+            if (conf.DriveMetadataReadonly is not null && conf.DriveMetadataReadonly != last.DriveMetadataReadonly)
+                return true;
+
+            if (conf.DrivePhotosReadonly is not null && conf.DrivePhotosReadonly != last.DrivePhotosReadonly)
+                return true;
+
+            if (conf.DriveReadonly is not null && conf.DriveReadonly != last.DriveReadonly)
+                return true;
+
+            if (conf.DriveScripts is not null && conf.DriveScripts != last.DriveScripts)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.Gmail is not null && conf.Gmail != last.Gmail)
+                return true;
+
+            if (conf.GmailCompose is not null && conf.GmailCompose != last.GmailCompose)
+                return true;
+
+            if (conf.GmailInsert is not null && conf.GmailInsert != last.GmailInsert)
+                return true;
+
+            if (conf.GmailLabels is not null && conf.GmailLabels != last.GmailLabels)
+                return true;
+
+            if (conf.GmailMetadata is not null && conf.GmailMetadata != last.GmailMetadata)
+                return true;
+
+            if (conf.GmailModify is not null && conf.GmailModify != last.GmailModify)
+                return true;
+
+            if (conf.GmailNew is not null && conf.GmailNew != last.GmailNew)
+                return true;
+
+            if (conf.GmailReadonly is not null && conf.GmailReadonly != last.GmailReadonly)
+                return true;
+
+            if (conf.GmailSend is not null && conf.GmailSend != last.GmailSend)
+                return true;
+
+            if (conf.GmailSettingsBasic is not null && conf.GmailSettingsBasic != last.GmailSettingsBasic)
+                return true;
+
+            if (conf.GmailSettingsSharing is not null && conf.GmailSettingsSharing != last.GmailSettingsSharing)
+                return true;
+
+            if (conf.GoogleAffiliateNetwork is not null && conf.GoogleAffiliateNetwork != last.GoogleAffiliateNetwork)
+                return true;
+
+            if (conf.GoogleBooks is not null && conf.GoogleBooks != last.GoogleBooks)
+                return true;
+
+            if (conf.GoogleCloudStorage is not null && conf.GoogleCloudStorage != last.GoogleCloudStorage)
+                return true;
+
+            if (conf.GoogleDrive is not null && conf.GoogleDrive != last.GoogleDrive)
+                return true;
+
+            if (conf.GoogleDriveFiles is not null && conf.GoogleDriveFiles != last.GoogleDriveFiles)
+                return true;
+
+            if (conf.GooglePlus is not null && conf.GooglePlus != last.GooglePlus)
+                return true;
+
+            if (conf.LatitudeBest is not null && conf.LatitudeBest != last.LatitudeBest)
+                return true;
+
+            if (conf.LatitudeCity is not null && conf.LatitudeCity != last.LatitudeCity)
+                return true;
+
+            if (conf.Moderator is not null && conf.Moderator != last.Moderator)
+                return true;
+
+            if (conf.OfflineAccess is not null && conf.OfflineAccess != last.OfflineAccess)
+                return true;
+
+            if (conf.Orkut is not null && conf.Orkut != last.Orkut)
+                return true;
+
+            if (conf.PicasaWeb is not null && conf.PicasaWeb != last.PicasaWeb)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Sites is not null && conf.Sites != last.Sites)
+                return true;
+
+            if (conf.Tasks is not null && conf.Tasks != last.Tasks)
+                return true;
+
+            if (conf.TasksReadonly is not null && conf.TasksReadonly != last.TasksReadonly)
+                return true;
+
+            if (conf.UrlShortener is not null && conf.UrlShortener != last.UrlShortener)
+                return true;
+
+            if (conf.WebmasterTools is not null && conf.WebmasterTools != last.WebmasterTools)
+                return true;
+
+            if (conf.Youtube is not null && conf.Youtube != last.Youtube)
+                return true;
+
+            if (conf.YoutubeChannelmembershipsCreator is not null && conf.YoutubeChannelmembershipsCreator != last.YoutubeChannelmembershipsCreator)
+                return true;
+
+            if (conf.YoutubeNew is not null && conf.YoutubeNew != last.YoutubeNew)
+                return true;
+
+            if (conf.YoutubeReadonly is not null && conf.YoutubeReadonly != last.YoutubeReadonly)
+                return true;
+
+            if (conf.YoutubeUpload is not null && conf.YoutubeUpload != last.YoutubeUpload)
+                return true;
+
+            if (conf.Youtubepartner is not null && conf.Youtubepartner != last.Youtubepartner)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsInstagram? conf, V2alpha3ConnectionOptionsInstagram? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsLine? conf, V2alpha3ConnectionOptionsLine? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsLinkedin? conf, V2alpha3ConnectionOptionsLinkedin? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.StrategyVersion is not null && conf.StrategyVersion != last.StrategyVersion)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.BasicProfile is not null && conf.BasicProfile != last.BasicProfile)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.FullProfile is not null && conf.FullProfile != last.FullProfile)
+                return true;
+
+            if (conf.Network is not null && conf.Network != last.Network)
+                return true;
+
+            if (conf.Openid is not null && conf.Openid != last.Openid)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOAuth1? conf, V2alpha3ConnectionOptionsOAuth1? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AccessTokenUrl is not null && conf.AccessTokenUrl != last.AccessTokenUrl)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.RequestTokenUrl is not null && conf.RequestTokenUrl != last.RequestTokenUrl)
+                return true;
+
+            if (RequiresUpdate(conf.Scripts, last.Scripts))
+                return true;
+
+            if (conf.SignatureMethod is not null && conf.SignatureMethod != last.SignatureMethod)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UserAuthorizationUrl is not null && conf.UserAuthorizationUrl != last.UserAuthorizationUrl)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionScriptsOAuth1? conf, V2alpha3ConnectionScriptsOAuth1? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.FetchUserProfile is not null && conf.FetchUserProfile != last.FetchUserProfile)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOAuth2? conf, V2alpha3ConnectionOptionsOAuth2? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.AuthParams, last.AuthParams))
+                return true;
+
+            if (RequiresUpdate(conf.AuthParamsMap, last.AuthParamsMap))
+                return true;
+
+            if (conf.AuthorizationUrl is not null && conf.AuthorizationUrl != last.AuthorizationUrl)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (RequiresUpdate(conf.CustomHeaders, last.CustomHeaders))
+                return true;
+
+            if (RequiresUpdate(conf.FieldsMap, last.FieldsMap))
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.LogoutUrl is not null && conf.LogoutUrl != last.LogoutUrl)
+                return true;
+
+            if (conf.PkceEnabled is not null && conf.PkceEnabled != last.PkceEnabled)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (RequiresUpdate(conf.Scripts, last.Scripts))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.TokenUrl is not null && conf.TokenUrl != last.TokenUrl)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UseOauthSpecScope is not null && conf.UseOauthSpecScope != last.UseOauthSpecScope)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionScriptsOAuth2? conf, V2alpha3ConnectionScriptsOAuth2? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.FetchUserProfile is not null && conf.FetchUserProfile != last.FetchUserProfile)
+                return true;
+
+            if (conf.GetLogoutUrl is not null && conf.GetLogoutUrl != last.GetLogoutUrl)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOffice365? conf, V2alpha3ConnectionOptionsOffice365? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOidc? conf, V2alpha3ConnectionOptionsOidc? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.AttributeMap, last.AttributeMap))
+                return true;
+
+            if (conf.DiscoveryUrl is not null && conf.DiscoveryUrl != last.DiscoveryUrl)
+                return true;
+
+            if (conf.Type is not null && conf.Type != last.Type)
+                return true;
+
+            if (conf.AuthorizationEndpoint is not null && conf.AuthorizationEndpoint != last.AuthorizationEndpoint)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (RequiresUpdate(conf.ConnectionSettings, last.ConnectionSettings))
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
+                return true;
+
+            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.IdTokenSignedResponseAlgs is not null && (last.IdTokenSignedResponseAlgs is null || conf.IdTokenSignedResponseAlgs.ToHashSet().SetEquals(last.IdTokenSignedResponseAlgs) == false))
+                return true;
+
+            if (conf.Issuer is not null && conf.Issuer != last.Issuer)
+                return true;
+
+            if (conf.JwksUri is not null && conf.JwksUri != last.JwksUri)
+                return true;
+
+            if (RequiresUpdate(conf.OidcMetadata, last.OidcMetadata))
+                return true;
+
+            if (conf.Scope is not null && conf.Scope != last.Scope)
+                return true;
+
+            if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.TokenEndpoint is not null && conf.TokenEndpoint != last.TokenEndpoint)
+                return true;
+
+            if (conf.TokenEndpointAuthMethod is not null && conf.TokenEndpointAuthMethod != last.TokenEndpointAuthMethod)
+                return true;
+
+            if (conf.TokenEndpointAuthSigningAlg is not null && conf.TokenEndpointAuthSigningAlg != last.TokenEndpointAuthSigningAlg)
+                return true;
+
+            if (conf.TokenEndpointJwtcaAudFormat is not null && conf.TokenEndpointJwtcaAudFormat != last.TokenEndpointJwtcaAudFormat)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UserinfoEndpoint is not null && conf.UserinfoEndpoint != last.UserinfoEndpoint)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAttributeMapOidc? conf, V2alpha3ConnectionAttributeMapOidc? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Attributes, last.Attributes))
+                return true;
+
+            if (conf.MappingMode is not null && conf.MappingMode != last.MappingMode)
+                return true;
+
+            if (conf.UserinfoScope is not null && conf.UserinfoScope != last.UserinfoScope)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionConnectionSettings? conf, V2alpha3ConnectionConnectionSettings? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Pkce is not null && conf.Pkce != last.Pkce)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOidcMetadata? conf, V2alpha3ConnectionOptionsOidcMetadata? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AcrValuesSupported is not null && (last.AcrValuesSupported is null || conf.AcrValuesSupported.ToHashSet().SetEquals(last.AcrValuesSupported) == false))
+                return true;
+
+            if (conf.AuthorizationEndpoint is not null && conf.AuthorizationEndpoint != last.AuthorizationEndpoint)
+                return true;
+
+            if (conf.ClaimTypesSupported is not null && (last.ClaimTypesSupported is null || conf.ClaimTypesSupported.ToHashSet().SetEquals(last.ClaimTypesSupported) == false))
+                return true;
+
+            if (conf.ClaimsLocalesSupported is not null && (last.ClaimsLocalesSupported is null || conf.ClaimsLocalesSupported.ToHashSet().SetEquals(last.ClaimsLocalesSupported) == false))
+                return true;
+
+            if (conf.ClaimsParameterSupported is not null && conf.ClaimsParameterSupported != last.ClaimsParameterSupported)
+                return true;
+
+            if (conf.ClaimsSupported is not null && (last.ClaimsSupported is null || conf.ClaimsSupported.ToHashSet().SetEquals(last.ClaimsSupported) == false))
+                return true;
+
+            if (conf.DisplayValuesSupported is not null && (last.DisplayValuesSupported is null || conf.DisplayValuesSupported.ToHashSet().SetEquals(last.DisplayValuesSupported) == false))
+                return true;
+
+            if (conf.DpopSigningAlgValuesSupported is not null && (last.DpopSigningAlgValuesSupported is null || conf.DpopSigningAlgValuesSupported.ToHashSet().SetEquals(last.DpopSigningAlgValuesSupported) == false))
+                return true;
+
+            if (conf.EndSessionEndpoint is not null && conf.EndSessionEndpoint != last.EndSessionEndpoint)
+                return true;
+
+            if (conf.GrantTypesSupported is not null && (last.GrantTypesSupported is null || conf.GrantTypesSupported.ToHashSet().SetEquals(last.GrantTypesSupported) == false))
+                return true;
+
+            if (conf.IdTokenEncryptionAlgValuesSupported is not null && (last.IdTokenEncryptionAlgValuesSupported is null || conf.IdTokenEncryptionAlgValuesSupported.ToHashSet().SetEquals(last.IdTokenEncryptionAlgValuesSupported) == false))
+                return true;
+
+            if (conf.IdTokenEncryptionEncValuesSupported is not null && (last.IdTokenEncryptionEncValuesSupported is null || conf.IdTokenEncryptionEncValuesSupported.ToHashSet().SetEquals(last.IdTokenEncryptionEncValuesSupported) == false))
+                return true;
+
+            if (conf.IdTokenSigningAlgValuesSupported is not null && (last.IdTokenSigningAlgValuesSupported is null || conf.IdTokenSigningAlgValuesSupported.ToHashSet().SetEquals(last.IdTokenSigningAlgValuesSupported) == false))
+                return true;
+
+            if (conf.Issuer is not null && conf.Issuer != last.Issuer)
+                return true;
+
+            if (conf.JwksUri is not null && conf.JwksUri != last.JwksUri)
+                return true;
+
+            if (conf.OpPolicyUri is not null && conf.OpPolicyUri != last.OpPolicyUri)
+                return true;
+
+            if (conf.OpTosUri is not null && conf.OpTosUri != last.OpTosUri)
+                return true;
+
+            if (conf.RegistrationEndpoint is not null && conf.RegistrationEndpoint != last.RegistrationEndpoint)
+                return true;
+
+            if (conf.RequestObjectEncryptionAlgValuesSupported is not null && (last.RequestObjectEncryptionAlgValuesSupported is null || conf.RequestObjectEncryptionAlgValuesSupported.ToHashSet().SetEquals(last.RequestObjectEncryptionAlgValuesSupported) == false))
+                return true;
+
+            if (conf.RequestObjectEncryptionEncValuesSupported is not null && (last.RequestObjectEncryptionEncValuesSupported is null || conf.RequestObjectEncryptionEncValuesSupported.ToHashSet().SetEquals(last.RequestObjectEncryptionEncValuesSupported) == false))
+                return true;
+
+            if (conf.RequestObjectSigningAlgValuesSupported is not null && (last.RequestObjectSigningAlgValuesSupported is null || conf.RequestObjectSigningAlgValuesSupported.ToHashSet().SetEquals(last.RequestObjectSigningAlgValuesSupported) == false))
+                return true;
+
+            if (conf.RequestParameterSupported is not null && conf.RequestParameterSupported != last.RequestParameterSupported)
+                return true;
+
+            if (conf.RequestUriParameterSupported is not null && conf.RequestUriParameterSupported != last.RequestUriParameterSupported)
+                return true;
+
+            if (conf.RequireRequestUriRegistration is not null && conf.RequireRequestUriRegistration != last.RequireRequestUriRegistration)
+                return true;
+
+            if (conf.ResponseModesSupported is not null && (last.ResponseModesSupported is null || conf.ResponseModesSupported.ToHashSet().SetEquals(last.ResponseModesSupported) == false))
+                return true;
+
+            if (conf.ResponseTypesSupported is not null && (last.ResponseTypesSupported is null || conf.ResponseTypesSupported.ToHashSet().SetEquals(last.ResponseTypesSupported) == false))
+                return true;
+
+            if (conf.ScopesSupported is not null && (last.ScopesSupported is null || conf.ScopesSupported.ToHashSet().SetEquals(last.ScopesSupported) == false))
+                return true;
+
+            if (conf.ServiceDocumentation is not null && conf.ServiceDocumentation != last.ServiceDocumentation)
+                return true;
+
+            if (conf.SubjectTypesSupported is not null && (last.SubjectTypesSupported is null || conf.SubjectTypesSupported.ToHashSet().SetEquals(last.SubjectTypesSupported) == false))
+                return true;
+
+            if (conf.TokenEndpoint is not null && conf.TokenEndpoint != last.TokenEndpoint)
+                return true;
+
+            if (conf.TokenEndpointAuthMethodsSupported is not null && (last.TokenEndpointAuthMethodsSupported is null || conf.TokenEndpointAuthMethodsSupported.ToHashSet().SetEquals(last.TokenEndpointAuthMethodsSupported) == false))
+                return true;
+
+            if (conf.TokenEndpointAuthSigningAlgValuesSupported is not null && (last.TokenEndpointAuthSigningAlgValuesSupported is null || conf.TokenEndpointAuthSigningAlgValuesSupported.ToHashSet().SetEquals(last.TokenEndpointAuthSigningAlgValuesSupported) == false))
+                return true;
+
+            if (conf.UiLocalesSupported is not null && (last.UiLocalesSupported is null || conf.UiLocalesSupported.ToHashSet().SetEquals(last.UiLocalesSupported) == false))
+                return true;
+
+            if (conf.UserinfoEncryptionAlgValuesSupported is not null && (last.UserinfoEncryptionAlgValuesSupported is null || conf.UserinfoEncryptionAlgValuesSupported.ToHashSet().SetEquals(last.UserinfoEncryptionAlgValuesSupported) == false))
+                return true;
+
+            if (conf.UserinfoEncryptionEncValuesSupported is not null && (last.UserinfoEncryptionEncValuesSupported is null || conf.UserinfoEncryptionEncValuesSupported.ToHashSet().SetEquals(last.UserinfoEncryptionEncValuesSupported) == false))
+                return true;
+
+            if (conf.UserinfoEndpoint is not null && conf.UserinfoEndpoint != last.UserinfoEndpoint)
+                return true;
+
+            if (conf.UserinfoSigningAlgValuesSupported is not null && (last.UserinfoSigningAlgValuesSupported is null || conf.UserinfoSigningAlgValuesSupported.ToHashSet().SetEquals(last.UserinfoSigningAlgValuesSupported) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsOkta? conf, V2alpha3ConnectionOptionsOkta? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.AttributeMap, last.AttributeMap))
+                return true;
+
+            if (conf.Domain is not null && conf.Domain != last.Domain)
+                return true;
+
+            if (conf.Type is not null && conf.Type != last.Type)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            if (conf.AuthorizationEndpoint is not null && conf.AuthorizationEndpoint != last.AuthorizationEndpoint)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (RequiresUpdate(conf.ConnectionSettings, last.ConnectionSettings))
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
+                return true;
+
+            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (conf.IdTokenSignedResponseAlgs is not null && (last.IdTokenSignedResponseAlgs is null || conf.IdTokenSignedResponseAlgs.ToHashSet().SetEquals(last.IdTokenSignedResponseAlgs) == false))
+                return true;
+
+            if (conf.Issuer is not null && conf.Issuer != last.Issuer)
+                return true;
+
+            if (conf.JwksUri is not null && conf.JwksUri != last.JwksUri)
+                return true;
+
+            if (RequiresUpdate(conf.OidcMetadata, last.OidcMetadata))
+                return true;
+
+            if (conf.Scope is not null && conf.Scope != last.Scope)
+                return true;
+
+            if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.TokenEndpoint is not null && conf.TokenEndpoint != last.TokenEndpoint)
+                return true;
+
+            if (conf.TokenEndpointAuthMethod is not null && conf.TokenEndpointAuthMethod != last.TokenEndpointAuthMethod)
+                return true;
+
+            if (conf.TokenEndpointAuthSigningAlg is not null && conf.TokenEndpointAuthSigningAlg != last.TokenEndpointAuthSigningAlg)
+                return true;
+
+            if (conf.TokenEndpointJwtcaAudFormat is not null && conf.TokenEndpointJwtcaAudFormat != last.TokenEndpointJwtcaAudFormat)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.UserinfoEndpoint is not null && conf.UserinfoEndpoint != last.UserinfoEndpoint)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAttributeMapOkta? conf, V2alpha3ConnectionAttributeMapOkta? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.Attributes, last.Attributes))
+                return true;
+
+            if (conf.MappingMode is not null && conf.MappingMode != last.MappingMode)
+                return true;
+
+            if (conf.UserinfoScope is not null && conf.UserinfoScope != last.UserinfoScope)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsPaypal? conf, V2alpha3ConnectionOptionsPaypal? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.Address is not null && conf.Address != last.Address)
+                return true;
+
+            if (conf.Email is not null && conf.Email != last.Email)
+                return true;
+
+            if (conf.Phone is not null && conf.Phone != last.Phone)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsPingFederate? conf, V2alpha3ConnectionOptionsPingFederate? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.PingFederateBaseUrl is not null && conf.PingFederateBaseUrl != last.PingFederateBaseUrl)
+                return true;
+
+            if (conf.SigningCert is not null && conf.SigningCert != last.SigningCert)
+                return true;
+
+            if (RequiresUpdate(conf.AssertionDecryptionSettings, last.AssertionDecryptionSettings))
+                return true;
+
+            if (conf.Cert is not null && conf.Cert != last.Cert)
+                return true;
+
+            if (RequiresUpdate(conf.DecryptionKey, last.DecryptionKey))
+                return true;
+
+            if (conf.DigestAlgorithm is not null && conf.DigestAlgorithm != last.DigestAlgorithm)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.EntityId is not null && conf.EntityId != last.EntityId)
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (RequiresUpdate(conf.Idpinitiated, last.Idpinitiated))
+                return true;
+
+            if (conf.ProtocolBinding is not null && conf.ProtocolBinding != last.ProtocolBinding)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.SignInEndpoint is not null && conf.SignInEndpoint != last.SignInEndpoint)
+                return true;
+
+            if (conf.SignSamlRequest is not null && conf.SignSamlRequest != last.SignSamlRequest)
+                return true;
+
+            if (conf.SignatureAlgorithm is not null && conf.SignatureAlgorithm != last.SignatureAlgorithm)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.Thumbprints is not null && (last.Thumbprints is null || conf.Thumbprints.ToHashSet().SetEquals(last.Thumbprints) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionAssertionDecryptionSettings? conf, V2alpha3ConnectionAssertionDecryptionSettings? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.AlgorithmProfile is not null && conf.AlgorithmProfile != last.AlgorithmProfile)
+                return true;
+
+            if (conf.AlgorithmExceptions is not null && (last.AlgorithmExceptions is null || conf.AlgorithmExceptions.ToHashSet().SetEquals(last.AlgorithmExceptions) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionDecryptionKeySaml? conf, V2alpha3ConnectionDecryptionKeySaml? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            // the decryption key is a union of a raw private key or a cert/key pair; compare both shapes explicitly
+            if (conf.PrivateKey is not null && conf.PrivateKey != last.PrivateKey)
+                return true;
+
+            if (RequiresUpdate(conf.KeyPair, last.KeyPair))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionDecryptionKeySamlCert? conf, V2alpha3ConnectionDecryptionKeySamlCert? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Cert is not null && conf.Cert != last.Cert)
+                return true;
+
+            if (conf.Key is not null && conf.Key != last.Key)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsIdpinitiatedSaml? conf, V2alpha3ConnectionOptionsIdpinitiatedSaml? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientAuthorizequery is not null && conf.ClientAuthorizequery != last.ClientAuthorizequery)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientProtocol is not null && conf.ClientProtocol != last.ClientProtocol)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsPlanningCenter? conf, V2alpha3ConnectionOptionsPlanningCenter? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSalesforce? conf, V2alpha3ConnectionOptionsSalesforce? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSalesforceCommunity? conf, V2alpha3ConnectionOptionsSalesforceCommunity? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.CommunityBaseUrl is not null && conf.CommunityBaseUrl != last.CommunityBaseUrl)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSaml? conf, V2alpha3ConnectionOptionsSaml? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Debug is not null && conf.Debug != last.Debug)
+                return true;
+
+            if (conf.Deflate is not null && conf.Deflate != last.Deflate)
+                return true;
+
+            if (conf.DestinationUrl is not null && conf.DestinationUrl != last.DestinationUrl)
+                return true;
+
+            if (conf.DisableSignout is not null && conf.DisableSignout != last.DisableSignout)
+                return true;
+
+            if (RequiresUpdate(conf.FieldsMap, last.FieldsMap))
+                return true;
+
+            if (conf.GlobalTokenRevocationJwtIss is not null && conf.GlobalTokenRevocationJwtIss != last.GlobalTokenRevocationJwtIss)
+                return true;
+
+            if (conf.GlobalTokenRevocationJwtSub is not null && conf.GlobalTokenRevocationJwtSub != last.GlobalTokenRevocationJwtSub)
+                return true;
+
+            if (conf.MetadataUrl is not null && conf.MetadataUrl != last.MetadataUrl)
+                return true;
+
+            if (conf.MetadataXml is not null && conf.MetadataXml != last.MetadataXml)
+                return true;
+
+            if (conf.RecipientUrl is not null && conf.RecipientUrl != last.RecipientUrl)
+                return true;
+
+            if (conf.RequestTemplate is not null && conf.RequestTemplate != last.RequestTemplate)
+                return true;
+
+            if (conf.SigningCert is not null && conf.SigningCert != last.SigningCert)
+                return true;
+
+            if (RequiresUpdate(conf.SigningKey, last.SigningKey))
+                return true;
+
+            if (conf.SignOutEndpoint is not null && conf.SignOutEndpoint != last.SignOutEndpoint)
+                return true;
+
+            if (conf.UserIdAttribute is not null && conf.UserIdAttribute != last.UserIdAttribute)
+                return true;
+
+            if (RequiresUpdate(conf.AssertionDecryptionSettings, last.AssertionDecryptionSettings))
+                return true;
+
+            if (conf.Cert is not null && conf.Cert != last.Cert)
+                return true;
+
+            if (RequiresUpdate(conf.DecryptionKey, last.DecryptionKey))
+                return true;
+
+            if (conf.DigestAlgorithm is not null && conf.DigestAlgorithm != last.DigestAlgorithm)
+                return true;
+
+            if (conf.DomainAliases is not null && (last.DomainAliases is null || conf.DomainAliases.ToHashSet().SetEquals(last.DomainAliases) == false))
+                return true;
+
+            if (conf.EntityId is not null && conf.EntityId != last.EntityId)
+                return true;
+
+            if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
+                return true;
+
+            if (RequiresUpdate(conf.Idpinitiated, last.Idpinitiated))
+                return true;
+
+            if (conf.ProtocolBinding is not null && conf.ProtocolBinding != last.ProtocolBinding)
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.SignInEndpoint is not null && conf.SignInEndpoint != last.SignInEndpoint)
+                return true;
+
+            if (conf.SignSamlRequest is not null && conf.SignSamlRequest != last.SignSamlRequest)
+                return true;
+
+            if (conf.SignatureAlgorithm is not null && conf.SignatureAlgorithm != last.SignatureAlgorithm)
+                return true;
+
+            if (conf.TenantDomain is not null && conf.TenantDomain != last.TenantDomain)
+                return true;
+
+            if (conf.Thumbprints is not null && (last.Thumbprints is null || conf.Thumbprints.ToHashSet().SetEquals(last.Thumbprints) == false))
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionSigningKeySaml? conf, V2alpha3ConnectionSigningKeySaml? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Cert is not null && conf.Cert != last.Cert)
+                return true;
+
+            if (conf.Key is not null && conf.Key != last.Key)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSharepoint? conf, V2alpha3ConnectionOptionsSharepoint? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsShop? conf, V2alpha3ConnectionOptionsShop? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsShopify? conf, V2alpha3ConnectionOptionsShopify? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSms? conf, V2alpha3ConnectionOptionsSms? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.BruteForceProtection is not null && conf.BruteForceProtection != last.BruteForceProtection)
+                return true;
+
+            if (conf.DisableSignup is not null && conf.DisableSignup != last.DisableSignup)
+                return true;
+
+            if (conf.ForwardReqInfo is not null && conf.ForwardReqInfo != last.ForwardReqInfo)
+                return true;
+
+            if (conf.From is not null && conf.From != last.From)
+                return true;
+
+            if (RequiresUpdate(conf.GatewayAuthentication, last.GatewayAuthentication))
+                return true;
+
+            if (conf.GatewayUrl is not null && conf.GatewayUrl != last.GatewayUrl)
+                return true;
+
+            if (conf.MessagingServiceSid is not null && conf.MessagingServiceSid != last.MessagingServiceSid)
+                return true;
+
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+
+            if (conf.Provider is not null && conf.Provider != last.Provider)
+                return true;
+
+            if (conf.Syntax is not null && conf.Syntax != last.Syntax)
+                return true;
+
+            if (conf.Template is not null && conf.Template != last.Template)
+                return true;
+
+            if (RequiresUpdate(conf.Totp, last.Totp))
+                return true;
+
+            if (conf.TwilioSid is not null && conf.TwilioSid != last.TwilioSid)
+                return true;
+
+            if (conf.TwilioToken is not null && conf.TwilioToken != last.TwilioToken)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionGatewayAuthenticationSms? conf, V2alpha3ConnectionGatewayAuthenticationSms? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Audience is not null && conf.Audience != last.Audience)
+                return true;
+
+            if (conf.Method is not null && conf.Method != last.Method)
+                return true;
+
+            if (conf.Secret is not null && conf.Secret != last.Secret)
+                return true;
+
+            if (conf.SecretBase64Encoded is not null && conf.SecretBase64Encoded != last.SecretBase64Encoded)
+                return true;
+
+            if (conf.Subject is not null && conf.Subject != last.Subject)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionTotpSms? conf, V2alpha3ConnectionTotpSms? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Length is not null && conf.Length != last.Length)
+                return true;
+
+            if (conf.TimeStep is not null && conf.TimeStep != last.TimeStep)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsSoundcloud? conf, V2alpha3ConnectionOptionsSoundcloud? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsThirtySevenSignals? conf, V2alpha3ConnectionOptionsThirtySevenSignals? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsTwitter? conf, V2alpha3ConnectionOptionsTwitter? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Protocol is not null && conf.Protocol != last.Protocol)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.OfflineAccess is not null && conf.OfflineAccess != last.OfflineAccess)
+                return true;
+
+            if (conf.Profile is not null && conf.Profile != last.Profile)
+                return true;
+
+            if (conf.TweetRead is not null && conf.TweetRead != last.TweetRead)
+                return true;
+
+            if (conf.UsersRead is not null && conf.UsersRead != last.UsersRead)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsUntappd? conf, V2alpha3ConnectionOptionsUntappd? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsVkontakte? conf, V2alpha3ConnectionOptionsVkontakte? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsWeibo? conf, V2alpha3ConnectionOptionsWeibo? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsWindowsLive? conf, V2alpha3ConnectionOptionsWindowsLive? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.FreeformScopes is not null && (last.FreeformScopes is null || conf.FreeformScopes.ToHashSet().SetEquals(last.FreeformScopes) == false))
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (conf.StrategyVersion is not null && conf.StrategyVersion != last.StrategyVersion)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.Applications is not null && conf.Applications != last.Applications)
+                return true;
+
+            if (conf.ApplicationsCreate is not null && conf.ApplicationsCreate != last.ApplicationsCreate)
+                return true;
+
+            if (conf.Basic is not null && conf.Basic != last.Basic)
+                return true;
+
+            if (conf.Birthday is not null && conf.Birthday != last.Birthday)
+                return true;
+
+            if (conf.Calendars is not null && conf.Calendars != last.Calendars)
+                return true;
+
+            if (conf.CalendarsUpdate is not null && conf.CalendarsUpdate != last.CalendarsUpdate)
+                return true;
+
+            if (conf.ContactsBirthday is not null && conf.ContactsBirthday != last.ContactsBirthday)
+                return true;
+
+            if (conf.ContactsCalendars is not null && conf.ContactsCalendars != last.ContactsCalendars)
+                return true;
+
+            if (conf.ContactsCreate is not null && conf.ContactsCreate != last.ContactsCreate)
+                return true;
+
+            if (conf.ContactsPhotos is not null && conf.ContactsPhotos != last.ContactsPhotos)
+                return true;
+
+            if (conf.ContactsSkydrive is not null && conf.ContactsSkydrive != last.ContactsSkydrive)
+                return true;
+
+            if (conf.DirectoryAccessasuserAll is not null && conf.DirectoryAccessasuserAll != last.DirectoryAccessasuserAll)
+                return true;
+
+            if (conf.DirectoryReadAll is not null && conf.DirectoryReadAll != last.DirectoryReadAll)
+                return true;
+
+            if (conf.DirectoryReadwriteAll is not null && conf.DirectoryReadwriteAll != last.DirectoryReadwriteAll)
+                return true;
+
+            if (conf.Emails is not null && conf.Emails != last.Emails)
+                return true;
+
+            if (conf.EventsCreate is not null && conf.EventsCreate != last.EventsCreate)
+                return true;
+
+            if (conf.GraphCalendars is not null && conf.GraphCalendars != last.GraphCalendars)
+                return true;
+
+            if (conf.GraphCalendarsUpdate is not null && conf.GraphCalendarsUpdate != last.GraphCalendarsUpdate)
+                return true;
+
+            if (conf.GraphContacts is not null && conf.GraphContacts != last.GraphContacts)
+                return true;
+
+            if (conf.GraphContactsUpdate is not null && conf.GraphContactsUpdate != last.GraphContactsUpdate)
+                return true;
+
+            if (conf.GraphDevice is not null && conf.GraphDevice != last.GraphDevice)
+                return true;
+
+            if (conf.GraphDeviceCommand is not null && conf.GraphDeviceCommand != last.GraphDeviceCommand)
+                return true;
+
+            if (conf.GraphEmails is not null && conf.GraphEmails != last.GraphEmails)
+                return true;
+
+            if (conf.GraphEmailsUpdate is not null && conf.GraphEmailsUpdate != last.GraphEmailsUpdate)
+                return true;
+
+            if (conf.GraphFiles is not null && conf.GraphFiles != last.GraphFiles)
+                return true;
+
+            if (conf.GraphFilesAll is not null && conf.GraphFilesAll != last.GraphFilesAll)
+                return true;
+
+            if (conf.GraphFilesAllUpdate is not null && conf.GraphFilesAllUpdate != last.GraphFilesAllUpdate)
+                return true;
+
+            if (conf.GraphFilesUpdate is not null && conf.GraphFilesUpdate != last.GraphFilesUpdate)
+                return true;
+
+            if (conf.GraphNotes is not null && conf.GraphNotes != last.GraphNotes)
+                return true;
+
+            if (conf.GraphNotesCreate is not null && conf.GraphNotesCreate != last.GraphNotesCreate)
+                return true;
+
+            if (conf.GraphNotesUpdate is not null && conf.GraphNotesUpdate != last.GraphNotesUpdate)
+                return true;
+
+            if (conf.GraphTasks is not null && conf.GraphTasks != last.GraphTasks)
+                return true;
+
+            if (conf.GraphTasksUpdate is not null && conf.GraphTasksUpdate != last.GraphTasksUpdate)
+                return true;
+
+            if (conf.GraphUser is not null && conf.GraphUser != last.GraphUser)
+                return true;
+
+            if (conf.GraphUserActivity is not null && conf.GraphUserActivity != last.GraphUserActivity)
+                return true;
+
+            if (conf.GraphUserUpdate is not null && conf.GraphUserUpdate != last.GraphUserUpdate)
+                return true;
+
+            if (conf.GroupReadAll is not null && conf.GroupReadAll != last.GroupReadAll)
+                return true;
+
+            if (conf.GroupReadwriteAll is not null && conf.GroupReadwriteAll != last.GroupReadwriteAll)
+                return true;
+
+            if (conf.MailReadwriteAll is not null && conf.MailReadwriteAll != last.MailReadwriteAll)
+                return true;
+
+            if (conf.MailSend is not null && conf.MailSend != last.MailSend)
+                return true;
+
+            if (conf.Messenger is not null && conf.Messenger != last.Messenger)
+                return true;
+
+            if (conf.OfflineAccess is not null && conf.OfflineAccess != last.OfflineAccess)
+                return true;
+
+            if (conf.PhoneNumbers is not null && conf.PhoneNumbers != last.PhoneNumbers)
+                return true;
+
+            if (conf.Photos is not null && conf.Photos != last.Photos)
+                return true;
+
+            if (conf.PostalAddresses is not null && conf.PostalAddresses != last.PostalAddresses)
+                return true;
+
+            if (conf.RolemanagementReadAll is not null && conf.RolemanagementReadAll != last.RolemanagementReadAll)
+                return true;
+
+            if (conf.RolemanagementReadwriteDirectory is not null && conf.RolemanagementReadwriteDirectory != last.RolemanagementReadwriteDirectory)
+                return true;
+
+            if (conf.Share is not null && conf.Share != last.Share)
+                return true;
+
+            if (conf.Signin is not null && conf.Signin != last.Signin)
+                return true;
+
+            if (conf.SitesReadAll is not null && conf.SitesReadAll != last.SitesReadAll)
+                return true;
+
+            if (conf.SitesReadwriteAll is not null && conf.SitesReadwriteAll != last.SitesReadwriteAll)
+                return true;
+
+            if (conf.Skydrive is not null && conf.Skydrive != last.Skydrive)
+                return true;
+
+            if (conf.SkydriveUpdate is not null && conf.SkydriveUpdate != last.SkydriveUpdate)
+                return true;
+
+            if (conf.TeamReadbasicAll is not null && conf.TeamReadbasicAll != last.TeamReadbasicAll)
+                return true;
+
+            if (conf.TeamReadwriteAll is not null && conf.TeamReadwriteAll != last.TeamReadwriteAll)
+                return true;
+
+            if (conf.UserReadAll is not null && conf.UserReadAll != last.UserReadAll)
+                return true;
+
+            if (conf.UserReadbasicAll is not null && conf.UserReadbasicAll != last.UserReadbasicAll)
+                return true;
+
+            if (conf.WorkProfile is not null && conf.WorkProfile != last.WorkProfile)
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsWordpress? conf, V2alpha3ConnectionOptionsWordpress? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsYahoo? conf, V2alpha3ConnectionOptionsYahoo? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionOptionsYandex? conf, V2alpha3ConnectionOptionsYandex? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.ClientId is not null && conf.ClientId != last.ClientId)
+                return true;
+
+            if (conf.ClientSecret is not null && conf.ClientSecret != last.ClientSecret)
+                return true;
+
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+
+            if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
+                return true;
+
+            if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
+                return true;
+
+            if (conf.NonPersistentAttrs is not null && (last.NonPersistentAttrs is null || conf.NonPersistentAttrs.ToHashSet().SetEquals(last.NonPersistentAttrs) == false))
+                return true;
+
+            return false;
+        }
+
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, V2alpha3ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
@@ -5158,7 +9220,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             // enabled-clients management is part of updating the connection; only apply it when Update is permitted
             if (((V1TenantEntityInstance<V2alpha3Connection.SpecDef, V2alpha3Connection.StatusDef, V2alpha3ConnectionConf, V2alpha3ConnectionConf>)entity).HasPolicy(V1EntityPolicyType.Update))
-                await ApplyEnabledClientsAsync(api, entity, defaultNamespace, cancellationToken);
+                await ApplyEnabledClientsAsync(api, entity, lastConf, defaultNamespace, cancellationToken);
 
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
@@ -5171,10 +9233,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="api"></param>
         /// <param name="entity"></param>
+        /// <param name="lastConf"></param>
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        async Task ApplyEnabledClientsAsync(IManagementApiClient api, V2alpha3Connection entity, string defaultNamespace, CancellationToken cancellationToken)
+        async Task ApplyEnabledClientsAsync(IManagementApiClient api, V2alpha3Connection entity, V2alpha3ConnectionConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             // a null enabledClients means this Connection does not manage enabled clients at all;
             // clear any previously-tracked managed set so the hand-off is clean and a later
@@ -5195,7 +9258,10 @@ namespace Alethic.Auth0.Operator.Controllers
             // clients this Connection previously enabled itself; the only ones we are allowed to disable
             var previouslyManaged = entity.Status.ManagedEnabledClientIds ?? Array.Empty<string>();
 
-            var req = ComputeEnabledClientsRequest(desired, previouslyManaged);
+            // clients actually enabled right now, as read back by Get earlier this cycle
+            var current = new HashSet<string>(lastConf.EnabledClients?.Select(i => i.Id).OfType<string>() ?? []);
+
+            var req = ComputeEnabledClientsRequest(desired, previouslyManaged, current);
             if (req.Count > 0)
                 await api.Connections.Clients.UpdateAsync(id, req, null, cancellationToken);
 
@@ -5204,25 +9270,29 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Computes the enabled-clients batch for a scoped, additive update: every <paramref name="desired"/> client is
-        /// enabled, and only <paramref name="previouslyManaged"/> clients that are no longer desired are disabled.
-        /// Clients that were never managed by this Connection (e.g. enabled via a <c>ConnectionClient</c> resource) are
-        /// never included, so they are left untouched.
+        /// Computes the enabled-clients batch for a scoped, additive update: every <paramref name="desired"/> client
+        /// not already in <paramref name="current"/> is enabled, and only <paramref name="previouslyManaged"/> clients
+        /// that are no longer desired but still in <paramref name="current"/> are disabled. Clients already in the
+        /// desired state are omitted so an in-sync connection produces an empty batch and no API call. Clients that
+        /// were never managed by this Connection (e.g. enabled via a <c>ConnectionClient</c> resource) are never
+        /// included, so they are left untouched.
         /// </summary>
         /// <param name="desired"></param>
         /// <param name="previouslyManaged"></param>
+        /// <param name="current"></param>
         /// <returns></returns>
-        internal static List<UpdateEnabledClientConnectionsRequestContentItem> ComputeEnabledClientsRequest(ISet<string> desired, IEnumerable<string> previouslyManaged)
+        internal static List<UpdateEnabledClientConnectionsRequestContentItem> ComputeEnabledClientsRequest(ISet<string> desired, IEnumerable<string> previouslyManaged, ISet<string> current)
         {
             var req = new List<UpdateEnabledClientConnectionsRequestContentItem>();
 
-            // enable every desired client
+            // enable every desired client not already enabled
             foreach (var clientId in desired)
-                req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = true });
+                if (current.Contains(clientId) == false)
+                    req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = true });
 
-            // disable only previously-managed clients that are no longer desired
+            // disable only previously-managed clients that are no longer desired and are still enabled
             foreach (var clientId in previouslyManaged)
-                if (desired.Contains(clientId) == false)
+                if (desired.Contains(clientId) == false && current.Contains(clientId))
                     req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = false });
 
             return req;
