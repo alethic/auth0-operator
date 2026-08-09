@@ -126,3 +126,12 @@ options:
     replenishmentPeriod:
     # Maximum requests allowed to wait for a token before failing fast. Default: 10000.
     queueLimit:
+    # Circuit breaker: when Auth0 answers any request with a 429, all requests to that domain fail fast until the
+    # server-reported rate limit reset instead of every reconcile discovering the rate limit on its own.
+    circuitBreaker:
+      # Whether the circuit breaker is applied. Default: true.
+      enabled:
+      # How long the breaker stays open when a 429 carries no usable reset header, as a duration. Default: "00:01:00".
+      defaultOpenDuration:
+      # Upper bound on how long the breaker stays open, guarding against clock skew. Default: "00:10:00".
+      maxOpenDuration:

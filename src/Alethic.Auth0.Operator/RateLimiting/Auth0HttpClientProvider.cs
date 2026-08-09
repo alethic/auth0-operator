@@ -32,16 +32,14 @@ namespace Alethic.Auth0.Operator.RateLimiting
         public HttpClient Client { get; }
 
         /// <summary>
-        /// Builds the <see cref="HttpClient"/>, applying the rate limiter when enabled.
+        /// Builds the <see cref="HttpClient"/>, applying the rate limiter and circuit breaker when enabled.
         /// </summary>
         /// <param name="options"></param>
         static HttpClient Create(RateLimitOptions options)
         {
             var transport = new SocketsHttpHandler();
-            if (options.Enabled == false)
-                return new HttpClient(transport);
 
-            var limiter = PartitionedRateLimiter.Create<HttpRequestMessage, string>(request =>
+            var limiter = options.Enabled == false ? null : PartitionedRateLimiter.Create<HttpRequestMessage, string>(request =>
                 RateLimitPartition.GetTokenBucketLimiter(
                     request.RequestUri?.Host ?? string.Empty,
                     _ => new TokenBucketRateLimiterOptions
@@ -54,7 +52,12 @@ namespace Alethic.Auth0.Operator.RateLimiting
                         AutoReplenishment = true,
                     }));
 
-            return new HttpClient(new Auth0RateLimitingHandler(limiter, transport));
+            var breaker = options.CircuitBreaker.Enabled ? new Auth0CircuitBreaker(options.CircuitBreaker) : null;
+
+            if (limiter is null && breaker is null)
+                return new HttpClient(transport);
+
+            return new HttpClient(new Auth0RateLimitingHandler(limiter, breaker, transport));
         }
 
     }
