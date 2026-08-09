@@ -3,6 +3,9 @@
 Guidance for working in this repository. Also read `.github/copilot-instructions.md` — its
 rules (manual Auth0 mapping, two-line `if` statements, etc.) apply here too.
 
+**Never include Claude in commits or PRs.** No `Co-Authored-By: Claude ...` trailers on commit
+messages, no "Generated with Claude Code" (or similar attribution) in PR titles or bodies.
+
 ## What this is
 
 A Kubernetes operator (KubeOps 12.x, .NET 10) that manages Auth0 Management API resources —
