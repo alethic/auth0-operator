@@ -256,3 +256,6 @@ ModelManifest.xml
 
 # Docker
 Dockerfile.local
+# MSBuild solution metaprojects (generated when building a .sln)
+*.metaproj
+*.metaproj.tmp

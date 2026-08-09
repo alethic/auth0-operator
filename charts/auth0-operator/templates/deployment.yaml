@@ -129,6 +129,18 @@ spec:
             - name: Auth0__Operator__RateLimit__QueueLimit
               value: {{ .Values.options.rateLimit.queueLimit | quote }}
 {{- end }}
+{{- if not (kindIs "invalid" .Values.options.rateLimit.circuitBreaker.enabled) }}
+            - name: Auth0__Operator__RateLimit__CircuitBreaker__Enabled
+              value: {{ .Values.options.rateLimit.circuitBreaker.enabled | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.circuitBreaker.defaultOpenDuration }}
+            - name: Auth0__Operator__RateLimit__CircuitBreaker__DefaultOpenDuration
+              value: {{ .Values.options.rateLimit.circuitBreaker.defaultOpenDuration | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.circuitBreaker.maxOpenDuration }}
+            - name: Auth0__Operator__RateLimit__CircuitBreaker__MaxOpenDuration
+              value: {{ .Values.options.rateLimit.circuitBreaker.maxOpenDuration | quote }}
+{{- end }}
 
 {{- range .Values.operator.env }}
             - name: {{ .name | quote }}
