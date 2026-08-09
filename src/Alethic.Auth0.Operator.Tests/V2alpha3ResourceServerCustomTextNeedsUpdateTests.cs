@@ -126,6 +126,39 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
+        public void CustomText_JsonElementReadback_ParsesAndConverges()
+        {
+            // the SDK deserializes the untyped screens as JsonElement values; parsing them wrongly made the
+            // read-back empty and re-issued the full-replace write every cycle in labs
+            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+                """{"login":{"description":"Log in to ${companyName} to start exploring!","title":"Welcome to Sweep!"}}""");
+
+            var last = V2alpha3CustomTextController.FromApiScreens(apiShape);
+
+            Assert.IsNotNull(last);
+            Assert.AreEqual("Welcome to Sweep!", last["login"]["title"]);
+
+            var conf = new Dictionary<string, V2alpha3CustomTextScreen>
+            {
+                ["login"] = Screen(("description", "Log in to ${companyName} to start exploring!"), ("title", "Welcome to Sweep!")),
+            };
+
+            Assert.IsFalse(V2alpha3CustomTextController.ScreensRequireUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void CustomText_JsonElementReadback_ChangedValueStillDetected()
+        {
+            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+                """{"login":{"title":"Old Title"}}""");
+
+            var last = V2alpha3CustomTextController.FromApiScreens(apiShape);
+            var conf = new Dictionary<string, V2alpha3CustomTextScreen> { ["login"] = Screen(("title", "New Title")) };
+
+            Assert.IsTrue(V2alpha3CustomTextController.ScreensRequireUpdate(conf, last));
+        }
+
+        [TestMethod]
         public void ResourceServer_ScopesReordered_NoUpdate()
         {
             // scopes are a set keyed by value; Auth0 returning them in a different order is not drift
