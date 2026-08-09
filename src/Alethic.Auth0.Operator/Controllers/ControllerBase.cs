@@ -549,6 +549,18 @@ namespace Alethic.Auth0.Operator.Controllers
                 await ReconcileSuccessAsync(entity, cancellationToken);
                 return ReconciliationResult<TEntity>.Success(entity, Options.Reconciliation.Interval);
             }
+            catch (Exception e) when (Auth0CircuitOpenException.Find(e) is { } circuitOpen)
+            {
+                // the circuit for this tenant's domain is open following a 429; the request never reached Auth0.
+                // no per-entity event is emitted since every entity on the domain backs off at once and the
+                // entity that actually hit the 429 already carries a RateLimit event
+                var interval = circuitOpen.OpenUntil - DateTimeOffset.Now;
+                if (interval < TimeSpan.FromMinutes(1))
+                    interval = TimeSpan.FromMinutes(1);
+
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling reconciliation after {TimeSpan}.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host, interval);
+                return ReconciliationResult<TEntity>.Failure(entity, circuitOpen.Message, e, interval);
+            }
             catch (ErrorApiException e)
             {
                 Logger.LogError(e, "API error reconciling {EntityTypeName} {EntityNamespace}/{EntityName}: {Message}", EntityTypeName, entity.Namespace(), entity.Name(), e.ApiError?.Message ?? "");
@@ -686,6 +698,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 await DeletedAsync(entity, cancellationToken);
                 await DeletingSuccessAsync(entity, cancellationToken);
                 return ReconciliationResult<TEntity>.Success(entity);
+            }
+            catch (Exception e) when (Auth0CircuitOpenException.Find(e) is { } circuitOpen)
+            {
+                // the circuit for this tenant's domain is open following a 429; the request never reached Auth0
+                var interval = circuitOpen.OpenUntil - DateTimeOffset.Now;
+                if (interval < TimeSpan.FromMinutes(1))
+                    interval = TimeSpan.FromMinutes(1);
+
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling deletion after {TimeSpan}.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host, interval);
+                return ReconciliationResult<TEntity>.Failure(entity, circuitOpen.Message, e, interval);
             }
             catch (ErrorApiException e)
             {
