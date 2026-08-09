@@ -10,25 +10,29 @@ namespace Alethic.Auth0.Operator.RateLimiting
 
     /// <summary>
     /// <see cref="DelegatingHandler"/> that gates every outgoing Auth0 Management API request through a rate limiter
-    /// before it is sent, and trips the per-domain circuit breaker on any 429 response so that no further requests
-    /// reach that domain until the server-reported rate limit reset.
+    /// before it is sent, paces requests down to Auth0's refill rate as the reported budget depletes, and trips the
+    /// per-domain circuit breaker on any 429 response so that no further requests reach that domain until the
+    /// server-reported rate limit reset.
     /// </summary>
     sealed class Auth0RateLimitingHandler : DelegatingHandler
     {
 
         readonly PartitionedRateLimiter<HttpRequestMessage>? _limiter;
         readonly Auth0CircuitBreaker? _breaker;
+        readonly Auth0RatePacer? _pacer;
 
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="limiter"></param>
         /// <param name="breaker"></param>
+        /// <param name="pacer"></param>
         /// <param name="innerHandler"></param>
-        public Auth0RateLimitingHandler(PartitionedRateLimiter<HttpRequestMessage>? limiter, Auth0CircuitBreaker? breaker, HttpMessageHandler innerHandler)
+        public Auth0RateLimitingHandler(PartitionedRateLimiter<HttpRequestMessage>? limiter, Auth0CircuitBreaker? breaker, Auth0RatePacer? pacer, HttpMessageHandler innerHandler)
         {
             _limiter = limiter;
             _breaker = breaker;
+            _pacer = pacer;
             InnerHandler = innerHandler ?? throw new ArgumentNullException(nameof(innerHandler));
         }
 
@@ -47,7 +51,14 @@ namespace Alethic.Auth0.Operator.RateLimiting
                     throw new HttpRequestException("Auth0 Management API client-side rate limit queue is full; backing off.");
             }
 
+            // when the reported budget is low, slow down to Auth0's refill rate instead of draining the bucket;
+            // holding the request (and thereby its reconcile slot) is the intended backpressure
+            if (_pacer?.GetDelay(host) is { } delay && delay > TimeSpan.Zero)
+                await Task.Delay(delay, cancellationToken);
+
             var response = await base.SendAsync(request, cancellationToken);
+
+            _pacer?.Record(host, response);
 
             // a 429 opens the circuit for the whole domain; the response still flows back so the SDK surfaces
             // its rate limit error to the requesting reconcile, which reschedules on its own. a successful

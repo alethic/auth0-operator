@@ -141,6 +141,18 @@ spec:
             - name: Auth0__Operator__RateLimit__CircuitBreaker__MaxOpenDuration
               value: {{ .Values.options.rateLimit.circuitBreaker.maxOpenDuration | quote }}
 {{- end }}
+{{- if not (kindIs "invalid" .Values.options.rateLimit.pacing.enabled) }}
+            - name: Auth0__Operator__RateLimit__Pacing__Enabled
+              value: {{ .Values.options.rateLimit.pacing.enabled | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.pacing.remainingThreshold }}
+            - name: Auth0__Operator__RateLimit__Pacing__RemainingThreshold
+              value: {{ .Values.options.rateLimit.pacing.remainingThreshold | quote }}
+{{- end }}
+{{- if .Values.options.rateLimit.pacing.maxRequestDelay }}
+            - name: Auth0__Operator__RateLimit__Pacing__MaxRequestDelay
+              value: {{ .Values.options.rateLimit.pacing.maxRequestDelay | quote }}
+{{- end }}
 
 {{- range .Values.operator.env }}
             - name: {{ .name | quote }}

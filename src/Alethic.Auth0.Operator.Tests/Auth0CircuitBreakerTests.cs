@@ -202,7 +202,7 @@ namespace Alethic.Auth0.Operator.Tests
                     return ok;
                 },
             };
-            using var client = new HttpClient(new Auth0RateLimitingHandler(null, breaker, stub));
+            using var client = new HttpClient(new Auth0RateLimitingHandler(null, breaker, null, stub));
 
             // the exhausting request itself succeeds
             var response = await client.GetAsync("https://tenant.us.auth0.com/api/v2/clients");
@@ -251,7 +251,7 @@ namespace Alethic.Auth0.Operator.Tests
             var time = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
             var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions { DefaultOpenDuration = TimeSpan.FromMinutes(1) }, time);
             var stub = new StubHandler { Respond = _ => TooManyRequests() };
-            using var client = new HttpClient(new Auth0RateLimitingHandler(null, breaker, stub));
+            using var client = new HttpClient(new Auth0RateLimitingHandler(null, breaker, null, stub));
 
             // first request reaches Auth0 and receives the 429 back
             var response = await client.GetAsync("https://tenant.us.auth0.com/api/v2/clients");
