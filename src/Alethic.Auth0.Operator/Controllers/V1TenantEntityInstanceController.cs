@@ -107,17 +107,13 @@ namespace Alethic.Auth0.Operator.Controllers
 
         /// <summary>
         /// Determines whether the remote entity differs from the desired configuration and requires an update.
-        /// The default compares the spec conf as a structural subset of the conf read back from Auth0: only
-        /// properties the spec sets are considered. Controllers whose update request excludes conf fields
-        /// (create-only fields, ref-shaped fields, separately-reconciled fields) must override this to compare
-        /// exactly the fields their update manages.
+        /// Implementations compare the spec conf against the conf read back from Auth0 explicitly, property by
+        /// property, covering exactly the fields their update request transmits; a property left null on the spec
+        /// conf is unmanaged and must be ignored.
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="last"></param>
-        protected virtual bool NeedsUpdate(TConf conf, TLastConf last)
-        {
-            return ConfDiff.IsSubsetOf(conf, last) == false;
-        }
+        protected abstract bool NeedsUpdate(TConf conf, TLastConf last);
 
         /// <inheritdoc />
         protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)

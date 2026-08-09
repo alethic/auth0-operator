@@ -9,7 +9,6 @@ using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.ClientGrants;
 
 using k8s.Models;
 

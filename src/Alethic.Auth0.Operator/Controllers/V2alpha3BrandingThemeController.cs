@@ -595,6 +595,268 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         /// <summary>
+        /// Determines whether the configured theme differs from the theme last observed in Auth0. Only properties
+        /// set on <paramref name="conf"/> are considered; a null leaf is unmanaged and ignored. Subset semantics are
+        /// correct here because <see cref="ToUpdateRequest"/> back-fills unspecified leaves from the live theme, so
+        /// an unmanaged leaf never changes on update.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool ConfRequiresUpdate(V2alpha3BrandingThemeConf conf, V2alpha3BrandingThemeConf last)
+        {
+            if (conf.DisplayName is not null && conf.DisplayName != last.DisplayName)
+                return true;
+
+            if (RequiresUpdate(conf.Borders, last.Borders))
+                return true;
+
+            if (RequiresUpdate(conf.Colors, last.Colors))
+                return true;
+
+            if (RequiresUpdate(conf.Fonts, last.Fonts))
+                return true;
+
+            if (RequiresUpdate(conf.PageBackground, last.PageBackground))
+                return true;
+
+            if (RequiresUpdate(conf.Widget, last.Widget))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured borders differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeBorders? conf, V2alpha3BrandingThemeBorders? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.ButtonBorderRadius is not null && conf.ButtonBorderRadius != last.ButtonBorderRadius)
+                return true;
+
+            if (conf.ButtonBorderWeight is not null && conf.ButtonBorderWeight != last.ButtonBorderWeight)
+                return true;
+
+            if (conf.ButtonsStyle is not null && conf.ButtonsStyle != last.ButtonsStyle)
+                return true;
+
+            if (conf.InputBorderRadius is not null && conf.InputBorderRadius != last.InputBorderRadius)
+                return true;
+
+            if (conf.InputBorderWeight is not null && conf.InputBorderWeight != last.InputBorderWeight)
+                return true;
+
+            if (conf.InputsStyle is not null && conf.InputsStyle != last.InputsStyle)
+                return true;
+
+            if (conf.ShowWidgetShadow is not null && conf.ShowWidgetShadow != last.ShowWidgetShadow)
+                return true;
+
+            if (conf.WidgetBorderWeight is not null && conf.WidgetBorderWeight != last.WidgetBorderWeight)
+                return true;
+
+            if (conf.WidgetCornerRadius is not null && conf.WidgetCornerRadius != last.WidgetCornerRadius)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured colors differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeColors? conf, V2alpha3BrandingThemeColors? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.BaseFocusColor is not null && conf.BaseFocusColor != last.BaseFocusColor)
+                return true;
+
+            if (conf.BaseHoverColor is not null && conf.BaseHoverColor != last.BaseHoverColor)
+                return true;
+
+            if (conf.BodyText is not null && conf.BodyText != last.BodyText)
+                return true;
+
+            if (conf.CaptchaWidgetTheme is not null && conf.CaptchaWidgetTheme != last.CaptchaWidgetTheme)
+                return true;
+
+            if (conf.Error is not null && conf.Error != last.Error)
+                return true;
+
+            if (conf.Header is not null && conf.Header != last.Header)
+                return true;
+
+            if (conf.Icons is not null && conf.Icons != last.Icons)
+                return true;
+
+            if (conf.InputBackground is not null && conf.InputBackground != last.InputBackground)
+                return true;
+
+            if (conf.InputBorder is not null && conf.InputBorder != last.InputBorder)
+                return true;
+
+            if (conf.InputFilledText is not null && conf.InputFilledText != last.InputFilledText)
+                return true;
+
+            if (conf.InputLabelsPlaceholders is not null && conf.InputLabelsPlaceholders != last.InputLabelsPlaceholders)
+                return true;
+
+            if (conf.LinksFocusedComponents is not null && conf.LinksFocusedComponents != last.LinksFocusedComponents)
+                return true;
+
+            if (conf.PrimaryButton is not null && conf.PrimaryButton != last.PrimaryButton)
+                return true;
+
+            if (conf.PrimaryButtonLabel is not null && conf.PrimaryButtonLabel != last.PrimaryButtonLabel)
+                return true;
+
+            if (conf.SecondaryButtonBorder is not null && conf.SecondaryButtonBorder != last.SecondaryButtonBorder)
+                return true;
+
+            if (conf.SecondaryButtonLabel is not null && conf.SecondaryButtonLabel != last.SecondaryButtonLabel)
+                return true;
+
+            if (conf.Success is not null && conf.Success != last.Success)
+                return true;
+
+            if (conf.WidgetBackground is not null && conf.WidgetBackground != last.WidgetBackground)
+                return true;
+
+            if (conf.WidgetBorder is not null && conf.WidgetBorder != last.WidgetBorder)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured fonts differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeFonts? conf, V2alpha3BrandingThemeFonts? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.BodyText, last.BodyText))
+                return true;
+
+            if (RequiresUpdate(conf.ButtonsText, last.ButtonsText))
+                return true;
+
+            if (conf.FontUrl is not null && conf.FontUrl != last.FontUrl)
+                return true;
+
+            if (RequiresUpdate(conf.InputLabels, last.InputLabels))
+                return true;
+
+            if (RequiresUpdate(conf.Links, last.Links))
+                return true;
+
+            if (conf.LinksStyle is not null && conf.LinksStyle != last.LinksStyle)
+                return true;
+
+            if (conf.ReferenceTextSize is not null && conf.ReferenceTextSize != last.ReferenceTextSize)
+                return true;
+
+            if (RequiresUpdate(conf.Subtitle, last.Subtitle))
+                return true;
+
+            if (RequiresUpdate(conf.Title, last.Title))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured font differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeFont? conf, V2alpha3BrandingThemeFont? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Bold is not null && conf.Bold != last.Bold)
+                return true;
+
+            if (conf.Size is not null && conf.Size != last.Size)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured page background differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemePageBackground? conf, V2alpha3BrandingThemePageBackground? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.BackgroundColor is not null && conf.BackgroundColor != last.BackgroundColor)
+                return true;
+
+            if (conf.BackgroundImageUrl is not null && conf.BackgroundImageUrl != last.BackgroundImageUrl)
+                return true;
+
+            if (conf.PageLayout is not null && conf.PageLayout != last.PageLayout)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured widget differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeWidget? conf, V2alpha3BrandingThemeWidget? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.HeaderTextAlignment is not null && conf.HeaderTextAlignment != last.HeaderTextAlignment)
+                return true;
+
+            if (conf.LogoHeight is not null && conf.LogoHeight != last.LogoHeight)
+                return true;
+
+            if (conf.LogoPosition is not null && conf.LogoPosition != last.LogoPosition)
+                return true;
+
+            if (conf.LogoUrl is not null && conf.LogoUrl != last.LogoUrl)
+                return true;
+
+            if (conf.SocialButtonsLayout is not null && conf.SocialButtonsLayout != last.SocialButtonsLayout)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
@@ -665,6 +927,12 @@ namespace Alethic.Auth0.Operator.Controllers
             var self = await api.Branding.Themes.CreateAsync(ToCreateRequest(conf), cancellationToken: cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created theme in Auth0 with ID: {ThemeId} and name: {ThemeName}", EntityTypeName, self.ThemeId, conf.DisplayName);
             return self.ThemeId;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3BrandingThemeConf conf, V2alpha3BrandingThemeConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
         }
 
         /// <inheritdoc />

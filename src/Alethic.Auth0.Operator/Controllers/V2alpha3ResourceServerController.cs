@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -54,7 +56,7 @@ namespace Alethic.Auth0.Operator.Controllers
             TokenDialect = source.TokenDialect is { } td ? FromApi(td) : null,
             EnforcePolicies = source.EnforcePolicies,
             ConsentPolicy = source.ConsentPolicy.IsDefined && source.ConsentPolicy.Value is { } cp ? FromApi(cp) : null,
-            AuthorizationDetails = null,
+            AuthorizationDetails = source.AuthorizationDetails.IsDefined && source.AuthorizationDetails.Value is { } ad ? ad.Select(FromApiAuthorizationDetail).ToArray() : null,
             AuthorizationPolicy = source.AuthorizationPolicy.IsDefined && source.AuthorizationPolicy.Value is { } ap ? FromApi(ap) : null,
             SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
             TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
@@ -83,6 +85,23 @@ namespace Alethic.Auth0.Operator.Controllers
             SubjectTypeAuthorization = FromApi(source.SubjectTypeAuthorization),
             TokenEncryption = source.TokenEncryption.IsDefined && source.TokenEncryption.Value is { } te ? FromApi(te) : null,
             ProofOfPossession = source.ProofOfPossession.IsDefined && source.ProofOfPossession.Value is { } pop ? FromApi(pop) : null,
+        };
+
+        /// <summary>
+        /// The SDK surfaces authorization details as untyped objects; extract the modeled property from the
+        /// element's JSON form.
+        /// </summary>
+        internal static V2alpha3ResourceServerAuthorizationDetail FromApiAuthorizationDetail(object? source) => new()
+        {
+            Type = source is JsonElement element && element.ValueKind == JsonValueKind.Object && element.TryGetProperty("type", out var type) ? type.GetString() : null,
+        };
+
+        /// <summary>
+        /// Converts an authorization detail to the untyped object shape the SDK request expects.
+        /// </summary>
+        internal static object ToApiAuthorizationDetail(V2alpha3ResourceServerAuthorizationDetail source) => new Dictionary<string, object?>()
+        {
+            ["type"] = source.Type,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -334,6 +353,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ConsentPolicy is { } consentPolicy)
                 request.ConsentPolicy = ToApi(consentPolicy);
 
+            if (conf.AuthorizationDetails is { } authorizationDetails)
+                request.AuthorizationDetails = authorizationDetails.Select(ToApiAuthorizationDetail).ToList();
+
             if (conf.AuthorizationPolicy is { } authorizationPolicy)
                 request.AuthorizationPolicy = ToApi(authorizationPolicy);
 
@@ -384,6 +406,9 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.ConsentPolicy is { } consentPolicy)
                 request.ConsentPolicy = ToApi(consentPolicy);
+
+            if (conf.AuthorizationDetails is { } authorizationDetails)
+                request.AuthorizationDetails = authorizationDetails.Select(ToApiAuthorizationDetail).ToList();
 
             if (conf.AuthorizationPolicy is { } authorizationPolicy)
                 request.AuthorizationPolicy = ToApi(authorizationPolicy);
@@ -455,13 +480,214 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Determines whether the resource server differs from the desired configuration. Identifier is
-        /// create-only, id is read-only, and tokenLifetimeForWeb, verificationLocation and authorizationDetails
-        /// are never transmitted by the update request, so none of them can cause an update.
+        /// Determines whether the desired scope list differs from the scope list reported by Auth0. Scopes are a
+        /// set keyed by value — ordering carries no meaning, so Auth0 returning them in a different order than the
+        /// spec declares them is not drift.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerScope[]? conf, V2alpha3ResourceServerScope[]? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Length != last.Length)
+                return true;
+
+            foreach (var scope in conf)
+            {
+                var match = last.FirstOrDefault(i => i.Value == scope.Value);
+                if (match is null)
+                    return true;
+                if (scope.Description is not null && scope.Description != match.Description)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired authorization details differ from those reported by Auth0. Details are a
+        /// set keyed by type — ordering carries no meaning.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerAuthorizationDetail[]? conf, V2alpha3ResourceServerAuthorizationDetail[]? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Length != last.Length)
+                return true;
+
+            foreach (var detail in conf)
+                if (last.Any(i => i.Type == detail.Type) == false)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired authorization policy differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerAuthorizationPolicy? conf, V2alpha3ResourceServerAuthorizationPolicy? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.PolicyId is not null && conf.PolicyId != last.PolicyId)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired client subject type authorization differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerSubjectTypeAuthorizationClient? conf, V2alpha3ResourceServerSubjectTypeAuthorizationClient? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Policy is not null && conf.Policy != last.Policy)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired user subject type authorization differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerSubjectTypeAuthorizationUser? conf, V2alpha3ResourceServerSubjectTypeAuthorizationUser? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Policy is not null && conf.Policy != last.Policy)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired subject type authorization differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerSubjectTypeAuthorization? conf, V2alpha3ResourceServerSubjectTypeAuthorization? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (RequiresUpdate(conf.Client, last.Client))
+                return true;
+            if (RequiresUpdate(conf.User, last.User))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired token encryption key differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerTokenEncryptionKey? conf, V2alpha3ResourceServerTokenEncryptionKey? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+            if (conf.Algorithm is not null && conf.Algorithm != last.Algorithm)
+                return true;
+            if (conf.Kid is not null && conf.Kid != last.Kid)
+                return true;
+            if (conf.Pem is not null && conf.Pem != last.Pem)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired token encryption differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerTokenEncryption? conf, V2alpha3ResourceServerTokenEncryption? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Format is not null && conf.Format != last.Format)
+                return true;
+            if (RequiresUpdate(conf.EncryptionKey, last.EncryptionKey))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the desired proof of possession differs from the value reported by Auth0.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ResourceServerProofOfPossession? conf, V2alpha3ResourceServerProofOfPossession? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+            if (conf.Required is not null && conf.Required != last.Required)
+                return true;
+            if (conf.Mechanism is not null && conf.Mechanism != last.Mechanism)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the resource server differs from the desired configuration. Compares exactly the
+        /// properties transmitted by <see cref="ApplyToApi(V2alpha3ResourceServerConf, UpdateResourceServerRequestContent)"/>;
+        /// a property left null on the desired configuration is unmanaged and ignored. Excluded: id is read-only,
+        /// identifier is create-only and immutable, tokenLifetimeForWeb is response-only in the SDK, and
+        /// verificationLocation is not supported by the SDK at all; a skew in those can never be corrected by
+        /// updating.
         /// </summary>
         internal static bool ConfRequiresUpdate(V2alpha3ResourceServerConf conf, V2alpha3ResourceServerConf last)
         {
-            return ConfDiff.IsSubsetOf(conf, last, "id", "identifier", "tokenLifetimeForWeb", "verificationLocation", "authorizationDetails") == false;
+            if (conf.Name is not null && conf.Name != last.Name)
+                return true;
+            if (RequiresUpdate(conf.Scopes, last.Scopes))
+                return true;
+            if (conf.SigningAlgorithm is not null && conf.SigningAlgorithm != last.SigningAlgorithm)
+                return true;
+            if (conf.SigningSecret is not null && conf.SigningSecret != last.SigningSecret)
+                return true;
+            if (conf.TokenLifetime is not null && conf.TokenLifetime != last.TokenLifetime)
+                return true;
+            if (conf.AllowOfflineAccess is not null && conf.AllowOfflineAccess != last.AllowOfflineAccess)
+                return true;
+            if (conf.AllowOnlineAccess is not null && conf.AllowOnlineAccess != last.AllowOnlineAccess)
+                return true;
+            if (conf.AllowOnlineAccessWithEphemeralSessions is not null && conf.AllowOnlineAccessWithEphemeralSessions != last.AllowOnlineAccessWithEphemeralSessions)
+                return true;
+            if (conf.SkipConsentForVerifiableFirstPartyClients is not null && conf.SkipConsentForVerifiableFirstPartyClients != last.SkipConsentForVerifiableFirstPartyClients)
+                return true;
+            if (conf.TokenDialect is not null && conf.TokenDialect != last.TokenDialect)
+                return true;
+            if (conf.EnforcePolicies is not null && conf.EnforcePolicies != last.EnforcePolicies)
+                return true;
+            if (conf.ConsentPolicy is not null && conf.ConsentPolicy != last.ConsentPolicy)
+                return true;
+            if (RequiresUpdate(conf.AuthorizationDetails, last.AuthorizationDetails))
+                return true;
+            if (RequiresUpdate(conf.AuthorizationPolicy, last.AuthorizationPolicy))
+                return true;
+            if (RequiresUpdate(conf.SubjectTypeAuthorization, last.SubjectTypeAuthorization))
+                return true;
+            if (RequiresUpdate(conf.TokenEncryption, last.TokenEncryption))
+                return true;
+            if (RequiresUpdate(conf.ProofOfPossession, last.ProofOfPossession))
+                return true;
+
+            return false;
         }
 
         /// <inheritdoc />
