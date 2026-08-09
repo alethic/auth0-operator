@@ -550,9 +550,10 @@ namespace Alethic.Auth0.Operator.Tests
             };
 
             var conf = V2alpha3ConnectionController.FromApi(source)!;
-            var req = new CreateConnectionRequestContent { Strategy = new ConnectionIdentityProviderEnum(System.Text.Json.JsonSerializer.Serialize(conf.Strategy).Trim('"')), Name = conf.Name! };
+            var req = new CreateConnectionRequestContent { Strategy = ConnectionIdentityProviderEnum.FromCustom(V2alpha3ConnectionController.ToApiStrategy(conf.Strategy!.Value)), Name = conf.Name! };
             V2alpha3ConnectionController.ApplyToApi(conf, req);
 
+            Assert.AreEqual(source.Strategy, req.Strategy.Value);
             Assert.AreEqual(source.Name, req.Name);
             Assert.AreEqual(source.DisplayName, req.DisplayName);
             Assert.AreEqual(source.IsDomainConnection, req.IsDomainConnection);
@@ -637,6 +638,61 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsTrue(options.AdditionalProperties.TryGetValue(propertyName, out var value));
             Assert.IsInstanceOfType<JsonElement>(value);
             return (JsonElement)value!;
+        }
+
+        [TestMethod]
+        public void FromApiStrategy_Null_ReturnsNull()
+        {
+            Assert.IsNull(V2alpha3ConnectionController.FromApiStrategy(null));
+        }
+
+        [TestMethod]
+        public void FromApiStrategy_UnknownStrategy_ReturnsNull()
+        {
+            Assert.IsNull(V2alpha3ConnectionController.FromApiStrategy("custom"));
+        }
+
+        [TestMethod]
+        public void FromApiStrategy_GoogleOAuth2WireValue_MapsToEnum()
+        {
+            Assert.AreEqual(V2alpha3ConnectionStrategy.GoogleOAuth2, V2alpha3ConnectionController.FromApiStrategy("google-oauth2"));
+        }
+
+        [TestMethod]
+        public void ToApiStrategy_ProducesAuth0WireValues()
+        {
+            Assert.AreEqual("google-oauth2", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.GoogleOAuth2));
+            Assert.AreEqual("waad", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.AzureAd));
+            Assert.AreEqual("samlp", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.Saml));
+            Assert.AreEqual("google-apps", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.GoogleApps));
+            Assert.AreEqual("evernote-sandbox", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.EvernoteSandbox));
+            Assert.AreEqual("paypal-sandbox", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.PaypalSandbox));
+            Assert.AreEqual("salesforce-community", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.SalesforceCommunity));
+            Assert.AreEqual("salesforce-sandbox", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.SalesforceSandbox));
+            Assert.AreEqual("auth0", V2alpha3ConnectionController.ToApiStrategy(V2alpha3ConnectionStrategy.Auth0));
+        }
+
+        [TestMethod]
+        public void StrategyMapping_RoundTrips_AllEnumMembers()
+        {
+            foreach (var strategy in Enum.GetValues<V2alpha3ConnectionStrategy>())
+                Assert.AreEqual(strategy, V2alpha3ConnectionController.FromApiStrategy(V2alpha3ConnectionController.ToApiStrategy(strategy)), $"Strategy {strategy} did not round-trip through the Auth0 wire value.");
+        }
+
+        [TestMethod]
+        public void FromApi_Connection_GoogleOAuth2Strategy_MapsStrategy()
+        {
+            var source = new GetConnectionResponseContent
+            {
+                Id = "con_google",
+                Name = "google-oauth2",
+                Strategy = ConnectionResponseContentGoogleOAuth2Strategy.Values.GoogleOauth2,
+            };
+
+            var result = V2alpha3ConnectionController.FromApi(source);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(V2alpha3ConnectionStrategy.GoogleOAuth2, result.Strategy);
         }
 
     }
