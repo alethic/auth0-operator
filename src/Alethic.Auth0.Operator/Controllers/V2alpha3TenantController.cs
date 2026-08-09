@@ -771,8 +771,8 @@ namespace Alethic.Auth0.Operator.Controllers
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
             {
-                // settings may not be specified
-                if (conf.Settings is { } newSettings)
+                // settings may not be specified, and are only pushed when they differ from the live settings
+                if (conf.Settings is { } newSettings && ConfDiff.IsSubsetOf(newSettings, FromApi(settings)) == false)
                 {
                     // verify that no changes to enable_sso are being made
                     if (newSettings.Flags != null && newSettings.Flags.EnableSso != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSso != settings.Flags.EnableSso)
@@ -786,8 +786,8 @@ namespace Alethic.Auth0.Operator.Controllers
                     settings = await api.Tenants.Settings.GetAsync(new GetTenantSettingsRequestParameters() { }, cancellationToken: cancellationToken);
                 }
 
-                // branding may not be specified
-                if (conf.Branding is { } newBranding)
+                // branding may not be specified, and is only pushed when it differs from the live branding
+                if (conf.Branding is { } newBranding && ConfDiff.IsSubsetOf(newBranding, FromApi(branding)) == false)
                 {
                     // push update to Auth0
                     var req = new UpdateBrandingRequestContent();
@@ -796,8 +796,8 @@ namespace Alethic.Auth0.Operator.Controllers
                     branding = await api.Branding.GetAsync(cancellationToken: cancellationToken);
                 }
 
-                // prompts may not be specified
-                if (conf.Prompts is { } newPrompts)
+                // prompts may not be specified, and are only pushed when they differ from the live prompts
+                if (conf.Prompts is { } newPrompts && ConfDiff.IsSubsetOf(newPrompts, FromApi(prompts)) == false)
                 {
                     // push update to Auth0
                     var req = new UpdateSettingsRequestContent();

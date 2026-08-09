@@ -563,11 +563,12 @@ namespace Alethic.Auth0.Operator.Tests
         // ──────────────────────── enabledClients scoped/additive update ──────────
 
         [TestMethod]
-        public void ComputeEnabledClientsRequest_EnablesAllDesired()
+        public void ComputeEnabledClientsRequest_EnablesAllDesiredNotYetEnabled()
         {
             var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
                 new HashSet<string> { "a", "b" },
-                System.Array.Empty<string>());
+                System.Array.Empty<string>(),
+                new HashSet<string>());
 
             CollectionAssert.AreEquivalent(new[] { "a", "b" }, req.Select(static i => i.ClientId).ToArray());
             Assert.IsTrue(req.All(static i => i.Status == true));
@@ -576,13 +577,15 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void ComputeEnabledClientsRequest_DisablesOnlyPreviouslyManagedNoLongerDesired()
         {
-            // previously managed a and b; now only a is desired => b gets disabled, a stays enabled
+            // previously managed a and b, both currently enabled; now only a is desired
+            // => b gets disabled, a is already enabled and stays untouched
             var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
                 new HashSet<string> { "a" },
-                new[] { "a", "b" });
+                new[] { "a", "b" },
+                new HashSet<string> { "a", "b" });
 
             var byId = req.ToDictionary(static i => i.ClientId!, static i => i.Status);
-            Assert.AreEqual(true, byId["a"]);
+            Assert.IsFalse(byId.ContainsKey("a"));
             Assert.AreEqual(false, byId["b"]);
         }
 
@@ -590,10 +593,11 @@ namespace Alethic.Auth0.Operator.Tests
         public void ComputeEnabledClientsRequest_LeavesUnmanagedClientsUntouched()
         {
             // "c" was never managed by this Connection (e.g. enabled via a ConnectionClient resource)
-            // and is not desired => it must not appear in the request at all.
+            // and is not desired => it must not appear in the request at all, even though it is enabled.
             var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
                 new HashSet<string> { "a" },
-                new[] { "a" });
+                new[] { "a" },
+                new HashSet<string> { "c" });
 
             Assert.IsFalse(req.Any(static i => i.ClientId == "c"));
             CollectionAssert.AreEqual(new[] { "a" }, req.Select(static i => i.ClientId).ToArray());
@@ -604,9 +608,96 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
                 new HashSet<string>(),
-                System.Array.Empty<string>());
+                System.Array.Empty<string>(),
+                new HashSet<string>());
 
             Assert.AreEqual(0, req.Count);
+        }
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_InSync_ProducesEmpty()
+        {
+            // everything desired is already enabled and nothing needs disabling => no API call at all
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string> { "a", "b" },
+                new[] { "a", "b" },
+                new HashSet<string> { "a", "b" });
+
+            Assert.AreEqual(0, req.Count);
+        }
+
+        [TestMethod]
+        public void ComputeEnabledClientsRequest_DisableSkippedWhenAlreadyDisabled()
+        {
+            // b is no longer desired but is also no longer enabled => nothing to send
+            var req = V2alpha3ConnectionController.ComputeEnabledClientsRequest(
+                new HashSet<string> { "a" },
+                new[] { "a", "b" },
+                new HashSet<string> { "a" });
+
+            Assert.AreEqual(0, req.Count);
+        }
+
+        // ──────────────────────── drift detection ────────────────────────────────
+
+        [TestMethod]
+        public void ConfRequiresUpdate_IdenticalConf_ReturnsFalse()
+        {
+            var conf = new V2alpha3ConnectionConf { DisplayName = "Display", ShowAsButton = true };
+            var last = new V2alpha3ConnectionConf { DisplayName = "Display", ShowAsButton = true, Realms = ["realm"] };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_IgnoresCreateOnlyAndSeparatelyReconciledFields()
+        {
+            // name/strategy are never sent on update and enabledClients has its own delta logic;
+            // mismatches there must not force a PATCH (the prod google connection has exactly this name skew)
+            var conf = new V2alpha3ConnectionConf
+            {
+                Name = "googleOauth2",
+                Strategy = V2alpha3ConnectionStrategy.GoogleOAuth2,
+                EnabledClients = [new Core.Models.V1ClientReference { Name = "some-client" }],
+                DisplayName = "Google",
+            };
+            var last = new V2alpha3ConnectionConf
+            {
+                Name = "google-oauth2",
+                Strategy = V2alpha3ConnectionStrategy.GoogleOAuth2,
+                EnabledClients = [new Core.Models.V1ClientReference { Id = "abc123" }],
+                DisplayName = "Google",
+            };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_ChangedDisplayName_ReturnsTrue()
+        {
+            var conf = new V2alpha3ConnectionConf { DisplayName = "New" };
+            var last = new V2alpha3ConnectionConf { DisplayName = "Old" };
+
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_ChangedOptionLeaf_ReturnsTrue()
+        {
+            var conf = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { GoogleOAuth2 = new V2alpha3ConnectionOptionsGoogleOAuth2 { Email = true } } };
+            var last = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { GoogleOAuth2 = new V2alpha3ConnectionOptionsGoogleOAuth2 { Email = false, Profile = true } } };
+
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_OptionLeafSubset_ReturnsFalse()
+        {
+            // Auth0 fills server-side defaults the spec does not manage; only spec-set leaves count
+            var conf = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { GoogleOAuth2 = new V2alpha3ConnectionOptionsGoogleOAuth2 { Email = true } } };
+            var last = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { GoogleOAuth2 = new V2alpha3ConnectionOptionsGoogleOAuth2 { Email = true, Profile = true } } };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
         }
 
         static V2alpha3Connection InvokeConvert(V1Connection source)

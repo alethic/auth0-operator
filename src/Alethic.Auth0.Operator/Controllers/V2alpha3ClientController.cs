@@ -1366,6 +1366,28 @@ namespace Alethic.Auth0.Operator.Controllers
             return self.ClientId;
         }
 
+        /// <summary>
+        /// Determines whether the client differs from the desired configuration. A key present in the last-known
+        /// client metadata but absent from the spec metadata still requires an update, because the update request
+        /// tombstones such keys to delete them.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3ClientConf conf, V2alpha3ClientConf last)
+        {
+            if (conf.ClientMetaData is not null && last.ClientMetaData is not null)
+                foreach (string key in last.ClientMetaData.Keys)
+                    if (conf.ClientMetaData.ContainsKey(key) == false)
+                        return true;
+
+            // signingKeys is read-only and resourceServers is never transmitted; neither can be updated
+            return ConfDiff.IsSubsetOf(conf, last, "signingKeys", "resourceServers") == false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3ClientConf conf, V2alpha3ClientConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         protected override async Task Update(IManagementApiClient api, string id, V2alpha3ClientConf? last, V2alpha3ClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
             Logger.LogInformation("{EntityTypeName} updating client in Auth0 with id: {ClientId} and name: {ClientName}", EntityTypeName, id, conf.Name);

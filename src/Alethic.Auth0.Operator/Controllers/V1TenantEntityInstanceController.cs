@@ -105,6 +105,20 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <returns></returns>
         protected abstract Task Update(IManagementApiClient api, string id, TLastConf? last, TConf conf, string defaultNamespace, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Determines whether the remote entity differs from the desired configuration and requires an update.
+        /// The default compares the spec conf as a structural subset of the conf read back from Auth0: only
+        /// properties the spec sets are considered. Controllers whose update request excludes conf fields
+        /// (create-only fields, ref-shaped fields, separately-reconciled fields) must override this to compare
+        /// exactly the fields their update manages.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        protected virtual bool NeedsUpdate(TConf conf, TLastConf last)
+        {
+            return ConfDiff.IsSubsetOf(conf, last) == false;
+        }
+
         /// <inheritdoc />
         protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)
         {
@@ -164,11 +178,16 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} has missing API object, invalidating.");
             }
 
-            // apply updates if allowed
+            // apply updates if allowed, and only when the remote entity actually differs from the desired configuration
             if (entity.HasPolicy(V1EntityPolicyType.Update))
             {
                 if (entity.Spec.Conf is { } conf)
-                    await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                {
+                    if (NeedsUpdate(conf, lastConf))
+                        await Update(api, entity.Status.Id, lastConf, conf, entity.Namespace(), cancellationToken);
+                    else
+                        Logger.LogDebug("{EntityTypeName} {Namespace}/{Name} matches Auth0; skipping update.", EntityTypeName, entity.Namespace(), entity.Name());
+                }
             }
             else
             {

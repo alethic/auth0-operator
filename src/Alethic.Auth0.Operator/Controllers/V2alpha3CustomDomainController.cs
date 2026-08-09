@@ -193,6 +193,27 @@ namespace Alethic.Auth0.Operator.Controllers
             return self.CustomDomainId;
         }
 
+        /// <summary>
+        /// Determines whether the custom domain differs from the desired configuration. Only tlsPolicy and
+        /// customClientIpHeader are sent on update; domain, type and verificationMethod are create-only and
+        /// primary is read-only.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3CustomDomainConf conf, V2alpha3CustomDomainConf last)
+        {
+            if (conf.TlsPolicy is not null && conf.TlsPolicy != last.TlsPolicy)
+                return true;
+            if (conf.CustomClientIpHeader is not null && conf.CustomClientIpHeader != last.CustomClientIpHeader)
+                return true;
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3CustomDomainConf conf, V2alpha3CustomDomainConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, V2alpha3CustomDomainConf? last, V2alpha3CustomDomainConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {

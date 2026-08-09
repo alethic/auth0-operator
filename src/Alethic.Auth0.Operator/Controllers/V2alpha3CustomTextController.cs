@@ -107,8 +107,9 @@ namespace Alethic.Auth0.Operator.Controllers
             // configuration was specified
             if (entity.Spec.Conf is { } conf)
             {
-                // screens may not be specified
-                if (conf.Screens is { } newScreens)
+                // screens may not be specified; SetAsync is a full replace, so a screen or key removed from the
+                // spec must still be pushed — compare for exact equality rather than as a subset
+                if (conf.Screens is { } newScreens && ConfDiff.DeepEquals(newScreens, FromApiScreens(screens)) == false)
                 {
                     // push changes to Auth0 and reload resulting configuration
                     await api.Prompts.CustomText.SetAsync(prompt, language, ToApiScreens(newScreens), cancellationToken: cancellationToken);

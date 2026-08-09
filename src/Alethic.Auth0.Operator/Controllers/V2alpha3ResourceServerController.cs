@@ -454,6 +454,22 @@ namespace Alethic.Auth0.Operator.Controllers
             return self.Id;
         }
 
+        /// <summary>
+        /// Determines whether the resource server differs from the desired configuration. Identifier is
+        /// create-only, id is read-only, and tokenLifetimeForWeb, verificationLocation and authorizationDetails
+        /// are never transmitted by the update request, so none of them can cause an update.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3ResourceServerConf conf, V2alpha3ResourceServerConf last)
+        {
+            return ConfDiff.IsSubsetOf(conf, last, "id", "identifier", "tokenLifetimeForWeb", "verificationLocation", "authorizationDetails") == false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3ResourceServerConf conf, V2alpha3ResourceServerConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         /// <inheritdoc />
         protected override async Task Update(IManagementApiClient api, string id, V2alpha3ResourceServerConf? last, V2alpha3ResourceServerConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {

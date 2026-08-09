@@ -4713,6 +4713,22 @@ namespace Alethic.Auth0.Operator.Controllers
             return l.ToArray();
         }
 
+        /// <summary>
+        /// Determines whether the connection differs from the desired configuration. Name and strategy are
+        /// create-only (never sent on update), provisioningTicketUrl is never read back, and enabledClients is
+        /// reconciled separately with its own delta logic; none of them can cause an update.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3ConnectionConf conf, V2alpha3ConnectionConf last)
+        {
+            return ConfDiff.IsSubsetOf(conf, last, "name", "strategy", "provisioningTicketUrl", "enabledClients") == false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3ConnectionConf conf, V2alpha3ConnectionConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         /// <inheritdoc />
         protected override async Task<string> Create(IManagementApiClient api, V2alpha3ConnectionConf conf, string defaultNamespace, CancellationToken cancellationToken)
         {
@@ -5158,7 +5174,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             // enabled-clients management is part of updating the connection; only apply it when Update is permitted
             if (((V1TenantEntityInstance<V2alpha3Connection.SpecDef, V2alpha3Connection.StatusDef, V2alpha3ConnectionConf, V2alpha3ConnectionConf>)entity).HasPolicy(V1EntityPolicyType.Update))
-                await ApplyEnabledClientsAsync(api, entity, defaultNamespace, cancellationToken);
+                await ApplyEnabledClientsAsync(api, entity, lastConf, defaultNamespace, cancellationToken);
 
             await base.ApplyStatus(api, entity, lastConf, defaultNamespace, cancellationToken);
         }
@@ -5171,10 +5187,11 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         /// <param name="api"></param>
         /// <param name="entity"></param>
+        /// <param name="lastConf"></param>
         /// <param name="defaultNamespace"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        async Task ApplyEnabledClientsAsync(IManagementApiClient api, V2alpha3Connection entity, string defaultNamespace, CancellationToken cancellationToken)
+        async Task ApplyEnabledClientsAsync(IManagementApiClient api, V2alpha3Connection entity, V2alpha3ConnectionConf lastConf, string defaultNamespace, CancellationToken cancellationToken)
         {
             // a null enabledClients means this Connection does not manage enabled clients at all;
             // clear any previously-tracked managed set so the hand-off is clean and a later
@@ -5195,7 +5212,10 @@ namespace Alethic.Auth0.Operator.Controllers
             // clients this Connection previously enabled itself; the only ones we are allowed to disable
             var previouslyManaged = entity.Status.ManagedEnabledClientIds ?? Array.Empty<string>();
 
-            var req = ComputeEnabledClientsRequest(desired, previouslyManaged);
+            // clients actually enabled right now, as read back by Get earlier this cycle
+            var current = new HashSet<string>(lastConf.EnabledClients?.Select(i => i.Id).OfType<string>() ?? []);
+
+            var req = ComputeEnabledClientsRequest(desired, previouslyManaged, current);
             if (req.Count > 0)
                 await api.Connections.Clients.UpdateAsync(id, req, null, cancellationToken);
 
@@ -5204,25 +5224,29 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Computes the enabled-clients batch for a scoped, additive update: every <paramref name="desired"/> client is
-        /// enabled, and only <paramref name="previouslyManaged"/> clients that are no longer desired are disabled.
-        /// Clients that were never managed by this Connection (e.g. enabled via a <c>ConnectionClient</c> resource) are
-        /// never included, so they are left untouched.
+        /// Computes the enabled-clients batch for a scoped, additive update: every <paramref name="desired"/> client
+        /// not already in <paramref name="current"/> is enabled, and only <paramref name="previouslyManaged"/> clients
+        /// that are no longer desired but still in <paramref name="current"/> are disabled. Clients already in the
+        /// desired state are omitted so an in-sync connection produces an empty batch and no API call. Clients that
+        /// were never managed by this Connection (e.g. enabled via a <c>ConnectionClient</c> resource) are never
+        /// included, so they are left untouched.
         /// </summary>
         /// <param name="desired"></param>
         /// <param name="previouslyManaged"></param>
+        /// <param name="current"></param>
         /// <returns></returns>
-        internal static List<UpdateEnabledClientConnectionsRequestContentItem> ComputeEnabledClientsRequest(ISet<string> desired, IEnumerable<string> previouslyManaged)
+        internal static List<UpdateEnabledClientConnectionsRequestContentItem> ComputeEnabledClientsRequest(ISet<string> desired, IEnumerable<string> previouslyManaged, ISet<string> current)
         {
             var req = new List<UpdateEnabledClientConnectionsRequestContentItem>();
 
-            // enable every desired client
+            // enable every desired client not already enabled
             foreach (var clientId in desired)
-                req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = true });
+                if (current.Contains(clientId) == false)
+                    req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = true });
 
-            // disable only previously-managed clients that are no longer desired
+            // disable only previously-managed clients that are no longer desired and are still enabled
             foreach (var clientId in previouslyManaged)
-                if (desired.Contains(clientId) == false)
+                if (desired.Contains(clientId) == false && current.Contains(clientId))
                     req.Add(new UpdateEnabledClientConnectionsRequestContentItem() { ClientId = clientId, Status = false });
 
             return req;

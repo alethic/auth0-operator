@@ -145,6 +145,30 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <inheritdoc />
         protected override string EntityTypeName => "ClientGrant";
 
+        /// <summary>
+        /// Determines whether the client grant differs from the desired configuration. Only scope,
+        /// allowAnyOrganization and organizationUsage are sent on update; clientRef and audience are create-only
+        /// and come back from Auth0 in resolved form that can never match the spec references. Scope is compared
+        /// as a set since ordering carries no meaning.
+        /// </summary>
+        internal static bool ConfRequiresUpdate(V2alpha3ClientGrantConf conf, V2alpha3ClientGrantConf last)
+        {
+            if (conf.Scope is not null && (last.Scope is null || conf.Scope.ToHashSet().SetEquals(last.Scope) == false))
+                return true;
+            if (conf.AllowAnyOrganization is not null && conf.AllowAnyOrganization != last.AllowAnyOrganization)
+                return true;
+            if (conf.OrganizationUsage is not null && conf.OrganizationUsage != last.OrganizationUsage)
+                return true;
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override bool NeedsUpdate(V2alpha3ClientGrantConf conf, V2alpha3ClientGrantConf last)
+        {
+            return ConfRequiresUpdate(conf, last);
+        }
+
         /// <inheritdoc />
         protected override async Task<V2alpha3ClientGrantConf?> Get(IManagementApiClient api, string id, string defaultNamespace, CancellationToken cancellationToken)
         {

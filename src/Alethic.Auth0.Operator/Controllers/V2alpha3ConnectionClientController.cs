@@ -187,13 +187,18 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <inheritdoc />
-        protected override async Task Update(IManagementApiClient api, string id, V2alpha3ConnectionClientConf? last, V2alpha3ConnectionClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        protected override bool NeedsUpdate(V2alpha3ConnectionClientConf conf, V2alpha3ConnectionClientConf last)
         {
-            // an enablement has no mutable fields; re-assert the enabled state idempotently
-            if (TryParseId(id, out var connectionId, out var clientId) == false)
-                throw new InvalidOperationException($"{EntityTypeName} has an invalid ID: {id}.");
+            // an enablement has no mutable fields, and Get returning non-null already proves the client is
+            // enabled on the connection; there is never anything to update
+            return false;
+        }
 
-            await SetClientEnabledAsync(api, connectionId, clientId, true, cancellationToken);
+        /// <inheritdoc />
+        protected override Task Update(IManagementApiClient api, string id, V2alpha3ConnectionClientConf? last, V2alpha3ConnectionClientConf conf, string defaultNamespace, CancellationToken cancellationToken)
+        {
+            // unreachable: NeedsUpdate always returns false
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
