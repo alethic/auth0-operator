@@ -551,14 +551,23 @@ namespace Alethic.Auth0.Operator.Controllers
             }
             catch (Exception e) when (Auth0CircuitOpenException.Find(e) is { } circuitOpen)
             {
-                // the circuit for this tenant's domain is open following a 429; the request never reached Auth0.
-                // no per-entity event is emitted since every entity on the domain backs off at once and the
-                // entity that actually hit the 429 already carries a RateLimit event
+                // the circuit for this tenant's domain is open following a 429; the request never reached Auth0
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling reconciliation.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host);
+
+                try
+                {
+                    await ReconcileWarningAsync(entity, "RateLimit", circuitOpen.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
                 var interval = circuitOpen.OpenUntil - DateTimeOffset.Now;
                 if (interval < TimeSpan.FromMinutes(1))
                     interval = TimeSpan.FromMinutes(1);
 
-                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling reconciliation after {TimeSpan}.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host, interval);
+                Logger.LogInformation("Rescheduling reconcilation after {TimeSpan}.", interval);
                 return ReconciliationResult<TEntity>.Failure(entity, circuitOpen.Message, e, interval);
             }
             catch (ErrorApiException e)
@@ -702,11 +711,22 @@ namespace Alethic.Auth0.Operator.Controllers
             catch (Exception e) when (Auth0CircuitOpenException.Find(e) is { } circuitOpen)
             {
                 // the circuit for this tenant's domain is open following a 429; the request never reached Auth0
+                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling deletion.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host);
+
+                try
+                {
+                    await DeletingWarningAsync(entity, "RateLimit", circuitOpen.Message, cancellationToken);
+                }
+                catch (Exception e2)
+                {
+                    Logger.LogCritical(e2, "Unexpected exception creating event.");
+                }
+
                 var interval = circuitOpen.OpenUntil - DateTimeOffset.Now;
                 if (interval < TimeSpan.FromMinutes(1))
                     interval = TimeSpan.FromMinutes(1);
 
-                Logger.LogWarning("{EntityTypeName} {EntityNamespace}/{EntityName} rate limit circuit for {Host} is open; rescheduling deletion after {TimeSpan}.", EntityTypeName, entity.Namespace(), entity.Name(), circuitOpen.Host, interval);
+                Logger.LogInformation("Rescheduling deletion after {TimeSpan}.", interval);
                 return ReconciliationResult<TEntity>.Failure(entity, circuitOpen.Message, e, interval);
             }
             catch (ErrorApiException e)
