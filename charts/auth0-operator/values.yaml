@@ -135,3 +135,13 @@ options:
       defaultOpenDuration:
       # Upper bound on how long the breaker stays open, guarding against clock skew. Default: "00:10:00".
       maxOpenDuration:
+    # Adaptive pacing: as Auth0's reported remaining budget depletes, outbound requests are delayed so the rest of
+    # the budget is spread across the time until the reset — consumption slows to Auth0's refill rate instead of
+    # draining the bucket and tripping the circuit breaker.
+    pacing:
+      # Whether adaptive pacing is applied. Default: true.
+      enabled:
+      # The remaining budget at or below which pacing begins. Default: 10.
+      remainingThreshold:
+      # Upper bound on the delay applied to a single request, as a duration. Default: "00:00:10".
+      maxRequestDelay:

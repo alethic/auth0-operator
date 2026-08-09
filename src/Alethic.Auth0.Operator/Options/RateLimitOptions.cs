@@ -43,6 +43,38 @@ namespace Alethic.Auth0.Operator.Options
         /// </summary>
         public CircuitBreakerOptions CircuitBreaker { get; set; } = new();
 
+        /// <summary>
+        /// Configuration of adaptive request pacing driven by Auth0's reported rate limit budget.
+        /// </summary>
+        public PacingOptions Pacing { get; set; } = new();
+
+    }
+
+    /// <summary>
+    /// Configuration for adaptive request pacing. Auth0 reports the remaining rate limit budget and its reset
+    /// time on every response; once the remaining budget falls to the threshold, outbound requests are delayed
+    /// so the rest of the budget is spread across the time until the reset — consumption slows to Auth0's
+    /// refill rate instead of draining the bucket.
+    /// </summary>
+    public class PacingOptions
+    {
+
+        /// <summary>
+        /// Whether adaptive pacing is applied.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// The remaining budget at or below which pacing begins. Above this, requests flow unpaced.
+        /// </summary>
+        public int RemainingThreshold { get; set; } = 10;
+
+        /// <summary>
+        /// Upper bound on the delay applied to a single request, so a nearly empty bucket with a distant reset
+        /// cannot stall a reconcile slot indefinitely; beyond it, the circuit breaker is the backstop.
+        /// </summary>
+        public TimeSpan MaxRequestDelay { get; set; } = TimeSpan.FromSeconds(10);
+
     }
 
     /// <summary>

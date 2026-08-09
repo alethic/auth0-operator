@@ -53,11 +53,12 @@ namespace Alethic.Auth0.Operator.RateLimiting
                     }));
 
             var breaker = options.CircuitBreaker.Enabled ? new Auth0CircuitBreaker(options.CircuitBreaker) : null;
+            var pacer = options.Pacing.Enabled ? new Auth0RatePacer(options.Pacing) : null;
 
-            if (limiter is null && breaker is null)
+            if (limiter is null && breaker is null && pacer is null)
                 return new HttpClient(transport);
 
-            return new HttpClient(new Auth0RateLimitingHandler(limiter, breaker, transport));
+            return new HttpClient(new Auth0RateLimitingHandler(limiter, breaker, pacer, transport));
         }
 
     }
