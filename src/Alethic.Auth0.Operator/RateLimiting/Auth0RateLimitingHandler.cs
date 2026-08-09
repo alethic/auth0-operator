@@ -50,9 +50,13 @@ namespace Alethic.Auth0.Operator.RateLimiting
             var response = await base.SendAsync(request, cancellationToken);
 
             // a 429 opens the circuit for the whole domain; the response still flows back so the SDK surfaces
-            // its rate limit error to the requesting reconcile, which reschedules on its own
+            // its rate limit error to the requesting reconcile, which reschedules on its own. a successful
+            // response reporting the bucket as exhausted opens the circuit preemptively, so the 429 the next
+            // request would receive never happens
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 _breaker?.Open(host, response);
+            else
+                _breaker?.OpenIfExhausted(host, response);
 
             return response;
         }

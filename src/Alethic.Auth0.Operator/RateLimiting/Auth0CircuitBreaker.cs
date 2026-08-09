@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 
 using Alethic.Auth0.Operator.Options;
@@ -71,6 +72,34 @@ namespace Alethic.Auth0.Operator.RateLimiting
 
             // an already-open circuit is never shortened; return whichever deadline is now in effect
             return _openUntil.AddOrUpdate(host, until, (_, existing) => until > existing ? until : existing);
+        }
+
+        /// <summary>
+        /// Opens the circuit for <paramref name="host"/> when a successful response reports the rate limit bucket
+        /// as exhausted (<c>x-ratelimit-remaining: 0</c>), so the 429 the next request would receive never happens.
+        /// Unlike <see cref="Open"/> this only acts on a parseable, future reset time — a success without usable
+        /// reset information opens nothing. Returns the time until which the circuit is open, or null.
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="response"></param>
+        public DateTimeOffset? OpenIfExhausted(string host, HttpResponseMessage response)
+        {
+            if (response.Headers.TryGetValues("x-ratelimit-remaining", out var remainingValues) == false)
+                return null;
+
+            if (long.TryParse(remainingValues.FirstOrDefault(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var remaining) == false || remaining != 0)
+                return null;
+
+            var now = _time.GetUtcNow();
+
+            var until = ResolveResetTime(response, now);
+            if (until is null || until <= now)
+                return null;
+
+            if (until > now + _options.MaxOpenDuration)
+                until = now + _options.MaxOpenDuration;
+
+            return _openUntil.AddOrUpdate(host, until.Value, (_, existing) => until.Value > existing ? until.Value : existing);
         }
 
         /// <summary>

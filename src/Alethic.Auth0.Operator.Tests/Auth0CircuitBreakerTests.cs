@@ -137,6 +137,88 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
+        public void OpenIfExhausted_RemainingZeroWithReset_OpensUntilReset()
+        {
+            var time = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
+            var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions(), time);
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Headers.Add("x-ratelimit-remaining", "0");
+            response.Headers.Add("x-ratelimit-reset", "60");
+
+            var until = breaker.OpenIfExhausted("tenant.us.auth0.com", response);
+
+            Assert.AreEqual(DateTimeOffset.FromUnixTimeSeconds(60), until);
+            Assert.ThrowsExactly<Auth0CircuitOpenException>(() => breaker.ThrowIfOpen("tenant.us.auth0.com"));
+        }
+
+        [TestMethod]
+        public void OpenIfExhausted_RemainingZeroWithoutReset_DoesNotOpen()
+        {
+            var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions());
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Headers.Add("x-ratelimit-remaining", "0");
+
+            Assert.IsNull(breaker.OpenIfExhausted("tenant.us.auth0.com", response));
+            breaker.ThrowIfOpen("tenant.us.auth0.com");
+        }
+
+        [TestMethod]
+        public void OpenIfExhausted_RemainingZeroWithPastReset_DoesNotOpen()
+        {
+            var time = new FakeTimeProvider(DateTimeOffset.FromUnixTimeSeconds(1000));
+            var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions(), time);
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Headers.Add("x-ratelimit-remaining", "0");
+            response.Headers.Add("x-ratelimit-reset", "500");
+
+            Assert.IsNull(breaker.OpenIfExhausted("tenant.us.auth0.com", response));
+            breaker.ThrowIfOpen("tenant.us.auth0.com");
+        }
+
+        [TestMethod]
+        public void OpenIfExhausted_RemainingNonZero_DoesNotOpen()
+        {
+            var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions());
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Headers.Add("x-ratelimit-remaining", "5");
+            response.Headers.Add("x-ratelimit-reset", "9999999999");
+
+            Assert.IsNull(breaker.OpenIfExhausted("tenant.us.auth0.com", response));
+            breaker.ThrowIfOpen("tenant.us.auth0.com");
+        }
+
+        [TestMethod]
+        public async Task Handler_PreemptivelyOpensWhenBucketExhausted()
+        {
+            var time = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
+            var breaker = new Auth0CircuitBreaker(new CircuitBreakerOptions(), time);
+            var stub = new StubHandler
+            {
+                Respond = _ =>
+                {
+                    var ok = new HttpResponseMessage(HttpStatusCode.OK);
+                    ok.Headers.Add("x-ratelimit-remaining", "0");
+                    ok.Headers.Add("x-ratelimit-reset", "60");
+                    return ok;
+                },
+            };
+            using var client = new HttpClient(new Auth0RateLimitingHandler(null, breaker, stub));
+
+            // the exhausting request itself succeeds
+            var response = await client.GetAsync("https://tenant.us.auth0.com/api/v2/clients");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            // the request that would have received the 429 fails fast instead
+            await Assert.ThrowsExactlyAsync<Auth0CircuitOpenException>(() => client.GetAsync("https://tenant.us.auth0.com/api/v2/clients"));
+            Assert.AreEqual(1, stub.Sent);
+
+            time.Advance(TimeSpan.FromSeconds(61));
+            stub.Respond = _ => new HttpResponseMessage(HttpStatusCode.OK);
+            var recovered = await client.GetAsync("https://tenant.us.auth0.com/api/v2/clients");
+            Assert.AreEqual(HttpStatusCode.OK, recovered.StatusCode);
+        }
+
+        [TestMethod]
         public void FindException_UnwrapsInnerChain()
         {
             var circuitOpen = new Auth0CircuitOpenException("tenant.us.auth0.com", DateTimeOffset.UnixEpoch);
