@@ -400,6 +400,35 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
         }
 
+        [TestMethod]
+        public void ConfRequiresUpdate_ReorderedAppleScopeString_ReturnsFalse()
+        {
+            // Auth0 normalizes the token order of delimited scope strings; "name email" vs "email name" is not
+            // drift (this exact skew caused the apple connections to re-update every cycle in labs)
+            var conf = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Apple = new V2alpha3ConnectionOptionsApple { Scope = "name email" } } };
+            var last = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Apple = new V2alpha3ConnectionOptionsApple { Scope = "email name" } } };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_ChangedAppleScopeToken_ReturnsTrue()
+        {
+            var conf = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Apple = new V2alpha3ConnectionOptionsApple { Scope = "name email" } } };
+            var last = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Apple = new V2alpha3ConnectionOptionsApple { Scope = "email" } } };
+
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_CommaDelimitedFacebookScope_ComparedAsTokenSet()
+        {
+            var conf = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Facebook = new V2alpha3ConnectionOptionsFacebook { Scope = "email,public_profile" } } };
+            var last = new V2alpha3ConnectionConf { Options = new V2alpha3ConnectionOptions { Facebook = new V2alpha3ConnectionOptionsFacebook { Scope = "public_profile email" } } };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, last));
+        }
+
     }
 
 }
