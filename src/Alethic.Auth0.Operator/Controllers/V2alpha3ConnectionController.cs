@@ -5859,6 +5859,26 @@ namespace Alethic.Auth0.Operator.Controllers
             return false;
         }
 
+        /// <summary>
+        /// Compares a delimited scope string (Apple, Facebook, Oidc, Okta) as an unordered token set. Auth0
+        /// normalizes the token order on its side, so a reordered scope string is not drift — and comparing it
+        /// ordinally would re-issue an update every cycle without ever converging.
+        /// </summary>
+        static bool ScopeRequiresUpdate(string? conf, string? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            var confTokens = conf.Split(ScopeSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var lastTokens = last.Split(ScopeSeparators, StringSplitOptions.RemoveEmptyEntries);
+            return confTokens.ToHashSet().SetEquals(lastTokens) == false;
+        }
+
+        static readonly char[] ScopeSeparators = [' ', ',', '\t'];
+
         static bool RequiresUpdate(V2alpha3ConnectionOptionsApple? conf, V2alpha3ConnectionOptionsApple? last)
         {
             if (conf is null)
@@ -5885,7 +5905,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.Name is not null && conf.Name != last.Name)
                 return true;
 
-            if (conf.Scope is not null && conf.Scope != last.Scope)
+            if (ScopeRequiresUpdate(conf.Scope, last.Scope))
                 return true;
 
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
@@ -6491,7 +6511,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (RequiresUpdate(conf.UpstreamParams, last.UpstreamParams))
                 return true;
 
-            if (conf.Scope is not null && conf.Scope != last.Scope)
+            if (ScopeRequiresUpdate(conf.Scope, last.Scope))
                 return true;
 
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
@@ -7390,7 +7410,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (RequiresUpdate(conf.OidcMetadata, last.OidcMetadata))
                 return true;
 
-            if (conf.Scope is not null && conf.Scope != last.Scope)
+            if (ScopeRequiresUpdate(conf.Scope, last.Scope))
                 return true;
 
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
@@ -7638,7 +7658,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (RequiresUpdate(conf.OidcMetadata, last.OidcMetadata))
                 return true;
 
-            if (conf.Scope is not null && conf.Scope != last.Scope)
+            if (ScopeRequiresUpdate(conf.Scope, last.Scope))
                 return true;
 
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
