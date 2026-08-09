@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,17 +33,37 @@ namespace Alethic.Auth0.Operator.Controllers
         IEntityController<V2alpha3CustomText>
     {
 
-        static V2alpha3CustomTextScreen FromApiScreen(Dictionary<string, object> source)
+        /// <summary>
+        /// Converts a single screen from the API's untyped shape. The SDK deserializes the untyped screen values
+        /// as <see cref="JsonElement"/> objects; a plain dictionary is also accepted for safety. Returns null for
+        /// values that are not object-shaped.
+        /// </summary>
+        internal static V2alpha3CustomTextScreen? FromApiScreen(object? source)
         {
-            var screen = new V2alpha3CustomTextScreen();
+            if (source is JsonElement element && element.ValueKind == JsonValueKind.Object)
+            {
+                var screen = new V2alpha3CustomTextScreen();
 
-            foreach (var kvp in source)
-                screen[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+                foreach (var property in element.EnumerateObject())
+                    screen[property.Name] = property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() ?? string.Empty : property.Value.ToString();
 
-            return screen;
+                return screen;
+            }
+
+            if (source is Dictionary<string, object> dict)
+            {
+                var screen = new V2alpha3CustomTextScreen();
+
+                foreach (var kvp in dict)
+                    screen[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+
+                return screen;
+            }
+
+            return null;
         }
 
-        static Dictionary<string, V2alpha3CustomTextScreen>? FromApiScreens(Dictionary<string, object>? source)
+        internal static Dictionary<string, V2alpha3CustomTextScreen>? FromApiScreens(Dictionary<string, object>? source)
         {
             if (source is null)
                 return null;
@@ -50,8 +71,8 @@ namespace Alethic.Auth0.Operator.Controllers
             var result = new Dictionary<string, V2alpha3CustomTextScreen>();
 
             foreach (var kvp in source)
-                if (kvp.Value is Dictionary<string, object> screenDict)
-                    result[kvp.Key] = FromApiScreen(screenDict);
+                if (FromApiScreen(kvp.Value) is { } screen)
+                    result[kvp.Key] = screen;
 
             return result;
         }
