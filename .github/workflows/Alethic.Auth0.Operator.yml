@@ -94,11 +94,65 @@ jobs:
       with:
         name: tests
         path: /tmp/tests.tar.gz
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        run:
+        - Alethic.Auth0.Operator.Tests
+        sys:
+        - win-x64
+        - linux-x64
+        - linux-arm64
+        tfm:
+        - net10.0
+    name: Test (${{ matrix.run }}:${{ matrix.tfm }}:${{ matrix.sys }})
+    needs:
+    - build
+    runs-on: ${{ fromJSON('{"win-x86":["windows-2022"],"win-x64":["windows-2022"],"linux-x64":["ubuntu-24.04"],"linux-arm64":["ubuntu-24.04-arm"],"osx-x64":["macos-15-intel"],"osx-arm64":["macos-15"]}')[matrix.sys] }}
+    steps:
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.x
+    - name: Download Tests
+      uses: actions/download-artifact@v8
+      with:
+        name: tests
+    - name: Restore Tests
+      run: tar xzvf tests.tar.gz
+    - name: Execute Tests
+      timeout-minutes: 60
+      shell: pwsh
+      run: |
+        # assign powershell variables
+        $run = "${{ matrix.run }}"
+        $tfm = "${{ matrix.tfm }}"
+        $sys = "${{ matrix.sys }}"
+
+        # tests use Microsoft.Testing.Platform: execute the published test assembly directly, not `dotnet test`
+        $test = $(gi .\tests\$run\$tfm\$run.dll)
+        if ($test) {
+            Add-Content $env:GITHUB_ENV "`nRET=TestResults--$run--$tfm--$sys"
+            dotnet exec $test.FullName --results-directory TestResults --report-trx
+        } else {
+            throw "no test assembly found for $run/$tfm"
+        }
+    - name: Archive Test Results
+      if: always() && startsWith(env.RET, 'TestResults--')
+      shell: pwsh
+      run: tar czvf TestResults.tar.gz TestResults
+    - name: Upload Test Results
+      if: always() && startsWith(env.RET, 'TestResults--')
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ env.RET }}
+        path: TestResults.tar.gz
   release:
     name: Release
     if: github.event_name != 'pull_request'
     needs:
-    - build
+    - test
     runs-on: ubuntu-24.04
     steps:
     - name: Checkout Source
