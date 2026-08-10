@@ -881,6 +881,45 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, same));
         }
 
+        // ──────────────────────── Deprecated fields ──────────────────────────────
+
+        [TestMethod]
+        public void GetDeprecatedFieldPaths_ReportsFederatedConnectionsAccessTokens()
+        {
+            var conf = new V2alpha3ConnectionConf
+            {
+                Options = new V2alpha3ConnectionOptions
+                {
+                    Oidc = new V2alpha3ConnectionOptionsOidc
+                    {
+                        FederatedConnectionsAccessTokens = new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = true },
+                    },
+                    Okta = new V2alpha3ConnectionOptionsOkta
+                    {
+                        FederatedConnectionsAccessTokens = new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = true },
+                    },
+                },
+            };
+
+            var result = System.Linq.Enumerable.ToArray(V2alpha3ConnectionController.GetDeprecatedFieldPaths(conf));
+
+            CollectionAssert.AreEquivalent(new[]
+            {
+                "options.oidc.federatedConnectionsAccessTokens",
+                "options.okta.federatedConnectionsAccessTokens",
+            }, result);
+        }
+
+        [TestMethod]
+        public void GetDeprecatedFieldPaths_EmptyWhenFieldsAbsent()
+        {
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(V2alpha3ConnectionController.GetDeprecatedFieldPaths(new V2alpha3ConnectionConf())));
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(V2alpha3ConnectionController.GetDeprecatedFieldPaths(new V2alpha3ConnectionConf
+            {
+                Options = new V2alpha3ConnectionOptions { Oidc = new V2alpha3ConnectionOptionsOidc() },
+            })));
+        }
+
     }
 
 }

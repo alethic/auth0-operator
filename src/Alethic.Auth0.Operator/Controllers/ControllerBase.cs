@@ -76,6 +76,11 @@ namespace Alethic.Auth0.Operator.Controllers
         protected IKubernetesClient Kube => _kube;
 
         /// <summary>
+        /// Gets the memory cache shared by the operator's controllers.
+        /// </summary>
+        protected IMemoryCache Cache => _cache;
+
+        /// <summary>
         /// Gets the logger.
         /// </summary>
         protected ILogger Logger => _logger;

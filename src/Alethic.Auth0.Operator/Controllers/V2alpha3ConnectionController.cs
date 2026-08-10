@@ -4790,6 +4790,37 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
+        /// Returns the JSON paths of deprecated fields present on the configuration. The
+        /// federated_connections_access_tokens connection option was removed from the Auth0 Management API in 9.0.0
+        /// along with the Federated Connections Tokensets feature, so values remain in the CRD schema but are never
+        /// applied to Auth0.
+        /// </summary>
+        /// <param name="conf"></param>
+        internal static IEnumerable<string> GetDeprecatedFieldPaths(V2alpha3ConnectionConf conf)
+        {
+            if (conf.Options is not { } options)
+                yield break;
+
+            if (options.AzureAd?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.waad.federatedConnectionsAccessTokens";
+
+            if (options.GoogleApps?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.googleApps.federatedConnectionsAccessTokens";
+
+            if (options.Oidc?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.oidc.federatedConnectionsAccessTokens";
+
+            if (options.Okta?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.okta.federatedConnectionsAccessTokens";
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<string> GetDeprecatedFields(V2alpha3ConnectionConf conf)
+        {
+            return GetDeprecatedFieldPaths(conf);
+        }
+
+        /// <summary>
         /// Determines whether any metadata entry on the desired configuration is missing from, or differs on, the
         /// last known configuration. Entries present only on the last known configuration are unmanaged and ignored.
         /// </summary>
