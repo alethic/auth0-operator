@@ -920,6 +920,109 @@ namespace Alethic.Auth0.Operator.Tests
             })));
         }
 
+        // ──────────────────────── Attribute identifiers ──────────────────────────
+
+        [TestMethod]
+        public void FromApi_EmailAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new EmailAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.EmailOtp),
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp, result.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void FromApi_PhoneAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new PhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp),
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp, result.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void ToApi_EmailAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionEmailAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(DefaultMethodEmailIdentifierEnum.Values.Password, result.DefaultMethod?.Value);
+        }
+
+        [TestMethod]
+        public void ToApi_PhoneAttributeIdentifier_MapsDefaultMethodAndSkipsCompatOnlyValue()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+            });
+
+            Assert.AreEqual(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp, result.DefaultMethod?.Value);
+
+            // emailOtp exists only for schema compatibility and must never be sent to Auth0
+            var compat = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp,
+            });
+
+            Assert.IsNull(compat.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void ToApi_UsernameAttribute_IgnoresCompatOnlyDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionUsernameAttribute
+            {
+                Identifier = new V2alpha3ConnectionUsernameAttributeIdentifier
+                {
+                    Active = true,
+                    DefaultMethod = V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+                },
+            });
+
+            Assert.IsTrue(result.Identifier?.Active);
+        }
+
+        // ──────────────────────── Identifier copy converters ─────────────────────
+
+        [TestMethod]
+        public void Copy_PhoneIdentifier_RoundTripsAndDropsPhoneOtpOnRevert()
+        {
+            var converted = Converters.Generated.ConnectionCopy.ConvertPhoneIdentifier(new Core.Models.Connection.V2alpha1.V2alpha1ConnectionAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = Core.Models.Connection.V2alpha1.V2alpha1ConnectionDefaultMethodEmailIdentifierEnum.Password,
+            });
+
+            Assert.IsNotNull(converted);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password, converted.DefaultMethod);
+
+            // phoneOtp has no representation in the older version and is dropped on downgrade
+            var reverted = Converters.Generated.ConnectionCopy.Revert(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+            });
+
+            Assert.IsNotNull(reverted);
+            Assert.IsTrue(reverted.Active);
+            Assert.IsNull(reverted.DefaultMethod);
+        }
+
     }
 
 }

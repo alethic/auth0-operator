@@ -7,7 +7,7 @@ public record V2alpha3ConnectionPhoneAttribute
 
     [JsonPropertyName("identifier")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha3ConnectionAttributeIdentifier? Identifier { get; set; }
+    public V2alpha3ConnectionPhoneAttributeIdentifier? Identifier { get; set; }
 
     [JsonPropertyName("profileRequired")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

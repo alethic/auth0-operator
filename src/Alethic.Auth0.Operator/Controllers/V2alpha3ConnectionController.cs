@@ -2272,25 +2272,39 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha3ConnectionAttributeIdentifier FromApi(EmailAttributeIdentifier source)
+        internal static V2alpha3ConnectionEmailAttributeIdentifier FromApi(EmailAttributeIdentifier source)
         {
-            return new V2alpha3ConnectionAttributeIdentifier
+            return new V2alpha3ConnectionEmailAttributeIdentifier
             {
                 Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    { Value: DefaultMethodEmailIdentifierEnum.Values.Password } => V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+                    { Value: DefaultMethodEmailIdentifierEnum.Values.EmailOtp } => V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
             };
         }
 
-        internal static V2alpha3ConnectionAttributeIdentifier FromApi(PhoneAttributeIdentifier source)
+        internal static V2alpha3ConnectionPhoneAttributeIdentifier FromApi(PhoneAttributeIdentifier source)
         {
-            return new V2alpha3ConnectionAttributeIdentifier
+            return new V2alpha3ConnectionPhoneAttributeIdentifier
             {
                 Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    { Value: DefaultMethodPhoneNumberIdentifierEnum.Values.Password } => V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password,
+                    { Value: DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp } => V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
             };
         }
 
-        internal static V2alpha3ConnectionAttributeIdentifier FromApi(UsernameAttributeIdentifier source)
+        internal static V2alpha3ConnectionUsernameAttributeIdentifier FromApi(UsernameAttributeIdentifier source)
         {
-            return new V2alpha3ConnectionAttributeIdentifier
+            return new V2alpha3ConnectionUsernameAttributeIdentifier
             {
                 Active = source.Active,
             };
@@ -2966,6 +2980,38 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static EmailAttributeIdentifier ToApi(V2alpha3ConnectionEmailAttributeIdentifier source)
+        {
+            return new EmailAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password => new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.Password),
+                    V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp => new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.EmailOtp),
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
+        internal static PhoneAttributeIdentifier ToApi(V2alpha3ConnectionPhoneAttributeIdentifier source)
+        {
+            return new PhoneAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password => new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.Password),
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp => new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp),
+                    // emailOtp exists only for schema compatibility and is not a valid phone identifier method
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp => null,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
         internal static ConnectionAttributes ToApi(V2alpha3ConnectionAttributes source)
         {
             return new ConnectionAttributes
@@ -2980,7 +3026,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new EmailAttribute
             {
-                Identifier = source.Identifier is { } identifier ? new EmailAttributeIdentifier { Active = identifier.Active } : null,
+                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
                 Unique = source.Unique,
                 ProfileRequired = source.ProfileRequired,
                 VerificationMethod = ToApi(source.VerificationMethod),
@@ -2992,7 +3038,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new PhoneAttribute
             {
-                Identifier = source.Identifier is { } identifier ? new PhoneAttributeIdentifier { Active = identifier.Active } : null,
+                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
                 ProfileRequired = source.ProfileRequired,
                 Signup = source.Signup is { } signup ? ToApi(signup) : null,
             };
@@ -5284,7 +5330,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return false;
         }
 
-        static bool RequiresUpdate(V2alpha3ConnectionAttributeIdentifier? conf, V2alpha3ConnectionAttributeIdentifier? last)
+        static bool RequiresUpdate(V2alpha3ConnectionEmailAttributeIdentifier? conf, V2alpha3ConnectionEmailAttributeIdentifier? last)
         {
             if (conf is null)
                 return false;
@@ -5298,6 +5344,39 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.DefaultMethod is not null && conf.DefaultMethod != last.DefaultMethod)
                 return true;
 
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPhoneAttributeIdentifier? conf, V2alpha3ConnectionPhoneAttributeIdentifier? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            // emailOtp exists only for schema compatibility, is never applied, and must not force an update
+            if (conf.DefaultMethod is { } defaultMethod && defaultMethod != V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp && defaultMethod != last.DefaultMethod)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameAttributeIdentifier? conf, V2alpha3ConnectionUsernameAttributeIdentifier? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            // the defaultMethod field exists only for schema compatibility, is never applied, and must not force an update
             return false;
         }
 
@@ -9074,13 +9153,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Status = ToApi(status);
         }
 
-        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, EmailAttributeIdentifier target)
+        static void ApplyToApi(V2alpha3ConnectionOptionsEmailAttributeIdentifier source, EmailAttributeIdentifier target)
         {
             if (source.Active is { } active)
                 target.Active = active;
         }
 
-        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, UsernameAttributeIdentifier target)
+        static void ApplyToApi(V2alpha3ConnectionOptionsUsernameAttributeIdentifier source, UsernameAttributeIdentifier target)
         {
             if (source.Active is { } active)
                 target.Active = active;

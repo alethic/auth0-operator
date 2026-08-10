@@ -14,7 +14,7 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha3
         /// </summary>
         [JsonPropertyName("identifier")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public V2alpha3ConnectionOptionsAttributeIdentifier? Identifier { get; set; }
+        public V2alpha3ConnectionOptionsEmailAttributeIdentifier? Identifier { get; set; }
 
         /// <summary>
         /// When <c>true</c>, the email address is required on the user profile.

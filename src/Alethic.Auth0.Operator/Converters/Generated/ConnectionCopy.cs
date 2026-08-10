@@ -40,17 +40,63 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             };
         }
 
-        public static V2alpha3ConnectionAttributeIdentifier? Convert(V2alpha1ConnectionAttributeIdentifier? s)
+        public static V2alpha3ConnectionEmailAttributeIdentifier? ConvertEmailIdentifier(V2alpha1ConnectionAttributeIdentifier? s)
         {
             if (s is null) return null;
-            return new V2alpha3ConnectionAttributeIdentifier
+            return new V2alpha3ConnectionEmailAttributeIdentifier
             {
                 Active = s.Active,
                 DefaultMethod = MapEnumN<V2alpha1ConnectionDefaultMethodEmailIdentifierEnum, V2alpha3ConnectionDefaultMethodEmailIdentifierEnum>(s.DefaultMethod),
             };
         }
 
-        public static V2alpha1ConnectionAttributeIdentifier? Revert(V2alpha3ConnectionAttributeIdentifier? s)
+        public static V2alpha1ConnectionAttributeIdentifier? Revert(V2alpha3ConnectionEmailAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha1ConnectionAttributeIdentifier
+            {
+                Active = s.Active,
+                DefaultMethod = MapEnumN<V2alpha3ConnectionDefaultMethodEmailIdentifierEnum, V2alpha1ConnectionDefaultMethodEmailIdentifierEnum>(s.DefaultMethod),
+            };
+        }
+
+        public static V2alpha3ConnectionPhoneAttributeIdentifier? ConvertPhoneIdentifier(V2alpha1ConnectionAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = s.Active,
+                DefaultMethod = MapEnumN<V2alpha1ConnectionDefaultMethodEmailIdentifierEnum, V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum>(s.DefaultMethod),
+            };
+        }
+
+        public static V2alpha1ConnectionAttributeIdentifier? Revert(V2alpha3ConnectionPhoneAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha1ConnectionAttributeIdentifier
+            {
+                Active = s.Active,
+                // phoneOtp has no representation in the older version and is dropped on downgrade
+                DefaultMethod = s.DefaultMethod switch
+                {
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password => V2alpha1ConnectionDefaultMethodEmailIdentifierEnum.Password,
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp => V2alpha1ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp,
+                    _ => null,
+                },
+            };
+        }
+
+        public static V2alpha3ConnectionUsernameAttributeIdentifier? ConvertUsernameIdentifier(V2alpha1ConnectionAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha3ConnectionUsernameAttributeIdentifier
+            {
+                Active = s.Active,
+                DefaultMethod = MapEnumN<V2alpha1ConnectionDefaultMethodEmailIdentifierEnum, V2alpha3ConnectionDefaultMethodEmailIdentifierEnum>(s.DefaultMethod),
+            };
+        }
+
+        public static V2alpha1ConnectionAttributeIdentifier? Revert(V2alpha3ConnectionUsernameAttributeIdentifier? s)
         {
             if (s is null) return null;
             return new V2alpha1ConnectionAttributeIdentifier
@@ -283,7 +329,7 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             if (s is null) return null;
             return new V2alpha3ConnectionEmailAttribute
             {
-                Identifier = Convert(s.Identifier),
+                Identifier = ConvertEmailIdentifier(s.Identifier),
                 Unique = s.Unique,
                 ProfileRequired = s.ProfileRequired,
                 VerificationMethod = MapEnumN<V2alpha1ConnectionVerificationMethodEnum, V2alpha3ConnectionVerificationMethodEnum>(s.VerificationMethod),
@@ -848,16 +894,34 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             };
         }
 
-        public static V2alpha3ConnectionOptionsAttributeIdentifier? Convert(V2alpha1ConnectionOptionsAttributeIdentifier? s)
+        public static V2alpha3ConnectionOptionsEmailAttributeIdentifier? ConvertEmailIdentifier(V2alpha1ConnectionOptionsAttributeIdentifier? s)
         {
             if (s is null) return null;
-            return new V2alpha3ConnectionOptionsAttributeIdentifier
+            return new V2alpha3ConnectionOptionsEmailAttributeIdentifier
             {
                 Active = s.Active,
             };
         }
 
-        public static V2alpha1ConnectionOptionsAttributeIdentifier? Revert(V2alpha3ConnectionOptionsAttributeIdentifier? s)
+        public static V2alpha1ConnectionOptionsAttributeIdentifier? Revert(V2alpha3ConnectionOptionsEmailAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha1ConnectionOptionsAttributeIdentifier
+            {
+                Active = s.Active,
+            };
+        }
+
+        public static V2alpha3ConnectionOptionsUsernameAttributeIdentifier? ConvertUsernameIdentifier(V2alpha1ConnectionOptionsAttributeIdentifier? s)
+        {
+            if (s is null) return null;
+            return new V2alpha3ConnectionOptionsUsernameAttributeIdentifier
+            {
+                Active = s.Active,
+            };
+        }
+
+        public static V2alpha1ConnectionOptionsAttributeIdentifier? Revert(V2alpha3ConnectionOptionsUsernameAttributeIdentifier? s)
         {
             if (s is null) return null;
             return new V2alpha1ConnectionOptionsAttributeIdentifier
@@ -1595,7 +1659,7 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             if (s is null) return null;
             return new V2alpha3ConnectionOptionsEmailAttribute
             {
-                Identifier = Convert(s.Identifier),
+                Identifier = ConvertEmailIdentifier(s.Identifier),
                 ProfileRequired = s.ProfileRequired,
                 Signup = Convert(s.Signup),
             };
@@ -3477,7 +3541,7 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             if (s is null) return null;
             return new V2alpha3ConnectionOptionsUsernameAttribute
             {
-                Identifier = Convert(s.Identifier),
+                Identifier = ConvertUsernameIdentifier(s.Identifier),
                 ProfileRequired = s.ProfileRequired,
                 Signup = Convert(s.Signup),
                 Validation = Convert(s.Validation),
@@ -4095,7 +4159,7 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             if (s is null) return null;
             return new V2alpha3ConnectionPhoneAttribute
             {
-                Identifier = Convert(s.Identifier),
+                Identifier = ConvertPhoneIdentifier(s.Identifier),
                 ProfileRequired = s.ProfileRequired,
                 Signup = Convert(s.Signup),
             };
@@ -4365,7 +4429,7 @@ namespace Alethic.Auth0.Operator.Converters.Generated
             if (s is null) return null;
             return new V2alpha3ConnectionUsernameAttribute
             {
-                Identifier = Convert(s.Identifier),
+                Identifier = ConvertUsernameIdentifier(s.Identifier),
                 ProfileRequired = s.ProfileRequired,
                 Signup = Convert(s.Signup),
                 Validation = Convert(s.Validation),

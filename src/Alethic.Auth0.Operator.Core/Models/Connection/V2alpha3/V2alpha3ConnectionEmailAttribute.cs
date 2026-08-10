@@ -7,7 +7,7 @@ public record V2alpha3ConnectionEmailAttribute
 
     [JsonPropertyName("identifier")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public V2alpha3ConnectionAttributeIdentifier? Identifier { get; set; }
+    public V2alpha3ConnectionEmailAttributeIdentifier? Identifier { get; set; }
 
     [JsonPropertyName("unique")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
