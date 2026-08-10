@@ -6,6 +6,8 @@ using System.Net.Http;
 
 using Alethic.Auth0.Operator.Options;
 
+using Microsoft.Extensions.Logging;
+
 namespace Alethic.Auth0.Operator.RateLimiting
 {
 
@@ -20,6 +22,7 @@ namespace Alethic.Auth0.Operator.RateLimiting
 
         readonly CircuitBreakerOptions _options;
         readonly TimeProvider _time;
+        readonly ILogger? _logger;
         readonly ConcurrentDictionary<string, DateTimeOffset> _openUntil = new();
 
         /// <summary>
@@ -27,10 +30,12 @@ namespace Alethic.Auth0.Operator.RateLimiting
         /// </summary>
         /// <param name="options"></param>
         /// <param name="time"></param>
-        public Auth0CircuitBreaker(CircuitBreakerOptions options, TimeProvider? time = null)
+        /// <param name="logger"></param>
+        public Auth0CircuitBreaker(CircuitBreakerOptions options, TimeProvider? time = null, ILogger? logger = null)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _time = time ?? TimeProvider.System;
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,7 +52,8 @@ namespace Alethic.Auth0.Operator.RateLimiting
                 throw new Auth0CircuitOpenException(host, until);
 
             // expired; remove only if unchanged so a concurrent reopen is not lost
-            _openUntil.TryRemove(new System.Collections.Generic.KeyValuePair<string, DateTimeOffset>(host, until));
+            if (_openUntil.TryRemove(new System.Collections.Generic.KeyValuePair<string, DateTimeOffset>(host, until)))
+                _logger?.LogDebug("Auth0 rate limit circuit for {Host} closed.", host);
         }
 
         /// <summary>
@@ -57,7 +63,8 @@ namespace Alethic.Auth0.Operator.RateLimiting
         /// </summary>
         /// <param name="host"></param>
         /// <param name="response"></param>
-        public DateTimeOffset Open(string host, HttpResponseMessage response)
+        /// <param name="endpoint"></param>
+        public DateTimeOffset Open(string host, HttpResponseMessage response, string? endpoint = null)
         {
             var now = _time.GetUtcNow();
 
@@ -70,8 +77,17 @@ namespace Alethic.Auth0.Operator.RateLimiting
             if (until > now + _options.MaxOpenDuration)
                 until = now + _options.MaxOpenDuration;
 
+            var wasOpen = _openUntil.TryGetValue(host, out var open) && open > now;
+
             // an already-open circuit is never shortened; return whichever deadline is now in effect
-            return _openUntil.AddOrUpdate(host, until, (_, existing) => until > existing ? until : existing);
+            var effective = _openUntil.AddOrUpdate(host, until, (_, existing) => until > existing ? until : existing);
+
+            if (wasOpen == false)
+                _logger?.LogWarning("Auth0 rate limit circuit for {Host} opened until {OpenUntil:O}: received 429 on {Endpoint}.", host, effective, endpoint);
+            else
+                _logger?.LogDebug("Auth0 rate limit circuit for {Host} extended until {OpenUntil:O}: received 429 on {Endpoint}.", host, effective, endpoint);
+
+            return effective;
         }
 
         /// <summary>
@@ -82,7 +98,8 @@ namespace Alethic.Auth0.Operator.RateLimiting
         /// </summary>
         /// <param name="host"></param>
         /// <param name="response"></param>
-        public DateTimeOffset? OpenIfExhausted(string host, HttpResponseMessage response)
+        /// <param name="endpoint"></param>
+        public DateTimeOffset? OpenIfExhausted(string host, HttpResponseMessage response, string? endpoint = null)
         {
             if (response.Headers.TryGetValues("x-ratelimit-remaining", out var remainingValues) == false)
                 return null;
@@ -99,7 +116,16 @@ namespace Alethic.Auth0.Operator.RateLimiting
             if (until > now + _options.MaxOpenDuration)
                 until = now + _options.MaxOpenDuration;
 
-            return _openUntil.AddOrUpdate(host, until.Value, (_, existing) => until.Value > existing ? until.Value : existing);
+            var wasOpen = _openUntil.TryGetValue(host, out var open) && open > now;
+
+            var effective = _openUntil.AddOrUpdate(host, until.Value, (_, existing) => until.Value > existing ? until.Value : existing);
+
+            if (wasOpen == false)
+                _logger?.LogWarning("Auth0 rate limit circuit for {Host} opened until {OpenUntil:O}: {Endpoint} reported its budget exhausted.", host, effective, endpoint);
+            else
+                _logger?.LogDebug("Auth0 rate limit circuit for {Host} extended until {OpenUntil:O}: {Endpoint} reported its budget exhausted.", host, effective, endpoint);
+
+            return effective;
         }
 
         /// <summary>

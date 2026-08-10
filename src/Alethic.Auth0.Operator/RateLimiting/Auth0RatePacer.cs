@@ -6,6 +6,8 @@ using System.Net.Http;
 
 using Alethic.Auth0.Operator.Options;
 
+using Microsoft.Extensions.Logging;
+
 namespace Alethic.Auth0.Operator.RateLimiting
 {
 
@@ -28,6 +30,7 @@ namespace Alethic.Auth0.Operator.RateLimiting
 
         readonly PacingOptions _options;
         readonly TimeProvider _time;
+        readonly ILogger? _logger;
         readonly ConcurrentDictionary<string, string> _buckets = new();
         readonly ConcurrentDictionary<string, Budget> _budgets = new();
         readonly ConcurrentDictionary<string, DateTimeOffset> _nextSend = new();
@@ -38,10 +41,12 @@ namespace Alethic.Auth0.Operator.RateLimiting
         /// </summary>
         /// <param name="options"></param>
         /// <param name="time"></param>
-        public Auth0RatePacer(PacingOptions options, TimeProvider? time = null)
+        /// <param name="logger"></param>
+        public Auth0RatePacer(PacingOptions options, TimeProvider? time = null, ILogger? logger = null)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _time = time ?? TimeProvider.System;
+            _logger = logger;
         }
 
         /// <summary>
@@ -101,10 +106,18 @@ namespace Alethic.Auth0.Operator.RateLimiting
             if (TryGetHeaderValue(response, "x-ratelimit-reset", out var resetEpochSeconds) == false)
                 return;
 
-            var bucket = TryGetHeaderValue(response, "x-ratelimit-limit", out var limit) ? BucketIdFor(endpoint, limit) : endpoint;
+            var hasLimit = TryGetHeaderValue(response, "x-ratelimit-limit", out var limit);
+            var bucket = hasLimit ? BucketIdFor(endpoint, limit) : endpoint;
+
+            if (_buckets.TryGetValue(endpoint, out var previous) == false || previous != bucket)
+                _logger?.LogDebug("Auth0 endpoint {Endpoint} bound to rate limit bucket {Bucket} (limit {Limit}).", endpoint, bucket, hasLimit ? limit : (long?)null);
+
+            var reset = DateTimeOffset.FromUnixTimeSeconds(resetEpochSeconds);
 
             _buckets[endpoint] = bucket;
-            _budgets[bucket] = new Budget(remaining, DateTimeOffset.FromUnixTimeSeconds(resetEpochSeconds));
+            _budgets[bucket] = new Budget(remaining, reset);
+
+            _logger?.LogDebug("Auth0 rate limit bucket {Bucket} has {Remaining} of {Limit} remaining, reset at {Reset:O} (reported by {Endpoint}).", bucket, remaining, hasLimit ? limit : (long?)null, reset, endpoint);
         }
 
         /// <summary>
@@ -162,6 +175,9 @@ namespace Alethic.Auth0.Operator.RateLimiting
             var delay = slot - now;
             if (delay > _options.MaxRequestDelay)
                 delay = _options.MaxRequestDelay;
+
+            if (delay > TimeSpan.Zero)
+                _logger?.LogDebug("Pacing Auth0 request to {Endpoint}: waiting {DelayMs}ms for a send slot on bucket {Bucket} ({Remaining} remaining, reset at {Reset:O}).", endpoint, (long)delay.TotalMilliseconds, bucket, budget.Remaining, budget.Reset);
 
             return delay;
         }
