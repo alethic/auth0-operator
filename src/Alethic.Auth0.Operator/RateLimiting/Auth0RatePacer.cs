@@ -10,10 +10,16 @@ namespace Alethic.Auth0.Operator.RateLimiting
 {
 
     /// <summary>
-    /// Adaptive per-domain pacing of Auth0 Management API requests. Every response's rate limit headers are
-    /// recorded, and once the reported remaining budget falls to the configured threshold, outbound requests are
-    /// delayed just enough to spread the remaining budget across the time until the server-reported reset — so
-    /// consumption slows to Auth0's refill rate instead of draining the bucket and tripping the circuit breaker.
+    /// Adaptive pacing of Auth0 Management API requests, tracked per rate limit bucket. Auth0 enforces separate
+    /// token buckets for different endpoint groups (e.g. connection reads have a far smaller budget than the
+    /// general Management API on most plans), but no response header names the bucket — so the pacer learns the
+    /// mapping: each request is classified into an endpoint key (host + method + id-normalized path), and every
+    /// response binds that endpoint to a bucket fingerprinted by host and the reported <c>x-ratelimit-limit</c>.
+    /// Endpoints that report the same limit share one budget; endpoints with a dedicated bucket get their own,
+    /// so a generous bucket's headers can no longer mask an exhausted one. Once a bucket's remaining budget falls
+    /// to the configured threshold, sends are reserved serially — each caller takes the next send slot, spaced by
+    /// the time until reset divided by the remaining budget — so concurrent requests spread out to the refill
+    /// rate instead of sleeping identically and firing together.
     /// </summary>
     public sealed class Auth0RatePacer
     {
@@ -22,7 +28,10 @@ namespace Alethic.Auth0.Operator.RateLimiting
 
         readonly PacingOptions _options;
         readonly TimeProvider _time;
+        readonly ConcurrentDictionary<string, string> _buckets = new();
         readonly ConcurrentDictionary<string, Budget> _budgets = new();
+        readonly ConcurrentDictionary<string, DateTimeOffset> _nextSend = new();
+        readonly object _sync = new();
 
         /// <summary>
         /// Initializes a new instance.
@@ -36,12 +45,55 @@ namespace Alethic.Auth0.Operator.RateLimiting
         }
 
         /// <summary>
-        /// Records the rate limit budget reported by a response. Responses without both a parseable remaining
-        /// count and reset time are ignored.
+        /// Classifies a request into its endpoint key: host, method and path, with identifier segments (those
+        /// containing characters outside lowercase letters, digits and hyphens — Auth0 resource ids always do)
+        /// replaced by <c>*</c> so all requests against the same route template share one key.
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="request"></param>
+        public static string EndpointKeyFor(HttpRequestMessage request)
+        {
+            var host = request.RequestUri?.Host ?? string.Empty;
+            var path = request.RequestUri?.AbsolutePath ?? string.Empty;
+            return $"{host} {request.Method.Method} {NormalizePath(path)}";
+        }
+
+        /// <summary>
+        /// Replaces identifier path segments with <c>*</c>, keeping route vocabulary segments intact.
+        /// </summary>
+        /// <param name="path"></param>
+        internal static string NormalizePath(string path)
+        {
+            var segments = path.Split('/');
+            for (var i = 0; i < segments.Length; i++)
+                if (IsIdSegment(segments[i]))
+                    segments[i] = "*";
+
+            return string.Join('/', segments);
+        }
+
+        /// <summary>
+        /// An identifier segment contains at least one character outside lowercase letters, digits and hyphens.
+        /// Auth0 route vocabulary ("connections", "email-templates", "v2") is all lowercase, while resource ids
+        /// carry uppercase letters or underscores ("con_AbC123", client ids).
+        /// </summary>
+        /// <param name="segment"></param>
+        static bool IsIdSegment(string segment)
+        {
+            foreach (var c in segment)
+                if (char.IsAsciiLetterLower(c) == false && char.IsAsciiDigit(c) == false && c != '-')
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Records the rate limit budget reported by a response to the given endpoint, and binds the endpoint to
+        /// the bucket the response's <c>x-ratelimit-limit</c> fingerprints. Responses without both a parseable
+        /// remaining count and reset time are ignored; without a limit header the endpoint is its own bucket.
+        /// </summary>
+        /// <param name="endpoint"></param>
         /// <param name="response"></param>
-        public void Record(string host, HttpResponseMessage response)
+        public void Record(string endpoint, HttpResponseMessage response)
         {
             if (TryGetHeaderValue(response, "x-ratelimit-remaining", out var remaining) == false)
                 return;
@@ -49,32 +101,65 @@ namespace Alethic.Auth0.Operator.RateLimiting
             if (TryGetHeaderValue(response, "x-ratelimit-reset", out var resetEpochSeconds) == false)
                 return;
 
-            _budgets[host] = new Budget(remaining, DateTimeOffset.FromUnixTimeSeconds(resetEpochSeconds));
+            var bucket = TryGetHeaderValue(response, "x-ratelimit-limit", out var limit) ? BucketIdFor(endpoint, limit) : endpoint;
+
+            _buckets[endpoint] = bucket;
+            _budgets[bucket] = new Budget(remaining, DateTimeOffset.FromUnixTimeSeconds(resetEpochSeconds));
         }
 
         /// <summary>
-        /// Computes the delay to apply before the next request to <paramref name="host"/>: zero while the
-        /// reported budget is above the threshold or already reset, otherwise the time until reset divided by
-        /// the remaining budget, bounded by the configured maximum per-request delay.
+        /// Fingerprints a bucket by the endpoint's host and the reported limit, so endpoints of one tenant that
+        /// report the same limit share a budget while other tenants' buckets stay separate.
         /// </summary>
-        /// <param name="host"></param>
-        public TimeSpan GetDelay(string host)
+        /// <param name="endpoint"></param>
+        /// <param name="limit"></param>
+        static string BucketIdFor(string endpoint, long limit)
         {
-            if (_budgets.TryGetValue(host, out var budget) == false)
+            var i = endpoint.IndexOf(' ');
+            var host = i > 0 ? endpoint[..i] : endpoint;
+            return $"{host}#{limit}";
+        }
+
+        /// <summary>
+        /// Reserves a send slot for the next request to <paramref name="endpoint"/> and returns how long the
+        /// caller must wait before sending: zero while the endpoint's bucket is unknown, above the threshold or
+        /// already reset, otherwise the time until the reserved slot — slots are spaced by the time until reset
+        /// divided by the remaining budget, and each reservation pushes the bucket's next slot out, so concurrent
+        /// senders serialize instead of firing together. The returned delay is bounded by the configured maximum
+        /// per-request delay; beyond it, the circuit breaker is the backstop.
+        /// </summary>
+        /// <param name="endpoint"></param>
+        public TimeSpan Reserve(string endpoint)
+        {
+            if (_buckets.TryGetValue(endpoint, out var bucket) == false)
+                return TimeSpan.Zero;
+
+            if (_budgets.TryGetValue(bucket, out var budget) == false)
                 return TimeSpan.Zero;
 
             var now = _time.GetUtcNow();
             if (budget.Reset <= now)
             {
                 // the bucket has refilled; forget the stale budget unless a newer one raced in
-                _budgets.TryRemove(new System.Collections.Generic.KeyValuePair<string, Budget>(host, budget));
+                _budgets.TryRemove(new System.Collections.Generic.KeyValuePair<string, Budget>(bucket, budget));
                 return TimeSpan.Zero;
             }
 
             if (budget.Remaining > _options.RemainingThreshold)
                 return TimeSpan.Zero;
 
-            var delay = (budget.Reset - now) / Math.Max(budget.Remaining, 1);
+            var interval = (budget.Reset - now) / Math.Max(budget.Remaining, 1);
+            if (interval > _options.MaxRequestDelay)
+                interval = _options.MaxRequestDelay;
+
+            DateTimeOffset slot;
+            lock (_sync)
+            {
+                slot = _nextSend.TryGetValue(bucket, out var next) && next > now ? next + interval : now + interval;
+                _nextSend[bucket] = slot;
+            }
+
+            var delay = slot - now;
             if (delay > _options.MaxRequestDelay)
                 delay = _options.MaxRequestDelay;
 

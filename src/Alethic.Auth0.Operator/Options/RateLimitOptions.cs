@@ -52,9 +52,10 @@ namespace Alethic.Auth0.Operator.Options
 
     /// <summary>
     /// Configuration for adaptive request pacing. Auth0 reports the remaining rate limit budget and its reset
-    /// time on every response; once the remaining budget falls to the threshold, outbound requests are delayed
-    /// so the rest of the budget is spread across the time until the reset — consumption slows to Auth0's
-    /// refill rate instead of draining the bucket.
+    /// time on every response, tracked per rate limit bucket (Auth0 enforces separate buckets for different
+    /// endpoint groups); once a bucket's remaining budget falls to the threshold, outbound requests to that
+    /// bucket's endpoints are delayed so the rest of the budget is spread across the time until the reset —
+    /// consumption slows to Auth0's refill rate instead of draining the bucket.
     /// </summary>
     public class PacingOptions
     {
