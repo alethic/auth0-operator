@@ -34,6 +34,22 @@ namespace Alethic.Auth0.Operator.Core.Models.Role.V2alpha3
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha3RolePermission[]? Permissions { get; set; }
 
+        /// <summary>
+        /// The type of the role. Tenant roles apply tenant-wide while organization roles are scoped to an
+        /// organization. Auth0 only accepts this value at creation time; it cannot be changed afterwards.
+        /// </summary>
+        [JsonPropertyName("type")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3RoleTypeEnum? Type { get; set; }
+
+        /// <summary>
+        /// The identifier of the entity that owns the role. Auth0 only accepts this value at creation time; it
+        /// cannot be changed afterwards.
+        /// </summary>
+        [JsonPropertyName("ownerId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? OwnerId { get; set; }
+
     }
 
 }

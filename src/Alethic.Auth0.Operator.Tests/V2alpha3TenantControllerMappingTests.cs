@@ -347,6 +347,171 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(inputValue, V2alpha3TenantController.ToApi(op).Value);
         }
 
+        // ──────────────────────── Country codes / security headers ───────────────
+
+        [TestMethod]
+        public void FromApi_Settings_MapsCountryCodes()
+        {
+            var result = V2alpha3TenantController.FromApi(new GetTenantSettingsResponseContent
+            {
+                CountryCodes = new TenantSettingsCountryCodesResponse
+                {
+                    List = new[] { "US", "DE" },
+                    Mode = new TenantSettingsCountryCodesModeResponse(TenantSettingsCountryCodesModeResponse.Values.Allow),
+                },
+                IncludeSessionMetadataInTenantLogs = true,
+            });
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.CountryCodes);
+            CollectionAssert.AreEqual(new[] { "US", "DE" }, result.CountryCodes.List);
+            Assert.AreEqual(V2alpha3TenantCountryCodesModeEnum.Allow, result.CountryCodes.Mode);
+            Assert.IsTrue(result.IncludeSessionMetadataInTenantLogs);
+        }
+
+        [TestMethod]
+        public void FromApi_Settings_MapsSecurityHeaders()
+        {
+            var result = V2alpha3TenantController.FromApi(new GetTenantSettingsResponseContent
+            {
+                SecurityHeaders = new TenantSettingsNullableSecurityHeaders
+                {
+                    ContentSecurityPolicy = new ContentSecurityPolicyConfig
+                    {
+                        Enabled = true,
+                        Policies = new[]
+                        {
+                            new CspPolicy
+                            {
+                                Directives = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>> { ["default-src"] = new[] { "'self'" } },
+                                Flags = new[] { new CspFlag(CspFlag.Values.UpgradeInsecureRequests) },
+                                Mode = new CspPolicyMode(CspPolicyMode.Values.Enforcing),
+                                Reporting = new CspPolicyReporting { ReportToGroup = "csp", ReportUri = "https://example.com/report" },
+                            },
+                        },
+                        ReportingInfrastructure = new CspReportingInfrastructure
+                        {
+                            ReportingEndpoints = new System.Collections.Generic.Dictionary<string, string> { ["csp"] = "https://example.com/report" },
+                            ReportTo = new CspReportTo
+                            {
+                                Endpoints = new[] { new CspReportToEndpoint { Url = "https://example.com/report" } },
+                                Group = "csp",
+                                MaxAge = 3600,
+                            },
+                        },
+                    },
+                    XXssProtection = new XssProtectionConfig
+                    {
+                        Enabled = true,
+                        Mode = new XssProtectionMode(XssProtectionMode.Values.Block),
+                        ReportUri = "https://example.com/xss",
+                    },
+                },
+            });
+
+            Assert.IsNotNull(result);
+            var headers = result.SecurityHeaders;
+            Assert.IsNotNull(headers);
+            var csp = headers.ContentSecurityPolicy;
+            Assert.IsNotNull(csp);
+            Assert.IsTrue(csp.Enabled);
+            Assert.IsNotNull(csp.Policies);
+            Assert.AreEqual(1, csp.Policies.Length);
+            CollectionAssert.AreEqual(new[] { "'self'" }, csp.Policies[0].Directives?["default-src"]);
+            Assert.AreEqual(V2alpha3TenantCspFlagEnum.UpgradeInsecureRequests, csp.Policies[0].Flags?[0]);
+            Assert.AreEqual(V2alpha3TenantCspPolicyModeEnum.Enforcing, csp.Policies[0].Mode);
+            Assert.AreEqual("csp", csp.Policies[0].Reporting?.ReportToGroup);
+            Assert.AreEqual("https://example.com/report", csp.ReportingInfrastructure?.ReportingEndpoints?["csp"]);
+            Assert.AreEqual("csp", csp.ReportingInfrastructure?.ReportTo?.Group);
+            Assert.AreEqual(3600, csp.ReportingInfrastructure?.ReportTo?.MaxAge);
+            Assert.AreEqual("https://example.com/report", csp.ReportingInfrastructure?.ReportTo?.Endpoints?[0].Url);
+            Assert.IsTrue(headers.XXssProtection?.Enabled);
+            Assert.AreEqual(V2alpha3TenantXssProtectionModeEnum.Block, headers.XXssProtection?.Mode);
+            Assert.AreEqual("https://example.com/xss", headers.XXssProtection?.ReportUri);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Settings_SetsCountryCodesAndSecurityHeaders()
+        {
+            var target = new UpdateTenantSettingsRequestContent();
+            V2alpha3TenantController.ApplyToApi(new V2alpha3TenantSettings
+            {
+                CountryCodes = new V2alpha3TenantCountryCodes { List = new[] { "US" }, Mode = V2alpha3TenantCountryCodesModeEnum.Deny },
+                IncludeSessionMetadataInTenantLogs = true,
+                SecurityHeaders = new V2alpha3TenantSecurityHeaders
+                {
+                    ContentSecurityPolicy = new V2alpha3TenantContentSecurityPolicy
+                    {
+                        Enabled = true,
+                        Policies = new[]
+                        {
+                            new V2alpha3TenantCspPolicy
+                            {
+                                Directives = new System.Collections.Generic.Dictionary<string, string[]> { ["default-src"] = new[] { "'self'" } },
+                                Flags = new[] { V2alpha3TenantCspFlagEnum.BlockAllMixedContent },
+                                Mode = V2alpha3TenantCspPolicyModeEnum.Reporting,
+                                Reporting = new V2alpha3TenantCspPolicyReporting { ReportUri = "https://example.com/report" },
+                            },
+                        },
+                        ReportingInfrastructure = new V2alpha3TenantCspReportingInfrastructure
+                        {
+                            ReportingEndpoints = new System.Collections.Generic.Dictionary<string, string> { ["csp"] = "https://example.com/report" },
+                        },
+                    },
+                    XXssProtection = new V2alpha3TenantXssProtection { Enabled = true, Mode = V2alpha3TenantXssProtectionModeEnum.Block },
+                },
+            }, target);
+
+            Assert.IsTrue(target.CountryCodes.IsDefined);
+            CollectionAssert.AreEqual(new[] { "US" }, System.Linq.Enumerable.ToArray(target.CountryCodes.Value!.List!));
+            Assert.AreEqual(TenantSettingsCountryCodesMode.Values.Deny, target.CountryCodes.Value!.Mode?.Value);
+            Assert.IsTrue(target.IncludeSessionMetadataInTenantLogs);
+            Assert.IsTrue(target.SecurityHeaders.IsDefined);
+            var headers = target.SecurityHeaders.Value!;
+            Assert.IsTrue(headers.ContentSecurityPolicy.IsDefined);
+            var csp = headers.ContentSecurityPolicy.Value!;
+            Assert.IsTrue(csp.Enabled);
+            var policy = System.Linq.Enumerable.Single(csp.Policies!);
+            CollectionAssert.AreEqual(new[] { "'self'" }, System.Linq.Enumerable.ToArray(policy.Directives!["default-src"]));
+            Assert.AreEqual(CspFlag.Values.BlockAllMixedContent, System.Linq.Enumerable.Single(policy.Flags!).Value);
+            Assert.AreEqual(CspPolicyMode.Values.Reporting, policy.Mode?.Value);
+            Assert.AreEqual("https://example.com/report", policy.Reporting.Value!.ReportUri);
+            Assert.AreEqual("https://example.com/report", csp.ReportingInfrastructure.Value!.ReportingEndpoints!["csp"]);
+            Assert.IsTrue(headers.XXssProtection.IsDefined);
+            Assert.IsTrue(headers.XXssProtection.Value!.Enabled);
+            Assert.AreEqual(XssProtectionMode.Values.Block, headers.XXssProtection.Value!.Mode?.Value);
+        }
+
+        [TestMethod]
+        public void SettingsRequireUpdate_DetectsCountryCodesAndSecurityHeaderDrift()
+        {
+            var conf = new V2alpha3TenantSettings
+            {
+                CountryCodes = new V2alpha3TenantCountryCodes { List = new[] { "US" }, Mode = V2alpha3TenantCountryCodesModeEnum.Allow },
+                IncludeSessionMetadataInTenantLogs = true,
+                SecurityHeaders = new V2alpha3TenantSecurityHeaders
+                {
+                    XXssProtection = new V2alpha3TenantXssProtection { Enabled = true },
+                },
+            };
+
+            var same = new V2alpha3TenantSettings
+            {
+                CountryCodes = new V2alpha3TenantCountryCodes { List = new[] { "US" }, Mode = V2alpha3TenantCountryCodesModeEnum.Allow },
+                IncludeSessionMetadataInTenantLogs = true,
+                SecurityHeaders = new V2alpha3TenantSecurityHeaders
+                {
+                    XXssProtection = new V2alpha3TenantXssProtection { Enabled = true },
+                },
+            };
+
+            Assert.IsFalse(V2alpha3TenantController.SettingsRequireUpdate(conf, same));
+            Assert.IsTrue(V2alpha3TenantController.SettingsRequireUpdate(conf, new V2alpha3TenantSettings()));
+
+            same.CountryCodes!.Mode = V2alpha3TenantCountryCodesModeEnum.Deny;
+            Assert.IsTrue(V2alpha3TenantController.SettingsRequireUpdate(conf, same));
+        }
+
     }
 
 }

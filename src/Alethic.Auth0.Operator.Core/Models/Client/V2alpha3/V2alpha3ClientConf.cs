@@ -155,6 +155,18 @@ namespace Alethic.Auth0.Operator.Core.Models.Client.V2alpha3
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? RequireProofOfPossession { get; set; }
 
+        [JsonPropertyName("fedcmLogin")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3ClientFedCmLogin? FedCmLogin { get; set; }
+
+        [JsonPropertyName("identityAssertionAuthorizationGrant")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3ClientIdentityAssertionAuthorizationGrant? IdentityAssertionAuthorizationGrant { get; set; }
+
+        [JsonPropertyName("nativeSocialLogin")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3ClientNativeSocialLogin? NativeSocialLogin { get; set; }
+
     }
 
 }

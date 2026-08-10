@@ -150,4 +150,16 @@ public record V2alpha3TenantSettings
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public V2alpha3TenantDynamicClientRegistrationSecurityMode? DynamicClientRegistrationSecurityMode { get; set; }
 
+    [JsonPropertyName("countryCodes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public V2alpha3TenantCountryCodes? CountryCodes { get; set; }
+
+    [JsonPropertyName("includeSessionMetadataInTenantLogs")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IncludeSessionMetadataInTenantLogs { get; set; }
+
+    [JsonPropertyName("securityHeaders")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public V2alpha3TenantSecurityHeaders? SecurityHeaders { get; set; }
+
 }

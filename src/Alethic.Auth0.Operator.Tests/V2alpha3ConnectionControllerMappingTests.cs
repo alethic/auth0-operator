@@ -787,6 +787,100 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(V2alpha3ConnectionStrategy.GoogleOAuth2, result.Strategy);
         }
 
+        // ──────────────────────── Cross-App Access / id token session expiry ─────
+
+        [TestMethod]
+        public void FromApi_Connection_MapsCrossAppAccess()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new GetConnectionResponseContent
+            {
+                Name = "test",
+                CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new CrossAppAccessResourceApp { Status = new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Enabled) },
+            });
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.CrossAppAccessRequestingApp?.Active);
+            Assert.AreEqual(V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled, result.CrossAppAccessResourceApp?.Status);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_SetsCrossAppAccess()
+        {
+            var target = new CreateConnectionRequestContent { Name = "test", Strategy = new ConnectionIdentityProviderEnum(ConnectionIdentityProviderEnum.Values.Auth0) };
+            V2alpha3ConnectionController.ApplyToApi(new V2alpha3ConnectionConf
+            {
+                Name = "test",
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled },
+            }, target);
+
+            Assert.IsTrue(target.CrossAppAccessRequestingApp?.Active);
+            Assert.AreEqual(CrossAppAccessResourceAppStatusEnum.Values.Disabled, target.CrossAppAccessResourceApp?.Status.Value);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Update_SetsCrossAppAccess()
+        {
+            var target = new UpdateConnectionRequestContent();
+            V2alpha3ConnectionController.ApplyToApi(new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = false },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            }, target);
+
+            Assert.IsFalse(target.CrossAppAccessRequestingApp?.Active);
+            Assert.IsTrue(target.CrossAppAccessResourceApp.IsDefined);
+            Assert.AreEqual(CrossAppAccessResourceAppStatusEnum.Values.Enabled, target.CrossAppAccessResourceApp.Value?.Status.Value);
+        }
+
+        [TestMethod]
+        public void FromApi_OptionsOidc_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new ConnectionOptionsOidc { ClientId = "client_1", IdTokenSessionExpirySupported = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ToApi_OptionsOidc_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionOptionsOidc { IdTokenSessionExpirySupported = true });
+
+            Assert.IsTrue(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ToApi_OptionsOkta_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionOptionsOkta { IdTokenSessionExpirySupported = false });
+
+            Assert.IsFalse(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_DetectsCrossAppAccessDrift()
+        {
+            var conf = new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            };
+
+            var same = new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, same));
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, new V2alpha3ConnectionConf()));
+
+            same.CrossAppAccessResourceApp!.Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled;
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, same));
+        }
+
     }
 
 }

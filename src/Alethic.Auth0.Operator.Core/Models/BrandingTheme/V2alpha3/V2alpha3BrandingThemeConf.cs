@@ -22,6 +22,10 @@ namespace Alethic.Auth0.Operator.Core.Models.BrandingTheme.V2alpha3
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha3BrandingThemeFonts? Fonts { get; set; }
 
+        [JsonPropertyName("identifiers")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3BrandingThemeIdentifiers? Identifiers { get; set; }
+
         [JsonPropertyName("pageBackground")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha3BrandingThemePageBackground? PageBackground { get; set; }

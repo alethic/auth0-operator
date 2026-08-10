@@ -71,6 +71,10 @@ public record V2alpha3ConnectionOptionsOidc
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Scope { get; set; }
 
+    [JsonPropertyName("idTokenSessionExpirySupported")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IdTokenSessionExpirySupported { get; set; }
+
     [JsonPropertyName("sendBackChannelNonce")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? SendBackChannelNonce { get; set; }

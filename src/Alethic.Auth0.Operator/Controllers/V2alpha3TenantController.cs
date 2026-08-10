@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -118,6 +119,7 @@ namespace Alethic.Auth0.Operator.Controllers
             AuthorizationResponseIssParameterSupported = source.AuthorizationResponseIssParameterSupported.IsDefined ? source.AuthorizationResponseIssParameterSupported.Value : null,
             ChangePassword = source.ChangePassword.IsDefined ? FromApi(source.ChangePassword.Value) : null,
             ClientIdMetadataDocumentSupported = source.ClientIdMetadataDocumentSupported,
+            CountryCodes = FromApi(source.CountryCodes),
             CustomizeMfaInPostloginAction = source.CustomizeMfaInPostloginAction,
             DefaultRedirectionUri = source.DefaultRedirectionUri,
             DefaultTokenQuota = source.DefaultTokenQuota.IsDefined ? FromApi(source.DefaultTokenQuota.Value) : null,
@@ -132,11 +134,13 @@ namespace Alethic.Auth0.Operator.Controllers
             GuardianMfaPage = source.GuardianMfaPage.IsDefined ? FromApi(source.GuardianMfaPage.Value) : null,
             IdleEphemeralSessionLifetime = source.IdleEphemeralSessionLifetime is { } idle_ephemeral_session_lifetime ? (int?)idle_ephemeral_session_lifetime : null,
             IdleSessionLifetime = source.IdleSessionLifetime is { } idle_session_lifetime ? (int?)idle_session_lifetime : null,
+            IncludeSessionMetadataInTenantLogs = source.IncludeSessionMetadataInTenantLogs,
             LegacySandboxVersion = source.LegacySandboxVersion,
             OidcLogout = FromApi(source.OidcLogout),
             PictureUrl = source.PictureUrl,
             PhoneConsolidatedExperience = source.PhoneConsolidatedExperience,
             ResourceParameterProfile = FromApi(source.ResourceParameterProfile),
+            SecurityHeaders = source.SecurityHeaders.IsDefined ? FromApi(source.SecurityHeaders.Value) : null,
             SessionLifetime = source.SessionLifetime is { } session_lifetime ? (int?)session_lifetime : null,
             SessionCookie = source.SessionCookie.IsDefined ? FromApi(source.SessionCookie.Value) : null,
             Sessions = source.Sessions.IsDefined ? FromApi(source.Sessions.Value) : null,
@@ -167,6 +171,95 @@ namespace Alethic.Auth0.Operator.Controllers
             Enforce = source.Enforce,
             PerDay = source.PerDay,
             PerHour = source.PerHour,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantCountryCodes? FromApi(TenantSettingsCountryCodesResponse? source) => source is null ? null : new()
+        {
+            List = source.List?.ToArray(),
+            Mode = source.Mode switch
+            {
+                { Value: TenantSettingsCountryCodesModeResponse.Values.Allow } => V2alpha3TenantCountryCodesModeEnum.Allow,
+                { Value: TenantSettingsCountryCodesModeResponse.Values.Deny } => V2alpha3TenantCountryCodesModeEnum.Deny,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source.Mode, null),
+            },
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantSecurityHeaders? FromApi(TenantSettingsNullableSecurityHeaders? source) => source is null ? null : new()
+        {
+            ContentSecurityPolicy = source.ContentSecurityPolicy.IsDefined ? FromApi(source.ContentSecurityPolicy.Value) : null,
+            XXssProtection = source.XXssProtection.IsDefined ? FromApi(source.XXssProtection.Value) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantContentSecurityPolicy? FromApi(ContentSecurityPolicyConfig? source) => source is null ? null : new()
+        {
+            Enabled = source.Enabled,
+            Policies = source.Policies?.Select(FromApi).ToArray(),
+            ReportingInfrastructure = source.ReportingInfrastructure.IsDefined ? FromApi(source.ReportingInfrastructure.Value) : null,
+        };
+
+        internal static V2alpha3TenantCspPolicy FromApi(CspPolicy source) => new()
+        {
+            Directives = source.Directives?.ToDictionary(i => i.Key, i => i.Value.ToArray()),
+            Flags = source.Flags?.Select(FromApi).ToArray(),
+            Mode = source.Mode switch
+            {
+                { Value: CspPolicyMode.Values.Enforcing } => V2alpha3TenantCspPolicyModeEnum.Enforcing,
+                { Value: CspPolicyMode.Values.Reporting } => V2alpha3TenantCspPolicyModeEnum.Reporting,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source.Mode, null),
+            },
+            Reporting = source.Reporting.IsDefined ? FromApi(source.Reporting.Value) : null,
+        };
+
+        internal static V2alpha3TenantCspFlagEnum FromApi(CspFlag source) => source switch
+        {
+            { Value: CspFlag.Values.BlockAllMixedContent } => V2alpha3TenantCspFlagEnum.BlockAllMixedContent,
+            { Value: CspFlag.Values.UpgradeInsecureRequests } => V2alpha3TenantCspFlagEnum.UpgradeInsecureRequests,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantCspPolicyReporting? FromApi(CspPolicyReporting? source) => source is null ? null : new()
+        {
+            ReportToGroup = source.ReportToGroup,
+            ReportUri = source.ReportUri,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantCspReportingInfrastructure? FromApi(CspReportingInfrastructure? source) => source is null ? null : new()
+        {
+            ReportingEndpoints = source.ReportingEndpoints?.ToDictionary(i => i.Key, i => i.Value),
+            ReportTo = source.ReportTo.IsDefined ? FromApi(source.ReportTo.Value) : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantCspReportTo? FromApi(CspReportTo? source) => source is null ? null : new()
+        {
+            Endpoints = source.Endpoints?.Select(FromApi).ToArray(),
+            Group = source.Group,
+            MaxAge = source.MaxAge,
+        };
+
+        internal static V2alpha3TenantCspReportToEndpoint FromApi(CspReportToEndpoint source) => new()
+        {
+            Url = source.Url,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3TenantXssProtection? FromApi(XssProtectionConfig? source) => source is null ? null : new()
+        {
+            Enabled = source.Enabled,
+            Mode = source.Mode switch
+            {
+                { Value: XssProtectionMode.Values.Block } => V2alpha3TenantXssProtectionModeEnum.Block,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source.Mode, null),
+            },
+            ReportUri = source.ReportUri,
         };
 
         /// <summary>
@@ -369,6 +462,13 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ClientIdMetadataDocumentSupported is { } client_id_metadata_document_supported)
                 target.ClientIdMetadataDocumentSupported = client_id_metadata_document_supported;
 
+            if (source.CountryCodes is { } country_codes)
+            {
+                var v = new TenantSettingsCountryCodes();
+                ApplyToApi(country_codes, v);
+                target.CountryCodes = v;
+            }
+
             if (source.CustomizeMfaInPostloginAction is { } customize_mfa_in_postlogin_action)
                 target.CustomizeMfaInPostloginAction = customize_mfa_in_postlogin_action;
 
@@ -433,6 +533,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.IdleEphemeralSessionLifetime is { } idle_ephemeral_session_lifetime)
                 target.IdleEphemeralSessionLifetime = idle_ephemeral_session_lifetime;
 
+            if (source.IncludeSessionMetadataInTenantLogs is { } include_session_metadata_in_tenant_logs)
+                target.IncludeSessionMetadataInTenantLogs = include_session_metadata_in_tenant_logs;
+
             if (source.LegacySandboxVersion is { } legacy_sandbox_version)
                 target.LegacySandboxVersion = legacy_sandbox_version;
 
@@ -464,6 +567,13 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.SandboxVersion is { } sandbox_version)
                 target.SandboxVersion = sandbox_version;
+
+            if (source.SecurityHeaders is { } security_headers)
+            {
+                var v = new TenantSettingsNullableSecurityHeaders();
+                ApplyToApi(security_headers, v);
+                target.SecurityHeaders = v;
+            }
 
             if (source.SessionCookie is { } session_cookie)
             {
@@ -499,6 +609,118 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.Html is { } html)
                 target.Html = html;
+        }
+
+        internal static void ApplyToApi(V2alpha3TenantCountryCodes source, TenantSettingsCountryCodes target)
+        {
+            if (source.List is { } list)
+                target.List = list;
+
+            if (source.Mode is { } mode)
+                target.Mode = mode switch
+                {
+                    V2alpha3TenantCountryCodesModeEnum.Allow => new TenantSettingsCountryCodesMode(TenantSettingsCountryCodesMode.Values.Allow),
+                    V2alpha3TenantCountryCodesModeEnum.Deny => new TenantSettingsCountryCodesMode(TenantSettingsCountryCodesMode.Values.Deny),
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), mode, null),
+                };
+        }
+
+        internal static void ApplyToApi(V2alpha3TenantSecurityHeaders source, TenantSettingsNullableSecurityHeaders target)
+        {
+            if (source.ContentSecurityPolicy is { } content_security_policy)
+            {
+                var v = new ContentSecurityPolicyConfig();
+                ApplyToApi(content_security_policy, v);
+                target.ContentSecurityPolicy = v;
+            }
+
+            if (source.XXssProtection is { } x_xss_protection)
+            {
+                var v = new XssProtectionConfig();
+                ApplyToApi(x_xss_protection, v);
+                target.XXssProtection = v;
+            }
+        }
+
+        internal static void ApplyToApi(V2alpha3TenantContentSecurityPolicy source, ContentSecurityPolicyConfig target)
+        {
+            if (source.Enabled is { } enabled)
+                target.Enabled = enabled;
+
+            if (source.Policies is { } policies)
+                target.Policies = policies.Select(ToApi).ToArray();
+
+            if (source.ReportingInfrastructure is { } reporting_infrastructure)
+            {
+                var v = new CspReportingInfrastructure();
+                ApplyToApi(reporting_infrastructure, v);
+                target.ReportingInfrastructure = v;
+            }
+        }
+
+        internal static CspPolicy ToApi(V2alpha3TenantCspPolicy source)
+        {
+            var target = new CspPolicy();
+
+            if (source.Directives is { } directives)
+                target.Directives = directives.ToDictionary(i => i.Key, i => (IEnumerable<string>)i.Value);
+
+            if (source.Flags is { } flags)
+                target.Flags = flags.Select(ToApi).ToArray();
+
+            if (source.Mode is { } mode)
+                target.Mode = mode switch
+                {
+                    V2alpha3TenantCspPolicyModeEnum.Enforcing => new CspPolicyMode(CspPolicyMode.Values.Enforcing),
+                    V2alpha3TenantCspPolicyModeEnum.Reporting => new CspPolicyMode(CspPolicyMode.Values.Reporting),
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), mode, null),
+                };
+
+            if (source.Reporting is { } reporting)
+                target.Reporting = new CspPolicyReporting
+                {
+                    ReportToGroup = reporting.ReportToGroup,
+                    ReportUri = reporting.ReportUri,
+                };
+
+            return target;
+        }
+
+        internal static CspFlag ToApi(V2alpha3TenantCspFlagEnum source) => source switch
+        {
+            V2alpha3TenantCspFlagEnum.BlockAllMixedContent => new CspFlag(CspFlag.Values.BlockAllMixedContent),
+            V2alpha3TenantCspFlagEnum.UpgradeInsecureRequests => new CspFlag(CspFlag.Values.UpgradeInsecureRequests),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        internal static void ApplyToApi(V2alpha3TenantCspReportingInfrastructure source, CspReportingInfrastructure target)
+        {
+            if (source.ReportingEndpoints is { } reporting_endpoints)
+                target.ReportingEndpoints = reporting_endpoints.ToDictionary(i => i.Key, i => i.Value);
+
+            if (source.ReportTo is { } report_to)
+                target.ReportTo = new CspReportTo
+                {
+                    Endpoints = report_to.Endpoints?.Select(i => new CspReportToEndpoint { Url = i.Url }).ToArray(),
+                    Group = report_to.Group,
+                    MaxAge = report_to.MaxAge,
+                };
+        }
+
+        internal static void ApplyToApi(V2alpha3TenantXssProtection source, XssProtectionConfig target)
+        {
+            if (source.Enabled is { } enabled)
+                target.Enabled = enabled;
+
+            if (source.Mode is { } mode)
+                target.Mode = mode switch
+                {
+                    V2alpha3TenantXssProtectionModeEnum.Block => new XssProtectionMode(XssProtectionMode.Values.Block),
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), mode, null),
+                };
+
+            if (source.ReportUri is { } report_uri)
+                target.ReportUri = report_uri;
         }
 
         internal static void ApplyToApi(V2alpha3TenantDeviceFlow source, TenantSettingsDeviceFlow target)
@@ -785,6 +1007,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ClientIdMetadataDocumentSupported is not null && conf.ClientIdMetadataDocumentSupported != last.ClientIdMetadataDocumentSupported)
                 return true;
 
+            if (RequiresUpdate(conf.CountryCodes, last.CountryCodes))
+                return true;
+
             if (conf.CustomizeMfaInPostloginAction is not null && conf.CustomizeMfaInPostloginAction != last.CustomizeMfaInPostloginAction)
                 return true;
 
@@ -834,6 +1059,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.IdleSessionLifetime is not null && conf.IdleSessionLifetime != last.IdleSessionLifetime)
                 return true;
 
+            if (conf.IncludeSessionMetadataInTenantLogs is not null && conf.IncludeSessionMetadataInTenantLogs != last.IncludeSessionMetadataInTenantLogs)
+                return true;
+
             if (conf.LegacySandboxVersion is not null && conf.LegacySandboxVersion != last.LegacySandboxVersion)
                 return true;
 
@@ -858,6 +1086,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.SandboxVersion is not null && conf.SandboxVersion != last.SandboxVersion)
                 return true;
 
+            if (RequiresUpdate(conf.SecurityHeaders, last.SecurityHeaders))
+                return true;
+
             if (RequiresUpdate(conf.SessionCookie, last.SessionCookie))
                 return true;
 
@@ -874,6 +1105,194 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.SupportUrl is not null && conf.SupportUrl != last.SupportUrl)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured country codes differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantCountryCodes? conf, V2alpha3TenantCountryCodes? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.List is not null && (last.List is null || conf.List.SequenceEqual(last.List) == false))
+                return true;
+
+            if (conf.Mode is not null && conf.Mode != last.Mode)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured security headers differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantSecurityHeaders? conf, V2alpha3TenantSecurityHeaders? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (RequiresUpdate(conf.ContentSecurityPolicy, last.ContentSecurityPolicy))
+                return true;
+
+            if (RequiresUpdate(conf.XXssProtection, last.XXssProtection))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured Content-Security-Policy differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantContentSecurityPolicy? conf, V2alpha3TenantContentSecurityPolicy? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            // policy ordering is semantic; policies are pushed as a whole list
+            if (conf.Policies is { } policies)
+            {
+                if (last.Policies is null || policies.Length != last.Policies.Length)
+                    return true;
+
+                for (var i = 0; i < policies.Length; i++)
+                    if (RequiresUpdate(policies[i], last.Policies[i]))
+                        return true;
+            }
+
+            if (RequiresUpdate(conf.ReportingInfrastructure, last.ReportingInfrastructure))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured Content-Security-Policy policy differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantCspPolicy? conf, V2alpha3TenantCspPolicy? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Directives is { } directives)
+            {
+                if (last.Directives is null || directives.Count != last.Directives.Count)
+                    return true;
+
+                foreach (var (key, value) in directives)
+                    if (last.Directives.TryGetValue(key, out var lastValue) == false || value.SequenceEqual(lastValue) == false)
+                        return true;
+            }
+
+            if (conf.Flags is not null && (last.Flags is null || conf.Flags.ToHashSet().SetEquals(last.Flags) == false))
+                return true;
+
+            if (conf.Mode is not null && conf.Mode != last.Mode)
+                return true;
+
+            if (conf.Reporting is { } reporting)
+            {
+                if (last.Reporting is null)
+                    return true;
+
+                if (reporting.ReportToGroup is not null && reporting.ReportToGroup != last.Reporting.ReportToGroup)
+                    return true;
+
+                if (reporting.ReportUri is not null && reporting.ReportUri != last.Reporting.ReportUri)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured Content-Security-Policy reporting infrastructure differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantCspReportingInfrastructure? conf, V2alpha3TenantCspReportingInfrastructure? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.ReportingEndpoints is { } endpoints)
+            {
+                if (last.ReportingEndpoints is null || endpoints.Count != last.ReportingEndpoints.Count)
+                    return true;
+
+                foreach (var (key, value) in endpoints)
+                    if (last.ReportingEndpoints.TryGetValue(key, out var lastValue) == false || value != lastValue)
+                        return true;
+            }
+
+            if (conf.ReportTo is { } reportTo)
+            {
+                if (last.ReportTo is null)
+                    return true;
+
+                if (reportTo.Group is not null && reportTo.Group != last.ReportTo.Group)
+                    return true;
+
+                if (reportTo.MaxAge is not null && reportTo.MaxAge != last.ReportTo.MaxAge)
+                    return true;
+
+                if (reportTo.Endpoints is { } reportToEndpoints)
+                {
+                    if (last.ReportTo.Endpoints is null || reportToEndpoints.Length != last.ReportTo.Endpoints.Length)
+                        return true;
+
+                    for (var i = 0; i < reportToEndpoints.Length; i++)
+                        if (reportToEndpoints[i].Url != last.ReportTo.Endpoints[i].Url)
+                            return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured X-XSS-Protection header differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3TenantXssProtection? conf, V2alpha3TenantXssProtection? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Enabled is not null && conf.Enabled != last.Enabled)
+                return true;
+
+            if (conf.Mode is not null && conf.Mode != last.Mode)
+                return true;
+
+            if (conf.ReportUri is not null && conf.ReportUri != last.ReportUri)
                 return true;
 
             return false;

@@ -204,6 +204,33 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         /// <summary>
+        /// Transforms an Auth0 Management API cross-app access resource app status to the operator's model.
+        /// </summary>
+        internal static V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum? FromApi(CrossAppAccessResourceAppStatusEnum source)
+        {
+            return source.Value switch
+            {
+                CrossAppAccessResourceAppStatusEnum.Values.Enabled => V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled,
+                CrossAppAccessResourceAppStatusEnum.Values.Disabled => V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        /// <summary>
+        /// Transforms the operator's cross-app access resource app status to the Auth0 Management API value.
+        /// </summary>
+        internal static CrossAppAccessResourceAppStatusEnum ToApi(V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum source)
+        {
+            return source switch
+            {
+                V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled => new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Enabled),
+                V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled => new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Disabled),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        /// <summary>
         /// Converts a <see cref="GetConnectionResponseContent"/> API response to a <see cref="V2alpha3ConnectionConf"/>.
         /// Note: <see cref="V2alpha3ConnectionConf.EnabledClients"/> is populated separately and left null here.
         /// <see cref="V2alpha3ConnectionConf.ProvisioningTicketUrl"/> is populated for the enterprise strategies whose
@@ -224,6 +251,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 IsDomainConnection = source.IsDomainConnection,
                 ShowAsButton = source.ShowAsButton,
                 Metadata = source.Metadata is { } md ? new System.Collections.Hashtable(md) : null,
+                CrossAppAccessRequestingApp = source.CrossAppAccessRequestingApp is { } crossAppAccessRequestingApp ? new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = crossAppAccessRequestingApp.Active } : null,
+                CrossAppAccessResourceApp = source.CrossAppAccessResourceApp is { } crossAppAccessResourceApp ? new V2alpha3ConnectionCrossAppAccessResourceApp { Status = FromApi(crossAppAccessResourceApp.Status) } : null,
                 Options = new V2alpha3ConnectionOptions()
             };
 
@@ -1373,6 +1402,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
+                IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported,
                 Type = FromApi(source.Type),
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
@@ -1407,6 +1437,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
+                IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported,
                 Type = FromApi(source.Type),
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
@@ -4268,6 +4299,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DpopSigningAlg is not null)
                 target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            target.IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
             if (source.OidcMetadata is { } oidcMetadata)
@@ -4310,6 +4342,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DpopSigningAlg is not null)
                 target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            target.IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
             if (source.OidcMetadata is { } oidcMetadata)
@@ -4736,6 +4769,12 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.ShowAsButton is not null && conf.ShowAsButton != last.ShowAsButton)
+                return true;
+
+            if (conf.CrossAppAccessRequestingApp is { Active: { } } crossAppAccessRequestingApp && (last.CrossAppAccessRequestingApp is null || crossAppAccessRequestingApp.Active != last.CrossAppAccessRequestingApp.Active))
+                return true;
+
+            if (conf.CrossAppAccessResourceApp is { Status: { } } crossAppAccessResourceApp && (last.CrossAppAccessResourceApp is null || crossAppAccessResourceApp.Status != last.CrossAppAccessResourceApp.Status))
                 return true;
 
             if (RequiresUpdate(conf.Options, last.Options))
@@ -7376,6 +7415,9 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
                 return true;
 
+            if (conf.IdTokenSessionExpirySupported is not null && conf.IdTokenSessionExpirySupported != last.IdTokenSessionExpirySupported)
+                return true;
+
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
                 return true;
 
@@ -7619,6 +7661,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
+                return true;
+
+            if (conf.IdTokenSessionExpirySupported is not null && conf.IdTokenSessionExpirySupported != last.IdTokenSessionExpirySupported)
                 return true;
 
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
@@ -8878,6 +8923,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
+            if (source.CrossAppAccessRequestingApp is { Active: { } crossAppAccessRequestingAppActive })
+                target.CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = crossAppAccessRequestingAppActive };
+
+            if (source.CrossAppAccessResourceApp is { Status: { } crossAppAccessResourceAppStatus })
+                target.CrossAppAccessResourceApp = new CreateCrossAppAccessResourceApp { Status = ToApi(crossAppAccessResourceAppStatus) };
+
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
                 target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
@@ -8899,6 +8950,12 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
+
+            if (source.CrossAppAccessRequestingApp is { Active: { } crossAppAccessRequestingAppActive })
+                target.CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = crossAppAccessRequestingAppActive };
+
+            if (source.CrossAppAccessResourceApp is { Status: { } crossAppAccessResourceAppStatus })
+                target.CrossAppAccessResourceApp = new UpdateCrossAppAccessResourceApp { Status = ToApi(crossAppAccessResourceAppStatus) };
 
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
