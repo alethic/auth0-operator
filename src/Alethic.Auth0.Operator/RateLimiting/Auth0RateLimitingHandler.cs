@@ -54,27 +54,26 @@ namespace Alethic.Auth0.Operator.RateLimiting
             // when the reported budget of the endpoint's rate limit bucket is low, reserve a send slot so
             // consumption slows to Auth0's refill rate instead of draining the bucket; holding the request
             // (and thereby its reconcile slot) is the intended backpressure
-            var endpoint = _pacer is null ? null : Auth0RatePacer.EndpointKeyFor(request);
-            if (endpoint is not null)
+            var endpoint = Auth0RatePacer.EndpointKeyFor(request);
+            if (_pacer is not null)
             {
-                var delay = _pacer!.Reserve(endpoint);
+                var delay = _pacer.Reserve(endpoint);
                 if (delay > TimeSpan.Zero)
                     await Task.Delay(delay, cancellationToken);
             }
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (endpoint is not null)
-                _pacer!.Record(endpoint, response);
+            _pacer?.Record(endpoint, response);
 
             // a 429 opens the circuit for the whole domain; the response still flows back so the SDK surfaces
             // its rate limit error to the requesting reconcile, which reschedules on its own. a successful
             // response reporting the bucket as exhausted opens the circuit preemptively, so the 429 the next
             // request would receive never happens
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                _breaker?.Open(host, response);
+                _breaker?.Open(host, response, endpoint);
             else
-                _breaker?.OpenIfExhausted(host, response);
+                _breaker?.OpenIfExhausted(host, response, endpoint);
 
             return response;
         }
