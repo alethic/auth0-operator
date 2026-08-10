@@ -19,13 +19,19 @@ namespace Alethic.Auth0.Operator.Options
 
         /// <summary>
         /// Maximum burst capacity: the number of requests that may be issued immediately before throttling applies.
+        /// Auth0 also enforces a tenant-wide global bucket across all Management API endpoints combined that is as
+        /// small as 10 requests of burst on self-service plans — and unlike the per-endpoint buckets it is never
+        /// reported in response headers, so adaptive pacing cannot see it depleting. The burst must therefore sit
+        /// well below 10, leaving headroom for the dashboard and other API consumers on the tenant.
         /// </summary>
-        public int TokenLimit { get; set; } = 10;
+        public int TokenLimit { get; set; } = 5;
 
         /// <summary>
         /// Number of request tokens replenished each <see cref="ReplenishmentPeriod"/> (i.e. the sustained rate).
+        /// The default of 2/second (120/minute) stays under the global bucket's sustained refill of 150/minute
+        /// observed on self-service plans; raise it via configuration for tenants on plans with higher limits.
         /// </summary>
-        public int TokensPerPeriod { get; set; } = 5;
+        public int TokensPerPeriod { get; set; } = 2;
 
         /// <summary>
         /// How often <see cref="TokensPerPeriod"/> tokens are added back to the bucket.
