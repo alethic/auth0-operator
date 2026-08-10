@@ -21,6 +21,10 @@ CustomText — as namespaced CRDs under group `kubernetes.auth0.com`.
   shared `ControllerBase`, `V1TenantEntityController`, `V1TenantEntityInstanceController` bases.
 - `src/Alethic.Auth0.Operator/Converters/` — conversion webhooks (one per Kind).
   `Converters/Generated/<Kind>Copy.cs` — structural property-copy converters (see below).
+- `src/Alethic.Auth0.Operator/RateLimiting/` — the client-side limiter, adaptive pacer and circuit breaker
+  applied to all Auth0 Management API traffic. `RateLimiting/Generated/Auth0ManagementApiRoutes.cs` is the
+  Management API route table, generated from Auth0's published OpenAPI spec by the
+  `Update-Auth0ManagementApiRoutes.ps1` beside it — regenerate rather than hand-edit. See Rate limiting.
 - `src/Alethic.Auth0.Operator/Finalizers/` — one finalizer per Kind, **named without a version**
   (`ClientFinalizer`, not `V2alpha3ClientFinalizer`). `Finalizers/Legacy/` holds shims for retired
   identifiers and `EntityFinalizers.cs` is the identifier table. See Finalizers below.
@@ -122,6 +126,31 @@ served version (it would break existing manifests).
 - The `Converters/Generated/<Kind>Copy.cs` files assign **every** model property in both
   `Convert` and `Revert`. When you add/remove a model property, update the Copy accordingly (a
   dropped assignment silently loses data — it won't fail to compile).
+
+## Rate limiting
+
+All Management API traffic goes through one shared `HttpClient` (`Auth0HttpClientProvider`) carrying three
+layers, each guarding a different Auth0 limit:
+
+- **Client-side token bucket**, partitioned by domain. Auth0 enforces a tenant-wide **global** bucket across
+  all endpoints combined (as small as burst 10 / 150 per minute) that **is never reported in response
+  headers** — nothing can observe it depleting, so the client-side defaults (burst 5, 2/second) simply stay
+  under it. Do not raise them without knowing the tenant's plan limits.
+- **Adaptive pacer**, keyed by *rate limit bucket*, not by domain. Auth0 buckets endpoints separately (connection
+  reads are far tighter than the general API), so a single per-domain budget let a generous bucket's headers mask
+  an exhausted one. Each request is classified into a route template (see below) and each response binds that
+  route to a bucket fingerprinted by host + reported `x-ratelimit-limit`. Once a bucket nears exhaustion, sends
+  reserve serialized slots spaced at the refill rate.
+- **Circuit breaker**, per domain, opening on a 429 or a fully exhausted budget until the reported reset.
+
+Requests are classified by matching the **real route table** (`RateLimiting/Generated/`), not by guessing which
+path segments look like identifiers — guessing failed in both directions (lowercase-hex resource server ids read
+as vocabulary; `email-templates/verify`, actually a `{templateName}` value, read as a literal route). Granularity
+matters beyond tidiness: the pacer cannot pace an endpoint key it has never recorded, so a key that varies per
+identifier spends one unpaced request per resource.
+
+Set `Logging__LogLevel__Alethic.Auth0.Operator.RateLimiting=Debug` to log every reported budget, bucket binding
+and pacing delay; circuit open/close logs at warning by default.
 
 ## Build & Test
 

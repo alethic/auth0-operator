@@ -50,9 +50,19 @@ namespace Alethic.Auth0.Operator.RateLimiting
         }
 
         /// <summary>
-        /// Classifies a request into its endpoint key: host, method and path, with identifier segments (those
-        /// containing characters outside lowercase letters, digits and hyphens — Auth0 resource ids always do)
-        /// replaced by <c>*</c> so all requests against the same route template share one key.
+        /// The Auth0 Management API route templates, pre-split into segments. The Management API is a public,
+        /// fixed surface with a published specification, so paths are classified by matching the real route table
+        /// rather than by guessing which segments look like identifiers — guessing both mistakes ids for
+        /// vocabulary (lowercase-hex resource server ids did exactly that) and risks the reverse. A path matching
+        /// no known route still falls back to the heuristic, so an unlisted route degrades rather than breaks.
+        /// </summary>
+        static readonly string[][] Routes = Auth0ManagementApiRoutes.All.Select(x => x.Split('/')).ToArray();
+
+        /// <summary>
+        /// Classifies a request into its endpoint key: host, method and the matched route template, so all
+        /// requests against one route share a key — and therefore one learned bucket binding. Granularity here
+        /// is not cosmetic: <see cref="Reserve"/> cannot pace an endpoint key it has never recorded, so a key
+        /// that varies per identifier spends one unpaced request per resource.
         /// </summary>
         /// <param name="request"></param>
         public static string EndpointKeyFor(HttpRequestMessage request)
@@ -63,17 +73,66 @@ namespace Alethic.Auth0.Operator.RateLimiting
         }
 
         /// <summary>
-        /// Replaces identifier path segments with <c>*</c>, keeping route vocabulary segments intact.
+        /// Reduces a request path to its route template: the known route matching the most literal segments, or
+        /// the heuristic replacement of identifier-looking segments when the path matches no known route.
         /// </summary>
         /// <param name="path"></param>
         internal static string NormalizePath(string path)
         {
             var segments = path.Split('/');
+
+            var best = default(string[]);
+            var bestLiterals = -1;
+
+            foreach (var route in Routes)
+            {
+                if (Matches(route, segments, out var literals) == false)
+                    continue;
+
+                if (literals > bestLiterals)
+                {
+                    best = route;
+                    bestLiterals = literals;
+                }
+            }
+
+            if (best is not null)
+                return string.Join('/', best);
+
             for (var i = 0; i < segments.Length; i++)
                 if (IsIdSegment(segments[i]))
                     segments[i] = "*";
 
             return string.Join('/', segments);
+        }
+
+        /// <summary>
+        /// Whether the path segments satisfy the route template, reporting how many segments matched literally so
+        /// a more specific route (<c>branding/themes/default</c>) wins over a wildcard one
+        /// (<c>branding/themes/*</c>).
+        /// </summary>
+        /// <param name="route"></param>
+        /// <param name="segments"></param>
+        /// <param name="literals"></param>
+        static bool Matches(string[] route, string[] segments, out int literals)
+        {
+            literals = 0;
+
+            if (route.Length != segments.Length)
+                return false;
+
+            for (var i = 0; i < route.Length; i++)
+            {
+                if (route[i] == "*")
+                    continue;
+
+                if (route[i] != segments[i])
+                    return false;
+
+                literals++;
+            }
+
+            return true;
         }
 
         /// <summary>
