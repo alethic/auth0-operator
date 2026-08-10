@@ -655,7 +655,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UseCommonEndpoint = source.UseCommonEndpoint,
                 UseWsfed = source.UseWsfed,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 UseridAttribute = source.UseridAttribute switch
                 {
                     { Value: ConnectionUseridAttributeEnumAzureAd.Values.Oid } => V2alpha3ConnectionUseridAttributeEnumAzureAd.Oid,
@@ -968,9 +967,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 ExtGroupsExtended = source.ExtGroupsExtended,
                 ExtIsAdmin = source.ExtIsAdmin,
                 ExtIsSuspended = source.ExtIsSuspended,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat
-                    ? new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active }
-                    : null,
                 HandleLoginFromSocial = source.HandleLoginFromSocial,
             };
         }
@@ -1381,7 +1377,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
@@ -1416,7 +1411,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
@@ -2247,7 +2241,23 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha3ConnectionAttributeIdentifier FromApi(ConnectionAttributeIdentifier source)
+        internal static V2alpha3ConnectionAttributeIdentifier FromApi(EmailAttributeIdentifier source)
+        {
+            return new V2alpha3ConnectionAttributeIdentifier
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V2alpha3ConnectionAttributeIdentifier FromApi(PhoneAttributeIdentifier source)
+        {
+            return new V2alpha3ConnectionAttributeIdentifier
+            {
+                Active = source.Active,
+            };
+        }
+
+        internal static V2alpha3ConnectionAttributeIdentifier FromApi(UsernameAttributeIdentifier source)
         {
             return new V2alpha3ConnectionAttributeIdentifier
             {
@@ -2643,14 +2653,6 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha3ConnectionFederatedConnectionsAccessTokens FromApi(ConnectionFederatedConnectionsAccessTokens source)
-        {
-            return new V2alpha3ConnectionFederatedConnectionsAccessTokens
-            {
-                Active = source.Active,
-            };
-        }
-
         internal static V2alpha3ConnectionOptionsOidcMetadata FromApi(ConnectionOptionsOidcMetadata source)
         {
             return new V2alpha3ConnectionOptionsOidcMetadata
@@ -2947,7 +2949,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new EmailAttribute
             {
-                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                Identifier = source.Identifier is { } identifier ? new EmailAttributeIdentifier { Active = identifier.Active } : null,
                 Unique = source.Unique,
                 ProfileRequired = source.ProfileRequired,
                 VerificationMethod = ToApi(source.VerificationMethod),
@@ -2959,7 +2961,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new PhoneAttribute
             {
-                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                Identifier = source.Identifier is { } identifier ? new PhoneAttributeIdentifier { Active = identifier.Active } : null,
                 ProfileRequired = source.ProfileRequired,
                 Signup = source.Signup is { } signup ? ToApi(signup) : null,
             };
@@ -2969,18 +2971,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new UsernameAttribute
             {
-                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                Identifier = source.Identifier is { } identifier ? new UsernameAttributeIdentifier { Active = identifier.Active } : null,
                 ProfileRequired = source.ProfileRequired,
                 Signup = source.Signup is { } signup ? ToApi(signup) : null,
                 Validation = source.Validation is { } validation ? ToApi(validation) : null,
-            };
-        }
-
-        internal static ConnectionAttributeIdentifier ToApi(V2alpha3ConnectionAttributeIdentifier source)
-        {
-            return new ConnectionAttributeIdentifier
-            {
-                Active = source.Active,
             };
         }
 
@@ -3196,14 +3190,6 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Active = source.Active,
                 ReturnEnrollSettings = source.ReturnEnrollSettings,
-            };
-        }
-
-        internal static ConnectionFederatedConnectionsAccessTokens ToApi(V2alpha3ConnectionFederatedConnectionsAccessTokens source)
-        {
-            return new ConnectionFederatedConnectionsAccessTokens
-            {
-                Active = source.Active,
             };
         }
 
@@ -3558,8 +3544,6 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtUpn = source.ExtUpn;
             target.ExtUsageLocation = source.ExtUsageLocation;
             target.ExtUserId = source.ExtUserId;
-            if (source.FederatedConnectionsAccessTokens is { } federatedConnectionsAccessTokens)
-                target.FederatedConnectionsAccessTokens = ToApi(federatedConnectionsAccessTokens);
             target.Granted = source.Granted;
             target.IconUrl = source.IconUrl;
             if (source.IdentityApi is not null)
@@ -3906,8 +3890,6 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtIsAdmin = source.ExtIsAdmin;
             target.ExtIsSuspended = source.ExtIsSuspended;
             target.HandleLoginFromSocial = source.HandleLoginFromSocial;
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active };
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4296,8 +4278,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.AttributeMap = ToApi(am);
             if (source.ConnectionSettings is { } cs)
                 target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = ToApi(fcat);
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4340,8 +4320,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.AttributeMap = ToApi(am);
             if (source.ConnectionSettings is { } cs)
                 target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = ToApi(fcat);
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4886,20 +4864,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.Value is not null && conf.Value != last.Value)
-                return true;
-
-            return false;
-        }
-
-        static bool RequiresUpdate(V2alpha3ConnectionFederatedConnectionsAccessTokens? conf, V2alpha3ConnectionFederatedConnectionsAccessTokens? last)
-        {
-            if (conf is null)
-                return false;
-
-            if (last is null)
-                return true;
-
-            if (conf.Active is not null && conf.Active != last.Active)
                 return true;
 
             return false;
@@ -6106,9 +6070,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ExtUserId is not null && conf.ExtUserId != last.ExtUserId)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.Granted is not null && conf.Granted != last.Granted)
                 return true;
 
@@ -6828,9 +6789,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ExtIsSuspended is not null && conf.ExtIsSuspended != last.ExtIsSuspended)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.HandleLoginFromSocial is not null && conf.HandleLoginFromSocial != last.HandleLoginFromSocial)
                 return true;
 
@@ -7397,9 +7355,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
                 return true;
 
@@ -7643,9 +7598,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
-                return true;
-
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
                 return true;
 
             if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
@@ -8957,7 +8909,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.Identifier is { } identifier)
             {
-                target.Identifier ??= new ConnectionAttributeIdentifier();
+                target.Identifier ??= new EmailAttributeIdentifier();
                 ApplyToApi(identifier, target.Identifier);
             }
 
@@ -9008,7 +8960,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.Identifier is { } identifier)
             {
-                target.Identifier ??= new ConnectionAttributeIdentifier();
+                target.Identifier ??= new UsernameAttributeIdentifier();
                 ApplyToApi(identifier, target.Identifier);
             }
 
@@ -9034,7 +8986,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Status = ToApi(status);
         }
 
-        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, ConnectionAttributeIdentifier target)
+        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, EmailAttributeIdentifier target)
+        {
+            if (source.Active is { } active)
+                target.Active = active;
+        }
+
+        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, UsernameAttributeIdentifier target)
         {
             if (source.Active is { } active)
                 target.Active = active;
