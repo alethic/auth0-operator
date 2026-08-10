@@ -283,11 +283,19 @@ namespace Alethic.Auth0.Operator.Converters
                 _ => throw new NotImplementedException(),
             };
 
-            static ClientDefaultOrganization ToApi(V2alpha3ClientDefaultOrganization source) => new()
+            static ClientDefaultOrganization ToApi(V2alpha3ClientDefaultOrganization source)
             {
-                OrganizationId = source.OrganizationId,
-                Flows = source.Flows?.Select(ToApi).ToArray(),
-            };
+                var target = new ClientDefaultOrganization
+                {
+                    // required by the SDK but optional in the CRD model; conversion must tolerate an absent value, so pass through unchecked
+                    OrganizationId = source.OrganizationId!,
+                };
+
+                if (source.Flows is { } flows)
+                    target.Flows = flows.Select(ToApi).ToArray();
+
+                return target;
+            }
 
             static ClientDefaultOrganizationFlowsEnum ToApi(V2alpha3ClientDefaultOrganizationFlowsEnum source) => source switch
             {

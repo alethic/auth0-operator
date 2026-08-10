@@ -80,7 +80,7 @@ namespace Alethic.Auth0.Operator.Tests
                 Id = "con_metadata",
                 Name = "x",
                 Strategy = ConnectionResponseContentAuth0Strategy.Values.Auth0,
-                Metadata = new System.Collections.Generic.Dictionary<string, string> { ["env"] = "prod" },
+                Metadata = new System.Collections.Generic.Dictionary<string, string?> { ["env"] = "prod" },
             };
 
             var result = V2alpha3ConnectionController.FromApi(source);
@@ -231,7 +231,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var source = new ConnectionOptionsGitHub
             {
-                UpstreamParams = global::Auth0.ManagementApi.Core.Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties>?>.Of(
+                UpstreamParams = global::Auth0.ManagementApi.Core.Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(
                     new Dictionary<string, ConnectionUpstreamAdditionalProperties?>
                     {
                         ["login_hint"] = ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamValue(
@@ -253,7 +253,7 @@ namespace Alethic.Auth0.Operator.Tests
             var source = new ConnectionOptionsPingFederate
             {
                 PingFederateBaseUrl = "https://pingfed.example",
-                UpstreamParams = global::Auth0.ManagementApi.Core.Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties>?>.Of(
+                UpstreamParams = global::Auth0.ManagementApi.Core.Optional<Dictionary<string, ConnectionUpstreamAdditionalProperties?>?>.Of(
                     new Dictionary<string, ConnectionUpstreamAdditionalProperties?>
                     {
                         ["resource"] = ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(
@@ -274,7 +274,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             var source = new ConnectionOptionsFacebook
             {
-                UpstreamParams = new Dictionary<string, ConnectionUpstreamAdditionalProperties?>
+                UpstreamParams = new Dictionary<string, ConnectionUpstreamAdditionalProperties>
                 {
                     ["prompt"] = ConnectionUpstreamAdditionalProperties.FromConnectionUpstreamAlias(
                         new ConnectionUpstreamAlias { Alias = ConnectionUpstreamAliasEnum.Prompt }),
@@ -380,9 +380,10 @@ namespace Alethic.Auth0.Operator.Tests
 
             var result = InvokeConvert(source);
 
-            Assert.IsNotNull(result.Spec.Conf?.Options?.Saml?.DecryptionKey);
-            Assert.AreEqual("pem-value", result.Spec.Conf.Options.Saml.DecryptionKey.PrivateKey);
-            Assert.IsNull(result.Spec.Conf.Options.Saml.DecryptionKey.KeyPair);
+            var decryptionKey = result.Spec.Conf?.Options?.Saml?.DecryptionKey;
+            Assert.IsNotNull(decryptionKey);
+            Assert.AreEqual("pem-value", decryptionKey.PrivateKey);
+            Assert.IsNull(decryptionKey.KeyPair);
         }
 
         [TestMethod]

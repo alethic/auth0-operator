@@ -232,7 +232,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (self is null)
                 throw new InvalidOperationException();
 
-            return self.Id;
+            return self.Id ?? throw new InvalidOperationException("Create response missing client grant ID.");
         }
 
         /// <inheritdoc />

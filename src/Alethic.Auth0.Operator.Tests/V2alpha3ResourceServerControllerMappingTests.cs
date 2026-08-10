@@ -379,9 +379,11 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.IsTrue(req.EnforcePolicies);
             Assert.AreEqual(ResourceServerConsentPolicyEnum.Values.TransactionalAuthorizationWithMfa, req.ConsentPolicy.Value?.Value);
             Assert.AreEqual("pol_123", req.AuthorizationPolicy.Value!.PolicyId);
+            Assert.IsNotNull(req.SubjectTypeAuthorization);
             Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationClientPolicyEnum.Values.RequireClientGrant.ToString(), req.SubjectTypeAuthorization.Client!.Policy!.Value.ToString());
             Assert.AreEqual<string>(ResourceServerSubjectTypeAuthorizationUserPolicyEnum.Values.AllowAll.ToString(), req.SubjectTypeAuthorization.User!.Policy!.Value.ToString());
-            Assert.AreEqual(1, req.Scopes!.Count());
+            Assert.IsNotNull(req.Scopes);
+            Assert.AreEqual(1, req.Scopes.Count());
             Assert.AreEqual("read:data", req.Scopes.First().Value);
         }
 

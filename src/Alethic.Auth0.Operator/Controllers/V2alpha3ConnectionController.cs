@@ -3209,10 +3209,13 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsOidcMetadata ToApi(V2alpha3ConnectionOptionsOidcMetadata source)
         {
-            return new ConnectionOptionsOidcMetadata
+            var target = new ConnectionOptionsOidcMetadata
             {
+                // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+                AuthorizationEndpoint = source.AuthorizationEndpoint!,
+                Issuer = source.Issuer!,
+                JwksUri = source.JwksUri!,
                 AcrValuesSupported = source.AcrValuesSupported,
-                AuthorizationEndpoint = source.AuthorizationEndpoint,
                 ClaimTypesSupported = source.ClaimTypesSupported,
                 ClaimsLocalesSupported = source.ClaimsLocalesSupported,
                 ClaimsParameterSupported = source.ClaimsParameterSupported,
@@ -3223,9 +3226,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 GrantTypesSupported = source.GrantTypesSupported,
                 IdTokenEncryptionAlgValuesSupported = source.IdTokenEncryptionAlgValuesSupported,
                 IdTokenEncryptionEncValuesSupported = source.IdTokenEncryptionEncValuesSupported,
-                IdTokenSigningAlgValuesSupported = source.IdTokenSigningAlgValuesSupported,
-                Issuer = source.Issuer,
-                JwksUri = source.JwksUri,
                 OpPolicyUri = source.OpPolicyUri,
                 OpTosUri = source.OpTosUri,
                 RegistrationEndpoint = source.RegistrationEndpoint,
@@ -3249,6 +3249,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 UserinfoSigningAlgValuesSupported = source.UserinfoSigningAlgValuesSupported,
                 ScopesSupported = source.ScopesSupported is { } scopesSupported ? Optional<IEnumerable<string>?>.Of(scopesSupported) : default,
             };
+
+            if (source.IdTokenSigningAlgValuesSupported is { } idTokenSigningAlgValuesSupported)
+                target.IdTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported;
+
+            return target;
         }
 
         internal static Optional<IEnumerable<ConnectionIdTokenSignedResponseAlgEnum>?> ToApi(IEnumerable<V2alpha3ConnectionIdTokenSignedResponseAlgEnum> source)
@@ -3502,7 +3507,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsAzureAd ToApi(V2alpha3ConnectionOptionsAzureAd source)
         {
-            var target = new ConnectionOptionsAzureAd { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            var target = new ConnectionOptionsAzureAd { ClientId = source.ClientId!, ClientSecret = source.ClientSecret };
             target.ApiEnableUsers = source.ApiEnableUsers;
             target.AppDomain = source.AppDomain;
             target.AppId = source.AppId;
@@ -3878,7 +3883,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsGoogleApps ToApi(V2alpha3ConnectionOptionsGoogleApps source)
         {
-            var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            var target = new ConnectionOptionsGoogleApps { ClientId = source.ClientId!, ClientSecret = source.ClientSecret };
             if (source.Scope is { } scope)
                 target.Scope = scope;
             target.Domain = source.Domain;
@@ -4260,7 +4265,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsOidc ToApi(V2alpha3ConnectionOptionsOidc source)
         {
-            var target = new ConnectionOptionsOidc { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            var target = new ConnectionOptionsOidc { ClientId = source.ClientId!, ClientSecret = source.ClientSecret };
             target.DiscoveryUrl = source.DiscoveryUrl;
             target.AuthorizationEndpoint = source.AuthorizationEndpoint;
             target.TokenEndpoint = source.TokenEndpoint;
@@ -4304,7 +4309,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsOkta ToApi(V2alpha3ConnectionOptionsOkta source)
         {
-            var target = new ConnectionOptionsOkta { ClientId = source.ClientId, ClientSecret = source.ClientSecret };
+            var target = new ConnectionOptionsOkta { ClientId = source.ClientId!, ClientSecret = source.ClientSecret };
             target.Domain = source.Domain;
             target.AuthorizationEndpoint = source.AuthorizationEndpoint;
             target.TokenEndpoint = source.TokenEndpoint;
@@ -4368,7 +4373,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ConnectionOptionsPingFederate ToApi(V2alpha3ConnectionOptionsPingFederate source)
         {
-            var target = new ConnectionOptionsPingFederate { PingFederateBaseUrl = source.PingFederateBaseUrl };
+            var target = new ConnectionOptionsPingFederate { PingFederateBaseUrl = source.PingFederateBaseUrl! };
             target.SignInEndpoint = source.SignInEndpoint;
             target.EntityId = source.EntityId;
             target.Cert = source.Cert;
@@ -8816,7 +8821,7 @@ namespace Alethic.Auth0.Operator.Controllers
                 throw new InvalidOperationException();
 
             Logger.LogInformation("{EntityTypeName} successfully created connection in Auth0 with ID: {ConnectionId}, name: {ConnectionName} and strategy: {Strategy}", EntityTypeName, self.Id, conf.Name, conf.Strategy);
-            return self.Id;
+            return self.Id ?? throw new InvalidOperationException("Create response missing connection ID.");
         }
 
         /// <inheritdoc />

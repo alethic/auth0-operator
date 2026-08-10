@@ -130,7 +130,7 @@ namespace Alethic.Auth0.Operator.Tests
         {
             // the SDK deserializes the untyped screens as JsonElement values; parsing them wrongly made the
             // read-back empty and re-issued the full-replace write every cycle in labs
-            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(
                 """{"login":{"description":"Log in to ${companyName} to start exploring!","title":"Welcome to Sweep!"}}""");
 
             var last = V2alpha3CustomTextController.FromApiScreens(apiShape);
@@ -149,7 +149,7 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void CustomText_JsonElementReadback_ChangedValueStillDetected()
         {
-            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+            var apiShape = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(
                 """{"login":{"title":"Old Title"}}""");
 
             var last = V2alpha3CustomTextController.FromApiScreens(apiShape);

@@ -63,7 +63,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return null;
         }
 
-        internal static Dictionary<string, V2alpha3CustomTextScreen>? FromApiScreens(Dictionary<string, object>? source)
+        internal static Dictionary<string, V2alpha3CustomTextScreen>? FromApiScreens(Dictionary<string, object?>? source)
         {
             if (source is null)
                 return null;
@@ -121,9 +121,9 @@ namespace Alethic.Auth0.Operator.Controllers
             return false;
         }
 
-        static Dictionary<string, object> ToApiScreens(Dictionary<string, V2alpha3CustomTextScreen> source)
+        static Dictionary<string, object?> ToApiScreens(Dictionary<string, V2alpha3CustomTextScreen> source)
         {
-            var result = new Dictionary<string, object>();
+            var result = new Dictionary<string, object?>();
 
             foreach (var kvp in source)
             {

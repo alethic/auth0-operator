@@ -44,7 +44,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Id = source.Id,
             Identifier = source.Identifier,
             Name = source.Name,
-            Scopes = source.Scopes?.Select(FromApi).ToArray(),
+            Scopes = source.Scopes?.Select(i => FromApi(i)).ToArray(),
             SigningAlgorithm = FromApi(source.SigningAlg),
             SigningSecret = source.SigningSecret,
             TokenLifetime = source.TokenLifetime,
@@ -69,7 +69,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Id = source.Id,
             Identifier = source.Identifier,
             Name = source.Name,
-            Scopes = source.Scopes?.Select(FromApi).ToArray(),
+            Scopes = source.Scopes?.Select(i => FromApi(i)).ToArray(),
             SigningAlgorithm = FromApi(source.SigningAlg),
             SigningSecret = source.SigningSecret,
             TokenLifetime = source.TokenLifetime,
@@ -240,7 +240,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ResourceServerAuthorizationPolicy ToApi(V2alpha3ResourceServerAuthorizationPolicy source) => new()
         {
-            PolicyId = source.PolicyId,
+            PolicyId = source.PolicyId ?? throw new InvalidOperationException("AuthorizationPolicy is missing a policy ID."),
         };
 
         internal static ResourceServerSubjectTypeAuthorization ToApi(V2alpha3ResourceServerSubjectTypeAuthorization source) => new()
@@ -268,7 +268,7 @@ namespace Alethic.Auth0.Operator.Controllers
         internal static ResourceServerTokenEncryption ToApi(V2alpha3ResourceServerTokenEncryption source) => new()
         {
             Format = ToApi(source.Format ?? default),
-            EncryptionKey = source.EncryptionKey is { } key ? ToApi(key) : null,
+            EncryptionKey = source.EncryptionKey is { } key ? ToApi(key) : throw new InvalidOperationException("TokenEncryption is missing an encryption key."),
         };
 
         internal static ResourceServerTokenEncryptionKey ToApi(V2alpha3ResourceServerTokenEncryptionKey source) => new()
@@ -308,7 +308,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
         internal static ResourceServerScope ToApi(V2alpha3ResourceServerScope source) => new()
         {
-            Value = source.Value,
+            Value = source.Value ?? throw new InvalidOperationException("Scope is missing a value."),
             Description = source.Description,
         };
 
@@ -476,7 +476,7 @@ namespace Alethic.Auth0.Operator.Controllers
             var req = new CreateResourceServerRequestContent { Identifier = conf.Identifier ?? throw new InvalidOperationException("Identifier is required.") };
             ApplyToApi(conf, req);
             var self = await api.ResourceServers.CreateAsync(req, null, cancellationToken);
-            return self.Id;
+            return self.Id ?? throw new InvalidOperationException("Create response missing resource server ID.");
         }
 
         /// <summary>
