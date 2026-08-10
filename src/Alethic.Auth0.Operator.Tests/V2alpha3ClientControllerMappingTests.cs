@@ -871,6 +871,98 @@ namespace Alethic.Auth0.Operator.Tests
             return Activator.CreateInstance(converterType!, nonPublic: true)!;
         }
 
+        // ──────────────────────── FedCM / ID-JAG / native social login ───────────
+
+        [TestMethod]
+        public void FromApi_Client_MapsFedCmLoginAndGrantAndNativeSocialLogin()
+        {
+            var result = V2alpha3ClientController.FromApi(new GetClientResponseContent
+            {
+                FedcmLogin = new FedCmLogin { Google = new FedCmLoginGoogle { IsEnabled = true } },
+                IdentityAssertionAuthorizationGrant = new IdentityAssertionAuthorizationGrant { Active = true },
+                NativeSocialLogin = new NativeSocialLogin
+                {
+                    Apple = new NativeSocialLoginApple { Enabled = true },
+                    Facebook = new NativeSocialLoginFacebook { Enabled = false },
+                    Google = new NativeSocialLoginGoogle { Enabled = true },
+                },
+            });
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.FedCmLogin?.Google?.IsEnabled);
+            Assert.IsTrue(result.IdentityAssertionAuthorizationGrant?.Active);
+            Assert.IsTrue(result.NativeSocialLogin?.Apple?.Enabled);
+            Assert.IsFalse(result.NativeSocialLogin?.Facebook?.Enabled);
+            Assert.IsTrue(result.NativeSocialLogin?.Google?.Enabled);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_SetsFedCmLoginAndGrantAndNativeSocialLogin()
+        {
+            var request = new CreateClientRequestContent { Name = "test" };
+            V2alpha3ClientController.ApplyToApi(new V2alpha3ClientConf
+            {
+                FedCmLogin = new V2alpha3ClientFedCmLogin { Google = new V2alpha3ClientFedCmLoginGoogle { IsEnabled = true } },
+                IdentityAssertionAuthorizationGrant = new V2alpha3ClientIdentityAssertionAuthorizationGrant { Active = true },
+                NativeSocialLogin = new V2alpha3ClientNativeSocialLogin
+                {
+                    Apple = new V2alpha3ClientNativeSocialLoginProvider { Enabled = true },
+                },
+            }, request);
+
+            Assert.IsTrue(request.FedcmLogin?.Google?.IsEnabled);
+            Assert.IsTrue(request.IdentityAssertionAuthorizationGrant?.Active);
+            Assert.IsTrue(request.NativeSocialLogin?.Apple?.Enabled);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Update_SetsFedCmLoginAndGrantAndNativeSocialLogin()
+        {
+            var request = new UpdateClientRequestContent();
+            V2alpha3ClientController.ApplyToApi(new V2alpha3ClientConf
+            {
+                FedCmLogin = new V2alpha3ClientFedCmLogin { Google = new V2alpha3ClientFedCmLoginGoogle { IsEnabled = false } },
+                IdentityAssertionAuthorizationGrant = new V2alpha3ClientIdentityAssertionAuthorizationGrant { Active = false },
+                NativeSocialLogin = new V2alpha3ClientNativeSocialLogin
+                {
+                    Facebook = new V2alpha3ClientNativeSocialLoginProvider { Enabled = true },
+                },
+            }, request);
+
+            Assert.IsTrue(request.FedcmLogin.IsDefined);
+            Assert.IsTrue(request.FedcmLogin.Value!.Google.IsDefined);
+            Assert.IsFalse(request.FedcmLogin.Value!.Google.Value!.IsEnabled);
+            Assert.IsTrue(request.IdentityAssertionAuthorizationGrant.IsDefined);
+            Assert.IsFalse(request.IdentityAssertionAuthorizationGrant.Value!.Active);
+            Assert.IsTrue(request.NativeSocialLogin.IsDefined);
+            Assert.IsTrue(request.NativeSocialLogin.Value!.Facebook.IsDefined);
+            Assert.IsTrue(request.NativeSocialLogin.Value!.Facebook.Value!.Enabled);
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_DetectsFedCmAndNativeSocialLoginDrift()
+        {
+            var conf = new V2alpha3ClientConf
+            {
+                FedCmLogin = new V2alpha3ClientFedCmLogin { Google = new V2alpha3ClientFedCmLoginGoogle { IsEnabled = true } },
+                IdentityAssertionAuthorizationGrant = new V2alpha3ClientIdentityAssertionAuthorizationGrant { Active = true },
+                NativeSocialLogin = new V2alpha3ClientNativeSocialLogin { Google = new V2alpha3ClientNativeSocialLoginProvider { Enabled = true } },
+            };
+
+            var same = new V2alpha3ClientConf
+            {
+                FedCmLogin = new V2alpha3ClientFedCmLogin { Google = new V2alpha3ClientFedCmLoginGoogle { IsEnabled = true } },
+                IdentityAssertionAuthorizationGrant = new V2alpha3ClientIdentityAssertionAuthorizationGrant { Active = true },
+                NativeSocialLogin = new V2alpha3ClientNativeSocialLogin { Google = new V2alpha3ClientNativeSocialLoginProvider { Enabled = true } },
+            };
+
+            Assert.IsFalse(V2alpha3ClientController.ConfRequiresUpdate(conf, same));
+            Assert.IsTrue(V2alpha3ClientController.ConfRequiresUpdate(conf, new V2alpha3ClientConf()));
+
+            same.NativeSocialLogin!.Google!.Enabled = false;
+            Assert.IsTrue(V2alpha3ClientController.ConfRequiresUpdate(conf, same));
+        }
+
     }
 
 }

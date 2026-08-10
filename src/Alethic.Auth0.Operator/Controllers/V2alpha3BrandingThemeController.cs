@@ -294,6 +294,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Borders = ToApi(conf.Borders),
             Colors = ToApi(conf.Colors),
             Fonts = ToApi(conf.Fonts),
+            Identifiers = ToApi(conf.Identifiers),
             Widget = ToApi(conf.Widget),
             PageBackground = ToApi(conf.PageBackground),
         };
@@ -308,8 +309,103 @@ namespace Alethic.Auth0.Operator.Controllers
             Borders = ToApi(conf.Borders, existing?.Borders),
             Colors = ToApi(conf.Colors, existing?.Colors),
             Fonts = ToApi(conf.Fonts, existing?.Fonts),
+            Identifiers = ToApi(conf.Identifiers, existing?.Identifiers),
             Widget = ToApi(conf.Widget, existing?.Widget),
             PageBackground = ToApi(conf.PageBackground, existing?.PageBackground),
+        };
+
+        /// <summary>
+        /// Converts the specified identifiers configuration to the API type, layering <paramref name="source"/>
+        /// over <paramref name="existing"/>. Returns null when neither is present so themes on tenants without the
+        /// early access universal_login_theme_identifiers feature are never sent the field.
+        /// </summary>
+        internal static BrandingThemeIdentifiers? ToApi(V2alpha3BrandingThemeIdentifiers? source, BrandingThemeIdentifiers? existing = null)
+        {
+            if (source is null && existing is null)
+                return null;
+
+            return new()
+            {
+                LoginDisplay = source?.LoginDisplay is { } loginDisplay ? ToApi(loginDisplay) : existing?.LoginDisplay ?? new BrandingThemeIdentifiersLoginDisplayEnum(BrandingThemeIdentifiersLoginDisplayEnum.Values.Unified),
+                OtpAutocomplete = source?.OtpAutocomplete ?? existing?.OtpAutocomplete ?? true,
+                PhoneDisplay = ToApi(source?.PhoneDisplay, existing?.PhoneDisplay),
+            };
+        }
+
+        /// <summary>
+        /// Converts the specified phone display configuration to the API type, layering <paramref name="source"/>
+        /// over <paramref name="existing"/>.
+        /// </summary>
+        internal static BrandingThemeIdentifiersPhoneDisplay ToApi(V2alpha3BrandingThemePhoneDisplay? source, BrandingThemeIdentifiersPhoneDisplay? existing = null) => new()
+        {
+            Formatting = source?.Formatting is { } formatting ? ToApi(formatting) : existing?.Formatting ?? new BrandingThemeIdentifiersPhoneDisplayFormattingEnum(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.International),
+            Masking = source?.Masking is { } masking ? ToApi(masking) : existing?.Masking ?? new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.MaskDigits),
+        };
+
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        internal static BrandingThemeIdentifiersLoginDisplayEnum ToApi(V2alpha3BrandingThemeLoginDisplay source) => source switch
+        {
+            V2alpha3BrandingThemeLoginDisplay.Separate => new BrandingThemeIdentifiersLoginDisplayEnum(BrandingThemeIdentifiersLoginDisplayEnum.Values.Separate),
+            V2alpha3BrandingThemeLoginDisplay.Unified => new BrandingThemeIdentifiersLoginDisplayEnum(BrandingThemeIdentifiersLoginDisplayEnum.Values.Unified),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        internal static BrandingThemeIdentifiersPhoneDisplayFormattingEnum ToApi(V2alpha3BrandingThemePhoneFormatting source) => source switch
+        {
+            V2alpha3BrandingThemePhoneFormatting.International => new BrandingThemeIdentifiersPhoneDisplayFormattingEnum(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.International),
+            V2alpha3BrandingThemePhoneFormatting.Regional => new BrandingThemeIdentifiersPhoneDisplayFormattingEnum(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.Regional),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        /// <summary>
+        /// Transforms the specified source to the API type.
+        /// </summary>
+        internal static BrandingThemeIdentifiersPhoneDisplayMaskingEnum ToApi(V2alpha3BrandingThemePhoneMasking source) => source switch
+        {
+            V2alpha3BrandingThemePhoneMasking.HideCountryCode => new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.HideCountryCode),
+            V2alpha3BrandingThemePhoneMasking.MaskDigits => new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.MaskDigits),
+            V2alpha3BrandingThemePhoneMasking.ShowAll => new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.ShowAll),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        internal static V2alpha3BrandingThemeIdentifiers? FromApi(BrandingThemeIdentifiers? source) => source is null ? null : new()
+        {
+            LoginDisplay = source.LoginDisplay.Value switch
+            {
+                BrandingThemeIdentifiersLoginDisplayEnum.Values.Separate => V2alpha3BrandingThemeLoginDisplay.Separate,
+                BrandingThemeIdentifiersLoginDisplayEnum.Values.Unified => V2alpha3BrandingThemeLoginDisplay.Unified,
+                _ => null,
+            },
+            OtpAutocomplete = source.OtpAutocomplete,
+            PhoneDisplay = FromApi(source.PhoneDisplay),
+        };
+
+        /// <summary>
+        /// Transforms the specified source from the API type.
+        /// </summary>
+        internal static V2alpha3BrandingThemePhoneDisplay? FromApi(BrandingThemeIdentifiersPhoneDisplay? source) => source is null ? null : new()
+        {
+            Formatting = source.Formatting.Value switch
+            {
+                BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.International => V2alpha3BrandingThemePhoneFormatting.International,
+                BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.Regional => V2alpha3BrandingThemePhoneFormatting.Regional,
+                _ => null,
+            },
+            Masking = source.Masking.Value switch
+            {
+                BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.HideCountryCode => V2alpha3BrandingThemePhoneMasking.HideCountryCode,
+                BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.MaskDigits => V2alpha3BrandingThemePhoneMasking.MaskDigits,
+                BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.ShowAll => V2alpha3BrandingThemePhoneMasking.ShowAll,
+                _ => null,
+            },
         };
 
         /// <summary>
@@ -323,6 +419,7 @@ namespace Alethic.Auth0.Operator.Controllers
             Borders = FromApi(source.Borders),
             Colors = FromApi(source.Colors),
             Fonts = FromApi(source.Fonts),
+            Identifiers = FromApi(source.Identifiers),
             PageBackground = FromApi(source.PageBackground),
             Widget = FromApi(source.Widget),
         };
@@ -616,10 +713,58 @@ namespace Alethic.Auth0.Operator.Controllers
             if (RequiresUpdate(conf.Fonts, last.Fonts))
                 return true;
 
+            if (RequiresUpdate(conf.Identifiers, last.Identifiers))
+                return true;
+
             if (RequiresUpdate(conf.PageBackground, last.PageBackground))
                 return true;
 
             if (RequiresUpdate(conf.Widget, last.Widget))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured identifiers differ from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemeIdentifiers? conf, V2alpha3BrandingThemeIdentifiers? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.LoginDisplay is not null && conf.LoginDisplay != last.LoginDisplay)
+                return true;
+
+            if (conf.OtpAutocomplete is not null && conf.OtpAutocomplete != last.OtpAutocomplete)
+                return true;
+
+            if (RequiresUpdate(conf.PhoneDisplay, last.PhoneDisplay))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured phone display differs from the last observed value.
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="last"></param>
+        internal static bool RequiresUpdate(V2alpha3BrandingThemePhoneDisplay? conf, V2alpha3BrandingThemePhoneDisplay? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Formatting is not null && conf.Formatting != last.Formatting)
+                return true;
+
+            if (conf.Masking is not null && conf.Masking != last.Masking)
                 return true;
 
             return false;

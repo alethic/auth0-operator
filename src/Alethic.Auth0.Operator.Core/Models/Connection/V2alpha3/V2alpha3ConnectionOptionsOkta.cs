@@ -75,6 +75,10 @@ public record V2alpha3ConnectionOptionsOkta
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Scope { get; set; }
 
+    [JsonPropertyName("idTokenSessionExpirySupported")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IdTokenSessionExpirySupported { get; set; }
+
     [JsonPropertyName("sendBackChannelNonce")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? SendBackChannelNonce { get; set; }

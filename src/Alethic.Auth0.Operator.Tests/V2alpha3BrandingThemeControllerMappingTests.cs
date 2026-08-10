@@ -223,6 +223,105 @@ namespace Alethic.Auth0.Operator.Tests
         [TestMethod]
         public void ToUpdateRequest_DisplayName_DefaultsWhenConfAndExistingNull() => Assert.AreEqual(V2alpha3BrandingThemeController.DefaultDisplayName, V2alpha3BrandingThemeController.ToUpdateRequest(new V2alpha3BrandingThemeConf { DisplayName = null }, new GetBrandingThemeResponseContent { Borders = null!, Colors = null!, DisplayName = null!, Fonts = null!, PageBackground = null!, ThemeId = null!, Widget = null! }).DisplayName);
 
+        // ──────────────────────── Identifiers ────────────────────────────────────
+
+        [TestMethod]
+        public void FromApi_Identifiers_MapsFields()
+        {
+            var result = V2alpha3BrandingThemeController.FromApi(new BrandingThemeIdentifiers
+            {
+                LoginDisplay = new BrandingThemeIdentifiersLoginDisplayEnum(BrandingThemeIdentifiersLoginDisplayEnum.Values.Separate),
+                OtpAutocomplete = false,
+                PhoneDisplay = new BrandingThemeIdentifiersPhoneDisplay
+                {
+                    Formatting = new BrandingThemeIdentifiersPhoneDisplayFormattingEnum(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.Regional),
+                    Masking = new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.HideCountryCode),
+                },
+            });
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(V2alpha3BrandingThemeLoginDisplay.Separate, result.LoginDisplay);
+            Assert.IsFalse(result.OtpAutocomplete);
+            Assert.AreEqual(V2alpha3BrandingThemePhoneFormatting.Regional, result.PhoneDisplay?.Formatting);
+            Assert.AreEqual(V2alpha3BrandingThemePhoneMasking.HideCountryCode, result.PhoneDisplay?.Masking);
+        }
+
+        [TestMethod]
+        public void FromApi_Identifiers_Null_Returns_Null()
+        {
+            Assert.IsNull(V2alpha3BrandingThemeController.FromApi((BrandingThemeIdentifiers?)null));
+        }
+
+        [TestMethod]
+        public void ToApi_Identifiers_NullConfAndExisting_Returns_Null()
+        {
+            // themes on tenants without the early access feature must never be sent identifiers
+            Assert.IsNull(V2alpha3BrandingThemeController.ToApi((V2alpha3BrandingThemeIdentifiers?)null, null));
+        }
+
+        [TestMethod]
+        public void ToApi_Identifiers_LayersConfOverExisting()
+        {
+            var existing = new BrandingThemeIdentifiers
+            {
+                LoginDisplay = new BrandingThemeIdentifiersLoginDisplayEnum(BrandingThemeIdentifiersLoginDisplayEnum.Values.Separate),
+                OtpAutocomplete = false,
+                PhoneDisplay = new BrandingThemeIdentifiersPhoneDisplay
+                {
+                    Formatting = new BrandingThemeIdentifiersPhoneDisplayFormattingEnum(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.Regional),
+                    Masking = new BrandingThemeIdentifiersPhoneDisplayMaskingEnum(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.ShowAll),
+                },
+            };
+
+            var result = V2alpha3BrandingThemeController.ToApi(new V2alpha3BrandingThemeIdentifiers
+            {
+                LoginDisplay = V2alpha3BrandingThemeLoginDisplay.Unified,
+            }, existing);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(BrandingThemeIdentifiersLoginDisplayEnum.Values.Unified, result.LoginDisplay.Value);
+            Assert.IsFalse(result.OtpAutocomplete);
+            Assert.AreEqual(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.Regional, result.PhoneDisplay.Formatting.Value);
+            Assert.AreEqual(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.ShowAll, result.PhoneDisplay.Masking.Value);
+        }
+
+        [TestMethod]
+        public void ToApi_Identifiers_FillsDefaultsWhenUnspecified()
+        {
+            var result = V2alpha3BrandingThemeController.ToApi(new V2alpha3BrandingThemeIdentifiers(), null);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(BrandingThemeIdentifiersLoginDisplayEnum.Values.Unified, result.LoginDisplay.Value);
+            Assert.IsTrue(result.OtpAutocomplete);
+            Assert.AreEqual(BrandingThemeIdentifiersPhoneDisplayFormattingEnum.Values.International, result.PhoneDisplay.Formatting.Value);
+            Assert.AreEqual(BrandingThemeIdentifiersPhoneDisplayMaskingEnum.Values.MaskDigits, result.PhoneDisplay.Masking.Value);
+        }
+
+        [TestMethod]
+        public void RequiresUpdate_Identifiers_DetectsDrift()
+        {
+            var conf = new V2alpha3BrandingThemeIdentifiers
+            {
+                LoginDisplay = V2alpha3BrandingThemeLoginDisplay.Unified,
+                OtpAutocomplete = true,
+                PhoneDisplay = new V2alpha3BrandingThemePhoneDisplay { Formatting = V2alpha3BrandingThemePhoneFormatting.International },
+            };
+
+            var same = new V2alpha3BrandingThemeIdentifiers
+            {
+                LoginDisplay = V2alpha3BrandingThemeLoginDisplay.Unified,
+                OtpAutocomplete = true,
+                PhoneDisplay = new V2alpha3BrandingThemePhoneDisplay { Formatting = V2alpha3BrandingThemePhoneFormatting.International },
+            };
+
+            Assert.IsFalse(V2alpha3BrandingThemeController.RequiresUpdate((V2alpha3BrandingThemeIdentifiers?)null, null));
+            Assert.IsFalse(V2alpha3BrandingThemeController.RequiresUpdate(conf, same));
+            Assert.IsTrue(V2alpha3BrandingThemeController.RequiresUpdate(conf, null));
+
+            same.OtpAutocomplete = false;
+            Assert.IsTrue(V2alpha3BrandingThemeController.RequiresUpdate(conf, same));
+        }
+
     }
 
 }

@@ -7,7 +7,7 @@
         <ChartPackage>$(ChartName)-$(Version).tgz</ChartPackage>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="YamlDotNet" Version="16.3.0" GeneratePathProperty="true" />
+        <PackageReference Include="YamlDotNet" Version="18.1.0" GeneratePathProperty="true" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Alethic.Auth0.Operator\Alethic.Auth0.Operator.csproj" />

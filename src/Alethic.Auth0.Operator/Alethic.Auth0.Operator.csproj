@@ -18,15 +18,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Auth0.AuthenticationApi" Version="7.46.0" />
-        <PackageReference Include="Auth0.ManagementApi" Version="8.3.0" />
-        <PackageReference Include="KubeOps.Generator" Version="12.0.0">
+        <PackageReference Include="Auth0.AuthenticationApi" Version="7.48.0" />
+        <PackageReference Include="Auth0.ManagementApi" Version="9.2.0" />
+        <PackageReference Include="KubeOps.Generator" Version="13.1.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="KubeOps.Operator" Version="12.0.0" />
-        <PackageReference Include="KubeOps.Operator.Web" Version="12.0.0" />
-        <PackageReference Include="System.Threading.RateLimiting" Version="10.0.9" />
+        <PackageReference Include="KubeOps.Operator" Version="13.1.0" />
+        <PackageReference Include="KubeOps.Operator.Web" Version="13.1.0" />
+        <PackageReference Include="System.Threading.RateLimiting" Version="10.0.10" />
     </ItemGroup>
 
     <ItemGroup>

@@ -64,6 +64,9 @@ namespace Alethic.Auth0.Operator.Controllers
             RequireProofOfPossession = source.RequireProofOfPossession,
             AddOns = source.Addons is { } addons ? FromApi(addons) : null,
             ApplicationType = FromApi(source.AppType),
+            FedCmLogin = source.FedcmLogin is { } fedcmLogin ? FromApi(fedcmLogin) : null,
+            IdentityAssertionAuthorizationGrant = source.IdentityAssertionAuthorizationGrant is { } identityAssertionAuthorizationGrant ? new V2alpha3ClientIdentityAssertionAuthorizationGrant { Active = identityAssertionAuthorizationGrant.Active } : null,
+            NativeSocialLogin = source.NativeSocialLogin is { } nativeSocialLogin ? FromApi(nativeSocialLogin) : null,
             ComplianceLevel = source.ComplianceLevel.IsDefined && source.ComplianceLevel.Value is { } complianceLevel ? FromApi(complianceLevel) : null,
             DefaultOrganization = source.DefaultOrganization.IsDefined && source.DefaultOrganization.Value is { } defaultOrganization ? FromApi(defaultOrganization) : null,
             EncryptionKey = source.EncryptionKey.IsDefined && source.EncryptionKey.Value is { } encryptionKey ? FromApi(encryptionKey) : null,
@@ -85,6 +88,20 @@ namespace Alethic.Auth0.Operator.Controllers
             ClientTokenEndpointAuthMethodEnum.Values.ClientSecretBasic => V2alpha3ClientTokenEndpointAuthMethodEnum.ClientSecretBasic,
             null => null,
             _ => throw new NotImplementedException(),
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3ClientFedCmLogin? FromApi(FedCmLogin? source) => source is null ? null : new()
+        {
+            Google = source.Google is { } google ? new V2alpha3ClientFedCmLoginGoogle { IsEnabled = google.IsEnabled } : null,
+        };
+
+        [return: NotNullIfNotNull(nameof(source))]
+        internal static V2alpha3ClientNativeSocialLogin? FromApi(NativeSocialLogin? source) => source is null ? null : new()
+        {
+            Apple = source.Apple is { } apple ? new V2alpha3ClientNativeSocialLoginProvider { Enabled = apple.Enabled } : null,
+            Facebook = source.Facebook is { } facebook ? new V2alpha3ClientNativeSocialLoginProvider { Enabled = facebook.Enabled } : null,
+            Google = source.Google is { } google ? new V2alpha3ClientNativeSocialLoginProvider { Enabled = google.Enabled } : null,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -1202,6 +1219,23 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.RequireProofOfPossession is not null)
                 request.RequireProofOfPossession = conf.RequireProofOfPossession;
+
+            if (conf.FedCmLogin is { } fedCmLogin)
+                request.FedcmLogin = new FedCmLogin
+                {
+                    Google = fedCmLogin.Google is { } google ? new FedCmLoginGoogle { IsEnabled = google.IsEnabled } : null,
+                };
+
+            if (conf.IdentityAssertionAuthorizationGrant is { Active: { } identityAssertionActive })
+                request.IdentityAssertionAuthorizationGrant = new CreateIdentityAssertionAuthorizationGrant { Active = identityAssertionActive };
+
+            if (conf.NativeSocialLogin is { } nativeSocialLogin)
+                request.NativeSocialLogin = new NativeSocialLogin
+                {
+                    Apple = nativeSocialLogin.Apple is { } apple ? new NativeSocialLoginApple { Enabled = apple.Enabled } : null,
+                    Facebook = nativeSocialLogin.Facebook is { } facebook ? new NativeSocialLoginFacebook { Enabled = facebook.Enabled } : null,
+                    Google = nativeSocialLogin.Google is { } google ? new NativeSocialLoginGoogle { Enabled = google.Enabled } : null,
+                };
         }
 
         internal static void ApplyToApiBase(V2alpha3ClientConf conf, UpdateClientRequestContent request)
@@ -1321,6 +1355,23 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.RequireProofOfPossession is not null)
                 request.RequireProofOfPossession = conf.RequireProofOfPossession;
+
+            if (conf.FedCmLogin is { } fedCmLogin)
+                request.FedcmLogin = new FedCmLoginPatch
+                {
+                    Google = fedCmLogin.Google is { } google ? new FedCmLoginGooglePatch { IsEnabled = google.IsEnabled } : null,
+                };
+
+            if (conf.IdentityAssertionAuthorizationGrant is { Active: { } identityAssertionActive })
+                request.IdentityAssertionAuthorizationGrant = new UpdateIdentityAssertionAuthorizationGrant { Active = identityAssertionActive };
+
+            if (conf.NativeSocialLogin is { } nativeSocialLogin)
+                request.NativeSocialLogin = new NativeSocialLoginPatch
+                {
+                    Apple = nativeSocialLogin.Apple is { } apple ? new NativeSocialLoginApplePatch { Enabled = apple.Enabled } : null,
+                    Facebook = nativeSocialLogin.Facebook is { } facebook ? new NativeSocialLoginFacebookPatch { Enabled = facebook.Enabled } : null,
+                    Google = nativeSocialLogin.Google is { } google ? new NativeSocialLoginGooglePatch { Enabled = google.Enabled } : null,
+                };
         }
 
         public V2alpha3ClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3ClientController> logger) :
@@ -1519,6 +1570,53 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.RequireProofOfPossession is not null && conf.RequireProofOfPossession != last.RequireProofOfPossession)
+                return true;
+
+            if (RequiresUpdate(conf.FedCmLogin, last.FedCmLogin))
+                return true;
+
+            if (conf.IdentityAssertionAuthorizationGrant is { Active: { } } identityAssertionAuthorizationGrant && (last.IdentityAssertionAuthorizationGrant is null || identityAssertionAuthorizationGrant.Active != last.IdentityAssertionAuthorizationGrant.Active))
+                return true;
+
+            if (RequiresUpdate(conf.NativeSocialLogin, last.NativeSocialLogin))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured FedCM login settings differ from the last observed value.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ClientFedCmLogin? conf, V2alpha3ClientFedCmLogin? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Google is { IsEnabled: { } } google && (last.Google is null || google.IsEnabled != last.Google.IsEnabled))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the configured native social login settings differ from the last observed value.
+        /// </summary>
+        internal static bool RequiresUpdate(V2alpha3ClientNativeSocialLogin? conf, V2alpha3ClientNativeSocialLogin? last)
+        {
+            if (conf is null)
+                return false;
+            if (last is null)
+                return true;
+
+            if (conf.Apple is { Enabled: { } } apple && (last.Apple is null || apple.Enabled != last.Apple.Enabled))
+                return true;
+
+            if (conf.Facebook is { Enabled: { } } facebook && (last.Facebook is null || facebook.Enabled != last.Facebook.Enabled))
+                return true;
+
+            if (conf.Google is { Enabled: { } } google && (last.Google is null || google.Enabled != last.Google.Enabled))
                 return true;
 
             return false;

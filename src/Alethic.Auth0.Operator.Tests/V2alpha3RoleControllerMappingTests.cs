@@ -134,6 +134,58 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual("read:users", conf.Permissions?.Single().Name);
         }
 
+        // ──────────────────────── Type / OwnerId ─────────────────────────────────
+
+        [TestMethod]
+        public void FromApi_Role_MapsTypeAndOwnerId()
+        {
+            var result = V2alpha3RoleController.FromApi(new GetRoleResponseContent
+            {
+                Name = "admin",
+                Type = new RoleTypeEnum(RoleTypeEnum.Values.Organization),
+                OwnerId = "org_123",
+            }, null);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(V2alpha3RoleTypeEnum.Organization, result.Type);
+            Assert.AreEqual("org_123", result.OwnerId);
+        }
+
+        [TestMethod]
+        public void FromApi_Role_NullType_MapsNull()
+        {
+            var result = V2alpha3RoleController.FromApi(new GetRoleResponseContent { Name = "admin" }, null);
+
+            Assert.IsNotNull(result);
+            Assert.IsNull(result.Type);
+            Assert.IsNull(result.OwnerId);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_SetsTypeAndOwnerId()
+        {
+            var request = new CreateRoleRequestContent { Name = "admin" };
+            V2alpha3RoleController.ApplyToApi(new V2alpha3RoleConf
+            {
+                Name = "admin",
+                Type = V2alpha3RoleTypeEnum.Tenant,
+                OwnerId = "owner_123",
+            }, request);
+
+            Assert.AreEqual(RoleTypeEnum.Values.Tenant, request.Type?.Value);
+            Assert.AreEqual("owner_123", request.OwnerId);
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_IgnoresTypeAndOwnerId()
+        {
+            // type and owner_id can only be set at creation; they must never force a PATCH
+            var conf = new V2alpha3RoleConf { Name = "admin", Type = V2alpha3RoleTypeEnum.Organization, OwnerId = "org_123" };
+            var last = new V2alpha3RoleConf { Name = "admin" };
+
+            Assert.IsFalse(V2alpha3RoleController.ConfRequiresUpdate(conf, last));
+        }
+
     }
 
 }

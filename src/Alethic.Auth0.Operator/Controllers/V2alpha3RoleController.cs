@@ -48,7 +48,23 @@ namespace Alethic.Auth0.Operator.Controllers
             Name = source.Name,
             Description = source.Description,
             Permissions = permissions?.Select(FromApi).ToArray(),
+            Type = FromApi(source.Type),
+            OwnerId = source.OwnerId,
         };
+
+        /// <summary>
+        /// Transforms an Auth0 Management API role type value to the operator's role type model.
+        /// </summary>
+        internal static V2alpha3RoleTypeEnum? FromApi(RoleTypeEnum? source)
+        {
+            return source switch
+            {
+                { Value: RoleTypeEnum.Values.Tenant } => V2alpha3RoleTypeEnum.Tenant,
+                { Value: RoleTypeEnum.Values.Organization } => V2alpha3RoleTypeEnum.Organization,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
 
         /// <summary>
         /// Transforms an Auth0 Management API permission payload to the operator's role permission model.
@@ -69,6 +85,17 @@ namespace Alethic.Auth0.Operator.Controllers
 
             if (conf.Description is not null)
                 request.Description = conf.Description;
+
+            if (conf.Type is { } type)
+                request.Type = type switch
+                {
+                    V2alpha3RoleTypeEnum.Tenant => new RoleTypeEnum(RoleTypeEnum.Values.Tenant),
+                    V2alpha3RoleTypeEnum.Organization => new RoleTypeEnum(RoleTypeEnum.Values.Organization),
+                    _ => throw new ArgumentOutOfRangeException(nameof(conf), type, null),
+                };
+
+            if (conf.OwnerId is not null)
+                request.OwnerId = conf.OwnerId;
         }
 
         /// <summary>

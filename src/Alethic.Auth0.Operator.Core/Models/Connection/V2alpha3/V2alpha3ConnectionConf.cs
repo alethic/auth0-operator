@@ -83,6 +83,20 @@ namespace Alethic.Auth0.Operator.Core.Models.Connection.V2alpha3
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public V2alpha3ConnectionOptions? Options { get; set; }
 
+        /// <summary>
+        /// Cross-App Access settings for the requesting-application side of the connection.
+        /// </summary>
+        [JsonPropertyName("crossAppAccessRequestingApp")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3ConnectionCrossAppAccessRequestingApp? CrossAppAccessRequestingApp { get; set; }
+
+        /// <summary>
+        /// Cross-App Access settings for the resource-application side of the connection.
+        /// </summary>
+        [JsonPropertyName("crossAppAccessResourceApp")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public V2alpha3ConnectionCrossAppAccessResourceApp? CrossAppAccessResourceApp { get; set; }
+
     }
 
 }

@@ -204,6 +204,33 @@ namespace Alethic.Auth0.Operator.Controllers
         };
 
         /// <summary>
+        /// Transforms an Auth0 Management API cross-app access resource app status to the operator's model.
+        /// </summary>
+        internal static V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum? FromApi(CrossAppAccessResourceAppStatusEnum source)
+        {
+            return source.Value switch
+            {
+                CrossAppAccessResourceAppStatusEnum.Values.Enabled => V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled,
+                CrossAppAccessResourceAppStatusEnum.Values.Disabled => V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        /// <summary>
+        /// Transforms the operator's cross-app access resource app status to the Auth0 Management API value.
+        /// </summary>
+        internal static CrossAppAccessResourceAppStatusEnum ToApi(V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum source)
+        {
+            return source switch
+            {
+                V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled => new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Enabled),
+                V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled => new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Disabled),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
+            };
+        }
+
+        /// <summary>
         /// Converts a <see cref="GetConnectionResponseContent"/> API response to a <see cref="V2alpha3ConnectionConf"/>.
         /// Note: <see cref="V2alpha3ConnectionConf.EnabledClients"/> is populated separately and left null here.
         /// <see cref="V2alpha3ConnectionConf.ProvisioningTicketUrl"/> is populated for the enterprise strategies whose
@@ -224,6 +251,8 @@ namespace Alethic.Auth0.Operator.Controllers
                 IsDomainConnection = source.IsDomainConnection,
                 ShowAsButton = source.ShowAsButton,
                 Metadata = source.Metadata is { } md ? new System.Collections.Hashtable(md) : null,
+                CrossAppAccessRequestingApp = source.CrossAppAccessRequestingApp is { } crossAppAccessRequestingApp ? new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = crossAppAccessRequestingApp.Active } : null,
+                CrossAppAccessResourceApp = source.CrossAppAccessResourceApp is { } crossAppAccessResourceApp ? new V2alpha3ConnectionCrossAppAccessResourceApp { Status = FromApi(crossAppAccessResourceApp.Status) } : null,
                 Options = new V2alpha3ConnectionOptions()
             };
 
@@ -655,7 +684,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 Thumbprints = source.Thumbprints?.ToArray(),
                 UseCommonEndpoint = source.UseCommonEndpoint,
                 UseWsfed = source.UseWsfed,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 UseridAttribute = source.UseridAttribute switch
                 {
                     { Value: ConnectionUseridAttributeEnumAzureAd.Values.Oid } => V2alpha3ConnectionUseridAttributeEnumAzureAd.Oid,
@@ -968,9 +996,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 ExtGroupsExtended = source.ExtGroupsExtended,
                 ExtIsAdmin = source.ExtIsAdmin,
                 ExtIsSuspended = source.ExtIsSuspended,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat
-                    ? new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active }
-                    : null,
                 HandleLoginFromSocial = source.HandleLoginFromSocial,
             };
         }
@@ -1377,11 +1402,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
+                IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported,
                 Type = FromApi(source.Type),
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 UpstreamParams = FromApi(source.UpstreamParams),
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
@@ -1412,11 +1437,11 @@ namespace Alethic.Auth0.Operator.Controllers
                 DpopSigningAlg = FromApi(source.DpopSigningAlg),
                 IdTokenSignedResponseAlgs = source.IdTokenSignedResponseAlgs.IsDefined && source.IdTokenSignedResponseAlgs.Value is { } algs ? algs.Select(FromApi).ToArray() : null,
                 SendBackChannelNonce = source.SendBackChannelNonce,
+                IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported,
                 Type = FromApi(source.Type),
                 OidcMetadata = source.OidcMetadata is { } oidcMetadata ? FromApi(oidcMetadata) : null,
                 AttributeMap = source.AttributeMap is { } am ? FromApi(am) : null,
                 ConnectionSettings = source.ConnectionSettings is { } cs ? FromApi(cs) : null,
-                FederatedConnectionsAccessTokens = source.FederatedConnectionsAccessTokens.IsDefined && source.FederatedConnectionsAccessTokens.Value is { } fcat ? FromApi(fcat) : null,
                 NonPersistentAttrs = source.NonPersistentAttrs?.ToArray(),
                 SetUserRootAttributes = source.SetUserRootAttributes is { } sura ? FromApi(sura) : null,
                 Domain = source.Domain,
@@ -2247,9 +2272,39 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha3ConnectionAttributeIdentifier FromApi(ConnectionAttributeIdentifier source)
+        internal static V2alpha3ConnectionEmailAttributeIdentifier FromApi(EmailAttributeIdentifier source)
         {
-            return new V2alpha3ConnectionAttributeIdentifier
+            return new V2alpha3ConnectionEmailAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    { Value: DefaultMethodEmailIdentifierEnum.Values.Password } => V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+                    { Value: DefaultMethodEmailIdentifierEnum.Values.EmailOtp } => V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
+        internal static V2alpha3ConnectionPhoneAttributeIdentifier FromApi(PhoneAttributeIdentifier source)
+        {
+            return new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    { Value: DefaultMethodPhoneNumberIdentifierEnum.Values.Password } => V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password,
+                    { Value: DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp } => V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
+        internal static V2alpha3ConnectionUsernameAttributeIdentifier FromApi(UsernameAttributeIdentifier source)
+        {
+            return new V2alpha3ConnectionUsernameAttributeIdentifier
             {
                 Active = source.Active,
             };
@@ -2643,14 +2698,6 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
-        internal static V2alpha3ConnectionFederatedConnectionsAccessTokens FromApi(ConnectionFederatedConnectionsAccessTokens source)
-        {
-            return new V2alpha3ConnectionFederatedConnectionsAccessTokens
-            {
-                Active = source.Active,
-            };
-        }
-
         internal static V2alpha3ConnectionOptionsOidcMetadata FromApi(ConnectionOptionsOidcMetadata source)
         {
             return new V2alpha3ConnectionOptionsOidcMetadata
@@ -2933,6 +2980,38 @@ namespace Alethic.Auth0.Operator.Controllers
             };
         }
 
+        internal static EmailAttributeIdentifier ToApi(V2alpha3ConnectionEmailAttributeIdentifier source)
+        {
+            return new EmailAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password => new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.Password),
+                    V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp => new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.EmailOtp),
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
+        internal static PhoneAttributeIdentifier ToApi(V2alpha3ConnectionPhoneAttributeIdentifier source)
+        {
+            return new PhoneAttributeIdentifier
+            {
+                Active = source.Active,
+                DefaultMethod = source.DefaultMethod switch
+                {
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password => new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.Password),
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp => new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp),
+                    // emailOtp exists only for schema compatibility and is not a valid phone identifier method
+                    V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp => null,
+                    null => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(source), source.DefaultMethod, null),
+                },
+            };
+        }
+
         internal static ConnectionAttributes ToApi(V2alpha3ConnectionAttributes source)
         {
             return new ConnectionAttributes
@@ -2969,18 +3048,10 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             return new UsernameAttribute
             {
-                Identifier = source.Identifier is { } identifier ? ToApi(identifier) : null,
+                Identifier = source.Identifier is { } identifier ? new UsernameAttributeIdentifier { Active = identifier.Active } : null,
                 ProfileRequired = source.ProfileRequired,
                 Signup = source.Signup is { } signup ? ToApi(signup) : null,
                 Validation = source.Validation is { } validation ? ToApi(validation) : null,
-            };
-        }
-
-        internal static ConnectionAttributeIdentifier ToApi(V2alpha3ConnectionAttributeIdentifier source)
-        {
-            return new ConnectionAttributeIdentifier
-            {
-                Active = source.Active,
             };
         }
 
@@ -3196,14 +3267,6 @@ namespace Alethic.Auth0.Operator.Controllers
             {
                 Active = source.Active,
                 ReturnEnrollSettings = source.ReturnEnrollSettings,
-            };
-        }
-
-        internal static ConnectionFederatedConnectionsAccessTokens ToApi(V2alpha3ConnectionFederatedConnectionsAccessTokens source)
-        {
-            return new ConnectionFederatedConnectionsAccessTokens
-            {
-                Active = source.Active,
             };
         }
 
@@ -3558,8 +3621,6 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtUpn = source.ExtUpn;
             target.ExtUsageLocation = source.ExtUsageLocation;
             target.ExtUserId = source.ExtUserId;
-            if (source.FederatedConnectionsAccessTokens is { } federatedConnectionsAccessTokens)
-                target.FederatedConnectionsAccessTokens = ToApi(federatedConnectionsAccessTokens);
             target.Granted = source.Granted;
             target.IconUrl = source.IconUrl;
             if (source.IdentityApi is not null)
@@ -3906,8 +3967,6 @@ namespace Alethic.Auth0.Operator.Controllers
             target.ExtIsAdmin = source.ExtIsAdmin;
             target.ExtIsSuspended = source.ExtIsSuspended;
             target.HandleLoginFromSocial = source.HandleLoginFromSocial;
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = new ConnectionFederatedConnectionsAccessTokens { Active = fcat.Active };
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4286,6 +4345,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DpopSigningAlg is not null)
                 target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            target.IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
             if (source.OidcMetadata is { } oidcMetadata)
@@ -4296,8 +4356,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.AttributeMap = ToApi(am);
             if (source.ConnectionSettings is { } cs)
                 target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = ToApi(fcat);
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4330,6 +4388,7 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.DpopSigningAlg is not null)
                 target.DpopSigningAlg = ToApi(source.DpopSigningAlg);
             target.SendBackChannelNonce = source.SendBackChannelNonce;
+            target.IdTokenSessionExpirySupported = source.IdTokenSessionExpirySupported;
             if (source.Type is not null)
                 target.Type = ToApi(source.Type);
             if (source.OidcMetadata is { } oidcMetadata)
@@ -4340,8 +4399,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.AttributeMap = ToApi(am);
             if (source.ConnectionSettings is { } cs)
                 target.ConnectionSettings = ToApi(cs);
-            if (source.FederatedConnectionsAccessTokens is { } fcat)
-                target.FederatedConnectionsAccessTokens = ToApi(fcat);
             if (source.NonPersistentAttrs is { } npa)
                 target.NonPersistentAttrs = npa;
             if (source.SetUserRootAttributes is not null)
@@ -4760,6 +4817,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ShowAsButton is not null && conf.ShowAsButton != last.ShowAsButton)
                 return true;
 
+            if (conf.CrossAppAccessRequestingApp is { Active: { } } crossAppAccessRequestingApp && (last.CrossAppAccessRequestingApp is null || crossAppAccessRequestingApp.Active != last.CrossAppAccessRequestingApp.Active))
+                return true;
+
+            if (conf.CrossAppAccessResourceApp is { Status: { } } crossAppAccessResourceApp && (last.CrossAppAccessResourceApp is null || crossAppAccessResourceApp.Status != last.CrossAppAccessResourceApp.Status))
+                return true;
+
             if (RequiresUpdate(conf.Options, last.Options))
                 return true;
 
@@ -4770,6 +4833,37 @@ namespace Alethic.Auth0.Operator.Controllers
         protected override bool NeedsUpdate(V2alpha3ConnectionConf conf, V2alpha3ConnectionConf last)
         {
             return ConfRequiresUpdate(conf, last);
+        }
+
+        /// <summary>
+        /// Returns the JSON paths of deprecated fields present on the configuration. The
+        /// federated_connections_access_tokens connection option was removed from the Auth0 Management API in 9.0.0
+        /// along with the Federated Connections Tokensets feature, so values remain in the CRD schema but are never
+        /// applied to Auth0.
+        /// </summary>
+        /// <param name="conf"></param>
+        internal static IEnumerable<string> GetDeprecatedFieldPaths(V2alpha3ConnectionConf conf)
+        {
+            if (conf.Options is not { } options)
+                yield break;
+
+            if (options.AzureAd?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.waad.federatedConnectionsAccessTokens";
+
+            if (options.GoogleApps?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.googleApps.federatedConnectionsAccessTokens";
+
+            if (options.Oidc?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.oidc.federatedConnectionsAccessTokens";
+
+            if (options.Okta?.FederatedConnectionsAccessTokens is not null)
+                yield return "options.okta.federatedConnectionsAccessTokens";
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<string> GetDeprecatedFields(V2alpha3ConnectionConf conf)
+        {
+            return GetDeprecatedFieldPaths(conf);
         }
 
         /// <summary>
@@ -4886,20 +4980,6 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.Value is not null && conf.Value != last.Value)
-                return true;
-
-            return false;
-        }
-
-        static bool RequiresUpdate(V2alpha3ConnectionFederatedConnectionsAccessTokens? conf, V2alpha3ConnectionFederatedConnectionsAccessTokens? last)
-        {
-            if (conf is null)
-                return false;
-
-            if (last is null)
-                return true;
-
-            if (conf.Active is not null && conf.Active != last.Active)
                 return true;
 
             return false;
@@ -5250,7 +5330,7 @@ namespace Alethic.Auth0.Operator.Controllers
             return false;
         }
 
-        static bool RequiresUpdate(V2alpha3ConnectionAttributeIdentifier? conf, V2alpha3ConnectionAttributeIdentifier? last)
+        static bool RequiresUpdate(V2alpha3ConnectionEmailAttributeIdentifier? conf, V2alpha3ConnectionEmailAttributeIdentifier? last)
         {
             if (conf is null)
                 return false;
@@ -5264,6 +5344,39 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.DefaultMethod is not null && conf.DefaultMethod != last.DefaultMethod)
                 return true;
 
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionPhoneAttributeIdentifier? conf, V2alpha3ConnectionPhoneAttributeIdentifier? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            // emailOtp exists only for schema compatibility, is never applied, and must not force an update
+            if (conf.DefaultMethod is { } defaultMethod && defaultMethod != V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp && defaultMethod != last.DefaultMethod)
+                return true;
+
+            return false;
+        }
+
+        static bool RequiresUpdate(V2alpha3ConnectionUsernameAttributeIdentifier? conf, V2alpha3ConnectionUsernameAttributeIdentifier? last)
+        {
+            if (conf is null)
+                return false;
+
+            if (last is null)
+                return true;
+
+            if (conf.Active is not null && conf.Active != last.Active)
+                return true;
+
+            // the defaultMethod field exists only for schema compatibility, is never applied, and must not force an update
             return false;
         }
 
@@ -6106,9 +6219,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ExtUserId is not null && conf.ExtUserId != last.ExtUserId)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.Granted is not null && conf.Granted != last.Granted)
                 return true;
 
@@ -6828,9 +6938,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.ExtIsSuspended is not null && conf.ExtIsSuspended != last.ExtIsSuspended)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.HandleLoginFromSocial is not null && conf.HandleLoginFromSocial != last.HandleLoginFromSocial)
                 return true;
 
@@ -7397,9 +7504,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
                 return true;
 
@@ -7419,6 +7523,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
+                return true;
+
+            if (conf.IdTokenSessionExpirySupported is not null && conf.IdTokenSessionExpirySupported != last.IdTokenSessionExpirySupported)
                 return true;
 
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
@@ -7645,9 +7752,6 @@ namespace Alethic.Auth0.Operator.Controllers
             if (conf.DpopSigningAlg is not null && conf.DpopSigningAlg != last.DpopSigningAlg)
                 return true;
 
-            if (RequiresUpdate(conf.FederatedConnectionsAccessTokens, last.FederatedConnectionsAccessTokens))
-                return true;
-
             if (conf.IconUrl is not null && conf.IconUrl != last.IconUrl)
                 return true;
 
@@ -7667,6 +7771,9 @@ namespace Alethic.Auth0.Operator.Controllers
                 return true;
 
             if (conf.SendBackChannelNonce is not null && conf.SendBackChannelNonce != last.SendBackChannelNonce)
+                return true;
+
+            if (conf.IdTokenSessionExpirySupported is not null && conf.IdTokenSessionExpirySupported != last.IdTokenSessionExpirySupported)
                 return true;
 
             if (conf.SetUserRootAttributes is not null && conf.SetUserRootAttributes != last.SetUserRootAttributes)
@@ -8926,6 +9033,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
+            if (source.CrossAppAccessRequestingApp is { Active: { } crossAppAccessRequestingAppActive })
+                target.CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = crossAppAccessRequestingAppActive };
+
+            if (source.CrossAppAccessResourceApp is { Status: { } crossAppAccessResourceAppStatus })
+                target.CrossAppAccessResourceApp = new CreateCrossAppAccessResourceApp { Status = ToApi(crossAppAccessResourceAppStatus) };
+
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
                 target.Options = JsonSerializer.Deserialize<ConnectionPropertiesOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
@@ -8948,6 +9061,12 @@ namespace Alethic.Auth0.Operator.Controllers
             if (source.ShowAsButton is { } showAsButton)
                 target.ShowAsButton = showAsButton;
 
+            if (source.CrossAppAccessRequestingApp is { Active: { } crossAppAccessRequestingAppActive })
+                target.CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = crossAppAccessRequestingAppActive };
+
+            if (source.CrossAppAccessResourceApp is { Status: { } crossAppAccessResourceAppStatus })
+                target.CrossAppAccessResourceApp = new UpdateCrossAppAccessResourceApp { Status = ToApi(crossAppAccessResourceAppStatus) };
+
             var options = ResolveStrategyOptions(source.Strategy, source.Options);
             if (options is not null)
                 target.Options = JsonSerializer.Deserialize<UpdateConnectionOptions>(JsonSerializer.Serialize(options, Auth0JsonSerializerOptions), Auth0JsonSerializerOptions);
@@ -8957,7 +9076,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.Identifier is { } identifier)
             {
-                target.Identifier ??= new ConnectionAttributeIdentifier();
+                target.Identifier ??= new EmailAttributeIdentifier();
                 ApplyToApi(identifier, target.Identifier);
             }
 
@@ -9008,7 +9127,7 @@ namespace Alethic.Auth0.Operator.Controllers
         {
             if (source.Identifier is { } identifier)
             {
-                target.Identifier ??= new ConnectionAttributeIdentifier();
+                target.Identifier ??= new UsernameAttributeIdentifier();
                 ApplyToApi(identifier, target.Identifier);
             }
 
@@ -9034,7 +9153,13 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Status = ToApi(status);
         }
 
-        static void ApplyToApi(V2alpha3ConnectionOptionsAttributeIdentifier source, ConnectionAttributeIdentifier target)
+        static void ApplyToApi(V2alpha3ConnectionOptionsEmailAttributeIdentifier source, EmailAttributeIdentifier target)
+        {
+            if (source.Active is { } active)
+                target.Active = active;
+        }
+
+        static void ApplyToApi(V2alpha3ConnectionOptionsUsernameAttributeIdentifier source, UsernameAttributeIdentifier target)
         {
             if (source.Active is { } active)
                 target.Active = active;

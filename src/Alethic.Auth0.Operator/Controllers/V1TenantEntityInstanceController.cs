@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -115,11 +117,48 @@ namespace Alethic.Auth0.Operator.Controllers
         /// <param name="last"></param>
         protected abstract bool NeedsUpdate(TConf conf, TLastConf last);
 
+        /// <summary>
+        /// Returns the JSON paths of fields present on the desired configuration that are deprecated and no longer
+        /// applied to Auth0 (for example because the Auth0 Management API removed the underlying feature). The paths
+        /// are surfaced to the user as a warning event. The default implementation reports none.
+        /// </summary>
+        /// <param name="conf"></param>
+        protected virtual IEnumerable<string> GetDeprecatedFields(TConf conf) => [];
+
+        /// <summary>
+        /// Emits a warning event when the spec contains deprecated fields that are no longer applied to Auth0. The
+        /// warning is emitted once per spec generation per operator instance so periodic reconciliation does not
+        /// flood the event stream.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        async Task WarnDeprecatedFieldsAsync(TEntity entity, CancellationToken cancellationToken)
+        {
+            var fields = new List<string>();
+            if (entity.Spec.Init is { } init)
+                fields.AddRange(GetDeprecatedFields(init).Select(i => $"init.{i}"));
+            if (entity.Spec.Conf is { } conf)
+                fields.AddRange(GetDeprecatedFields(conf).Select(i => $"conf.{i}"));
+            if (fields.Count == 0)
+                return;
+
+            var key = (nameof(WarnDeprecatedFieldsAsync), EntityTypeName, entity.Namespace(), entity.Name(), entity.Metadata.Generation ?? 0);
+            if (Cache.TryGetValue(key, out _))
+                return;
+
+            var note = $"The following fields are no longer supported by the Auth0 Management API and are ignored: {string.Join(", ", fields.Distinct())}.";
+            Logger.LogWarning("{EntityTypeName} {Namespace}/{Name} spec contains deprecated fields: {Fields}", EntityTypeName, entity.Namespace(), entity.Name(), string.Join(", ", fields.Distinct()));
+            await ReconcileWarningAsync(entity, "DeprecatedField", note, cancellationToken);
+            Cache.Set(key, true, TimeSpan.FromDays(1));
+        }
+
         /// <inheritdoc />
         protected override async Task<TEntity> ReconcileAsync(IManagementApiClient api, V2alpha3Tenant tenant, TEntity entity, CancellationToken cancellationToken)
         {
             if (entity.Spec.Conf is null)
                 throw new InvalidOperationException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()} missing configuration.");
+
+            await WarnDeprecatedFieldsAsync(entity, cancellationToken);
 
             // we have not resolved a remote entity
             if (string.IsNullOrWhiteSpace(entity.Status.Id))

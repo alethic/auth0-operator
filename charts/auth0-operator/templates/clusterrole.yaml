@@ -8,46 +8,6 @@ metadata:
     {{- include "auth0-operator.annotations" . | nindent 4 }}
 rules:
 - apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - brandingthemes
-  - clients
-  - clientgrants
-  - connectionclients
-  - customdomains
-  - customtexts
-  - resourceservers
-  - roles
-  verbs:
-  - '*'
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - tenants
-  - connections
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - '*'
-- apiGroups:
-  - events.k8s.io
-  resources:
-  - events
-  verbs:
-  - '*'
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - clients
-  - resourceservers
-  verbs:
-  - get
-  - list
-- apiGroups:
   - ""
   resources:
   - events
@@ -56,6 +16,12 @@ rules:
   - list
   - create
   - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - '*'
 - apiGroups:
   - coordination.k8s.io
   resources:
@@ -69,6 +35,25 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - '*'
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - brandingthemes
+  - clientgrants
+  - clients
+  - connectionclients
+  - customdomains
+  - customtexts
+  - resourceservers
+  - roles
+  verbs:
+  - '*'
+- apiGroups:
   - kubernetes.auth0.com
   resources:
   - brandingthemes/status
@@ -79,23 +64,23 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - tenants/status
+  - clientgrants/status
   verbs:
   - get
   - update
   - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - clients
+  - resourceservers
+  verbs:
+  - get
+  - list
 - apiGroups:
   - kubernetes.auth0.com
   resources:
   - clients/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - kubernetes.auth0.com
-  resources:
-  - clientgrants/status
   verbs:
   - get
   - update
@@ -116,6 +101,13 @@ rules:
   - get
   - update
   - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
+  - connections
+  - tenants
+  verbs:
+  - '*'
 - apiGroups:
   - kubernetes.auth0.com
   resources:
@@ -151,6 +143,14 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
+  - resourceservers/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - kubernetes.auth0.com
+  resources:
   - roles/status
   verbs:
   - get
@@ -159,7 +159,7 @@ rules:
 - apiGroups:
   - kubernetes.auth0.com
   resources:
-  - resourceservers/status
+  - tenants/status
   verbs:
   - get
   - update

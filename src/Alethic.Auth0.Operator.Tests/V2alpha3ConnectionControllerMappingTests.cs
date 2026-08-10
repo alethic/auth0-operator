@@ -787,6 +787,242 @@ namespace Alethic.Auth0.Operator.Tests
             Assert.AreEqual(V2alpha3ConnectionStrategy.GoogleOAuth2, result.Strategy);
         }
 
+        // ──────────────────────── Cross-App Access / id token session expiry ─────
+
+        [TestMethod]
+        public void FromApi_Connection_MapsCrossAppAccess()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new GetConnectionResponseContent
+            {
+                Name = "test",
+                CrossAppAccessRequestingApp = new CrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new CrossAppAccessResourceApp { Status = new CrossAppAccessResourceAppStatusEnum(CrossAppAccessResourceAppStatusEnum.Values.Enabled) },
+            });
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.CrossAppAccessRequestingApp?.Active);
+            Assert.AreEqual(V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled, result.CrossAppAccessResourceApp?.Status);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Create_SetsCrossAppAccess()
+        {
+            var target = new CreateConnectionRequestContent { Name = "test", Strategy = new ConnectionIdentityProviderEnum(ConnectionIdentityProviderEnum.Values.Auth0) };
+            V2alpha3ConnectionController.ApplyToApi(new V2alpha3ConnectionConf
+            {
+                Name = "test",
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled },
+            }, target);
+
+            Assert.IsTrue(target.CrossAppAccessRequestingApp?.Active);
+            Assert.AreEqual(CrossAppAccessResourceAppStatusEnum.Values.Disabled, target.CrossAppAccessResourceApp?.Status.Value);
+        }
+
+        [TestMethod]
+        public void ApplyToApi_Update_SetsCrossAppAccess()
+        {
+            var target = new UpdateConnectionRequestContent();
+            V2alpha3ConnectionController.ApplyToApi(new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = false },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            }, target);
+
+            Assert.IsFalse(target.CrossAppAccessRequestingApp?.Active);
+            Assert.IsTrue(target.CrossAppAccessResourceApp.IsDefined);
+            Assert.AreEqual(CrossAppAccessResourceAppStatusEnum.Values.Enabled, target.CrossAppAccessResourceApp.Value?.Status.Value);
+        }
+
+        [TestMethod]
+        public void FromApi_OptionsOidc_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new ConnectionOptionsOidc { ClientId = "client_1", IdTokenSessionExpirySupported = true });
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ToApi_OptionsOidc_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionOptionsOidc { IdTokenSessionExpirySupported = true });
+
+            Assert.IsTrue(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ToApi_OptionsOkta_MapsIdTokenSessionExpirySupported()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionOptionsOkta { IdTokenSessionExpirySupported = false });
+
+            Assert.IsFalse(result.IdTokenSessionExpirySupported);
+        }
+
+        [TestMethod]
+        public void ConfRequiresUpdate_DetectsCrossAppAccessDrift()
+        {
+            var conf = new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            };
+
+            var same = new V2alpha3ConnectionConf
+            {
+                CrossAppAccessRequestingApp = new V2alpha3ConnectionCrossAppAccessRequestingApp { Active = true },
+                CrossAppAccessResourceApp = new V2alpha3ConnectionCrossAppAccessResourceApp { Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Enabled },
+            };
+
+            Assert.IsFalse(V2alpha3ConnectionController.ConfRequiresUpdate(conf, same));
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, new V2alpha3ConnectionConf()));
+
+            same.CrossAppAccessResourceApp!.Status = V2alpha3ConnectionCrossAppAccessResourceAppStatusEnum.Disabled;
+            Assert.IsTrue(V2alpha3ConnectionController.ConfRequiresUpdate(conf, same));
+        }
+
+        // ──────────────────────── Deprecated fields ──────────────────────────────
+
+        [TestMethod]
+        public void GetDeprecatedFieldPaths_ReportsFederatedConnectionsAccessTokens()
+        {
+            var conf = new V2alpha3ConnectionConf
+            {
+                Options = new V2alpha3ConnectionOptions
+                {
+                    Oidc = new V2alpha3ConnectionOptionsOidc
+                    {
+                        FederatedConnectionsAccessTokens = new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = true },
+                    },
+                    Okta = new V2alpha3ConnectionOptionsOkta
+                    {
+                        FederatedConnectionsAccessTokens = new V2alpha3ConnectionFederatedConnectionsAccessTokens { Active = true },
+                    },
+                },
+            };
+
+            var result = System.Linq.Enumerable.ToArray(V2alpha3ConnectionController.GetDeprecatedFieldPaths(conf));
+
+            CollectionAssert.AreEquivalent(new[]
+            {
+                "options.oidc.federatedConnectionsAccessTokens",
+                "options.okta.federatedConnectionsAccessTokens",
+            }, result);
+        }
+
+        [TestMethod]
+        public void GetDeprecatedFieldPaths_EmptyWhenFieldsAbsent()
+        {
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(V2alpha3ConnectionController.GetDeprecatedFieldPaths(new V2alpha3ConnectionConf())));
+            Assert.AreEqual(0, System.Linq.Enumerable.Count(V2alpha3ConnectionController.GetDeprecatedFieldPaths(new V2alpha3ConnectionConf
+            {
+                Options = new V2alpha3ConnectionOptions { Oidc = new V2alpha3ConnectionOptionsOidc() },
+            })));
+        }
+
+        // ──────────────────────── Attribute identifiers ──────────────────────────
+
+        [TestMethod]
+        public void FromApi_EmailAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new EmailAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = new DefaultMethodEmailIdentifierEnum(DefaultMethodEmailIdentifierEnum.Values.EmailOtp),
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.EmailOtp, result.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void FromApi_PhoneAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.FromApi(new PhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = new DefaultMethodPhoneNumberIdentifierEnum(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp),
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp, result.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void ToApi_EmailAttributeIdentifier_MapsDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionEmailAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+            });
+
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual(DefaultMethodEmailIdentifierEnum.Values.Password, result.DefaultMethod?.Value);
+        }
+
+        [TestMethod]
+        public void ToApi_PhoneAttributeIdentifier_MapsDefaultMethodAndSkipsCompatOnlyValue()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+            });
+
+            Assert.AreEqual(DefaultMethodPhoneNumberIdentifierEnum.Values.PhoneOtp, result.DefaultMethod?.Value);
+
+            // emailOtp exists only for schema compatibility and must never be sent to Auth0
+            var compat = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.EmailOtp,
+            });
+
+            Assert.IsNull(compat.DefaultMethod);
+        }
+
+        [TestMethod]
+        public void ToApi_UsernameAttribute_IgnoresCompatOnlyDefaultMethod()
+        {
+            var result = V2alpha3ConnectionController.ToApi(new V2alpha3ConnectionUsernameAttribute
+            {
+                Identifier = new V2alpha3ConnectionUsernameAttributeIdentifier
+                {
+                    Active = true,
+                    DefaultMethod = V2alpha3ConnectionDefaultMethodEmailIdentifierEnum.Password,
+                },
+            });
+
+            Assert.IsTrue(result.Identifier?.Active);
+        }
+
+        // ──────────────────────── Identifier copy converters ─────────────────────
+
+        [TestMethod]
+        public void Copy_PhoneIdentifier_RoundTripsAndDropsPhoneOtpOnRevert()
+        {
+            var converted = Converters.Generated.ConnectionCopy.ConvertPhoneIdentifier(new Core.Models.Connection.V2alpha1.V2alpha1ConnectionAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = Core.Models.Connection.V2alpha1.V2alpha1ConnectionDefaultMethodEmailIdentifierEnum.Password,
+            });
+
+            Assert.IsNotNull(converted);
+            Assert.AreEqual(V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.Password, converted.DefaultMethod);
+
+            // phoneOtp has no representation in the older version and is dropped on downgrade
+            var reverted = Converters.Generated.ConnectionCopy.Revert(new V2alpha3ConnectionPhoneAttributeIdentifier
+            {
+                Active = true,
+                DefaultMethod = V2alpha3ConnectionDefaultMethodPhoneIdentifierEnum.PhoneOtp,
+            });
+
+            Assert.IsNotNull(reverted);
+            Assert.IsTrue(reverted.Active);
+            Assert.IsNull(reverted.DefaultMethod);
+        }
+
     }
 
 }
