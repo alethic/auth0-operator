@@ -1314,13 +1314,14 @@ namespace Alethic.Auth0.Operator.Controllers
                 if (conf.Settings is { } newSettings && SettingsRequireUpdate(newSettings, FromApi(settings)))
                 {
                     // verify that no changes to enable_sso are being made
-                    if (newSettings.Flags != null && newSettings.Flags.EnableSso != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSso != settings.Flags.EnableSso)
+                    if (newSettings.Flags != null && newSettings.Flags.EnableSso != null && settings.Flags != null && settings.Flags.EnableSso != null && newSettings.Flags.EnableSso != settings.Flags.EnableSso)
                         throw new RetryException($"{EntityTypeName} {entity.Namespace()}/{entity.Name()}: updating the enable_sso flag is not allowed.");
 
                     // push update to Auth0
                     var req = new UpdateTenantSettingsRequestContent();
                     ApplyToApi(newSettings, req);
-                    req.Flags.EnableSso = null; // this can never be passed
+                    if (req.Flags != null)
+                        req.Flags.EnableSso = null; // this can never be passed
                     var res = await api.Tenants.Settings.UpdateAsync(req, cancellationToken: cancellationToken);
                     settings = await api.Tenants.Settings.GetAsync(new GetTenantSettingsRequestParameters() { }, cancellationToken: cancellationToken);
                 }

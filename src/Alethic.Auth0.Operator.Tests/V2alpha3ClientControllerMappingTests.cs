@@ -145,7 +145,7 @@ namespace Alethic.Auth0.Operator.Tests
                 SecretEncoded = true,
                 LifetimeInSeconds = 3600,
                 Alg = new SigningAlgorithmEnum(SigningAlgorithmEnum.Values.Rs256),
-                Scopes = new Dictionary<string, object>
+                Scopes = new Dictionary<string, object?>
                 {
                     ["read:data"] = "allow",
                 },

@@ -73,7 +73,7 @@ namespace Alethic.Auth0.Operator.Controllers
             OrganizationRequireBehavior = FromApi(source.OrganizationRequireBehavior),
             OrganizationUsage = FromApi(source.OrganizationUsage),
             RefreshToken = source.RefreshToken.IsDefined && source.RefreshToken.Value is { } refreshToken ? FromApi(refreshToken) : null,
-            SigningKeys = source.SigningKeys.IsDefined ? source.SigningKeys.Value?.Select(FromApi).ToArray() : null,
+            SigningKeys = source.SigningKeys.IsDefined ? source.SigningKeys.Value?.Select(i => FromApi(i)).ToArray() : null,
             TokenEndpointAuthMethod = FromApi(source.TokenEndpointAuthMethod),
         };
 
@@ -105,7 +105,7 @@ namespace Alethic.Auth0.Operator.Controllers
             RotationType = FromApi(source.RotationType),
             TokenLifetime = source.TokenLifetime,
             IdleTokenLifetime = source.IdleTokenLifetime,
-            Policies = source.Policies.IsDefined && source.Policies.Value is { } policies ? policies.Select(FromApi).ToArray() : null,
+            Policies = source.Policies.IsDefined && source.Policies.Value is { } policies ? policies.Select(i => FromApi(i)).ToArray() : null,
         };
 
         [return: NotNullIfNotNull(nameof(source))]
@@ -518,7 +518,6 @@ namespace Alethic.Auth0.Operator.Controllers
             ExternalUrl = source.ExternalUrl is { } externalUrl ? FromApi(externalUrl) : null,
         };
 
-        [return: NotNullIfNotNull(nameof(source))]
         internal static string[]? FromApi(ClientAddonSharePointExternalUrl? source)
         {
             if (source is null)
@@ -699,11 +698,18 @@ namespace Alethic.Auth0.Operator.Controllers
             Include = source.Include,
         };
 
-        static ClientDefaultOrganization ToApi(V2alpha3ClientDefaultOrganization source) => new()
+        static ClientDefaultOrganization ToApi(V2alpha3ClientDefaultOrganization source)
         {
-            OrganizationId = source.OrganizationId,
-            Flows = source.Flows?.Select(ToApi).ToArray(),
-        };
+            var target = new ClientDefaultOrganization
+            {
+                OrganizationId = source.OrganizationId ?? throw new InvalidOperationException("DefaultOrganization is missing an organization ID."),
+            };
+
+            if (source.Flows is { } flows)
+                target.Flows = flows.Select(ToApi).ToArray();
+
+            return target;
+        }
 
         static ClientDefaultOrganizationFlowsEnum ToApi(V2alpha3ClientDefaultOrganizationFlowsEnum source) => source switch
         {
@@ -780,17 +786,20 @@ namespace Alethic.Auth0.Operator.Controllers
 
         static ClientAddonRms ToApi(V2alpha3ClientAddonRms source) => new()
         {
-            Url = source.Url,
+            // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+            Url = source.Url!,
         };
 
         static ClientAddonMscrm ToApi(V2alpha3ClientAddonMscrm source) => new()
         {
-            Url = source.Url,
+            // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+            Url = source.Url!,
         };
 
         static ClientAddonSlack ToApi(V2alpha3ClientAddonSlack source) => new()
         {
-            Team = source.Team,
+            // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+            Team = source.Team!,
         };
 
         static ClientAddonSentry ToApi(V2alpha3ClientAddonSentry source) => new()
@@ -872,9 +881,10 @@ namespace Alethic.Auth0.Operator.Controllers
 
         static ClientAddonLayer ToApi(V2alpha3ClientAddonLayer source) => new()
         {
-            ProviderId = source.ProviderId,
-            KeyId = source.KeyId,
-            PrivateKey = source.PrivateKey,
+            // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+            ProviderId = source.ProviderId!,
+            KeyId = source.KeyId!,
+            PrivateKey = source.PrivateKey!,
             Principal = source.Principal,
             Expiration = source.Expiration,
         };
@@ -964,11 +974,19 @@ namespace Alethic.Auth0.Operator.Controllers
                 target.Policies = policies.Select(ToApi).ToList();
         }
 
-        static ClientRefreshTokenPolicy ToApi(V2alpha3ClientRefreshTokenPolicy source) => new()
+        static ClientRefreshTokenPolicy ToApi(V2alpha3ClientRefreshTokenPolicy source)
         {
-            Audience = source.Audience,
-            Scope = source.Scope?.ToList(),
-        };
+            var target = new ClientRefreshTokenPolicy
+            {
+                // required by the SDK but optional in the CRD model; shared with the conversion webhook, so pass through unchecked
+                Audience = source.Audience!,
+            };
+
+            if (source.Scope is { } scope)
+                target.Scope = scope.ToList();
+
+            return target;
+        }
 
         internal static void ApplyToApi(V2alpha3ClientOidcBackchannelLogoutInitiators source, ClientOidcBackchannelLogoutInitiators target)
         {
@@ -1380,7 +1398,7 @@ namespace Alethic.Auth0.Operator.Controllers
 
             var self = await api.Clients.CreateAsync(req, null, cancellationToken);
             Logger.LogInformation("{EntityTypeName} successfully created client in Auth0 with ID: {ClientId} and name: {ClientName}", EntityTypeName, self.ClientId, conf.Name);
-            return self.ClientId;
+            return self.ClientId ?? throw new InvalidOperationException("Create response missing client ID.");
         }
 
         /// <summary>
