@@ -209,11 +209,59 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
+        public void EndpointKeyFor_ReplacesLowercaseHexIdSegments()
+        {
+            // resource server ids are lowercase hex, so no character marks them as ids; the route table does
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/resource-servers/6a6138f9c72d57d0faf77934");
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/resource-servers/*", Auth0RatePacer.EndpointKeyFor(request));
+        }
+
+        [TestMethod]
+        public void EndpointKeyFor_CollapsesCustomTextPromptAndLanguage()
+        {
+            // prompt and language are route parameters, not vocabulary: every custom-text call is one endpoint
+            var login = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/prompts/login/custom-text/en");
+            var signup = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/prompts/signup/custom-text/fr");
+
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/prompts/*/custom-text/*", Auth0RatePacer.EndpointKeyFor(login));
+            Assert.AreEqual(Auth0RatePacer.EndpointKeyFor(login), Auth0RatePacer.EndpointKeyFor(signup));
+        }
+
+        [TestMethod]
+        public void EndpointKeyFor_PrefersLiteralRouteOverParameterized()
+        {
+            // /clients/search and /clients/{id} both match; the more specific route must win so a real endpoint
+            // is not folded into the id route
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/clients/search");
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/clients/search", Auth0RatePacer.EndpointKeyFor(request));
+        }
+
+        [TestMethod]
+        public void EndpointKeyFor_UnknownRouteFallsBackToHeuristic()
+        {
+            // a route absent from the table still classifies rather than failing
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/not-a-real-endpoint/con_AbC123");
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/not-a-real-endpoint/*", Auth0RatePacer.EndpointKeyFor(request));
+        }
+
+        [TestMethod]
         public void EndpointKeyFor_KeepsRouteVocabulary()
         {
-            // lowercase segments, hyphens and the version segment are route vocabulary, not ids
+            // fully literal routes survive intact, including ones whose last segment looks like a value
+            var settings = new HttpRequestMessage(HttpMethod.Patch, "https://tenant.us.auth0.com/api/v2/tenants/settings");
+            var theme = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/branding/themes/default");
+
+            Assert.AreEqual("tenant.us.auth0.com PATCH /api/v2/tenants/settings", Auth0RatePacer.EndpointKeyFor(settings));
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/branding/themes/default", Auth0RatePacer.EndpointKeyFor(theme));
+        }
+
+        [TestMethod]
+        public void EndpointKeyFor_TreatsTemplateNameAsParameter()
+        {
+            // the real route is /email-templates/{templateName}, so "verify" is a value, not vocabulary — the
+            // segment heuristic this table replaced guessed the opposite
             var request = new HttpRequestMessage(HttpMethod.Patch, "https://tenant.us.auth0.com/api/v2/email-templates/verify");
-            Assert.AreEqual("tenant.us.auth0.com PATCH /api/v2/email-templates/verify", Auth0RatePacer.EndpointKeyFor(request));
+            Assert.AreEqual("tenant.us.auth0.com PATCH /api/v2/email-templates/*", Auth0RatePacer.EndpointKeyFor(request));
         }
 
         [TestMethod]
