@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +9,6 @@ using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
 using Auth0.ManagementApi;
-using Auth0.ManagementApi.Connections;
 
 using k8s.Models;
 
@@ -43,17 +40,20 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         const char IdSeparator = '|';
 
+        readonly ConnectionEnabledClientsCache _enabledClients;
+
         /// <summary>
         /// Initializes a new instance.
         /// </summary>
         /// <param name="kube"></param>
         /// <param name="cache"></param>
+        /// <param name="enabledClients"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public V2alpha3ConnectionClientController(IKubernetesClient kube, IMemoryCache cache, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3ConnectionClientController> logger) :
+        public V2alpha3ConnectionClientController(IKubernetesClient kube, IMemoryCache cache, ConnectionEnabledClientsCache enabledClients, IOptions<OperatorOptions> options, Auth0HttpClientProvider httpClientProvider, ILogger<V2alpha3ConnectionClientController> logger) :
             base(kube, cache, options, httpClientProvider, logger)
         {
-
+            _enabledClients = enabledClients ?? throw new ArgumentNullException(nameof(enabledClients));
         }
 
         /// <inheritdoc />
@@ -85,17 +85,12 @@ namespace Alethic.Auth0.Operator.Controllers
         }
 
         /// <summary>
-        /// Determines whether the given client is currently enabled on the given connection.
+        /// Determines whether the given client is currently enabled on the given connection. Served through the
+        /// shared cache so ConnectionClient reconciles for the same connection share one Auth0 fetch per TTL.
         /// </summary>
-        async Task<bool> IsClientEnabledAsync(IManagementApiClient api, string connectionId, string clientId, CancellationToken cancellationToken)
+        Task<bool> IsClientEnabledAsync(IManagementApiClient api, string connectionId, string clientId, CancellationToken cancellationToken)
         {
-            var pager = await api.Connections.Clients.GetAsync(connectionId, new GetConnectionEnabledClientsRequestParameters(), null, cancellationToken);
-            if (pager?.CurrentPage?.Items is { } items)
-                foreach (var item in items)
-                    if (item.ClientId == clientId)
-                        return true;
-
-            return false;
+            return _enabledClients.IsClientEnabledAsync(api, connectionId, clientId, cancellationToken);
         }
 
         /// <summary>
@@ -103,12 +98,7 @@ namespace Alethic.Auth0.Operator.Controllers
         /// </summary>
         Task SetClientEnabledAsync(IManagementApiClient api, string connectionId, string clientId, bool status, CancellationToken cancellationToken)
         {
-            var req = new List<UpdateEnabledClientConnectionsRequestContentItem>
-            {
-                new UpdateEnabledClientConnectionsRequestContentItem { ClientId = clientId, Status = status },
-            };
-
-            return api.Connections.Clients.UpdateAsync(connectionId, req, null, cancellationToken);
+            return _enabledClients.SetClientEnabledAsync(api, connectionId, clientId, status, cancellationToken);
         }
 
         /// <inheritdoc />

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 
+using Alethic.Auth0.Operator.Controllers;
 using Alethic.Auth0.Operator.Options;
 using Alethic.Auth0.Operator.RateLimiting;
 
@@ -30,6 +31,7 @@ namespace Alethic.Auth0.Operator
                 s.AutoAttachFinalizers = false;
             }).RegisterComponents();
             builder.Services.AddSingleton<Auth0HttpClientProvider>();
+            builder.Services.AddSingleton<ConnectionEnabledClientsCache>();
             builder.Services.AddMemoryCache();
             builder.Services.AddRouting();
             builder.Services.AddControllers();
