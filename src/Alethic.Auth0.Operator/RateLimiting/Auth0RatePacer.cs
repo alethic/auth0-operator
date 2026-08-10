@@ -77,9 +77,11 @@ namespace Alethic.Auth0.Operator.RateLimiting
         }
 
         /// <summary>
-        /// An identifier segment contains at least one character outside lowercase letters, digits and hyphens.
-        /// Auth0 route vocabulary ("connections", "email-templates", "v2") is all lowercase, while resource ids
-        /// carry uppercase letters or underscores ("con_AbC123", client ids).
+        /// An identifier segment contains at least one character outside lowercase letters, digits and hyphens —
+        /// Auth0 route vocabulary ("connections", "email-templates", "v2") is all lowercase, while most resource
+        /// ids carry uppercase letters or underscores ("con_AbC123", client ids) — or is a long lowercase-hex
+        /// string, which slips past the character test but is always an id (e.g. resource server ids); route
+        /// vocabulary is short and always contains letters outside a–f.
         /// </summary>
         /// <param name="segment"></param>
         static bool IsIdSegment(string segment)
@@ -88,7 +90,20 @@ namespace Alethic.Auth0.Operator.RateLimiting
                 if (char.IsAsciiLetterLower(c) == false && char.IsAsciiDigit(c) == false && c != '-')
                     return true;
 
-            return false;
+            return segment.Length >= 16 && IsLowercaseHex(segment);
+        }
+
+        /// <summary>
+        /// Whether the segment consists solely of lowercase hexadecimal characters.
+        /// </summary>
+        /// <param name="segment"></param>
+        static bool IsLowercaseHex(string segment)
+        {
+            foreach (var c in segment)
+                if (char.IsAsciiDigit(c) == false && (c < 'a' || c > 'f'))
+                    return false;
+
+            return true;
         }
 
         /// <summary>

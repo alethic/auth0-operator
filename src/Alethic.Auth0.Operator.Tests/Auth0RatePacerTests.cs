@@ -209,6 +209,22 @@ namespace Alethic.Auth0.Operator.Tests
         }
 
         [TestMethod]
+        public void EndpointKeyFor_ReplacesLowercaseHexIdSegments()
+        {
+            // resource server ids are lowercase hex, so no character alone marks them as ids; length does
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/resource-servers/6a6138f9c72d57d0faf77934");
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/resource-servers/*", Auth0RatePacer.EndpointKeyFor(request));
+        }
+
+        [TestMethod]
+        public void EndpointKeyFor_KeepsShortHexOnlyVocabulary()
+        {
+            // short segments that happen to be hex-only ("ad", "face") are vocabulary, not ids
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://tenant.us.auth0.com/api/v2/prompts/face/custom-text/ad");
+            Assert.AreEqual("tenant.us.auth0.com GET /api/v2/prompts/face/custom-text/ad", Auth0RatePacer.EndpointKeyFor(request));
+        }
+
+        [TestMethod]
         public void EndpointKeyFor_KeepsRouteVocabulary()
         {
             // lowercase segments, hyphens and the version segment are route vocabulary, not ids
