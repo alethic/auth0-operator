@@ -18,15 +18,19 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Auth0.AuthenticationApi" Version="7.48.0" />
-        <PackageReference Include="Auth0.ManagementApi" Version="9.2.0" />
+        <!-- KubeOps is held at 13.1.0. The 13.2.0 CLI crashes during "Generate CRDs" with
+             "Could not find assembly 'Microsoft.CodeAnalysis, Version=5.9.0.0'", then exits 0, so
+             the build reports success while config/ stays empty and the chart packages with no CRDs.
+             Verify a bump restores a full-size chart before taking it. -->
+        <PackageReference Include="Auth0.AuthenticationApi" Version="7.49.0" />
+        <PackageReference Include="Auth0.ManagementApi" Version="10.1.0" />
         <PackageReference Include="KubeOps.Generator" Version="13.1.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="KubeOps.Operator" Version="13.1.0" />
         <PackageReference Include="KubeOps.Operator.Web" Version="13.1.0" />
-        <PackageReference Include="System.Threading.RateLimiting" Version="10.0.10" />
+        <PackageReference Include="System.Threading.RateLimiting" Version="10.0.11" />
     </ItemGroup>
 
     <ItemGroup>
